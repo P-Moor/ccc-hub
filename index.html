@@ -3672,7 +3672,79 @@ if (document.readyState === 'loading') {
       '<div style="background:rgba(163,230,53,0.04);border:1px solid ' + color + ';border-left:3px solid ' + color + ';padding:0.8rem 1rem;border-radius:8px;margin-top:1rem">' +
       '<div style="font-family:DM Mono,monospace;font-size:0.7rem;color:' + color + ';text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">' + title + '</div>' +
       '<div style="font-size:0.85rem;line-height:1.5;color:var(--text,#e8e9ea)">' + text + '</div>' +
+      '<div id="reco-ai" style="margin-top:0.7rem"></div>' +
       '</div>';
+
+    // Couche IA : conseil personnalisé enrichi (avec cache journalier)
+    enrichRecoWithAI(data, flags, color);
+  }
+
+  // Génère un conseil IA personnalisé, mis en cache une fois par jour
+  async function enrichRecoWithAI(data, flags, color) {
+    var slot = document.getElementById('reco-ai');
+    if (!slot) return;
+    if (typeof window.askClaude !== 'function') return;          // pas d'IA dispo
+    if (!localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) return;
+
+    var dk = (function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+    var cacheKey = 'ccc_reco_ai_' + dk;
+    // Cache : réutilise le conseil du jour s'il existe
+    var cached = null;
+    try { cached = localStorage.getItem(cacheKey); } catch(e){}
+    if (cached) { showAIReco(slot, cached, color); return; }
+
+    // Indicateur discret de génération
+    slot.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);font-style:italic">le coach analyse…</div>';
+
+    // Contexte
+    var ctx = { hrv:(data.hrv||{}).value, body_battery:(data.body_battery||{}).current,
+      sommeil_h:(data.sleep||{}).duration_hours, readiness:(data.readiness||{}).score,
+      rhr:data.rhr, flags:flags };
+    try {
+      if (typeof PLAN_DATA !== 'undefined') {
+        var start=new Date('2026-05-11'), now=new Date(dk);
+        var wi=Math.floor((now-start)/(7*864e5));
+        if (wi>=0 && wi<PLAN_DATA.length) {
+          var w=PLAN_DATA[wi];
+          ctx.semaine={num:w.num,phase:w.phase};
+          // séance du jour
+          var dd=w.days.filter(function(x){return x.date===dk;})[0];
+          if (dd) ctx.seance_prevue={titre:dd.title, run:dd.run, velo:dd.velo};
+        }
+      }
+    } catch(e){}
+
+    var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg. " +
+      "Ferme mais bienveillant, tu contres la culpabilité par les données. Tutoie-le.";
+    var prompt = "Données forme de Pierre ce matin :\n" + JSON.stringify(ctx,null,2) +
+      "\n\nRédige UN conseil court (2-3 phrases max, percutant) sur sa séance du jour au vu de ces données. " +
+      "Pas de titre, pas de markdown, juste le conseil direct. Réfère-toi à sa séance prévue si pertinent.";
+    try {
+      var txt = await window.askClaude(prompt, { system: SYS, max_tokens: 300 });
+      txt = (txt||'').trim();
+      if (txt) {
+        try { localStorage.setItem(cacheKey, txt); } catch(e){}
+        showAIReco(slot, txt, color);
+      } else { slot.innerHTML = ''; }
+    } catch(err) {
+      slot.innerHTML = '';  // en cas d'erreur, on garde juste le conseil par règles
+    }
+  }
+
+  function showAIReco(slot, txt, color) {
+    slot.innerHTML =
+      '<div style="border-top:1px dashed var(--border,#242528);padding-top:0.6rem;margin-top:0.2rem">' +
+      '<div style="display:flex;align-items:center;gap:5px;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem">' +
+      '<svg viewBox="0 0 20 20" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/></svg>' +
+      'analyse personnalisée · <span id="reco-refresh" style="cursor:pointer;color:var(--accent,#a3e635)">rafraîchir</span></div>' +
+      '<div style="font-size:0.82rem;line-height:1.5;color:var(--text,#e8e9ea)">' + txt.replace(/\n/g,'<br>') + '</div>' +
+      '</div>';
+    var rf = document.getElementById('reco-refresh');
+    if (rf) rf.addEventListener('click', function(){
+      var dk=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+      try { localStorage.removeItem('ccc_reco_ai_'+dk); } catch(e){}
+      if (window.__garminData) renderReco(window.__garminData);
+    });
   }
   
   // Génère un commentaire coach intelligent selon l'activité
