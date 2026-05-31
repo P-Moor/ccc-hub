@@ -3707,7 +3707,11 @@ if (document.readyState === 'loading') {
         var wi=Math.floor((now-start)/(7*864e5));
         if (wi>=0 && wi<PLAN_DATA.length) {
           var w=PLAN_DATA[wi];
-          ctx.semaine={num:w.num,phase:w.phase};
+          var real = (window.__weekRealized ? window.__weekRealized() : {run:0,velo:0,dplus:0,muscu:0});
+          ctx.semaine={ num:w.num, phase:w.phase,
+            prevu_run_km: w.days.reduce(function(a,d){return a+(d.run||0);},0),
+            prevu_velo_km: w.days.reduce(function(a,d){return a+(d.velo||0);},0),
+            realise_run_km: real.run, realise_velo_km: real.velo, realise_dplus: real.dplus };
           // séance du jour
           var dd=w.days.filter(function(x){return x.date===dk;})[0];
           if (dd) ctx.seance_prevue={titre:dd.title, run:dd.run, velo:dd.velo};
@@ -3973,17 +3977,18 @@ if (document.readyState === 'loading') {
     
     // SVG anneau (gauge circulaire)
     function ring(emoji, label, value, goal, unit, big) {
-      var pct = goal > 0 ? Math.min(value / goal * 100, 100) : (value > 0 ? 100 : 0);
+      var pctReal = goal > 0 ? Math.round(value / goal * 100) : (value > 0 ? 100 : 0);
+      var pct = Math.min(pctReal, 100);   // remplissage anneau plafonné à 100 (sinon déborde)
       var size = big ? 130 : 104;
       var stroke = big ? 11 : 9;
       var r = (size - stroke) / 2 - 2;
       var cx = size / 2, cy = size / 2;
       var circ = 2 * Math.PI * r;
       var offset = circ * (1 - pct / 100);
-      // Couleur selon progression
-      var col = pct >= 100 ? 'var(--green,#5ec27a)' :
-                pct >= 60  ? 'var(--accent,#a3e635)' :
-                pct >= 30  ? 'var(--orange,#e8a020)' : 'var(--muted,#7a7d85)';
+      // Couleur selon progression (vrai %, le vert s'active dès 100% atteint/dépassé)
+      var col = pctReal >= 100 ? 'var(--green,#5ec27a)' :
+                pctReal >= 60  ? 'var(--accent,#a3e635)' :
+                pctReal >= 30  ? 'var(--orange,#e8a020)' : 'var(--muted,#7a7d85)';
       var valFontSize = big ? '1.5rem' : '1.25rem';
       var valDisplay = (unit === 'x') ? value + '/' + goal : value.toFixed(0);
       var subDisplay = (unit === 'x') ? 'séances' : '/ ' + goal + ' ' + unit;
@@ -4000,7 +4005,7 @@ if (document.readyState === 'loading') {
              '<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center">' +
              '<div style="font-family:Syne,sans-serif;font-size:' + valFontSize + ';font-weight:800;color:var(--text,#e8e9ea);line-height:1">' + valDisplay + '</div>' +
              '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068);margin-top:0.15rem">' + subDisplay + '</div>' +
-             '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:' + col + ';font-weight:500;margin-top:0.1rem">' + Math.round(pct) + '%</div>' +
+             '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:' + col + ';font-weight:500;margin-top:0.1rem">' + pctReal + '%</div>' +
              '</div></div>' +
              '<div style="font-family:DM Mono,monospace;font-size:0.65rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.04em">' + emoji + ' ' + label + '</div>' +
              '</div>';
@@ -5269,9 +5274,12 @@ if (document.readyState === 'loading') {
         var wi = Math.floor((now - start)/(7*864e5));
         if (wi >= 0 && wi < PLAN_DATA.length) {
           var w = PLAN_DATA[wi];
+          var real = (window.__weekRealized ? window.__weekRealized() : {run:0,velo:0,dplus:0,muscu:0});
           ctx.semaine = { num: w.num, phase: w.phase,
-            run: w.days.reduce(function(a,d){return a+(d.run||0);},0),
-            velo: w.days.reduce(function(a,d){return a+(d.velo||0);},0) };
+            prevu_run_km: w.days.reduce(function(a,d){return a+(d.run||0);},0),
+            prevu_velo_km: w.days.reduce(function(a,d){return a+(d.velo||0);},0),
+            realise_run_km: real.run, realise_velo_km: real.velo,
+            realise_dplus: real.dplus, realise_muscu: real.muscu };
         }
       }
     } catch(e){}
@@ -5413,6 +5421,41 @@ if (document.readyState === 'loading') {
 (function(){
   function dk(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
+  // Calcule le RÉALISÉ de la semaine courante depuis les activités Garmin
+  // (même logique que les jauges objectif). Renvoie {run, velo, muscu, dplus}.
+  function weekRealized() {
+    var out = { run:0, velo:0, muscu:0, dplus:0 };
+    try {
+      var g = window.__garminData;
+      if (!g || !g.activities) return out;
+      // Lundi → dimanche de la semaine courante
+      var start = new Date('2026-05-11T00:00:00');
+      var now = new Date(dk()+'T00:00:00');
+      var wi = Math.floor((now - start)/(7*864e5));
+      var monday = new Date(start); monday.setDate(start.getDate() + wi*7);
+      var sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+      g.activities.forEach(function(a){
+        if (!a.date) return;
+        var d = new Date(a.date.slice(0,10)+'T00:00:00');
+        if (d < monday || d > sunday) return;
+        var t = (a.type||'').toLowerCase();
+        if (t.indexOf('cycl')>=0 || t.indexOf('ride')>=0 || t.indexOf('gravel')>=0 || t.indexOf('biking')>=0 || t.indexOf('velo')>=0) {
+          out.velo += (a.distance_km||0);
+        } else if (t.indexOf('strength')>=0 || t.indexOf('muscu')>=0 || (t.indexOf('training')>=0 && t.indexOf('treadmill')<0)) {
+          out.muscu += 1;
+        } else if (t.indexOf('run')>=0 || t.indexOf('cours')>=0 || t.indexOf('treadmill')>=0 || t.indexOf('trail')>=0 || t.indexOf('hiking')>=0) {
+          out.run += (a.distance_km||0);
+          out.dplus += (a.elevation_gain||0);
+        }
+      });
+      out.run = Math.round(out.run*10)/10;
+      out.velo = Math.round(out.velo*10)/10;
+      out.dplus = Math.round(out.dplus);
+    } catch(e){}
+    return out;
+  }
+  window.__weekRealized = weekRealized;
+
   // Calcule l'état complet de la journée
   function dayState() {
     var now = new Date();
@@ -5451,6 +5494,17 @@ if (document.readyState === 'loading') {
         if (wi>=0 && wi<PLAN_DATA.length) {
           var dd = PLAN_DATA[wi].days.filter(function(x){return x.date===dk();})[0];
           if (dd) st.seance_prevue = { titre:dd.title, run:dd.run, velo:dd.velo, type:dd.type };
+          // Volume PRÉVU et RÉALISÉ de la semaine
+          var w = PLAN_DATA[wi];
+          var prevuRun = w.days.reduce(function(a,d){return a+(d.run||0);},0);
+          var prevuVelo = w.days.reduce(function(a,d){return a+(d.velo||0);},0);
+          var real = weekRealized();
+          st.semaine = {
+            num: w.num, phase: w.phase,
+            prevu_run_km: prevuRun, prevu_velo_km: prevuVelo,
+            realise_run_km: real.run, realise_velo_km: real.velo,
+            realise_dplus: real.dplus, realise_muscu: real.muscu
+          };
         }
       }
     } catch(e){}
