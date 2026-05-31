@@ -281,7 +281,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   :root{--sw:54px}
-  .sb-brand-text,.sbw-label,.sbw-val,.sbw-sub,.sn-lbl,.sb-ccc,.sb-week-block,.sb-foot{display:none}
+  .sb-brand-text,.sbw-label,.sbw-val,.sbw-sub,.sn-lbl,.sb-week-block{display:none}
   .sb-brand{padding:0.75rem;justify-content:center}
   .sn{justify-content:center;padding:0.7rem 0.45rem}
   .sn-ico{width:20px;height:20px}
@@ -316,8 +316,23 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
     padding-bottom: env(safe-area-inset-bottom, 0);
     background: var(--surface);
   }
-  /* Masquer brand, semaine, footer dans la barre du bas */
-  .sb-brand, .sb-week-block, .sb-foot { display: none !important; }
+  /* Masquer brand et semaine dans la barre du bas (PAS le footer : il porte le toggle thème) */
+  .sb-brand, .sb-week-block { display: none !important; }
+  /* Toggle thème : footer sorti de la barre, aligné à droite au niveau du titre de page */
+  .sb-foot { display: block !important; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 0.9rem); right: 0.85rem; bottom: auto; left: auto; width: auto; padding: 0 !important; border: none !important; background: transparent !important; z-index: 350; overflow: visible !important; }
+  .sb-foot .sb-ccc { display: none !important; }
+  #theme-toggle {
+    width: auto !important; margin: 0 !important;
+    padding: 0.3rem 0.6rem !important; border-radius: 6px !important;
+    background: transparent !important; border: 1px solid var(--accent, #a3e635) !important;
+    color: var(--accent, #a3e635) !important;
+    font-family: 'DM Mono', monospace !important; font-size: 0.6rem !important;
+    box-shadow: none !important;
+  }
+  #theme-toggle #theme-toggle-lbl { display: none !important; }
+  #theme-toggle #theme-toggle-icon { font-size: 0.85rem; line-height: 1; }
+  /* Laisser de la place au toggle pour ne pas chevaucher un titre long */
+  .ptitle { padding-right: 3.2rem; }
   /* La nav prend toute la largeur, items répartis */
   .sb-nav {
     display: flex !important; flex-direction: row !important;
@@ -377,19 +392,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 }
 
 @media (max-width: 400px) {
-  /* Toggle thème : aligné à droite, au niveau du titre de page */
-  .sb-foot { display: block !important; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: 0.85rem; bottom: auto; left: auto; width: auto; padding: 0; border: none; background: transparent; z-index: 350; }
-  .sb-foot .sb-ccc { display: none !important; }
-  #theme-toggle {
-    width: auto !important; margin: 0 !important;
-    padding: 0.35rem 0.55rem !important; border-radius: 8px !important;
-    background: var(--surface2) !important; border: 1px solid var(--border2) !important;
-  }
-  #theme-toggle .sn-lbl, #theme-toggle #theme-toggle-lbl { display: none !important; }
-  #theme-toggle #theme-toggle-icon { font-size: 1.05rem; line-height: 1; }
-  /* Laisser de la place au toggle pour ne pas chevaucher un titre long */
-  .ptitle { padding-right: 3rem; }
-
   /* Très petits écrans : tuiles métriques en 1 colonne si vraiment étroit */
   .week-strip, .ag-grid { gap: 2px; }
   .ptitle-sub { display: none; }
@@ -901,7 +903,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
   </nav>
   <div class="sb-foot">
     <button id="theme-toggle" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:0.5rem;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;margin-bottom:0.6rem;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:all .15s">
-      <span id="theme-toggle-icon">☀️</span><span class="sn-lbl" id="theme-toggle-lbl">Mode clair</span>
+      <span id="theme-toggle-icon"><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.5"/><line x1="10" y1="1.5" x2="10" y2="3.5"/><line x1="10" y1="16.5" x2="10" y2="18.5"/><line x1="1.5" y1="10" x2="3.5" y2="10"/><line x1="16.5" y1="10" x2="18.5" y2="10"/><line x1="4" y1="4" x2="5.4" y2="5.4"/><line x1="14.6" y1="14.6" x2="16" y2="16"/><line x1="16" y1="4" x2="14.6" y2="5.4"/><line x1="5.4" y1="14.6" x2="4" y2="16"/></svg></span><span class="sn-lbl" id="theme-toggle-lbl">Mode clair</span>
     </button>
     <div class="sb-ccc"><strong id="sb-days">—</strong>jours avant CCC<br><span id="sb-date" style="font-size:0.52rem">Ven 28 août 2026</span></div>
   </div>
@@ -1113,7 +1115,11 @@ function applyThemeButton() {
   var icon = document.getElementById('theme-toggle-icon');
   var lbl = document.getElementById('theme-toggle-lbl');
   var isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  if (icon) icon.textContent = isLight ? '🌙' : '☀️';
+  // Icônes SVG monochromes (suivent currentColor = accent)
+  var sun = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.5"/><line x1="10" y1="1.5" x2="10" y2="3.5"/><line x1="10" y1="16.5" x2="10" y2="18.5"/><line x1="1.5" y1="10" x2="3.5" y2="10"/><line x1="16.5" y1="10" x2="18.5" y2="10"/><line x1="4" y1="4" x2="5.4" y2="5.4"/><line x1="14.6" y1="14.6" x2="16" y2="16"/><line x1="16" y1="4" x2="14.6" y2="5.4"/><line x1="5.4" y1="14.6" x2="4" y2="16"/></svg>';
+  var moon = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11.5 A6.5 6.5 0 1 1 8.5 4 A5 5 0 0 0 16 11.5 Z"/></svg>';
+  // En mode sombre on propose de passer en clair (soleil) ; en clair on propose la lune
+  if (icon) icon.innerHTML = isLight ? moon : sun;
   if (lbl) lbl.textContent = isLight ? 'Mode sombre' : 'Mode clair';
   // theme-color de la barre iOS
   var tc = document.querySelector('meta[name="theme-color"]');
