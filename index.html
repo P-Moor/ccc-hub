@@ -917,6 +917,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 <!-- AUJOURD'HUI -->
 <div class="panel active" id="panel-today"><div class="inner">
   <div class="ptitle">Aujourd'hui</div>
+  <div id="fil-du-jour"></div>
   <div id="today-hero-block"></div>
   
   <div class="forme-block" id="forme-block">
@@ -5060,7 +5061,11 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
   } else { start(); }
 
-  window.__renderNutrition = render;
+  window.__renderNutrition = function(){
+    render();
+    // Le fil du jour réagit aux changements de repas/hydratation
+    if (window.__updateFilDuJour) { try { window.__updateFilDuJour(false); } catch(e){} }
+  };
 
 })();
 
@@ -5400,6 +5405,127 @@ if (document.readyState === 'loading') {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCoach);
   else initCoach();
 })();
+
+/* ════════════════════════════════════════════════════════════
+   FIL DU JOUR — coach vivant qui suit la journée (tout IA, cache malin)
+   Rappelle l'IA seulement quand l'état change (repas, séance, heure).
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  function dk(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  // Calcule l'état complet de la journée
+  function dayState() {
+    var now = new Date();
+    var hour = now.getHours();
+    var st = { heure: hour, moment: hour<11?'matin':hour<14?'midi':hour<18?'apres-midi':'soir' };
+    // Nutrition du jour
+    try {
+      var meals = JSON.parse(localStorage.getItem('ccc_meals2_'+dk()) || '{}');
+      var kcal=0, p=0, nbItems=0, slotsRemplis=[];
+      Object.keys(meals).forEach(function(s){
+        if ((meals[s]||[]).length) slotsRemplis.push(s);
+        (meals[s]||[]).forEach(function(it){ kcal+=it.kcal||0; p+=it.p||0; nbItems++; });
+      });
+      st.repas = { kcal:Math.round(kcal), proteines:Math.round(p), nb_aliments:nbItems, creneaux:slotsRemplis };
+    } catch(e){ st.repas={kcal:0,nb_aliments:0,creneaux:[]}; }
+    // Hydratation
+    try { st.eau_litres = parseFloat(localStorage.getItem('ccc_water_'+dk()) || '0'); } catch(e){ st.eau_litres=0; }
+    // Garmin + séance du jour
+    try {
+      var g = window.__garminData;
+      if (g) {
+        st.body_battery = g.body_battery && g.body_battery.current;
+        st.readiness = g.readiness && g.readiness.score;
+        // Activité réalisée aujourd'hui ?
+        var todayAct = (g.activities||[]).filter(function(a){ return (a.date||'').slice(0,10) === dk(); });
+        if (todayAct.length) {
+          var a = todayAct[0];
+          st.seance_faite = { nom:a.name, km:a.distance_km, dplus:a.elevation_gain, te:a.te_aerobic, hr:a.avg_hr };
+        }
+      }
+    } catch(e){}
+    // Séance prévue aujourd'hui
+    try {
+      if (typeof PLAN_DATA !== 'undefined') {
+        var start=new Date('2026-05-11'), wi=Math.floor((new Date(dk())-start)/(7*864e5));
+        if (wi>=0 && wi<PLAN_DATA.length) {
+          var dd = PLAN_DATA[wi].days.filter(function(x){return x.date===dk();})[0];
+          if (dd) st.seance_prevue = { titre:dd.title, run:dd.run, velo:dd.velo, type:dd.type };
+        }
+      }
+    } catch(e){}
+    return st;
+  }
+
+  // Signature : si elle ne change pas, pas besoin de rappeler l'IA
+  function signature(st) {
+    return [st.moment, st.repas.kcal, st.repas.nb_aliments, Math.round(st.eau_litres*10),
+            st.seance_faite?st.seance_faite.km:0, st.body_battery||0].join('|');
+  }
+
+  function render(txt, tone) {
+    var slot = document.getElementById('fil-du-jour');
+    if (!slot) return;
+    var col = tone==='warn' ? 'var(--orange,#e8a020)' : tone==='good' ? 'var(--accent,#a3e635)' : 'var(--blue,#5ba3e8)';
+    slot.innerHTML =
+      '<div style="display:flex;gap:0.7rem;align-items:flex-start;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-left:3px solid '+col+';border-radius:10px;padding:0.8rem 1rem;margin-bottom:1rem">' +
+      '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/><circle cx="7" cy="8.5" r="0.8" fill="'+col+'"/><circle cx="10" cy="8.5" r="0.8" fill="'+col+'"/><circle cx="13" cy="8.5" r="0.8" fill="'+col+'"/></svg>' +
+      '<div style="flex:1"><div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem">Fil du jour · <span id="fdj-refresh" style="cursor:pointer;color:'+col+'">rafraîchir</span></div>' +
+      '<div style="font-size:0.85rem;line-height:1.5;color:var(--text,#e8e9ea)">'+txt.replace(/\n/g,'<br>')+'</div></div></div>';
+    var rf = document.getElementById('fdj-refresh');
+    if (rf) rf.addEventListener('click', function(){ updateFil(true); });
+  }
+
+  var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg, carb cycling. " +
+    "Tu suis sa journée en direct et lui donnes UN message court et vivant adapté au moment présent : l'inviter à manger/boire s'il est en retard, " +
+    "féliciter ou cadrer après une séance, rappeler la récup, etc. Ton chaleureux, direct, tutoiement. JAMAIS de conseil médical alarmant.";
+
+  async function updateFil(force) {
+    var slot = document.getElementById('fil-du-jour');
+    if (!slot) return;
+    if (typeof window.askClaude !== 'function') return;
+    if (!localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) return;
+
+    var st = dayState();
+    var sig = signature(st);
+    var cacheKey = 'ccc_fdj_'+dk();
+    // Cache : {sig, txt, tone}
+    if (!force) {
+      try {
+        var c = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+        if (c && c.sig === sig) { render(c.txt, c.tone); return; }
+      } catch(e){}
+    }
+    if (!slot.innerHTML) slot.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);font-style:italic;margin-bottom:1rem">le coach observe ta journée…</div>';
+
+    var prompt = "État actuel de la journée de Pierre :\n" + JSON.stringify(st,null,2) +
+      "\n\nDonne UN message de coach court (1-2 phrases, percutant et vivant) adapté à CE moment précis de sa journée. " +
+      "Exemples de registre : 'Il est midi et tu n'as encore rien mangé, pense à ton déjeuner', 'Belle séance ce matin, n'oublie pas de t'hydrater pour récupérer', 'Grosse charge aujourd'hui, repos maintenant', 'Tu es en retard sur ton hydratation'. " +
+      "Réponds en JSON : {\"message\": string, \"tone\": \"info\"|\"good\"|\"warn\"}. Pas de markdown.";
+    try {
+      var res = await window.askClaudeJSON(prompt, { system: SYS, max_tokens: 250 });
+      var txt = res.message || '';
+      var tone = res.tone || 'info';
+      if (txt) {
+        try { localStorage.setItem(cacheKey, JSON.stringify({sig:sig, txt:txt, tone:tone})); } catch(e){}
+        render(txt, tone);
+      } else { slot.innerHTML=''; }
+    } catch(err) { if(!slot.querySelector('div[style*="border-left"]')) slot.innerHTML=''; }
+  }
+
+  window.__updateFilDuJour = updateFil;
+
+  // Déclencheurs : au chargement, au retour sur l'app, après ajout repas/eau
+  function hook() {
+    setTimeout(function(){ updateFil(false); }, 1500);  // laisse Garmin charger d'abord
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) updateFil(false);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook);
+  else hook();
+})();
+
 </script>
 </body>
 </html>
