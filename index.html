@@ -3862,8 +3862,7 @@ if (document.readyState === 'loading') {
     {id:'dej',       label:'🍽️ Déjeuner'},
     {id:'postseance',label:'💪 Post-séance'},
     {id:'encas',     label:'🍎 Encas'},
-    {id:'diner',     label:'🌙 Dîner'},
-    {id:'boissons',  label:'🥤 Boissons', drinks:true}
+    {id:'diner',     label:'🌙 Dîner'}
   ];
 
   function todayKey() {
@@ -3980,10 +3979,6 @@ if (document.readyState === 'loading') {
       var arr = dayMeals[slot.id] || [];
       var ms = macroOfMeal(arr);
       var isActive = (activeSlot === slot.id);
-      // Séparateur visuel avant le créneau Boissons
-      if (slot.drinks) {
-        html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin:0.8rem 0 0.5rem">Hydratation calorique · hors repas</div>';
-      }
       html += '<div style="margin-bottom:0.6rem;border:1px solid var(--border,#242528);border-radius:8px;overflow:hidden">';
       // En-tête du repas
       html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.7rem;background:var(--bg,#0f0f10)">' +
@@ -4043,39 +4038,32 @@ if (document.readyState === 'loading') {
 
   // Sélecteur d'aliment (catégorie + recherche + liste filtrée)
   function renderFoodPicker(slotId) {
-    var allFoods = getFoods();
-    // Le créneau Boissons ne montre QUE les boissons ; les repas montrent tout SAUF les boissons
-    var isDrinkSlot = (slotId === 'boissons');
-    var foods = allFoods.filter(function(f){
-      return isDrinkSlot ? (f.cat === 'Boissons') : (f.cat !== 'Boissons');
-    });
+    var foods = getFoods();
     var cats = [];
     foods.forEach(function(f){ if (cats.indexOf(f.cat)<0) cats.push(f.cat); });
 
     var h = '<div style="padding:0.6rem;background:var(--bg,#0f0f10);border-top:1px solid var(--border,#242528)">';
     // Recherche
-    h += '<input id="nh-search" type="text" placeholder="🔍 Rechercher...' + (isDrinkSlot?' une boisson':' un aliment') + '" value="' + searchTerm + '" style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.68rem;margin-bottom:0.5rem">';
-    // Catégories (chips) — masquées pour le créneau Boissons (une seule catégorie)
-    if (!isDrinkSlot) {
-      h += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem">';
-      h += '<span class="nh-cat" data-cat="all" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat==='all'?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat==='all'?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">Tous</span>';
-      cats.forEach(function(c){
-        h += '<span class="nh-cat" data-cat="' + c + '" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat===c?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat===c?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">' + c + '</span>';
-      });
-      h += '</div>';
-    }
+    h += '<input id="nh-search" type="text" placeholder="🔍 Rechercher un aliment..." value="' + searchTerm + '" style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.68rem;margin-bottom:0.5rem">';
+    // Catégories (chips)
+    h += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem">';
+    h += '<span class="nh-cat" data-cat="all" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat==='all'?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat==='all'?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">Tous</span>';
+    cats.forEach(function(c){
+      h += '<span class="nh-cat" data-cat="' + c + '" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat===c?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat===c?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">' + c + '</span>';
+    });
+    h += '</div>';
     // Liste filtrée
     var filtered = foods.filter(function(f){
-      var okCat = (isDrinkSlot || selectedCat==='all' || f.cat===selectedCat);
+      var okCat = (selectedCat==='all' || f.cat===selectedCat);
       var okSearch = (!searchTerm || f.n.toLowerCase().indexOf(searchTerm.toLowerCase())>=0);
       return okCat && okSearch;
     });
     h += '<div style="max-height:160px;overflow-y:auto;margin-bottom:0.5rem">';
     if (filtered.length===0) {
-      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">Aucun ' + (isDrinkSlot?'boisson':'aliment') + '</div>';
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">Aucun aliment</div>';
     } else {
       filtered.forEach(function(f){
-        var realIdx = allFoods.indexOf(f);
+        var realIdx = foods.indexOf(f);
         h += '<div class="nh-pick" data-slot="' + slotId + '" data-food="' + realIdx + '" style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.5rem;cursor:pointer;border-radius:5px;margin-bottom:2px;background:var(--surface,#16171a)">' +
           '<span style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--text,#e8e9ea)">' + f.n + (f.note?' <span style="color:var(--orange,#e8a020);font-size:0.55rem">'+f.note+'</span>':'') + '</span>' +
           '<span style="font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068)">' + f.kcal + 'k/' + f.u + '</span></div>';
