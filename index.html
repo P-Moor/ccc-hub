@@ -878,6 +878,30 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 }
 .ex:hover .ex-arrow { transform: translateX(2px); color: var(--accent); }
 
+/* ── Module Poids & Composition ── */
+.wgt{margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.wgt-head{display:flex;justify-content:space-between;align-items:center;padding:0.7rem 0.85rem;border-bottom:1px solid var(--border)}
+.wgt-title{display:flex;align-items:center;gap:0.5rem;font-family:'Syne',sans-serif;font-weight:600;font-size:0.92rem;color:var(--text)}
+.wgt-body{padding:0.85rem}
+.wgt-row{display:flex;gap:0.6rem;margin-bottom:0.7rem}
+.wgt-stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.7rem}
+.wgt-stat .lbl{font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+.wgt-stat .val{font-family:'DM Mono',monospace;font-size:1.25rem;color:var(--text);font-weight:500;margin-top:2px;line-height:1.1}
+.wgt-stat .val small{font-size:0.62rem;color:var(--muted);font-weight:400}
+.wgt-stat .sub{font-family:'DM Mono',monospace;font-size:0.58rem;margin-top:2px}
+.wgt-note{font-size:0.72rem;line-height:1.45;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:6px;padding:0.5rem 0.6rem;margin-bottom:0.7rem}
+.wgt-spark{width:100%;height:48px;margin-bottom:0.7rem;display:block}
+.wgt-form{display:none;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.7rem;margin-bottom:0.6rem}
+.wgt-form.open{display:flex}
+.wgt-field{display:flex;flex-direction:column;gap:3px}
+.wgt-field label{font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);text-transform:uppercase}
+.wgt-field input{width:84px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.9rem;padding:0.4rem 0.5rem}
+.wgt-actions{display:flex;gap:0.4rem;justify-content:flex-end}
+.wgt-btn{background:var(--accent);color:#0f0f10;border:none;border-radius:7px;padding:0.45rem 0.85rem;font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:500;cursor:pointer}
+.wgt-btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.wgt-btn.full{width:100%;text-align:center}
+.wgt-empty{font-size:0.78rem;color:var(--muted);text-align:center;padding:0.4rem 0 0.7rem}
+
 </style>
 </head>
 <body>
@@ -932,6 +956,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
     <div id="metrics-content"></div>
     <div id="reco-content"></div>
   </div>
+
+  <div class="wgt" id="weight-card"></div>
 
   <div id="mini-cal-block"></div>
   <div class="sec sec-first">Cette semaine</div>
@@ -4109,6 +4135,11 @@ if (document.readyState === 'loading') {
   // Notes : ⚠️ purines (goutte) · 🍯 fructose/sucre rapide · 🍒 favorable goutte
   // Valeurs Ciqual (ANSES) + USDA + étiquettes fabricant (Näak/Maurten/SIS...).
   var FOODS_DEFAULT = [
+    // — Ajouts habitudes Pierre —
+    {cat:'Protéines', n:'Poulet haché (steak)', u:'100g', g:0, p:20, l:8, kcal:155},
+    {cat:'Laitiers', n:'Petit-suisse 0% / light', u:'100g', g:4, p:9, l:0.2, kcal:55},
+    {cat:'Boissons', n:'Coca-Cola Zéro', u:'100g', g:0, p:0, l:0, kcal:0, note:'0 kcal'},
+    {cat:'Épicerie/Condiments', n:'Vinaigre de cidre', u:'100g', g:1, p:0, l:0, kcal:14, note:'1 c.à.s ≈ 15g · rituel repas'},
     // PROTÉINES — viandes blanches & volaille
     {cat:'Protéines', n:'Blanc de poulet', u:'100g', g:0, p:23, l:1.5, kcal:110},
     {cat:'Protéines', n:'Cuisse de poulet (sans peau)', u:'100g', g:0, p:19, l:8, kcal:150},
@@ -5290,6 +5321,31 @@ if (document.readyState === 'loading') {
       Object.keys(meals).forEach(function(s){ (meals[s]||[]).forEach(function(it){ kcal+=it.kcal||0; g_+=it.g||0; p_+=it.p||0; l_+=it.l||0; }); });
       ctx.nutrition_jour = { kcal: Math.round(kcal), glucides: Math.round(g_), proteines: Math.round(p_), lipides: Math.round(l_) };
     } catch(e){}
+    // Poids & composition
+    try {
+      var wlog = JSON.parse(localStorage.getItem('ccc_weight_log') || '[]');
+      if (wlog.length) {
+        wlog.sort(function(a,b){ return a.d < b.d ? -1 : 1; });
+        var last = wlog[wlog.length-1];
+        var prev = wlog.length > 1 ? wlog[wlog.length-2] : null;
+        var phaseNote = '';
+        try {
+          if (typeof PLAN_DATA !== 'undefined') {
+            var s2 = new Date('2026-05-11'), n2 = new Date(todayKey());
+            var wi2 = Math.floor((n2 - s2)/(7*864e5));
+            if (wi2 >= 0 && wi2 < PLAN_DATA.length) phaseNote = PLAN_DATA[wi2].phase;
+          }
+        } catch(e){}
+        ctx.poids = {
+          dernier_kg: last.kg,
+          tour_taille_cm: last.tw || null,
+          variation_kg: prev ? Math.round((last.kg - prev.kg)*10)/10 : null,
+          cible_kg: 71,
+          phase_cycle: phaseNote,
+          note: 'Interpréter selon la phase : en charge une hausse = surtout flotte/glycogène ; en décharge la balance dit vrai. Lire la tendance, pas le chiffre du jour.'
+        };
+      }
+    } catch(e){}
     return ctx;
   }
 
@@ -5578,6 +5634,169 @@ if (document.readyState === 'loading') {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook);
   else hook();
+})();
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE POIDS & COMPOSITION — suivi poids + tour de taille
+   Saisie hebdo (matin à jeun) · moyenne hebdo · tendance ·
+   lecture interprétée par phase de cycle · sparkline + cible 71.
+   Stockage localStorage 'ccc_weight_log'. Lu par buildContext (IA).
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var KEY = 'ccc_weight_log';
+  var CIBLE = 71;
+
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function load(){
+    var arr = [];
+    try { arr = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){ arr = []; }
+    if (!Array.isArray(arr)) arr = [];
+    arr.sort(function(a,b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
+    return arr;
+  }
+  function persist(arr){ try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){} }
+
+  function saveEntry(kg, tw){
+    var arr = load(), dk = todayKey(), existing = null, i;
+    for (i=0;i<arr.length;i++){ if (arr[i].d === dk){ existing = arr[i]; break; } }
+    if (existing){ existing.kg = kg; if (tw != null) existing.tw = tw; }
+    else { arr.push({ d: dk, kg: kg, tw: (tw != null ? tw : null) }); }
+    arr.sort(function(a,b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
+    persist(arr);
+  }
+
+  // Moyenne des pesées des 7 derniers jours (sinon dernière valeur)
+  function weeklyAvg(arr){
+    if (!arr.length) return null;
+    var lastD = new Date(arr[arr.length-1].d), sum = 0, n = 0, i;
+    for (i=0;i<arr.length;i++){
+      var diff = (lastD - new Date(arr[i].d)) / 864e5;
+      if (diff >= 0 && diff < 7){ sum += arr[i].kg; n++; }
+    }
+    return n ? Math.round(sum/n*10)/10 : arr[arr.length-1].kg;
+  }
+  function lastWaist(arr){
+    for (var i=arr.length-1;i>=0;i--){ if (arr[i].tw != null) return arr[i].tw; }
+    return null;
+  }
+  function cyclePhase(){
+    try {
+      if (typeof PLAN_DATA !== 'undefined'){
+        var s = new Date('2026-05-11'), n = new Date(todayKey());
+        var wi = Math.floor((n - s)/(7*864e5));
+        if (wi >= 0 && wi < PLAN_DATA.length) return PLAN_DATA[wi];
+      }
+    } catch(e){}
+    return null;
+  }
+  function phaseNote(w, variation){
+    var dir = (variation == null) ? '' : (variation > 0 ? '+'+variation+' kg' : (variation < 0 ? variation+' kg' : 'stable'));
+    if (!w) return 'Pèse-toi 1×/semaine, le matin à jeun. La tendance compte, pas le chiffre du jour.';
+    var tag = w.tag || '';
+    if (tag === 'decharge') return 'Décharge ('+w.phase+') — l\'eau et l\'inflammation retombent : ta lecture la plus fiable. '+(dir?'('+dir+' vs dernière pesée)':'');
+    if (tag === 'taper' || tag === 'course') return 'Affûtage / course ('+w.phase+') — ton poids de forme se révèle ici. '+(dir?'('+dir+')':'');
+    return 'Charge ('+w.phase+') — une hausse = surtout flotte/glycogène, pas du gras. Lis la tendance. '+(dir?'('+dir+' vs dernière pesée)':'');
+  }
+
+  // Sparkline poids + ligne cible
+  function sparkline(arr){
+    if (arr.length < 2) return '';
+    var pts = arr.slice(-12), W = 300, H = 48, pad = 6;
+    var vals = pts.map(function(p){ return p.kg; });
+    var mn = Math.min.apply(null, vals.concat([CIBLE]));
+    var mx = Math.max.apply(null, vals.concat([CIBLE]));
+    if (mx - mn < 1){ mx += 0.5; mn -= 0.5; }
+    function X(i){ return pad + (W - 2*pad) * (pts.length === 1 ? 0.5 : i/(pts.length-1)); }
+    function Y(v){ return pad + (H - 2*pad) * (1 - (v - mn)/(mx - mn)); }
+    var d = '', i;
+    for (i=0;i<pts.length;i++){ d += (i===0?'M':'L') + X(i).toFixed(1) + ' ' + Y(pts[i].kg).toFixed(1) + ' '; }
+    var yc = Y(CIBLE).toFixed(1);
+    var lastX = X(pts.length-1).toFixed(1), lastY = Y(pts[pts.length-1].kg).toFixed(1);
+    return '<svg class="wgt-spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">' +
+      '<line x1="'+pad+'" y1="'+yc+'" x2="'+(W-pad)+'" y2="'+yc+'" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>' +
+      '<path d="'+d.replace(/\s+$/,'')+'" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="'+lastX+'" cy="'+lastY+'" r="2.6" fill="var(--accent)"/>' +
+      '</svg>';
+  }
+
+  function fmt(n){ return n.toString().replace('.', ','); }
+
+  function render(){
+    var el = document.getElementById('weight-card');
+    if (!el) return;
+    var arr = load();
+    var arrLast = arr.length ? arr[arr.length-1] : null;
+    var icon = (typeof ic === 'function') ? ic('target', 16) : '';
+
+    var head = '<div class="wgt-head"><div class="wgt-title">'+icon+' Poids &amp; Composition</div>' +
+      '<button class="wgt-btn ghost" id="wgt-toggle" type="button">+ saisir</button></div>';
+
+    var body = '<div class="wgt-body">';
+    body += '<div class="wgt-form" id="wgt-form">' +
+        '<div class="wgt-field"><label>Poids (kg)</label><input type="number" step="0.1" inputmode="decimal" id="wgt-kg" placeholder="ex 74,5" value="'+(arrLast?arrLast.kg:'')+'"></div>' +
+        '<div class="wgt-field"><label>Tour de taille (cm)</label><input type="number" step="0.5" inputmode="decimal" id="wgt-tw" placeholder="opt." value="'+(arrLast&&arrLast.tw!=null?arrLast.tw:'')+'"></div>' +
+        '<div class="wgt-actions"><button class="wgt-btn ghost" id="wgt-cancel" type="button">Annuler</button><button class="wgt-btn" id="wgt-save" type="button">Enregistrer</button></div>' +
+      '</div>';
+
+    if (!arr.length){
+      body += '<div class="wgt-empty">Aucune pesée. Pèse-toi le matin à jeun, 1×/semaine.</div>';
+      body += '<button class="wgt-btn full" id="wgt-first" type="button">+ Première pesée</button>';
+    } else {
+      var avg = weeklyAvg(arr), tw = lastWaist(arr);
+      var prev = arr.length > 1 ? arr[arr.length-2] : null;
+      var variation = prev ? Math.round((arrLast.kg - prev.kg)*10)/10 : null;
+      var trendCol = (variation == null) ? 'var(--muted)' : (variation > 0 ? 'var(--orange)' : (variation < 0 ? 'var(--green)' : 'var(--muted)'));
+      var trendTxt = (variation == null) ? '1re donnée' : (variation > 0 ? '\u25B2 +'+variation+' kg' : (variation < 0 ? '\u25BC '+variation+' kg' : '= stable'));
+      var w = cyclePhase();
+      body += '<div class="wgt-row">' +
+        '<div class="wgt-stat"><div class="lbl">Poids</div><div class="val">'+fmt(arrLast.kg)+' <small>kg</small></div>' +
+          '<div class="sub" style="color:'+trendCol+'">'+trendTxt+'</div></div>' +
+        '<div class="wgt-stat"><div class="lbl">Tour de taille</div><div class="val">'+(tw!=null?(fmt(tw)+' <small>cm</small>'):'<small>—</small>')+'</div>' +
+          '<div class="sub" style="color:var(--muted)">moy. hebdo '+fmt(avg)+' kg</div></div>' +
+        '</div>';
+      body += sparkline(arr);
+      body += '<div class="wgt-note">'+phaseNote(w, variation)+' <span style="color:var(--accent)">Cible '+CIBLE+' kg.</span></div>';
+    }
+    body += '</div>';
+    el.innerHTML = head + body;
+    bind();
+  }
+
+  function openForm(open){
+    var f = document.getElementById('wgt-form');
+    if (f) f.classList.toggle('open', open !== false);
+  }
+  function bind(){
+    var toggle = document.getElementById('wgt-toggle');
+    if (toggle) toggle.addEventListener('click', function(){
+      var f = document.getElementById('wgt-form');
+      openForm(!(f && f.classList.contains('open')));
+    });
+    var first = document.getElementById('wgt-first');
+    if (first) first.addEventListener('click', function(){ openForm(true); var i=document.getElementById('wgt-kg'); if(i) i.focus(); });
+    var cancel = document.getElementById('wgt-cancel');
+    if (cancel) cancel.addEventListener('click', function(){ openForm(false); });
+    var save = document.getElementById('wgt-save');
+    if (save) save.addEventListener('click', doSave);
+  }
+  function doSave(){
+    var kgEl = document.getElementById('wgt-kg'), twEl = document.getElementById('wgt-tw');
+    var kg = kgEl ? parseFloat(String(kgEl.value).replace(',', '.')) : NaN;
+    var tw = (twEl && String(twEl.value).trim() !== '') ? parseFloat(String(twEl.value).replace(',', '.')) : null;
+    if (isNaN(kg) || kg < 30 || kg > 200){ if (kgEl){ kgEl.style.borderColor = 'var(--red)'; kgEl.focus(); } return; }
+    if (tw != null && (isNaN(tw) || tw < 40 || tw > 200)) tw = null;
+    saveEntry(Math.round(kg*10)/10, tw != null ? Math.round(tw*2)/2 : null);
+    render();
+  }
+
+  window.__renderWeight = render;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
+  else render();
 })();
 
 </script>
