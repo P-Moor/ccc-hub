@@ -4224,9 +4224,18 @@ if (document.readyState === 'loading') {
     {cat:'Plats préparés', n:'Crêpe', u:'unité', g:18, p:4, l:5, kcal:130, note:'1 crêpe ≈ 60g'}
   ];
 
+  function getCustomFoods() {
+    try { var s = localStorage.getItem('ccc_foods_custom'); if (s) return JSON.parse(s); } catch(e){}
+    return [];
+  }
+  function saveCustomFood(food) {
+    var arr = getCustomFoods();
+    arr.push(food);
+    try { localStorage.setItem('ccc_foods_custom', JSON.stringify(arr)); } catch(e){}
+  }
   function getFoods() {
-    try { var s = localStorage.getItem('ccc_foods_v2'); if (s) return JSON.parse(s); } catch(e){}
-    return FOODS_DEFAULT.slice();
+    // Base par défaut + aliments custom (créés par l'utilisateur, flag custom:true)
+    return FOODS_DEFAULT.concat(getCustomFoods());
   }
 
   // ── Repas de la journée ──
@@ -4305,6 +4314,91 @@ if (document.readyState === 'loading') {
   // ════════════════════════════════════════
   // RENDU
   // ════════════════════════════════════════
+  // ── Modale de création d'un aliment custom ──
+  function openNewFoodModal() {
+    var old = document.getElementById('newfood-overlay');
+    if (old) old.remove();
+
+    // Catégories existantes pour le menu déroulant
+    var cats = [];
+    FOODS_DEFAULT.forEach(function(f){ if (cats.indexOf(f.cat)<0) cats.push(f.cat); });
+    var catOpts = cats.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+
+    var html = '<div id="newfood-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10003;padding:1rem">' +
+      '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.3rem;max-width:400px;width:100%;max-height:88vh;overflow-y:auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">' +
+        '<span style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700">➕ Nouvel aliment</span>' +
+        '<span id="nf-close" style="cursor:pointer;font-size:1.2rem;color:var(--muted,#5e6068)">✕</span>' +
+      '</div>' +
+      '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068);margin-bottom:1rem">Les calories se calculent automatiquement (modifiables).</div>';
+
+    function field(label, id, type, val, ph) {
+      return '<div style="margin-bottom:0.7rem">' +
+        '<label style="display:block;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">' + label + '</label>' +
+        '<input id="' + id + '" type="' + type + '"' + (val!=null?' value="'+val+'"':'') + (ph?' placeholder="'+ph+'"':'') + ' style="width:100%;box-sizing:border-box;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:6px;padding:0.5rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem"></div>';
+    }
+
+    html += field('Nom de l\'aliment', 'nf-name', 'text', null, 'ex: Pâtes Barilla');
+    html += '<div style="margin-bottom:0.7rem">' +
+      '<label style="display:block;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Catégorie</label>' +
+      '<select id="nf-cat" style="width:100%;box-sizing:border-box;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:6px;padding:0.5rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem">' + catOpts + '</select></div>';
+    html += '<div style="margin-bottom:0.7rem">' +
+      '<label style="display:block;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Référence</label>' +
+      '<select id="nf-unit" style="width:100%;box-sizing:border-box;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:6px;padding:0.5rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem">' +
+        '<option value="100g">pour 100g</option><option value="unité">à l\'unité</option></select></div>';
+    // Macros sur une ligne
+    html += '<div style="display:flex;gap:0.5rem">' +
+      '<div style="flex:1">' + field('Glucides (g)', 'nf-g', 'number', '0') + '</div>' +
+      '<div style="flex:1">' + field('Protéines (g)', 'nf-p', 'number', '0') + '</div>' +
+      '<div style="flex:1">' + field('Lipides (g)', 'nf-l', 'number', '0') + '</div>' +
+      '</div>';
+    html += field('Calories (auto, modifiable)', 'nf-kcal', 'number', '0');
+    html += field('Note (optionnel)', 'nf-note', 'text', null, 'ex: ⚠️ purines, marque...');
+
+    html += '<div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem">' +
+      '<button id="nf-cancel" style="background:transparent;border:1px solid var(--border,#242528);color:var(--text,#e8e9ea);padding:0.5rem 0.9rem;border-radius:6px;font-family:DM Mono,monospace;font-size:0.72rem;cursor:pointer">Annuler</button>' +
+      '<button id="nf-save" style="background:var(--accent,#a3e635);border:none;color:#0f0f10;padding:0.5rem 0.9rem;border-radius:6px;font-family:DM Mono,monospace;font-size:0.72rem;font-weight:600;cursor:pointer">Créer</button>' +
+      '</div></div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    var overlay = document.getElementById('newfood-overlay');
+
+    // Calcul auto des kcal quand on change g/p/l
+    function recalcKcal() {
+      var g = parseFloat(document.getElementById('nf-g').value) || 0;
+      var p = parseFloat(document.getElementById('nf-p').value) || 0;
+      var l = parseFloat(document.getElementById('nf-l').value) || 0;
+      document.getElementById('nf-kcal').value = Math.round(g*4 + p*4 + l*9);
+    }
+    ['nf-g','nf-p','nf-l'].forEach(function(id){
+      document.getElementById(id).addEventListener('input', recalcKcal);
+    });
+
+    document.getElementById('nf-close').addEventListener('click', function(){ overlay.remove(); });
+    document.getElementById('nf-cancel').addEventListener('click', function(){ overlay.remove(); });
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+
+    document.getElementById('nf-save').addEventListener('click', function(){
+      var name = document.getElementById('nf-name').value.trim();
+      if (!name) { alert('Donne un nom à l\'aliment.'); return; }
+      var food = {
+        cat: document.getElementById('nf-cat').value,
+        n: name,
+        u: document.getElementById('nf-unit').value,
+        g: parseFloat(document.getElementById('nf-g').value) || 0,
+        p: parseFloat(document.getElementById('nf-p').value) || 0,
+        l: parseFloat(document.getElementById('nf-l').value) || 0,
+        kcal: parseInt(document.getElementById('nf-kcal').value, 10) || 0,
+        custom: true
+      };
+      var note = document.getElementById('nf-note').value.trim();
+      if (note) food.note = note;
+      saveCustomFood(food);
+      overlay.remove();
+      render();
+    });
+  }
+
   function render() {
     var existing = document.getElementById('nutri-hydra-card');
     if (existing) existing.remove();
@@ -4326,7 +4420,10 @@ if (document.readyState === 'loading') {
     var water = getWater(dk);
 
     var html = '<div id="nutri-hydra-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.2rem;margin-top:1rem">';
-    html += '<div style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.2rem">🍽️ Nutrition du jour</div>';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.2rem">' +
+      '<span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700">🍽️ Nutrition du jour</span>' +
+      '<span id="nh-newfood" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--accent,#a3e635);border:1px solid var(--accent,#a3e635);border-radius:6px;padding:0.25rem 0.5rem">+ Aliment</span>' +
+      '</div>';
     html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:1rem">BMR Mifflin ' + t.bmr + ' kcal' + (t.actKcal>0 ? ' + ' + t.actKcal + ' kcal entraînement' : ' · pas de séance enregistrée') + ' → cible ' + t.kcal + ' kcal</div>';
 
     // Barres d'apport global
@@ -4493,6 +4590,10 @@ if (document.readyState === 'loading') {
   // ════════════════════════════════════════
   function attachHandlers() {
     var dk = todayKey();
+
+    // Bouton "+ Aliment" (création d'un aliment custom)
+    var nfBtn = document.getElementById('nh-newfood');
+    if (nfBtn) nfBtn.addEventListener('click', function(){ openNewFoodModal(); });
 
     document.querySelectorAll('.nh-addbtn').forEach(function(el){
       el.addEventListener('click', function(){
