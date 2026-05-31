@@ -1181,199 +1181,120 @@ function chReset() {
 /* ════════════════════════════════════════
    DATA INJECTED HERE
 ════════════════════════════════════════ */
-const vols = [
-  {l:'S1 — 11 mai',   v:108, run:58,  velo:50, muscu:1, e:'',              phase:'CHARGE 1'},
-  {l:'S2 — 18 mai',   v:127, run:72,  velo:55, muscu:1, e:'',              phase:'CHARGE 2'},
-  {l:'S3 — 25 mai',   v:142, run:82,  velo:60, muscu:1, e:'',              phase:'CHARGE 3'},
-  {l:'S4↓ — 1 juin',  v:83,  run:48,  velo:35, muscu:2, e:'',              phase:'DÉCHARGE'},
-  {l:'S5 — 8 juin',   v:160, run:70,  velo:90, muscu:1, e:'🚴 Gravel 13/6', phase:'CHARGE 1'},
-  {l:'S6 — 15 juin',  v:148, run:88,  velo:60, muscu:1, e:'',              phase:'CHARGE 2'},
-  {l:'S7 — 22 juin',  v:165, run:95,  velo:70, muscu:1, e:'',              phase:'CHARGE 3'},
-  {l:'S8↓ — 29 juin', v:92,  run:52,  velo:40, muscu:2, e:'',              phase:'DÉCHARGE'},
-  {l:'S9 — 6 juil',   v:120, run:80,  velo:40, muscu:1, e:'🇮🇹 Toscane',    phase:'CHARGE 1'},
-  {l:'S10 — 13 juil', v:145, run:100, velo:45, muscu:1, e:'🇮🇹 Toscane',    phase:'CHARGE 2'},
-  {l:'S11 — 20 juil', v:163, run:108, velo:55, muscu:1, e:'',              phase:'CHARGE 3'},
-  {l:'S12↓ — 27 juil',v:90,  run:55,  velo:35, muscu:2, e:'',              phase:'DÉCHARGE'},
-  {l:'S13 — 3 août',  v:133, run:88,  velo:45, muscu:1, e:'',              phase:'CHARGE 1'},
-  {l:'S14 — 10 août', v:113, run:78,  velo:35, muscu:1, e:'',              phase:'CHARGE 2'},
-  {l:'S15 Taper — 17 août', v:75, run:55, velo:20, muscu:1, e:'✂️ Affûtage', phase:'TAPER'},
-  {l:'S16 Course — 24 août',v:30, run:30, velo:0,  muscu:0, e:'🏔️ CCC Ven 28', phase:'COURSE'},
-]
+// ═══════════════════════════════════════════════════════════
+// PLAN_DATA — SOURCE UNIQUE DE VÉRITÉ (séances structurées)
+// Volume = somme des séances. Tout en dérive : vols, months, jauges.
+// ═══════════════════════════════════════════════════════════
+var PLAN_DATA = [{"num": 1, "phase": "CHARGE 1", "tag": "charge", "e": "", "monday": "2026-05-11", "label": "11 mai", "days": [{"date": "2026-05-11", "label": "Lun 11", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-05-12", "label": "Mar 12", "type": "ef", "run": 10, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-05-13", "label": "Mer 13", "type": "spe", "run": 9, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-05-14", "label": "Jeu 14", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-05-15", "label": "Ven 15", "type": "ef", "run": 8, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-05-16", "label": "Sam 16", "type": "long", "run": 31, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-05-17", "label": "Dim 17", "type": "velo", "run": 0, "velo": 50, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 2, "phase": "CHARGE 2", "tag": "charge", "e": "", "monday": "2026-05-18", "label": "18 mai", "days": [{"date": "2026-05-18", "label": "Lun 18", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-05-19", "label": "Mar 19", "type": "ef", "run": 13, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-05-20", "label": "Mer 20", "type": "spe", "run": 12, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-05-21", "label": "Jeu 21", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-05-22", "label": "Ven 22", "type": "ef", "run": 10, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-05-23", "label": "Sam 23", "type": "long", "run": 37, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-05-24", "label": "Dim 24", "type": "velo", "run": 0, "velo": 55, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 3, "phase": "CHARGE 3", "tag": "charge", "e": "", "monday": "2026-05-25", "label": "25 mai", "days": [{"date": "2026-05-25", "label": "Lun 25", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-05-26", "label": "Mar 26", "type": "ef", "run": 15, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-05-27", "label": "Mer 27", "type": "spe", "run": 13, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-05-28", "label": "Jeu 28", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-05-29", "label": "Ven 29", "type": "ef", "run": 11, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-05-30", "label": "Sam 30", "type": "long", "run": 43, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-05-31", "label": "Dim 31", "type": "velo", "run": 0, "velo": 60, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 4, "phase": "DÉCHARGE", "tag": "decharge", "e": "", "monday": "2026-06-01", "label": "1 juin", "days": [{"date": "2026-06-01", "label": "Lun 1", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 20min", "sub": "Semaine décharge · récup"}, {"date": "2026-06-02", "label": "Mar 2", "type": "ef", "run": 14, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 pur · max 135bpm"}, {"date": "2026-06-03", "label": "Mer 3", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "Focus muscu"}, {"date": "2026-06-04", "label": "Jeu 4", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou marche", "sub": "Jambes fraîches"}, {"date": "2026-06-05", "label": "Ven 5", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "2e séance muscu"}, {"date": "2026-06-06", "label": "Sam 6", "type": "long", "run": 34, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ modéré · évaluation"}, {"date": "2026-06-07", "label": "Dim 7", "type": "velo", "run": 0, "velo": 35, "muscu": 0, "title": "Vélo récup", "sub": "Cross-training léger"}]}, {"num": 5, "phase": "CHARGE 1", "tag": "gravel", "e": "🚴 Gravel 13/6", "monday": "2026-06-08", "label": "8 juin", "days": [{"date": "2026-06-08", "label": "Lun 8", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Semaine gravel"}, {"date": "2026-06-09", "label": "Mar 9", "type": "ef", "run": 28, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · jambes fraîches"}, {"date": "2026-06-10", "label": "Mer 10", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 30min", "sub": "Charges légères"}, {"date": "2026-06-11", "label": "Jeu 11", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou marche 30min", "sub": "Pré-gravel"}, {"date": "2026-06-12", "label": "Ven 12", "type": "ef", "run": 14, "velo": 0, "muscu": 0, "title": "Strides 6×80m", "sub": "Activation légère"}, {"date": "2026-06-13", "label": "Sam 13", "type": "gravel", "run": 0, "velo": 81, "muscu": 0, "title": "🚴 Gravel 93km — événement", "sub": "Effort long Z2"}, {"date": "2026-06-14", "label": "Dim 14", "type": "ef", "run": 28, "velo": 9, "muscu": 0, "title": "EF récup", "sub": "Footing souple post-gravel"}]}, {"num": 6, "phase": "CHARGE 2", "tag": "charge", "e": "", "monday": "2026-06-15", "label": "15 juin", "days": [{"date": "2026-06-15", "label": "Lun 15", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-06-16", "label": "Mar 16", "type": "ef", "run": 16, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-06-17", "label": "Mer 17", "type": "spe", "run": 14, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-06-18", "label": "Jeu 18", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-06-19", "label": "Ven 19", "type": "ef", "run": 12, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-06-20", "label": "Sam 20", "type": "long", "run": 46, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-06-21", "label": "Dim 21", "type": "velo", "run": 0, "velo": 60, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 7, "phase": "CHARGE 3", "tag": "charge", "e": "", "monday": "2026-06-22", "label": "22 juin", "days": [{"date": "2026-06-22", "label": "Lun 22", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-06-23", "label": "Mar 23", "type": "ef", "run": 17, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-06-24", "label": "Mer 24", "type": "spe", "run": 15, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-06-25", "label": "Jeu 25", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-06-26", "label": "Ven 26", "type": "ef", "run": 13, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-06-27", "label": "Sam 27", "type": "long", "run": 50, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-06-28", "label": "Dim 28", "type": "velo", "run": 0, "velo": 70, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 8, "phase": "DÉCHARGE", "tag": "decharge", "e": "", "monday": "2026-06-29", "label": "29 juin", "days": [{"date": "2026-06-29", "label": "Lun 29", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 20min", "sub": "Semaine décharge · récup"}, {"date": "2026-06-30", "label": "Mar 30", "type": "ef", "run": 16, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 pur · max 135bpm"}, {"date": "2026-07-01", "label": "Mer 1", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "Focus muscu"}, {"date": "2026-07-02", "label": "Jeu 2", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou marche", "sub": "Jambes fraîches"}, {"date": "2026-07-03", "label": "Ven 3", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "2e séance muscu"}, {"date": "2026-07-04", "label": "Sam 4", "type": "long", "run": 36, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ modéré · évaluation"}, {"date": "2026-07-05", "label": "Dim 5", "type": "velo", "run": 0, "velo": 40, "muscu": 0, "title": "Vélo récup", "sub": "Cross-training léger"}]}, {"num": 9, "phase": "CHARGE 1", "tag": "toscane", "e": "🇮🇹 Toscane", "monday": "2026-07-06", "label": "6 juil", "days": [{"date": "2026-07-06", "label": "Lun 6", "type": "ef", "run": 11, "velo": 0, "muscu": 0, "title": "EF sentiers", "sub": "🇮🇹 Découverte terrain"}, {"date": "2026-07-07", "label": "Mar 7", "type": "spe", "run": 16, "velo": 0, "muscu": 0, "title": "Sortie D+ montagne", "sub": "Côtes longues"}, {"date": "2026-07-08", "label": "Mer 8", "type": "ef", "run": 8, "velo": 0, "muscu": 0, "title": "Récup active Z1", "sub": "Jambes légères"}, {"date": "2026-07-09", "label": "Jeu 9", "type": "long", "run": 23, "velo": 0, "muscu": 0, "title": "Sortie longue / gros D+", "sub": "Simulation CCC"}, {"date": "2026-07-10", "label": "Ven 10", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou rando famille", "sub": ""}, {"date": "2026-07-11", "label": "Sam 11", "type": "long", "run": 22, "velo": 0, "muscu": 0, "title": "Sortie longue vallonnée", "sub": "Le gros morceau"}, {"date": "2026-07-12", "label": "Dim 12", "type": "velo", "run": 0, "velo": 40, "muscu": 1, "title": "Vélo récup + renfo", "sub": "Mobilité hallux"}]}, {"num": 10, "phase": "CHARGE 2", "tag": "toscane", "e": "🇮🇹 Toscane", "monday": "2026-07-13", "label": "13 juil", "days": [{"date": "2026-07-13", "label": "Lun 13", "type": "ef", "run": 14, "velo": 0, "muscu": 0, "title": "EF sentiers", "sub": "🇮🇹 Découverte terrain"}, {"date": "2026-07-14", "label": "Mar 14", "type": "spe", "run": 20, "velo": 0, "muscu": 0, "title": "Sortie D+ montagne", "sub": "Côtes longues"}, {"date": "2026-07-15", "label": "Mer 15", "type": "ef", "run": 10, "velo": 0, "muscu": 0, "title": "Récup active Z1", "sub": "Jambes légères"}, {"date": "2026-07-16", "label": "Jeu 16", "type": "long", "run": 28, "velo": 0, "muscu": 0, "title": "Sortie longue / gros D+", "sub": "Simulation CCC"}, {"date": "2026-07-17", "label": "Ven 17", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou rando famille", "sub": ""}, {"date": "2026-07-18", "label": "Sam 18", "type": "long", "run": 28, "velo": 0, "muscu": 0, "title": "Sortie longue vallonnée", "sub": "Le gros morceau"}, {"date": "2026-07-19", "label": "Dim 19", "type": "velo", "run": 0, "velo": 45, "muscu": 1, "title": "Vélo récup + renfo", "sub": "Mobilité hallux"}]}, {"num": 11, "phase": "CHARGE 3", "tag": "charge", "e": "", "monday": "2026-07-20", "label": "20 juil", "days": [{"date": "2026-07-20", "label": "Lun 20", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-07-21", "label": "Mar 21", "type": "ef", "run": 19, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-07-22", "label": "Mer 22", "type": "spe", "run": 17, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-07-23", "label": "Jeu 23", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-07-24", "label": "Ven 24", "type": "ef", "run": 15, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-07-25", "label": "Sam 25", "type": "long", "run": 57, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-07-26", "label": "Dim 26", "type": "velo", "run": 0, "velo": 55, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 12, "phase": "DÉCHARGE", "tag": "decharge", "e": "", "monday": "2026-07-27", "label": "27 juil", "days": [{"date": "2026-07-27", "label": "Lun 27", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 20min", "sub": "Semaine décharge · récup"}, {"date": "2026-07-28", "label": "Mar 28", "type": "ef", "run": 16, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 pur · max 135bpm"}, {"date": "2026-07-29", "label": "Mer 29", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "Focus muscu"}, {"date": "2026-07-30", "label": "Jeu 30", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou marche", "sub": "Jambes fraîches"}, {"date": "2026-07-31", "label": "Ven 31", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "2e séance muscu"}, {"date": "2026-08-01", "label": "Sam 1", "type": "long", "run": 39, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ modéré · évaluation"}, {"date": "2026-08-02", "label": "Dim 2", "type": "velo", "run": 0, "velo": 35, "muscu": 0, "title": "Vélo récup", "sub": "Cross-training léger"}]}, {"num": 13, "phase": "CHARGE 1", "tag": "charge", "e": "", "monday": "2026-08-03", "label": "3 août", "days": [{"date": "2026-08-03", "label": "Lun 3", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-08-04", "label": "Mar 4", "type": "ef", "run": 16, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-08-05", "label": "Mer 5", "type": "spe", "run": 14, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-08-06", "label": "Jeu 6", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-08-07", "label": "Ven 7", "type": "ef", "run": 12, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-08-08", "label": "Sam 8", "type": "long", "run": 46, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-08-09", "label": "Dim 9", "type": "velo", "run": 0, "velo": 45, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 14, "phase": "CHARGE 2", "tag": "charge", "e": "", "monday": "2026-08-10", "label": "10 août", "days": [{"date": "2026-08-10", "label": "Lun 10", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Gainage, hallux"}, {"date": "2026-08-11", "label": "Mar 11", "type": "ef", "run": 14, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1-Z2 · plat"}, {"date": "2026-08-12", "label": "Mer 12", "type": "spe", "run": 12, "velo": 0, "muscu": 0, "title": "Spé", "sub": "Côtes / qualité selon BB"}, {"date": "2026-08-13", "label": "Jeu 13", "type": "muscu", "run": 0, "velo": 0, "muscu": 1, "title": "Renfo / Plio 40min", "sub": "4 blocs"}, {"date": "2026-08-14", "label": "Ven 14", "type": "ef", "run": 11, "velo": 0, "muscu": 0, "title": "EF", "sub": "Z1 · allure conversation"}, {"date": "2026-08-15", "label": "Sam 15", "type": "long", "run": 41, "velo": 0, "muscu": 0, "title": "Sortie longue", "sub": "D+ · marcher les montées"}, {"date": "2026-08-16", "label": "Dim 16", "type": "velo", "run": 0, "velo": 35, "muscu": 0, "title": "Vélo", "sub": "Cross-training cardio Z2"}]}, {"num": 15, "phase": "TAPER", "tag": "taper", "e": "✂️ Affûtage", "monday": "2026-08-17", "label": "17 août", "days": [{"date": "2026-08-17", "label": "Lun 17", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + mobilité 15min", "sub": "Début affûtage"}, {"date": "2026-08-18", "label": "Mar 18", "type": "ef", "run": 16, "velo": 0, "muscu": 0, "title": "EF + 4 strides", "sub": "Garder le pied vif"}, {"date": "2026-08-19", "label": "Mer 19", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos", "sub": "Assimilation"}, {"date": "2026-08-20", "label": "Jeu 20", "type": "spe", "run": 12, "velo": 0, "muscu": 1, "title": "Rappel Z2 + 3×1min Z3", "sub": "Vivacité sans fatigue"}, {"date": "2026-08-21", "label": "Ven 21", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos ou marche 30min", "sub": ""}, {"date": "2026-08-22", "label": "Sam 22", "type": "long", "run": 27, "velo": 0, "muscu": 0, "title": "Sortie vallonnée", "sub": "Dernière sortie longue"}, {"date": "2026-08-23", "label": "Dim 23", "type": "velo", "run": 0, "velo": 20, "muscu": 0, "title": "Vélo léger", "sub": "Déliage"}]}, {"num": 16, "phase": "COURSE", "tag": "course", "e": "🏔️ CCC Ven 28", "monday": "2026-08-24", "label": "24 août", "days": [{"date": "2026-08-24", "label": "Lun 24", "type": "ef", "run": 9, "velo": 0, "muscu": 0, "title": "EF easy + 4 strides", "sub": "Jambes vives"}, {"date": "2026-08-25", "label": "Mar 25", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos", "sub": "Hydratation, sommeil"}, {"date": "2026-08-26", "label": "Mer 26", "type": "ef", "run": 6, "velo": 0, "muscu": 0, "title": "EF + 3×30s allure", "sub": "Activation"}, {"date": "2026-08-27", "label": "Jeu 27", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Repos + voyage Chamonix", "sub": "Récup, glucides"}, {"date": "2026-08-28", "label": "Ven 28", "type": "course", "run": 15, "velo": 0, "muscu": 0, "title": "🏔️ CCC — 101km / 6100m D+", "sub": "LE JOUR J"}, {"date": "2026-08-29", "label": "Sam 29", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Récup totale", "sub": "Tu l'as fait"}, {"date": "2026-08-30", "label": "Dim 30", "type": "repos", "run": 0, "velo": 0, "muscu": 0, "title": "Marche légère", "sub": "Savoure"}]}];
 
-// Applique les overrides utilisateur (édition manuelle des volumes) AVANT tout rendu
-try {
-  var _ov = JSON.parse(localStorage.getItem('ccc_plan_overrides') || '{}');
-  for (var _i in _ov) {
-    var _idx = parseInt(_i, 10);
-    if (vols[_idx]) {
-      if (_ov[_i].run  != null) vols[_idx].run  = _ov[_i].run;
-      if (_ov[_i].velo != null) vols[_idx].velo = _ov[_i].velo;
-      if (_ov[_i].muscu!= null) vols[_idx].muscu= _ov[_i].muscu;
-      vols[_idx].v = (vols[_idx].run || 0) + (vols[_idx].velo || 0);
-    }
+
+// ── Overrides utilisateur appliqués sur PLAN_DATA (édition volumes/séances) ──
+// Format : { "weekNum": { run: X, velo: Y, muscu: Z } } → redistribue les séances
+function getPlanOverrides2() {
+  try { return JSON.parse(localStorage.getItem('ccc_plan_overrides') || '{}'); } catch(e) { return {}; }
+}
+
+// Redistribue un volume cible (run ou velo) sur les jours d'une semaine selon leurs poids actuels
+function redistribute(days, field, target) {
+  // Poids = répartition actuelle des km sur ce champ
+  var current = days.map(function(d){ return d[field] || 0; });
+  var sum = current.reduce(function(a,b){ return a+b; }, 0);
+  if (sum === 0) {
+    // Aucun km actuellement : on ne peut pas répartir proportionnellement, on laisse à 0
+    return;
   }
-} catch(e) {}
+  var newSum = 0;
+  days.forEach(function(d, i){
+    if (current[i] > 0) {
+      d[field] = Math.round(target * current[i] / sum);
+      newSum += d[field];
+    }
+  });
+  // Ajustement arrondi : la diff va sur le plus gros segment
+  var diff = target - newSum;
+  if (diff !== 0) {
+    var maxIdx = -1, maxVal = -1;
+    days.forEach(function(d, i){ if (d[field] > maxVal) { maxVal = d[field]; maxIdx = i; } });
+    if (maxIdx >= 0) days[maxIdx][field] = Math.max(0, days[maxIdx][field] + diff);
+  }
+}
 
-// Helper : volume équivalent course d'une semaine (ratio 3:1 vélo→course)
+// Applique les overrides sur PLAN_DATA (modifie les séances pour coller au volume cible)
+function applyPlanData() {
+  var ov = getPlanOverrides2();
+  PLAN_DATA.forEach(function(w){
+    var o = ov[w.num];
+    if (!o) return;
+    if (o.run != null)  redistribute(w.days, 'run', o.run);
+    if (o.velo != null) redistribute(w.days, 'velo', o.velo);
+    if (o.muscu != null) {
+      // Ajuste le nb de séances muscu (ajoute/retire des flags muscu)
+      var currentMuscu = w.days.filter(function(d){ return d.muscu; }).length;
+      var target = o.muscu;
+      if (target < currentMuscu) {
+        // Retirer des muscu (en partant de la fin)
+        for (var i = w.days.length-1; i >= 0 && currentMuscu > target; i--) {
+          if (w.days[i].muscu && w.days[i].type === 'muscu') { w.days[i].muscu = 0; currentMuscu--; }
+        }
+      }
+    }
+  });
+}
+
+// Volume couru/vélo/muscu d'une semaine = SOMME des séances
+function weekVolume(w) {
+  var run = 0, velo = 0, muscu = 0;
+  w.days.forEach(function(d){ run += d.run||0; velo += d.velo||0; muscu += d.muscu||0; });
+  return { run: run, velo: velo, muscu: muscu };
+}
+
+// ── DÉRIVATION : génère vols[] et months{} depuis PLAN_DATA ──
+function deriveVolsAndMonths() {
+  applyPlanData();
+  var newVols = [];
+  var newMonths = { 1:[], 2:[], 3:[], 4:[] };
+  PLAN_DATA.forEach(function(w){
+    var vol = weekVolume(w);
+    var total = vol.run + vol.velo;
+    var arrow = (w.phase === 'DÉCHARGE') ? '↓' : '';
+    var lbl = 'S' + w.num + arrow + ' — ' + w.label;
+    // vols entry (compat avec le code existant : l, v, run, velo, muscu, e, phase)
+    newVols.push({
+      l: lbl, v: total, run: vol.run, velo: vol.velo, muscu: vol.muscu,
+      e: w.e || '', phase: w.phase, num: w.num
+    });
+    // months entry (compat : w label + days avec d/m/s/sub)
+    var bloc = Math.floor((w.num - 1) / 4) + 1;
+    var volEqW = Math.round(vol.run + vol.velo / 3);
+    var mDays = w.days.map(function(d){
+      // Reconstruit le libellé de séance avec la distance réelle
+      var s = d.title;
+      if (d.run > 0 && d.type !== 'gravel') s = d.title + ' ' + d.run + 'km';
+      else if (d.velo > 0 && (d.type === 'velo')) s = d.title + ' ' + d.velo + 'km';
+      // Code couleur charge : LC (faible), MC (moyen), HC (haut)
+      var m = 'LC';
+      if (d.type === 'long' || d.type === 'gravel' || d.type === 'course') m = 'HC';
+      else if (d.type === 'spe' || d.type === 'ef' || d.type === 'velo' || d.muscu) m = 'MC';
+      return { d: d.label, m: m, s: s, sub: d.sub,
+               gravel: (d.type === 'gravel' || d.type === 'course'),
+               run: d.run, velo: d.velo, muscu: d.muscu, type: d.type, date: d.date };
+    });
+    newMonths[bloc].push({ w: lbl, days: mDays, num: w.num });
+  });
+  return { vols: newVols, months: newMonths };
+}
+
+// Génère les structures et les expose globalement (remplace les anciennes const)
+var _derived = deriveVolsAndMonths();
+var vols = _derived.vols;
+var months = _derived.months;
+
+// Helper volume équivalent course (ratio 3:1) — inchangé
 function volEq(v) {
   if (!v) return 0;
   return Math.round((v.run || 0) + (v.velo || 0) / 3);
 }
 
-const months = {
-  1:[
-    {w:'S1 — 108km · 11 mai',days:[
-      {d:'Lun 11',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 12',m:'MC',s:'EF 9km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 13',m:'MC',s:'Spé 8km — Z2',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 14',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 15',m:'LC',s:'EF 8km — Z1',sub:'Allure conversation'},
-      {d:'Sam 16',m:'HC',s:'Sortie longue 19km / D+',sub:'Marcher les montées'},
-      {d:'Dim 17',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S2 — 127km · 18 mai',days:[
-      {d:'Lun 18',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 19',m:'MC',s:'EF 12km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 20',m:'MC',s:'Spé 10km — Z2-Z3',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 21',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 22',m:'LC',s:'EF 10km — Z1',sub:'Allure conversation'},
-      {d:'Sam 23',m:'HC',s:'Sortie longue 24km / D+',sub:'Marcher les montées'},
-      {d:'Dim 24',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S3 — 142km · 25 mai',days:[
-      {d:'Lun 25',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 26',m:'MC',s:'EF 13km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 27',m:'MC',s:'Spé 11km — Z3 si BB>70',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 28',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 29',m:'LC',s:'EF 11km — Z1',sub:'Allure conversation'},
-      {d:'Sam 30',m:'HC',s:'Sortie longue 27km / D+',sub:'Marcher les montées'},
-      {d:'Dim 31',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S4↓ — 83km · 1 juin',days:[
-      {d:'Lun 1',m:'LC',s:'Repos + mobilité 20min',sub:'Semaine décharge — récup'},
-      {d:'Mar 2',m:'LC',s:'EF 10km — Z1 pur',sub:'Max 135bpm'},
-      {d:'Mer 3',m:'MC',s:'Renfo / Plio 40min',sub:'Focus muscu (2× cette semaine)'},
-      {d:'Jeu 4',m:'LC',s:'Repos ou marche',sub:'Jambes fraîches'},
-      {d:'Ven 5',m:'MC',s:'Renfo / Plio 40min',sub:'2e séance muscu'},
-      {d:'Sam 6',m:'MC',s:'Sortie longue 16km / D+ modéré',sub:'Évaluation forme'},
-      {d:'Dim 7',m:'LC',s:'Repos complet',sub:''},
-    ]},
-  ],
-  2:[
-    {w:'S5 — 160km + 🚴 Gravel · 8 juin',days:[
-      {d:'Lun 8',m:'LC',s:'Repos + mobilité 15min',sub:'Semaine gravel — trail allégé'},
-      {d:'Mar 9',m:'MC',s:'EF 10km — Z1 pur',sub:'Jambes fraîches'},
-      {d:'Mer 10',m:'LC',s:'Renfo / Plio 30min',sub:'Charges légères'},
-      {d:'Jeu 11',m:'LC',s:'Repos ou marche 30min',sub:'Pré-gravel'},
-      {d:'Ven 12',m:'LC',s:'Strides 6×80m — 20min',sub:'Activation légère'},
-      {d:'Sam 13',m:'HC',s:'🚴 Gravel 93km — événement',sub:'Effort long Z2 — compensation cardio',gravel:true},
-      {d:'Dim 14',m:'LC',s:'Repos complet',sub:'Récup post-gravel'},
-    ]},
-    {w:'S6 — 148km · 15 juin',days:[
-      {d:'Lun 15',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 16',m:'MC',s:'EF 14km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 17',m:'MC',s:'Spé 12km — Z2-Z3',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 18',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 19',m:'LC',s:'EF 12km — Z1',sub:'Allure conversation'},
-      {d:'Sam 20',m:'HC',s:'Sortie longue 29km / D+',sub:'Marcher les montées'},
-      {d:'Dim 21',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S7 — 165km · 22 juin',days:[
-      {d:'Lun 22',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 23',m:'MC',s:'EF 15km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 24',m:'MC',s:'Spé 13km — Z3 si BB>70',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 25',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 26',m:'LC',s:'EF 13km — Z1',sub:'Allure conversation'},
-      {d:'Sam 27',m:'HC',s:'Sortie longue 31km / D+',sub:'Marcher les montées'},
-      {d:'Dim 28',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S8↓ — 92km · 29 juin',days:[
-      {d:'Lun 29',m:'LC',s:'Repos + mobilité 20min',sub:'Semaine décharge — récup'},
-      {d:'Mar 30',m:'LC',s:'EF 10km — Z1 pur',sub:'Max 135bpm'},
-      {d:'Mer 1',m:'MC',s:'Renfo / Plio 40min',sub:'Focus muscu (2× cette semaine)'},
-      {d:'Jeu 2',m:'LC',s:'Repos ou marche',sub:'Jambes fraîches'},
-      {d:'Ven 3',m:'MC',s:'Renfo / Plio 40min',sub:'2e séance muscu'},
-      {d:'Sam 4',m:'MC',s:'Sortie longue 17km / D+ modéré',sub:'Évaluation forme'},
-      {d:'Dim 5',m:'LC',s:'Repos complet',sub:''},
-    ]},
-  ],
-  3:[
-    {w:'S9 — 120km · 🇮🇹 6 juil',days:[
-      {d:'Lun 6',m:'MC',s:'EF 12km — sentiers',sub:'🇮🇹 Découverte terrain Montefegatesi'},
-      {d:'Mar 7',m:'HC',s:'Sortie D+ 16km montagne',sub:'Travail spécifique côtes longues'},
-      {d:'Mer 8',m:'LC',s:'Récup active 8km Z1',sub:'Jambes légères'},
-      {d:'Jeu 9',m:'HC',s:'Sortie longue 20km / gros D+',sub:'Simulation CCC — marcher les raides'},
-      {d:'Ven 10',m:'LC',s:'Repos ou rando famille',sub:''},
-      {d:'Sam 11',m:'HC',s:'Sortie longue 26km vallonné',sub:'Le gros morceau de la semaine'},
-      {d:'Dim 12',m:'MC',s:'EF 10km récup + renfo',sub:'Étirements, mobilité hallux'},
-    ]},
-    {w:'S10 — 145km · 🇮🇹 13 juil',days:[
-      {d:'Lun 13',m:'MC',s:'EF 12km — sentiers',sub:'🇮🇹 Découverte terrain Montefegatesi'},
-      {d:'Mar 14',m:'HC',s:'Sortie D+ 20km montagne',sub:'Travail spécifique côtes longues'},
-      {d:'Mer 15',m:'LC',s:'Récup active 8km Z1',sub:'Jambes légères'},
-      {d:'Jeu 16',m:'HC',s:'Sortie longue 25km / gros D+',sub:'Simulation CCC — marcher les raides'},
-      {d:'Ven 17',m:'LC',s:'Repos ou rando famille',sub:''},
-      {d:'Sam 18',m:'HC',s:'Sortie longue 33km vallonné',sub:'Le gros morceau de la semaine'},
-      {d:'Dim 19',m:'MC',s:'EF 10km récup + renfo',sub:'Étirements, mobilité hallux'},
-    ]},
-    {w:'S11 — 163km · 20 juil',days:[
-      {d:'Lun 20',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 21',m:'MC',s:'EF 18km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 22',m:'MC',s:'Spé 15km — Z3 si BB>70',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 23',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 24',m:'LC',s:'EF 15km — Z1',sub:'Allure conversation'},
-      {d:'Sam 25',m:'HC',s:'Sortie longue 36km / D+',sub:'Marcher les montées'},
-      {d:'Dim 26',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S12↓ — 90km · 27 juil',days:[
-      {d:'Lun 27',m:'LC',s:'Repos + mobilité 20min',sub:'Semaine décharge — récup'},
-      {d:'Mar 28',m:'LC',s:'EF 10km — Z1 pur',sub:'Max 135bpm'},
-      {d:'Mer 29',m:'MC',s:'Renfo / Plio 40min',sub:'Focus muscu (2× cette semaine)'},
-      {d:'Jeu 30',m:'LC',s:'Repos ou marche',sub:'Jambes fraîches'},
-      {d:'Ven 31',m:'MC',s:'Renfo / Plio 40min',sub:'2e séance muscu'},
-      {d:'Sam 1',m:'MC',s:'Sortie longue 18km / D+ modéré',sub:'Évaluation forme'},
-      {d:'Dim 2',m:'LC',s:'Repos complet',sub:''},
-    ]},
-  ],
-  4:[
-    {w:'S13 — 133km · 3 août',days:[
-      {d:'Lun 3',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 4',m:'MC',s:'EF 14km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 5',m:'MC',s:'Spé 12km — Z2',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 6',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 7',m:'LC',s:'EF 12km — Z1',sub:'Allure conversation'},
-      {d:'Sam 8',m:'HC',s:'Sortie longue 29km / D+',sub:'Marcher les montées'},
-      {d:'Dim 9',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S14 — 113km · 10 août',days:[
-      {d:'Lun 10',m:'LC',s:'Repos + mobilité 15min',sub:'Gainage, hallux'},
-      {d:'Mar 11',m:'MC',s:'EF 13km — Z1-Z2',sub:'Plat'},
-      {d:'Mer 12',m:'MC',s:'Spé 11km — Z2-Z3',sub:'Côtes / qualité selon BB'},
-      {d:'Jeu 13',m:'MC',s:'Renfo / Plio 40min',sub:'4 blocs'},
-      {d:'Ven 14',m:'LC',s:'EF 11km — Z1',sub:'Allure conversation'},
-      {d:'Sam 15',m:'HC',s:'Sortie longue 26km / D+',sub:'Marcher les montées'},
-      {d:'Dim 16',m:'MC',s:'Vélo ou renfo récup',sub:'Cross-training cardio'},
-    ]},
-    {w:'S15 Taper — 75km · 17 août',days:[
-      {d:'Lun 17',m:'LC',s:'Repos + mobilité 15min',sub:'Début affûtage'},
-      {d:'Mar 18',m:'MC',s:'EF 10km + 4 strides',sub:'Garder le pied vif'},
-      {d:'Mer 19',m:'LC',s:'Repos',sub:'Assimilation'},
-      {d:'Jeu 20',m:'MC',s:'Rappel 8km Z2 + 3×1min Z3',sub:'Vivacité sans fatigue'},
-      {d:'Ven 21',m:'LC',s:'Repos ou marche 30min',sub:''},
-      {d:'Sam 22',m:'MC',s:'Sortie 14km vallonné',sub:'Dernière sortie un peu longue'},
-      {d:'Dim 23',m:'LC',s:'Repos complet',sub:''},
-    ]},
-    {w:'S16 Course — 24 août 🏔️',days:[
-      {d:'Lun 24',m:'LC',s:'EF 8km easy + 4 strides',sub:'Jambes vives'},
-      {d:'Mar 25',m:'LC',s:'Repos',sub:'Hydratation, sommeil'},
-      {d:'Mer 26',m:'LC',s:'EF 6km + 3×30s allure course',sub:'Activation'},
-      {d:'Jeu 27',m:'LC',s:'Repos + voyage Chamonix',sub:'Récup, glucides'},
-      {d:'Ven 28',m:'HC',s:'🏔️ CCC — 101km / 6100m D+',sub:'LE JOUR J. Tout ce travail pour ça.',gravel:true},
-      {d:'Sam 29',m:'LC',s:'Récup totale',sub:'Tu l\'as fait 🏆'},
-      {d:'Dim 30',m:'LC',s:'Marche légère',sub:'Savoure'},
-    ]},
-  ],
-};
 
 function getMonthWeek(weekIndex) {
   let flat = [];
@@ -2867,29 +2788,16 @@ if (document.readyState === 'loading') {
     return {};
   }
   
-  function savePlanOverride(weekIdx, field, value) {
+  function savePlanOverride(weekNum, field, value) {
     var ov = getPlanOverrides();
-    if (!ov[weekIdx]) ov[weekIdx] = {};
-    ov[weekIdx][field] = value;
+    if (!ov[weekNum]) ov[weekNum] = {};
+    ov[weekNum][field] = value;
     try { localStorage.setItem('ccc_plan_overrides', JSON.stringify(ov)); } catch(e) {}
-    // Applique direct sur l'objet vols global
-    applyOverrides();
   }
   
-  // Applique les overrides localStorage sur le tableau vols global
-  function applyOverrides() {
-    if (typeof vols === 'undefined') return;
-    var ov = getPlanOverrides();
-    for (var idx in ov) {
-      var i = parseInt(idx, 10);
-      if (vols[i]) {
-        if (ov[idx].run != null)   vols[i].run = ov[idx].run;
-        if (ov[idx].velo != null)  vols[i].velo = ov[idx].velo;
-        if (ov[idx].muscu != null) vols[i].muscu = ov[idx].muscu;
-        vols[i].v = (vols[i].run || 0) + (vols[i].velo || 0);
-      }
-    }
-  }
+  // Obsolète : les overrides sont désormais appliqués sur PLAN_DATA (deriveVolsAndMonths).
+  // Conservée vide pour compatibilité avec les anciens appels.
+  function applyOverrides() { /* no-op : géré par applyPlanData() sur PLAN_DATA */ }
   
   // Numéro de semaine courante (1-based) = WI global + 1
   function currentWeekNum() {
@@ -3547,14 +3455,15 @@ if (document.readyState === 'loading') {
     var rows = '';
     for (var i = 0; i < vols.length; i++) {
       var v = vols[i];
+      var wkNum = v.num || (i + 1);  // clé override = numéro de semaine (1-based)
       var isCur = (typeof WI !== 'undefined' && i === WI);
       var weekLabel = v.l.split('—')[0].trim();
       var rowBg = isCur ? 'background:rgba(163,230,53,0.06)' : '';
       rows += '<tr style="' + rowBg + '">' +
         '<td style="padding:0.4rem 0.5rem;font-family:DM Mono,monospace;font-size:0.7rem;color:' + (isCur ? 'var(--accent,#a3e635)' : 'var(--text,#e8e9ea)') + ';white-space:nowrap">' + weekLabel + '<div style="font-size:0.55rem;color:var(--muted,#5e6068)">' + (v.phase||'') + '</div></td>' +
-        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + i + '" data-field="run" value="' + (v.run||0) + '" style="width:54px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
-        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + i + '" data-field="velo" value="' + (v.velo||0) + '" style="width:54px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
-        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + i + '" data-field="muscu" value="' + (v.muscu||0) + '" style="width:42px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
+        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + wkNum + '" data-field="run" value="' + (v.run||0) + '" style="width:54px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
+        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + wkNum + '" data-field="velo" value="' + (v.velo||0) + '" style="width:54px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
+        '<td style="padding:0.4rem 0.3rem"><input type="number" data-week="' + wkNum + '" data-field="muscu" value="' + (v.muscu||0) + '" style="width:42px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:5px;padding:0.3rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.72rem;text-align:center"></td>' +
         '</tr>';
     }
     
@@ -3784,70 +3693,535 @@ if (document.readyState === 'loading') {
 (function() {
   'use strict';
 
-  // ── Base d'aliments catégorisée (macros aux 100g ou à l'unité) ──
-  // cat = catégorie, n=nom, u=unité, g/p/l=macros, kcal, note?
+  // ── Base d'aliments & boissons CCC HUB (version étendue ~430 entrées) ──
+  // cat = catégorie · n = nom · u = '100g'|'unité' · g/p/l = macros · kcal · note?
+  // Notes : ⚠️ purines (goutte) · 🍯 fructose/sucre rapide · 🍒 favorable goutte
+  // Valeurs Ciqual (ANSES) + USDA + étiquettes fabricant (Näak/Maurten/SIS...).
   var FOODS_DEFAULT = [
-    // PROTÉINES
-    {cat:'Protéines', n:'Poulet (filet)',    u:'100g', g:0,   p:31,  l:3.6, kcal:165},
-    {cat:'Protéines', n:'Poulet haché',      u:'100g', g:0,   p:27,  l:8,   kcal:185},
-    {cat:'Protéines', n:'Dinde (escalope)',  u:'100g', g:0,   p:29,  l:2,   kcal:135},
-    {cat:'Protéines', n:'Boeuf haché 5%',    u:'100g', g:0,   p:21,  l:5,   kcal:137, note:'⚠️ purines (goutte)'},
-    {cat:'Protéines', n:'Boeuf maigre',      u:'100g', g:0,   p:26,  l:6,   kcal:160, note:'⚠️ purines (goutte)'},
-    {cat:'Protéines', n:'Saumon',            u:'100g', g:0,   p:20,  l:13,  kcal:208},
-    {cat:'Protéines', n:'Thon (naturel)',    u:'100g', g:0,   p:26,  l:1,   kcal:116},
-    {cat:'Protéines', n:'Cabillaud',         u:'100g', g:0,   p:18,  l:1,   kcal:82},
-    {cat:'Protéines', n:'Oeuf',              u:'unité',g:0.6, p:6.3, l:5,   kcal:72},
-    {cat:'Protéines', n:'Jambon blanc',      u:'100g', g:1,   p:21,  l:3,   kcal:115},
+    // PROTÉINES — viandes blanches & volaille
+    {cat:'Protéines', n:'Blanc de poulet', u:'100g', g:0, p:23, l:1.5, kcal:110},
+    {cat:'Protéines', n:'Cuisse de poulet (sans peau)', u:'100g', g:0, p:19, l:8, kcal:150},
+    {cat:'Protéines', n:'Poulet rôti (avec peau)', u:'100g', g:0, p:25, l:14, kcal:230},
+    {cat:'Protéines', n:'Aile de poulet', u:'100g', g:0, p:20, l:16, kcal:230},
+    {cat:'Protéines', n:'Escalope de dinde', u:'100g', g:0, p:24, l:1, kcal:105},
+    {cat:'Protéines', n:'Cuisse de dinde', u:'100g', g:0, p:20, l:7, kcal:145},
+    {cat:'Protéines', n:'Lapin', u:'100g', g:0, p:21, l:6, kcal:140},
+    {cat:'Protéines', n:'Foie de volaille', u:'100g', g:1, p:20, l:5, kcal:130, note:'⚠️ PURINES TRÈS ÉLEVÉES (abats)'},
+    {cat:'Protéines', n:'Gésier de volaille', u:'100g', g:0, p:18, l:5, kcal:120, note:'⚠️ purines (abats)'},
+    {cat:'Protéines', n:'Canard confit', u:'100g', g:0, p:22, l:20, kcal:280, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Magret de canard', u:'100g', g:0, p:19, l:13, kcal:200, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Foie gras', u:'100g', g:3, p:9, l:44, kcal:460, note:'⚠️ PURINES TRÈS ÉLEVÉES + lipides'},
+    // PROTÉINES — viandes rouges
+    {cat:'Protéines', n:'Bœuf haché 5% MG', u:'100g', g:0, p:21, l:5, kcal:130, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Bœuf haché 15% MG', u:'100g', g:0, p:19, l:15, kcal:215, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Steak / rumsteck', u:'100g', g:0, p:26, l:6, kcal:160, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Entrecôte', u:'100g', g:0, p:24, l:16, kcal:240, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Bavette / onglet', u:'100g', g:0, p:25, l:9, kcal:185, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Rosbif', u:'100g', g:0, p:26, l:7, kcal:170, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Tartare de bœuf', u:'100g', g:0, p:21, l:8, kcal:160, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Viande des Grisons', u:'100g', g:1, p:36, l:7, kcal:220, note:'⚠️ purines + sel élevé'},
+    {cat:'Protéines', n:'Cheval', u:'100g', g:0, p:21, l:5, kcal:135, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Escalope de veau', u:'100g', g:0, p:21, l:3, kcal:115, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Filet mignon de porc', u:'100g', g:0, p:21, l:4, kcal:125, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:'Côte / échine de porc', u:'100g', g:0, p:20, l:13, kcal:200, note:'⚠️ purines (modéré)'},
+    {cat:'Protéines', n:"Gigot d'agneau", u:'100g', g:0, p:18, l:13, kcal:200, note:'⚠️ purines (modéré-élevé)'},
+    {cat:'Protéines', n:'Chevreuil / sanglier (gibier)', u:'100g', g:0, p:22, l:4, kcal:130, note:'⚠️ PURINES TRÈS ÉLEVÉES (gibier)'},
+    // PROTÉINES — abats
+    {cat:'Protéines', n:'Foie de veau', u:'100g', g:3, p:20, l:5, kcal:135, note:'⚠️ PURINES TRÈS ÉLEVÉES (abats) — éviter'},
+    {cat:'Protéines', n:'Rognons', u:'100g', g:0, p:17, l:5, kcal:110, note:'⚠️ PURINES TRÈS ÉLEVÉES (abats) — éviter'},
+    {cat:'Protéines', n:'Ris de veau', u:'100g', g:0, p:18, l:11, kcal:175, note:'⚠️ PURINES MAXIMALES — éviter absolument'},
+    {cat:'Protéines', n:'Langue de bœuf', u:'100g', g:0, p:16, l:16, kcal:215, note:'⚠️ purines (abats)'},
+    {cat:'Protéines', n:'Boudin noir', u:'100g', g:1, p:14, l:30, kcal:330, note:'⚠️ purines très élevées (sang)'},
+    // PROTÉINES — charcuterie
+    {cat:'Protéines', n:'Jambon blanc découenné', u:'100g', g:1, p:20, l:3, kcal:110, note:'⚠️ purines + sel'},
+    {cat:'Protéines', n:'Jambon de dinde', u:'100g', g:1, p:18, l:3, kcal:105, note:'⚠️ purines + sel (plus maigre)'},
+    {cat:'Protéines', n:'Jambon cru (Serrano/Parme)', u:'100g', g:0.5, p:28, l:12, kcal:230, note:'⚠️ purines + sel élevé'},
+    {cat:'Protéines', n:'Lardons / bacon', u:'100g', g:0.5, p:14, l:30, kcal:330, note:'⚠️ purines (charcuterie)'},
+    {cat:'Protéines', n:'Saucisse / chipolata', u:'100g', g:2, p:14, l:25, kcal:290, note:'⚠️ purines (charcuterie)'},
+    {cat:'Protéines', n:'Merguez', u:'100g', g:2, p:15, l:26, kcal:300, note:'⚠️ purines (charcuterie)'},
+    {cat:'Protéines', n:'Saucisson sec', u:'100g', g:2, p:25, l:38, kcal:450, note:'⚠️ purines + sel élevé'},
+    {cat:'Protéines', n:'Chorizo', u:'100g', g:2, p:24, l:38, kcal:450, note:'⚠️ purines + sel'},
+    {cat:'Protéines', n:'Salami', u:'100g', g:1, p:22, l:35, kcal:410, note:'⚠️ purines + sel'},
+    {cat:'Protéines', n:'Mortadelle', u:'100g', g:1, p:16, l:25, kcal:290, note:'⚠️ purines + sel'},
+    {cat:'Protéines', n:'Pâté / rillettes', u:'100g', g:1, p:13, l:35, kcal:380, note:'⚠️ purines (abats) + lipides'},
+    {cat:'Protéines', n:'Knack / saucisse de Strasbourg', u:'unité', g:1, p:8, l:13, kcal:150, note:'1 saucisse ≈ 50g · ⚠️ purines'},
+    {cat:'Protéines', n:'Cervelas', u:'100g', g:2, p:12, l:25, kcal:280, note:'⚠️ purines (charcuterie)'},
+    {cat:'Protéines', n:'Nuggets de poulet', u:'100g', g:15, p:15, l:18, kcal:280},
+    {cat:'Protéines', n:'Cordon bleu', u:'100g', g:12, p:15, l:14, kcal:240},
+    // PROTÉINES — poissons
+    {cat:'Protéines', n:'Cabillaud', u:'100g', g:0, p:18, l:0.7, kcal:80, note:'maigre, purines faibles'},
+    {cat:'Protéines', n:'Colin / lieu', u:'100g', g:0, p:17, l:1, kcal:80},
+    {cat:'Protéines', n:'Églefin', u:'100g', g:0, p:18, l:0.6, kcal:80},
+    {cat:'Protéines', n:'Merlu', u:'100g', g:0, p:17, l:2, kcal:90},
+    {cat:'Protéines', n:'Sole', u:'100g', g:0, p:18, l:1.2, kcal:85},
+    {cat:'Protéines', n:'Lotte', u:'100g', g:0, p:17, l:0.7, kcal:78},
+    {cat:'Protéines', n:'Raie', u:'100g', g:0, p:20, l:1, kcal:90},
+    {cat:'Protéines', n:'Tilapia', u:'100g', g:0, p:20, l:2, kcal:100},
+    {cat:'Protéines', n:'Dorade / bar', u:'100g', g:0, p:19, l:3, kcal:110},
+    {cat:'Protéines', n:'Rouget', u:'100g', g:0, p:19, l:4, kcal:115},
+    {cat:'Protéines', n:'Sandre / brochet / perche', u:'100g', g:0, p:19, l:1, kcal:85},
+    {cat:'Protéines', n:'Truite', u:'100g', g:0, p:20, l:6, kcal:140},
+    {cat:'Protéines', n:'Flétan', u:'100g', g:0, p:20, l:5, kcal:130},
+    {cat:'Protéines', n:'Saumon frais', u:'100g', g:0, p:20, l:13, kcal:200, note:'⚠️ purines (modéré), oméga-3'},
+    {cat:'Protéines', n:'Saumon fumé', u:'100g', g:0, p:22, l:8, kcal:165, note:'⚠️ purines + sel'},
+    {cat:'Protéines', n:'Espadon', u:'100g', g:0, p:20, l:5, kcal:130, note:'⚠️ purines (modéré), mercure'},
+    {cat:'Protéines', n:'Thon au naturel (égoutté)', u:'100g', g:0, p:26, l:1, kcal:115, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Thon frais', u:'100g', g:0, p:23, l:5, kcal:145, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:"Sardines (à l'huile, égouttées)", u:'100g', g:0, p:25, l:14, kcal:220, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Maquereau', u:'100g', g:0, p:18, l:14, kcal:200, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Hareng / rollmops', u:'100g', g:1, p:18, l:15, kcal:210, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Anchois', u:'100g', g:0, p:28, l:10, kcal:210, note:'⚠️ PURINES MAXIMALES — éviter'},
+    {cat:'Protéines', n:'Surimi', u:'100g', g:9, p:8, l:1, kcal:90},
+    {cat:'Protéines', n:'Poisson pané', u:'100g', g:18, p:13, l:10, kcal:215},
+    {cat:'Protéines', n:'Œufs de poisson / tarama', u:'100g', g:4, p:13, l:42, kcal:450, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    // PROTÉINES — fruits de mer
+    {cat:'Protéines', n:'Crevettes', u:'100g', g:0, p:20, l:1, kcal:95, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Gambas', u:'100g', g:0, p:20, l:1.5, kcal:100, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Moules', u:'100g', g:4, p:12, l:2, kcal:85, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Huîtres', u:'100g', g:5, p:9, l:2, kcal:70, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Coquilles Saint-Jacques', u:'100g', g:3, p:17, l:1, kcal:90, note:'⚠️ PURINES TRÈS ÉLEVÉES'},
+    {cat:'Protéines', n:'Calamar / encornet', u:'100g', g:3, p:16, l:1.5, kcal:90, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Poulpe', u:'100g', g:4, p:15, l:1, kcal:85, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Crabe', u:'100g', g:0, p:18, l:1.5, kcal:90, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Homard / langoustine', u:'100g', g:0, p:19, l:1, kcal:90, note:'⚠️ purines (élevé)'},
+    {cat:'Protéines', n:'Bulots / bigorneaux', u:'100g', g:7, p:18, l:1, kcal:110, note:'⚠️ purines (élevé)'},
+    // PROTÉINES — œufs
+    {cat:'Protéines', n:'Œuf entier', u:'unité', g:0.4, p:7.5, l:6, kcal:90, note:'1 œuf moyen ≈ 60g'},
+    {cat:'Protéines', n:'Œuf dur', u:'unité', g:0.4, p:7, l:6, kcal:85, note:'1 œuf ≈ 55g'},
+    {cat:'Protéines', n:"Blanc d'œuf", u:'unité', g:0.2, p:3.5, l:0, kcal:17, note:'1 blanc ≈ 33g'},
+    {cat:'Protéines', n:"Jaune d'œuf", u:'unité', g:0.3, p:2.7, l:4.5, kcal:55, note:'1 jaune ≈ 18g'},
+    {cat:'Protéines', n:'Œufs brouillés', u:'100g', g:1, p:11, l:13, kcal:165},
+    {cat:'Protéines', n:'Omelette nature', u:'100g', g:0.7, p:11, l:14, kcal:170},
+    {cat:'Protéines', n:'Œuf de caille', u:'unité', g:0.1, p:1.2, l:1, kcal:15, note:'1 œuf ≈ 9g'},
+    // PROTÉINES — végétales
+    {cat:'Protéines', n:'Tofu nature', u:'100g', g:2, p:12, l:7, kcal:120, note:'purines végétales = faible risque'},
+    {cat:'Protéines', n:'Tofu fumé', u:'100g', g:1, p:16, l:9, kcal:145},
+    {cat:'Protéines', n:'Tofu soyeux', u:'100g', g:2, p:5, l:3, kcal:55},
+    {cat:'Protéines', n:'Tempeh', u:'100g', g:9, p:19, l:11, kcal:190},
+    {cat:'Protéines', n:'Seitan', u:'100g', g:4, p:25, l:2, kcal:140},
+    {cat:'Protéines', n:'Natto', u:'100g', g:11, p:18, l:11, kcal:210},
+    {cat:'Protéines', n:'Protéine de soja texturée (sèche)', u:'100g', g:30, p:50, l:1, kcal:340},
+    {cat:'Protéines', n:'Steak / haché végétal', u:'100g', g:6, p:17, l:9, kcal:180},
+    {cat:'Protéines', n:'Falafel', u:'100g', g:22, p:10, l:14, kcal:250},
+    {cat:'Protéines', n:'Quorn (mycoprotéine)', u:'100g', g:5, p:14, l:3, kcal:105},
+    // LÉGUMINEUSES
+    {cat:'Légumineuses', n:'Lentilles vertes cuites', u:'100g', g:17, p:9, l:0.5, kcal:115},
+    {cat:'Légumineuses', n:'Lentilles corail cuites', u:'100g', g:18, p:8, l:0.4, kcal:115},
+    {cat:'Légumineuses', n:'Lentilles beluga cuites', u:'100g', g:18, p:9, l:0.6, kcal:120},
+    {cat:'Légumineuses', n:'Pois chiches cuits', u:'100g', g:22, p:9, l:3, kcal:150},
+    {cat:'Légumineuses', n:'Haricots rouges cuits', u:'100g', g:17, p:9, l:0.5, kcal:110},
+    {cat:'Légumineuses', n:'Haricots blancs cuits', u:'100g', g:17, p:8, l:0.5, kcal:105},
+    {cat:'Légumineuses', n:'Haricots noirs cuits', u:'100g', g:16, p:9, l:0.5, kcal:110},
+    {cat:'Légumineuses', n:'Flageolets cuits', u:'100g', g:16, p:8, l:0.5, kcal:105},
+    {cat:'Légumineuses', n:'Pois cassés cuits', u:'100g', g:18, p:8, l:0.4, kcal:110},
+    {cat:'Légumineuses', n:'Fèves cuites', u:'100g', g:11, p:8, l:0.6, kcal:90},
+    {cat:'Légumineuses', n:'Edamame', u:'100g', g:9, p:11, l:5, kcal:120},
+    {cat:'Légumineuses', n:'Lupin (graines)', u:'100g', g:10, p:16, l:5, kcal:150},
     // LAITIERS
-    {cat:'Laitiers',  n:'Skyr nature',       u:'100g', g:4,   p:11,  l:0.2, kcal:63},
-    {cat:'Laitiers',  n:'Fromage blanc 0%',  u:'100g', g:4,   p:8,   l:0.2, kcal:50},
-    {cat:'Laitiers',  n:'Petit-suisse',      u:'unité',g:3,   p:4,   l:3,   kcal:55},
-    {cat:'Laitiers',  n:'Whey Nutripure',    u:'30g',  g:1.5, p:24,  l:1,   kcal:115},
+    {cat:'Laitiers', n:'Skyr nature (sans lactose)', u:'100g', g:4, p:11, l:0.2, kcal:63, note:'ton défaut : nature, sans lactose'},
+    {cat:'Laitiers', n:'Fromage blanc 0%', u:'100g', g:4.5, p:8, l:0.2, kcal:50},
+    {cat:'Laitiers', n:'Fromage blanc 3%', u:'100g', g:4.5, p:7.5, l:3, kcal:75},
+    {cat:'Laitiers', n:'Petit-suisse', u:'100g', g:3, p:9, l:8, kcal:130},
+    {cat:'Laitiers', n:'Faisselle', u:'100g', g:3, p:7, l:4, kcal:75},
+    {cat:'Laitiers', n:'Cottage cheese', u:'100g', g:3, p:12, l:4, kcal:95},
+    {cat:'Laitiers', n:'Yaourt nature', u:'100g', g:5, p:4, l:3.5, kcal:65},
+    {cat:'Laitiers', n:'Yaourt nature 0%', u:'100g', g:4, p:4, l:0.1, kcal:38},
+    {cat:'Laitiers', n:'Yaourt grec', u:'100g', g:4, p:4, l:9, kcal:110},
+    {cat:'Laitiers', n:'Yaourt aux fruits', u:'100g', g:14, p:3.5, l:2.5, kcal:90},
+    {cat:'Laitiers', n:'Yaourt à boire', u:'100g', g:13, p:3, l:1.5, kcal:80},
+    {cat:'Laitiers', n:'Yaourt de soja', u:'100g', g:3, p:4, l:2, kcal:50, note:'alternative végétale'},
+    {cat:'Laitiers', n:'Kéfir', u:'100g', g:4, p:3, l:1, kcal:42},
+    {cat:'Laitiers', n:'Ricotta', u:'100g', g:3, p:8, l:11, kcal:150},
+    {cat:'Laitiers', n:'Mascarpone', u:'100g', g:4, p:4, l:42, kcal:415},
+    {cat:'Laitiers', n:'Mozzarella', u:'100g', g:1, p:18, l:16, kcal:220},
+    {cat:'Laitiers', n:'Burrata', u:'100g', g:2, p:13, l:24, kcal:280},
+    {cat:'Laitiers', n:'Feta', u:'100g', g:1, p:14, l:21, kcal:260},
+    {cat:'Laitiers', n:'Halloumi', u:'100g', g:2, p:22, l:25, kcal:320},
+    {cat:'Laitiers', n:'Chèvre frais', u:'100g', g:3, p:18, l:21, kcal:270},
+    {cat:'Laitiers', n:'Fromage frais type Philadelphia', u:'100g', g:4, p:6, l:24, kcal:250},
+    {cat:'Laitiers', n:'Cancoillotte', u:'100g', g:2, p:11, l:8, kcal:125},
+    {cat:'Laitiers', n:'Babybel / Vache qui rit', u:'unité', g:0.5, p:5, l:6, kcal:70, note:'1 portion ≈ 20g'},
+    {cat:'Laitiers', n:'Emmental', u:'100g', g:0, p:28, l:28, kcal:370},
+    {cat:'Laitiers', n:'Gouda / Edam', u:'100g', g:0, p:25, l:28, kcal:355},
+    {cat:'Laitiers', n:'Cheddar', u:'100g', g:1, p:25, l:33, kcal:400},
+    {cat:'Laitiers', n:'Comté / Gruyère', u:'100g', g:0, p:27, l:34, kcal:410},
+    {cat:'Laitiers', n:'Parmesan', u:'100g', g:0, p:36, l:28, kcal:400},
+    {cat:'Laitiers', n:'Brie / Camembert', u:'100g', g:0.5, p:20, l:24, kcal:300},
+    {cat:'Laitiers', n:'Reblochon', u:'100g', g:0, p:21, l:27, kcal:330},
+    {cat:'Laitiers', n:'Roquefort / bleu', u:'100g', g:0, p:19, l:31, kcal:360},
+    {cat:'Laitiers', n:'Raclette', u:'100g', g:0, p:23, l:28, kcal:355},
+    {cat:'Laitiers', n:'Lait entier', u:'100g', g:5, p:3.2, l:3.6, kcal:64, note:'≈ 100ml'},
+    {cat:'Laitiers', n:'Lait demi-écrémé', u:'100g', g:5, p:3.3, l:1.5, kcal:47, note:'≈ 100ml'},
+    {cat:'Laitiers', n:'Lait écrémé', u:'100g', g:5, p:3.4, l:0.2, kcal:35, note:'≈ 100ml'},
+    {cat:'Laitiers', n:'Lait sans lactose', u:'100g', g:5, p:3.3, l:1.5, kcal:47, note:'≈ 100ml'},
+    {cat:'Laitiers', n:'Lait de chèvre', u:'100g', g:4.5, p:3.4, l:4, kcal:66, note:'≈ 100ml'},
+    {cat:'Laitiers', n:'Lait concentré sucré', u:'100g', g:55, p:8, l:8, kcal:320, note:'🍯 sucre élevé'},
+    {cat:'Laitiers', n:'Crème dessert / flan', u:'100g', g:18, p:3, l:3, kcal:115},
+    {cat:'Laitiers', n:'Riz au lait', u:'100g', g:20, p:3, l:3, kcal:120},
     // FÉCULENTS
-    {cat:'Féculents', n:'Flocons avoine',    u:'100g', g:60,  p:13,  l:7,   kcal:370},
-    {cat:'Féculents', n:'Riz basmati (cuit)',u:'100g', g:28,  p:2.7, l:0.3, kcal:130},
-    {cat:'Féculents', n:'Pâtes (cuites)',    u:'100g', g:31,  p:5,   l:1.1, kcal:158},
-    {cat:'Féculents', n:'Quinoa (cuit)',     u:'100g', g:21,  p:4.4, l:1.9, kcal:120},
-    {cat:'Féculents', n:'Patate douce',      u:'100g', g:20,  p:1.6, l:0.1, kcal:86},
-    {cat:'Féculents', n:'Pomme de terre',    u:'100g', g:17,  p:2,   l:0.1, kcal:77},
-    {cat:'Féculents', n:'Pain noir',         u:'unité',g:12,  p:2.5, l:0.5, kcal:65, note:'1 tranche'},
-    {cat:'Féculents', n:'Boulgour (cuit)',   u:'100g', g:19,  p:3,   l:0.2, kcal:95},
-    // FRUITS
-    {cat:'Fruits',    n:'Banane',            u:'unité',g:23,  p:1.1, l:0.3, kcal:96},
-    {cat:'Fruits',    n:'Pomme',             u:'unité',g:21,  p:0.5, l:0.3, kcal:90},
-    {cat:'Fruits',    n:'Myrtilles',         u:'100g', g:12,  p:0.7, l:0.3, kcal:57},
-    {cat:'Fruits',    n:'Dattes',            u:'unité',g:18,  p:0.2, l:0,   kcal:70},
+    {cat:'Féculents', n:'Riz blanc cuit', u:'100g', g:28, p:2.5, l:0.3, kcal:130},
+    {cat:'Féculents', n:'Riz basmati cuit', u:'100g', g:28, p:3, l:0.4, kcal:130},
+    {cat:'Féculents', n:'Riz thaï / jasmin cuit', u:'100g', g:28, p:2.7, l:0.3, kcal:130},
+    {cat:'Féculents', n:'Riz complet cuit', u:'100g', g:23, p:2.6, l:0.9, kcal:110},
+    {cat:'Féculents', n:'Riz sauvage cuit', u:'100g', g:21, p:4, l:0.3, kcal:100},
+    {cat:'Féculents', n:'Risotto (cuit)', u:'100g', g:20, p:3, l:5, kcal:140},
+    {cat:'Féculents', n:'Pâtes cuites (al dente)', u:'100g', g:30, p:5, l:1, kcal:155},
+    {cat:'Féculents', n:'Pâtes complètes cuites', u:'100g', g:27, p:5.5, l:1.3, kcal:145},
+    {cat:'Féculents', n:'Pâtes fraîches cuites', u:'100g', g:28, p:6, l:2, kcal:160},
+    {cat:'Féculents', n:'Raviolis (cuits)', u:'100g', g:20, p:6, l:5, kcal:150},
+    {cat:'Féculents', n:'Nouilles soba (cuites)', u:'100g', g:24, p:5, l:0.5, kcal:120},
+    {cat:'Féculents', n:'Nouilles udon / ramen (cuites)', u:'100g', g:25, p:4, l:0.5, kcal:125},
+    {cat:'Féculents', n:'Vermicelles de riz (cuits)', u:'100g', g:25, p:1.5, l:0.2, kcal:110},
+    {cat:'Féculents', n:'Nouilles konjac', u:'100g', g:1, p:0, l:0, kcal:8, note:'quasi 0 kcal, fibres'},
+    {cat:'Féculents', n:'Pomme de terre cuite', u:'100g', g:17, p:2, l:0.1, kcal:80},
+    {cat:'Féculents', n:'Purée de pomme de terre', u:'100g', g:14, p:2, l:4, kcal:100},
+    {cat:'Féculents', n:'Patate douce cuite', u:'100g', g:20, p:1.6, l:0.1, kcal:90},
+    {cat:'Féculents', n:'Frites (cuites)', u:'100g', g:35, p:3, l:15, kcal:290},
+    {cat:'Féculents', n:'Pommes noisettes / dauphine', u:'100g', g:30, p:3, l:15, kcal:270},
+    {cat:'Féculents', n:'Quinoa cuit', u:'100g', g:21, p:4.4, l:1.9, kcal:120},
+    {cat:'Féculents', n:'Boulgour cuit', u:'100g', g:19, p:3, l:0.2, kcal:95},
+    {cat:'Féculents', n:'Semoule / couscous cuit', u:'100g', g:23, p:4, l:0.3, kcal:115},
+    {cat:'Féculents', n:'Ebly / blé précuit', u:'100g', g:25, p:4, l:0.5, kcal:125},
+    {cat:'Féculents', n:'Épeautre cuit', u:'100g', g:25, p:5, l:1, kcal:130},
+    {cat:'Féculents', n:'Orge perlé cuit', u:'100g', g:28, p:2.3, l:0.4, kcal:125},
+    {cat:'Féculents', n:'Millet cuit', u:'100g', g:23, p:3.5, l:1, kcal:120},
+    {cat:'Féculents', n:'Sarrasin / kasha cuit', u:'100g', g:20, p:3.4, l:0.6, kcal:95},
+    {cat:'Féculents', n:'Polenta cuite', u:'100g', g:15, p:2, l:0.5, kcal:75},
+    {cat:'Féculents', n:'Gnocchi', u:'100g', g:30, p:4, l:2, kcal:160},
+    {cat:'Féculents', n:'Maïs (boîte, égoutté)', u:'100g', g:19, p:3, l:1.5, kcal:100},
+    {cat:'Féculents', n:"Flocons d'avoine", u:'100g', g:60, p:13, l:7, kcal:370},
+    {cat:'Féculents', n:"Son d'avoine", u:'100g', g:50, p:17, l:7, kcal:340, note:'riche en fibres'},
+    {cat:'Féculents', n:'Muesli', u:'100g', g:60, p:10, l:8, kcal:360},
+    {cat:'Féculents', n:'Granola', u:'100g', g:64, p:9, l:14, kcal:440, note:'🍯 souvent sucré'},
+    {cat:'Féculents', n:'Corn flakes', u:'100g', g:84, p:7, l:1, kcal:380},
+    {cat:'Féculents', n:'Weetabix / blé complet', u:'100g', g:69, p:12, l:2, kcal:360},
+    {cat:'Féculents', n:'Pain blanc / baguette', u:'100g', g:55, p:8, l:1.5, kcal:270},
+    {cat:'Féculents', n:'Pain complet', u:'100g', g:45, p:9, l:2.5, kcal:240},
+    {cat:'Féculents', n:'Pain de seigle', u:'100g', g:46, p:8, l:1.5, kcal:240},
+    {cat:'Féculents', n:'Pain au levain', u:'100g', g:48, p:8, l:1.5, kcal:250},
+    {cat:'Féculents', n:'Pain aux céréales', u:'100g', g:43, p:10, l:5, kcal:255},
+    {cat:'Féculents', n:"Pain d'épeautre", u:'100g', g:47, p:9, l:2, kcal:245},
+    {cat:'Féculents', n:'Ciabatta / focaccia', u:'100g', g:52, p:9, l:4, kcal:280},
+    {cat:'Féculents', n:'Pain de mie (tranche)', u:'unité', g:15, p:2.5, l:1, kcal:80, note:'1 tranche ≈ 30g'},
+    {cat:'Féculents', n:'Pain pita', u:'unité', g:33, p:6, l:1, kcal:165, note:'1 pita ≈ 60g'},
+    {cat:'Féculents', n:'Pain naan', u:'unité', g:45, p:9, l:6, kcal:280, note:'1 naan ≈ 90g'},
+    {cat:'Féculents', n:'Bagel', u:'unité', g:50, p:10, l:2, kcal:260, note:'1 bagel ≈ 90g'},
+    {cat:'Féculents', n:'Wrap / tortilla', u:'unité', g:25, p:4, l:4, kcal:150, note:'1 wrap ≈ 50g'},
+    {cat:'Féculents', n:'Pain burger', u:'unité', g:30, p:6, l:4, kcal:180, note:'1 pain ≈ 60g'},
+    {cat:'Féculents', n:'Biscotte', u:'unité', g:6, p:0.8, l:0.5, kcal:35, note:'1 biscotte ≈ 8g'},
+    {cat:'Féculents', n:'Cracotte / Wasa', u:'unité', g:6.5, p:1, l:0.3, kcal:32, note:'1 tranche ≈ 8g'},
+    {cat:'Féculents', n:'Galette de riz soufflé', u:'unité', g:7, p:0.7, l:0.1, kcal:32, note:'1 galette ≈ 9g'},
+    {cat:'Féculents', n:'Brioche', u:'100g', g:50, p:8, l:16, kcal:380},
+    {cat:'Féculents', n:'Pain au lait', u:'unité', g:18, p:3, l:5, kcal:130, note:'1 pain ≈ 35g'},
     // LÉGUMES
-    {cat:'Légumes',   n:'Brocolis',          u:'100g', g:7,   p:2.8, l:0.4, kcal:34},
-    {cat:'Légumes',   n:'Haricots verts',    u:'100g', g:7,   p:1.8, l:0.1, kcal:31},
-    {cat:'Légumes',   n:'Courgettes',        u:'100g', g:3,   p:1.2, l:0.3, kcal:17},
-    {cat:'Légumes',   n:'Épinards',          u:'100g', g:1.4, p:2.9, l:0.4, kcal:23},
-    {cat:'Légumes',   n:'Carottes',          u:'100g', g:10,  p:0.9, l:0.2, kcal:41},
-    {cat:'Légumes',   n:'Salade verte',      u:'100g', g:2,   p:1.4, l:0.2, kcal:15},
-    // OLÉAGINEUX
-    {cat:'Oléagineux',n:'Amandes',           u:'100g', g:22,  p:21,  l:50,  kcal:579},
-    {cat:'Oléagineux',n:'Noix',              u:'100g', g:14,  p:15,  l:65,  kcal:654},
-    {cat:'Oléagineux',n:'Cajou',             u:'100g', g:30,  p:18,  l:44,  kcal:553},
-    {cat:'Oléagineux',n:'Avocat',            u:'unité',g:9,   p:2,   l:15,  kcal:160},
+    {cat:'Légumes', n:'Brocoli cuit', u:'100g', g:4, p:3, l:0.4, kcal:35},
+    {cat:'Légumes', n:'Chou-fleur', u:'100g', g:3, p:2, l:0.3, kcal:25},
+    {cat:'Légumes', n:'Chou de Bruxelles', u:'100g', g:5, p:3.4, l:0.3, kcal:43},
+    {cat:'Légumes', n:'Chou kale', u:'100g', g:4, p:3, l:1, kcal:35},
+    {cat:'Légumes', n:'Chou rouge / blanc', u:'100g', g:5, p:1.3, l:0.2, kcal:28},
+    {cat:'Légumes', n:'Chou chinois (pak choï)', u:'100g', g:2, p:1.5, l:0.2, kcal:13},
+    {cat:'Légumes', n:'Épinards cuits', u:'100g', g:1.5, p:3, l:0.5, kcal:25, note:'purines végétales = faible risque'},
+    {cat:'Légumes', n:'Blettes', u:'100g', g:3, p:1.8, l:0.2, kcal:20},
+    {cat:'Légumes', n:'Asperges', u:'100g', g:2, p:2.2, l:0.1, kcal:20},
+    {cat:'Légumes', n:'Champignons de Paris', u:'100g', g:1, p:3, l:0.3, kcal:22},
+    {cat:'Légumes', n:'Champignons shiitake / cèpe', u:'100g', g:4, p:2.5, l:0.4, kcal:30},
+    {cat:'Légumes', n:'Courgette', u:'100g', g:3, p:1.2, l:0.3, kcal:20},
+    {cat:'Légumes', n:'Aubergine', u:'100g', g:4, p:1, l:0.2, kcal:25},
+    {cat:'Légumes', n:'Poivron', u:'100g', g:4.5, p:1, l:0.3, kcal:25},
+    {cat:'Légumes', n:'Tomate', u:'100g', g:3, p:0.9, l:0.2, kcal:18},
+    {cat:'Légumes', n:'Tomates cerises', u:'100g', g:3.5, p:1, l:0.2, kcal:20},
+    {cat:'Légumes', n:"Tomates séchées (à l'huile)", u:'100g', g:12, p:4, l:12, kcal:200},
+    {cat:'Légumes', n:'Concombre', u:'100g', g:2, p:0.6, l:0.1, kcal:12},
+    {cat:'Légumes', n:'Carotte', u:'100g', g:7, p:0.8, l:0.2, kcal:35},
+    {cat:'Légumes', n:'Navet', u:'100g', g:4, p:0.9, l:0.1, kcal:22},
+    {cat:'Légumes', n:'Panais', u:'100g', g:13, p:1.2, l:0.3, kcal:60},
+    {cat:'Légumes', n:'Céleri rave', u:'100g', g:5, p:1.5, l:0.3, kcal:30},
+    {cat:'Légumes', n:'Céleri branche', u:'100g', g:2, p:0.7, l:0.2, kcal:16},
+    {cat:'Légumes', n:'Fenouil', u:'100g', g:4, p:1.2, l:0.2, kcal:25},
+    {cat:'Légumes', n:'Poireau', u:'100g', g:6, p:1.5, l:0.3, kcal:35},
+    {cat:'Légumes', n:'Endive', u:'100g', g:3, p:1, l:0.2, kcal:18},
+    {cat:'Légumes', n:'Salade verte / laitue', u:'100g', g:1.5, p:1.2, l:0.2, kcal:15},
+    {cat:'Légumes', n:'Roquette / mâche', u:'100g', g:2, p:2.5, l:0.6, kcal:25},
+    {cat:'Légumes', n:'Radis', u:'100g', g:2, p:0.7, l:0.1, kcal:14},
+    {cat:'Légumes', n:'Betterave cuite', u:'100g', g:8, p:1.6, l:0.1, kcal:43},
+    {cat:'Légumes', n:'Haricots verts', u:'100g', g:5, p:1.8, l:0.2, kcal:30},
+    {cat:'Légumes', n:'Petits pois', u:'100g', g:10, p:5, l:0.4, kcal:70},
+    {cat:'Légumes', n:'Potiron / potimarron', u:'100g', g:5, p:1, l:0.1, kcal:26},
+    {cat:'Légumes', n:'Courge butternut', u:'100g', g:10, p:1, l:0.1, kcal:45},
+    {cat:'Légumes', n:'Courge spaghetti', u:'100g', g:6, p:0.6, l:0.5, kcal:30},
+    {cat:'Légumes', n:'Oignon', u:'100g', g:8, p:1.1, l:0.1, kcal:40},
+    {cat:'Légumes', n:'Échalote', u:'100g', g:13, p:2.5, l:0.1, kcal:70},
+    {cat:'Légumes', n:'Ail', u:'100g', g:28, p:6, l:0.5, kcal:140},
+    {cat:'Légumes', n:'Gingembre', u:'100g', g:16, p:1.8, l:0.8, kcal:80},
+    {cat:'Légumes', n:'Artichaut', u:'100g', g:6, p:3, l:0.2, kcal:45},
+    {cat:'Légumes', n:'Cœur de palmier', u:'100g', g:4, p:2.5, l:0.6, kcal:30},
+    {cat:'Légumes', n:'Germes de soja', u:'100g', g:2, p:3, l:0.5, kcal:25},
+    {cat:'Légumes', n:'Algues nori / wakamé', u:'100g', g:5, p:6, l:1, kcal:45},
+    {cat:'Légumes', n:'Ratatouille', u:'100g', g:6, p:1.2, l:4, kcal:65},
+    {cat:'Légumes', n:'Avocat', u:'100g', g:2, p:2, l:15, kcal:160, note:'lipides mono-insaturés'},
+    // FRUITS
+    {cat:'Fruits', n:'Banane', u:'unité', g:23, p:1.1, l:0.3, kcal:95, note:'1 banane moyenne ≈ 120g'},
+    {cat:'Fruits', n:'Banane plantain (cuite)', u:'100g', g:31, p:1.3, l:0.2, kcal:122},
+    {cat:'Fruits', n:'Pomme', u:'unité', g:19, p:0.4, l:0.3, kcal:78, note:'1 pomme ≈ 150g'},
+    {cat:'Fruits', n:'Poire', u:'unité', g:21, p:0.5, l:0.2, kcal:85, note:'1 poire ≈ 160g'},
+    {cat:'Fruits', n:'Orange', u:'unité', g:13, p:1, l:0.2, kcal:62, note:'1 orange ≈ 130g'},
+    {cat:'Fruits', n:'Clémentine / mandarine', u:'unité', g:9, p:0.7, l:0.1, kcal:40, note:'1 fruit ≈ 70g'},
+    {cat:'Fruits', n:'Pamplemousse', u:'unité', g:20, p:1.6, l:0.2, kcal:90, note:'1 demi ≈ 200g'},
+    {cat:'Fruits', n:'Citron', u:'unité', g:5, p:0.6, l:0.2, kcal:20, note:'1 citron ≈ 60g'},
+    {cat:'Fruits', n:'Kiwi', u:'unité', g:9, p:1, l:0.4, kcal:45, note:'1 kiwi ≈ 75g'},
+    {cat:'Fruits', n:'Fraises', u:'100g', g:6, p:0.7, l:0.3, kcal:33},
+    {cat:'Fruits', n:'Framboises', u:'100g', g:5, p:1.2, l:0.6, kcal:40},
+    {cat:'Fruits', n:'Myrtilles', u:'100g', g:12, p:0.7, l:0.3, kcal:57},
+    {cat:'Fruits', n:'Mûres', u:'100g', g:5, p:1.4, l:0.5, kcal:40},
+    {cat:'Fruits', n:'Groseilles / cassis', u:'100g', g:11, p:1.4, l:0.4, kcal:55},
+    {cat:'Fruits', n:'Cerises', u:'100g', g:13, p:1, l:0.3, kcal:63, note:'🍒 FAVORABLE goutte (baisse acide urique)'},
+    {cat:'Fruits', n:'Raisin', u:'100g', g:16, p:0.6, l:0.2, kcal:70},
+    {cat:'Fruits', n:'Prune', u:'100g', g:10, p:0.7, l:0.2, kcal:46},
+    {cat:'Fruits', n:'Abricot frais', u:'100g', g:9, p:0.9, l:0.2, kcal:48},
+    {cat:'Fruits', n:'Pêche / nectarine', u:'100g', g:9, p:0.9, l:0.2, kcal:39},
+    {cat:'Fruits', n:'Mangue', u:'100g', g:15, p:0.8, l:0.4, kcal:65},
+    {cat:'Fruits', n:'Ananas', u:'100g', g:12, p:0.5, l:0.1, kcal:50},
+    {cat:'Fruits', n:'Papaye', u:'100g', g:11, p:0.5, l:0.3, kcal:45},
+    {cat:'Fruits', n:'Fruit de la passion', u:'100g', g:13, p:2, l:0.7, kcal:75},
+    {cat:'Fruits', n:'Grenade', u:'100g', g:17, p:1.7, l:1, kcal:85},
+    {cat:'Fruits', n:'Litchi', u:'100g', g:16, p:0.8, l:0.4, kcal:70},
+    {cat:'Fruits', n:'Kaki', u:'100g', g:18, p:0.6, l:0.2, kcal:75},
+    {cat:'Fruits', n:'Figue fraîche', u:'100g', g:16, p:0.8, l:0.3, kcal:65},
+    {cat:'Fruits', n:'Melon', u:'100g', g:8, p:0.8, l:0.2, kcal:34},
+    {cat:'Fruits', n:'Pastèque', u:'100g', g:8, p:0.6, l:0.2, kcal:30},
+    {cat:'Fruits', n:'Rhubarbe', u:'100g', g:1, p:0.9, l:0.2, kcal:14},
+    {cat:'Fruits', n:'Compote de pomme sans sucre', u:'unité', g:12, p:0.3, l:0.2, kcal:50, note:'1 gourde ≈ 90g'},
+    {cat:'Fruits', n:'Salade de fruits', u:'100g', g:14, p:0.6, l:0.2, kcal:60},
+    {cat:'Fruits', n:'Dattes', u:'100g', g:65, p:2, l:0.4, kcal:280, note:'🍯 fructose élevé — modérer au repos'},
+    {cat:'Fruits', n:'Raisins secs', u:'100g', g:75, p:3, l:0.5, kcal:300, note:'🍯 fructose élevé'},
+    {cat:'Fruits', n:'Abricots secs', u:'100g', g:60, p:3.4, l:0.5, kcal:270, note:'🍯 fructose élevé'},
+    {cat:'Fruits', n:'Figues séchées', u:'100g', g:58, p:3, l:1, kcal:250, note:'🍯 fructose élevé'},
+    {cat:'Fruits', n:'Pruneaux', u:'100g', g:60, p:2, l:0.4, kcal:240, note:'🍯 fructose élevé'},
+    {cat:'Fruits', n:'Cranberries séchées', u:'100g', g:78, p:0.2, l:1, kcal:320, note:'🍯 souvent sucrées'},
+    {cat:'Fruits', n:'Mangue séchée', u:'100g', g:80, p:2, l:1, kcal:330, note:'🍯 fructose élevé'},
+    {cat:'Fruits', n:'Chips de banane', u:'100g', g:58, p:2, l:34, kcal:520, note:"🍯 + frites dans l'huile"},
+    // OLÉAGINEUX & GRAINES
+    {cat:'Oléagineux', n:'Amandes', u:'100g', g:7, p:21, l:50, kcal:580},
+    {cat:'Oléagineux', n:'Noix', u:'100g', g:7, p:15, l:65, kcal:690},
+    {cat:'Oléagineux', n:'Noisettes', u:'100g', g:7, p:15, l:61, kcal:630},
+    {cat:'Oléagineux', n:'Noix de cajou', u:'100g', g:27, p:18, l:44, kcal:555},
+    {cat:'Oléagineux', n:'Pistaches', u:'100g', g:18, p:20, l:45, kcal:580},
+    {cat:'Oléagineux', n:'Cacahuètes', u:'100g', g:12, p:26, l:49, kcal:590},
+    {cat:'Oléagineux', n:'Noix de pécan', u:'100g', g:4, p:9, l:72, kcal:690},
+    {cat:'Oléagineux', n:'Noix de macadamia', u:'100g', g:5, p:8, l:76, kcal:720},
+    {cat:'Oléagineux', n:'Noix du Brésil', u:'100g', g:12, p:14, l:67, kcal:660},
+    {cat:'Oléagineux', n:'Pignons de pin', u:'100g', g:4, p:14, l:68, kcal:680},
+    {cat:'Oléagineux', n:'Mélange de fruits secs', u:'100g', g:15, p:18, l:50, kcal:600},
+    {cat:'Oléagineux', n:'Beurre de cacahuète', u:'100g', g:12, p:25, l:50, kcal:600},
+    {cat:'Oléagineux', n:"Purée d'amande", u:'100g', g:7, p:21, l:55, kcal:620},
+    {cat:'Oléagineux', n:'Purée de noisette / cajou', u:'100g', g:14, p:18, l:53, kcal:610},
+    {cat:'Oléagineux', n:'Graines de chia', u:'100g', g:8, p:17, l:31, kcal:440},
+    {cat:'Oléagineux', n:'Graines de lin', u:'100g', g:1, p:18, l:42, kcal:530},
+    {cat:'Oléagineux', n:'Graines de courge', u:'100g', g:11, p:30, l:49, kcal:560},
+    {cat:'Oléagineux', n:'Graines de tournesol', u:'100g', g:12, p:21, l:51, kcal:580},
+    {cat:'Oléagineux', n:'Graines de sésame', u:'100g', g:12, p:18, l:50, kcal:570},
+    {cat:'Oléagineux', n:'Graines de chanvre', u:'100g', g:5, p:31, l:49, kcal:550},
+    {cat:'Oléagineux', n:'Noix de coco râpée', u:'100g', g:7, p:6, l:65, kcal:660},
     // ÉNERGIE / SPORT
-    {cat:'Énergie',   n:'Miel',              u:'100g', g:82,  p:0.3, l:0,   kcal:304},
-    {cat:'Énergie',   n:'Gel énergétique',   u:'unité',g:22,  p:0,   l:0,   kcal:88},
-    {cat:'Énergie',   n:'Barre énergétique', u:'unité',g:25,  p:5,   l:6,   kcal:170},
-    {cat:'Énergie',   n:'Boisson isotonique',u:'unité',g:30,  p:0,   l:0,   kcal:120, note:'1 bidon 500ml'},
+    {cat:'Énergie/Sport', n:'Whey Nutripure Isolat Native', u:'100g', g:1, p:90, l:1, kcal:375, note:'ton défaut. Dose 30g ≈ 27g prot / 113 kcal'},
+    {cat:'Énergie/Sport', n:'Caséine micellaire', u:'100g', g:4, p:80, l:1.5, kcal:360, note:'digestion lente, soir'},
+    {cat:'Énergie/Sport', n:'Protéine de pois (poudre)', u:'100g', g:5, p:80, l:6, kcal:380, note:'whey végétale'},
+    {cat:'Énergie/Sport', n:'Gainer (poudre)', u:'100g', g:65, p:25, l:5, kcal:400, note:'prise de masse / recharge'},
+    {cat:'Énergie/Sport', n:'Maltodextrine', u:'100g', g:95, p:0, l:0, kcal:380, note:'glucides effort, IG élevé'},
+    {cat:'Énergie/Sport', n:'Dextrose / glucose poudre', u:'100g', g:100, p:0, l:0, kcal:400},
+    {cat:'Énergie/Sport', n:'Malto + fructose (mix 1:0.8)', u:'100g', g:94, p:0, l:0, kcal:376, note:'absorption >90g/h'},
+    {cat:'Énergie/Sport', n:'Créatine monohydrate', u:'100g', g:0, p:0, l:0, kcal:0, note:'dose 3-5g/j, ~0 kcal'},
+    {cat:'Énergie/Sport', n:'BCAA / EAA (poudre)', u:'100g', g:0, p:95, l:0, kcal:0, note:'apport calorique ~négligeable par dose'},
+    {cat:'Énergie/Sport', n:'Näak Ultra Energy Drink Mix', u:'unité', g:55, p:4, l:1, kcal:250, note:'1 portion ≈ 500ml · ravito UTMB/CCC'},
+    {cat:'Énergie/Sport', n:'Näak Boost Energy Drink Mix', u:'unité', g:60, p:0, l:0, kcal:240, note:'1 sachet · efforts intenses'},
+    {cat:'Énergie/Sport', n:'Näak Ultra Energy Gel', u:'unité', g:44, p:2, l:1, kcal:200, note:'1 gel · ravito UTMB/CCC'},
+    {cat:'Énergie/Sport', n:'Näak Ultra Energy Bar', u:'unité', g:28, p:7, l:7, kcal:200, note:'1 barre ≈ 50g · ratio 4:1 · ravito CCC'},
+    {cat:'Énergie/Sport', n:'Näak Ultra Energy Waffle', u:'unité', g:16, p:3, l:6, kcal:140, note:'1 gaufre ≈ 30g · ravito CCC'},
+    {cat:'Énergie/Sport', n:'Näak Ultra Energy Puree', u:'unité', g:40, p:3, l:2.5, kcal:200, note:'1 gourde 90g · texture purée bébé'},
+    {cat:'Énergie/Sport', n:'Maurten Drink Mix 320', u:'unité', g:79, p:0, l:0, kcal:320, note:'1 sachet préparé ≈ 500ml'},
+    {cat:'Énergie/Sport', n:'Maurten Gel 100', u:'unité', g:25, p:0, l:0, kcal:100, note:'1 gel = 25g glucides'},
+    {cat:'Énergie/Sport', n:'Maurten Gel 100 Caf', u:'unité', g:25, p:0, l:0, kcal:100, note:'1 gel + 100mg caféine'},
+    {cat:'Énergie/Sport', n:'SIS Beta Fuel Gel', u:'unité', g:40, p:0, l:0, kcal:160, note:'1 gel 60ml = 40g glucides'},
+    {cat:'Énergie/Sport', n:'SIS Go Isotonic Gel', u:'unité', g:22, p:0, l:0, kcal:87, note:'1 gel 60ml'},
+    {cat:'Énergie/Sport', n:'SIS Beta Fuel (boisson)', u:'unité', g:80, p:0, l:0, kcal:320, note:'1 portion ≈ 500ml'},
+    {cat:'Énergie/Sport', n:"Overstim's Coup de Fouet (gel)", u:'unité', g:20, p:0, l:0, kcal:80, note:'1 gel 33g · version caféine dispo'},
+    {cat:'Énergie/Sport', n:"Overstim's Hydrixir (boisson)", u:'unité', g:30, p:1, l:0, kcal:125, note:'1 portion ≈ 500ml'},
+    {cat:'Énergie/Sport', n:"Overstim's Gatosport (gâteau prêt)", u:'100g', g:50, p:8, l:5, kcal:280, note:'gâteau pré-effort (J-0)'},
+    {cat:'Énergie/Sport', n:'Aptonia (Decathlon) Gel', u:'unité', g:25, p:0, l:0, kcal:100, note:'1 gel'},
+    {cat:'Énergie/Sport', n:'Aptonia Barre énergétique', u:'unité', g:25, p:3, l:4, kcal:150, note:'1 barre ≈ 40g'},
+    {cat:'Énergie/Sport', n:'Aptonia Boisson iso (préparée)', u:'unité', g:30, p:0, l:0, kcal:120, note:'1 bidon ≈ 500ml'},
+    {cat:'Énergie/Sport', n:'PowerBar / High5 Gel', u:'unité', g:25, p:0, l:0, kcal:100, note:'1 gel (générique)'},
+    {cat:'Énergie/Sport', n:'Barre protéinée', u:'unité', g:20, p:20, l:7, kcal:215, note:'1 barre ≈ 60g · récup'},
+    {cat:'Énergie/Sport', n:'Pâte de fruits sport', u:'unité', g:20, p:0, l:0, kcal:80, note:'1 pâte ≈ 25g'},
+    {cat:'Énergie/Sport', n:'Gomme / chew énergétique', u:'unité', g:5, p:0, l:0, kcal:20, note:'1 gomme ≈ 6g'},
+    {cat:'Énergie/Sport', n:'Pastille électrolytes (sel)', u:'unité', g:0, p:0, l:0, kcal:0, note:'sodium/potassium, ~0 kcal'},
+    {cat:'Énergie/Sport', n:'Precision Hydration PH1500', u:'unité', g:0, p:0, l:0, kcal:5, note:'1500mg sodium/L, ~0 kcal'},
+    {cat:'Énergie/Sport', n:'Bouillon salé (course)', u:'unité', g:1, p:1, l:1, kcal:20, note:'1 tasse ≈ 250ml · sel + chaud'},
+    {cat:'Énergie/Sport', n:'TUC / crackers salés (ravito)', u:'100g', g:65, p:8, l:25, kcal:500, note:'real food, apport sel'},
+    {cat:'Énergie/Sport', n:'Boule énergétique datte-amande (maison)', u:'unité', g:14, p:2, l:5, kcal:110, note:'1 boule ≈ 25g'},
+    // MATIÈRES GRASSES
+    {cat:'Matières grasses', n:"Huile d'olive", u:'100g', g:0, p:0, l:100, kcal:900, note:'1 c. à soupe ≈ 10g / 90 kcal'},
+    {cat:'Matières grasses', n:'Huile de colza', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Huile de tournesol', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Huile de noix', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Huile de sésame', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Huile de lin', u:'100g', g:0, p:0, l:100, kcal:900, note:'oméga-3, à froid'},
+    {cat:'Matières grasses', n:'Huile de coco', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Beurre', u:'100g', g:0.7, p:0.7, l:82, kcal:745},
+    {cat:'Matières grasses', n:'Beurre allégé', u:'100g', g:1, p:1, l:40, kcal:370},
+    {cat:'Matières grasses', n:'Ghee / beurre clarifié', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Margarine', u:'100g', g:0.5, p:0, l:80, kcal:720},
+    {cat:'Matières grasses', n:'Saindoux / graisse de canard', u:'100g', g:0, p:0, l:100, kcal:900},
+    {cat:'Matières grasses', n:'Crème fraîche 30%', u:'100g', g:3, p:2.5, l:30, kcal:290},
+    {cat:'Matières grasses', n:'Crème liquide 15%', u:'100g', g:3.5, p:2.8, l:15, kcal:165},
+    {cat:'Matières grasses', n:'Crème fraîche allégée 4%', u:'100g', g:4, p:3, l:4, kcal:70},
+    {cat:'Matières grasses', n:'Crème de coco', u:'100g', g:3, p:2, l:24, kcal:230},
+    {cat:'Matières grasses', n:'Crème végétale (soja/avoine)', u:'100g', g:3, p:2, l:15, kcal:160},
+    {cat:'Matières grasses', n:'Mayonnaise', u:'100g', g:2, p:1, l:75, kcal:680},
+    {cat:'Matières grasses', n:'Olives vertes / noires', u:'100g', g:1, p:1, l:15, kcal:150},
     // BOISSONS
-    {cat:'Boissons',  n:'Coca-Cola',         u:'unité',g:35,  p:0,   l:0,   kcal:139, note:'canette 33cl'},
-    {cat:'Boissons',  n:'Coca Zero',         u:'unité',g:0,   p:0,   l:0,   kcal:1,   note:'canette 33cl'},
-    {cat:'Boissons',  n:'Jus d\'orange',     u:'100g', g:10,  p:0.7, l:0.2, kcal:45},
-    {cat:'Boissons',  n:'Jus de pomme',      u:'100g', g:11,  p:0.1, l:0.1, kcal:46},
-    {cat:'Boissons',  n:'Boisson d\'effort', u:'unité',g:36,  p:0,   l:0,   kcal:144, note:'bidon 500ml dosé'},
-    {cat:'Boissons',  n:'Maltodextrine',     u:'100g', g:96,  p:0,   l:0,   kcal:384},
-    {cat:'Boissons',  n:'Bière',             u:'unité',g:11,  p:1.6, l:0,   kcal:142, note:'33cl · rare'},
-    {cat:'Boissons',  n:'Lait demi-écrémé',  u:'100g', g:5,   p:3.3, l:1.5, kcal:46},
-    {cat:'Boissons',  n:'Lait d\'amande',    u:'100g', g:0.5, p:0.5, l:1.1, kcal:13},
-    {cat:'Boissons',  n:'Café noir',         u:'unité',g:0,   p:0.1, l:0,   kcal:2},
-    {cat:'Boissons',  n:'Smoothie maison',   u:'100g', g:15,  p:1,   l:0.3, kcal:68},
-    {cat:'Boissons',  n:'Vin rouge',         u:'unité',g:4,   p:0.1, l:0,   kcal:85, note:'verre 12cl · rare'},
-    {cat:'Boissons',  n:'Recharge électrolytes',u:'unité',g:0,p:0,  l:0,   kcal:5,   note:'sans sucre'}
+    {cat:'Boissons', n:'Eau (plate / pétillante)', u:'100g', g:0, p:0, l:0, kcal:0, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Eau aromatisée (light)', u:'100g', g:0, p:0, l:0, kcal:1, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Café noir', u:'100g', g:0, p:0.1, l:0, kcal:2, note:'≈ 100ml, sans sucre'},
+    {cat:'Boissons', n:'Café au lait / cappuccino', u:'100g', g:4, p:3, l:1.5, kcal:45, note:'≈ 100ml, sans sucre'},
+    {cat:'Boissons', n:'Thé / infusion', u:'100g', g:0, p:0, l:0, kcal:1, note:'≈ 100ml, sans sucre'},
+    {cat:'Boissons', n:'Chocolat chaud', u:'100g', g:11, p:3, l:3, kcal:85, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Coca-Cola', u:'100g', g:11, p:0, l:0, kcal:42, note:'🍯 sucre liquide — goutte'},
+    {cat:'Boissons', n:'Soda light / zéro', u:'100g', g:0, p:0, l:0, kcal:0, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Limonade / tonic', u:'100g', g:10, p:0, l:0, kcal:40, note:'🍯'},
+    {cat:'Boissons', n:'Ice tea', u:'100g', g:7, p:0, l:0, kcal:30, note:'🍯'},
+    {cat:'Boissons', n:'Energy drink (type Red Bull)', u:'100g', g:11, p:0, l:0, kcal:45, note:'🍯 + caféine/taurine'},
+    {cat:'Boissons', n:"Jus d'orange", u:'100g', g:10, p:0.7, l:0.1, kcal:45, note:'🍯 fructose — goutte'},
+    {cat:'Boissons', n:'Jus de pomme', u:'100g', g:11, p:0.1, l:0.1, kcal:46, note:'🍯 fructose — goutte'},
+    {cat:'Boissons', n:'Jus multifruits / raisin', u:'100g', g:13, p:0.3, l:0.1, kcal:55, note:'🍯 fructose'},
+    {cat:'Boissons', n:'Jus de cerise', u:'100g', g:12, p:0.5, l:0.1, kcal:50, note:'🍒 favorable goutte (mais 🍯 sucre)'},
+    {cat:'Boissons', n:'Jus de légumes / tomate', u:'100g', g:3, p:0.8, l:0.1, kcal:18, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Smoothie fruits', u:'100g', g:12, p:0.8, l:0.3, kcal:55, note:'🍯 fructose'},
+    {cat:'Boissons', n:'Milkshake', u:'100g', g:15, p:3, l:3, kcal:100, note:'🍯'},
+    {cat:'Boissons', n:'Eau de coco', u:'100g', g:4, p:0.2, l:0.1, kcal:19, note:'≈ 100ml, potassium'},
+    {cat:'Boissons', n:"Lait d'amande non sucré", u:'100g', g:0.2, p:0.5, l:1.1, kcal:13, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Lait de soja', u:'100g', g:1, p:3, l:1.8, kcal:33, note:'≈ 100ml'},
+    {cat:'Boissons', n:"Lait d'avoine", u:'100g', g:7, p:1, l:1.5, kcal:45, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Lait de riz / coco (boisson)', u:'100g', g:9, p:0.3, l:1, kcal:50, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Boisson protéinée RTD', u:'100g', g:2, p:8, l:1.5, kcal:55, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Kombucha', u:'100g', g:4, p:0, l:0, kcal:20, note:'≈ 100ml'},
+    {cat:'Boissons', n:'Bière (blonde)', u:'100g', g:3.5, p:0.5, l:0, kcal:43, note:'⚠️🍯 DÉCLENCHEUR GOUTTE MAJEUR (levure + alcool)'},
+    {cat:'Boissons', n:'Bière sans alcool', u:'100g', g:5, p:0.4, l:0, kcal:25, note:'⚠️ purines (levure) malgré 0 alcool'},
+    {cat:'Boissons', n:'Cidre', u:'100g', g:3, p:0, l:0, kcal:45, note:'⚠️ alcool — risque goutte'},
+    {cat:'Boissons', n:'Vin rouge', u:'100g', g:2.6, p:0.1, l:0, kcal:85, note:'⚠️ alcool — risque goutte'},
+    {cat:'Boissons', n:'Vin blanc / rosé', u:'100g', g:2.5, p:0.1, l:0, kcal:80, note:'⚠️ alcool — risque goutte'},
+    {cat:'Boissons', n:'Spiritueux (whisky/vodka)', u:'100g', g:0, p:0, l:0, kcal:250, note:'⚠️ alcool — risque goutte'},
+    // ÉPICERIE / CONDIMENTS / SAUCES
+    {cat:'Épicerie/Condiments', n:'Miel', u:'100g', g:80, p:0.4, l:0, kcal:320, note:'🍯 fructose élevé — goutte'},
+    {cat:'Épicerie/Condiments', n:"Sirop d'érable", u:'100g', g:67, p:0, l:0.2, kcal:270, note:'🍯'},
+    {cat:'Épicerie/Condiments', n:"Sirop d'agave", u:'100g', g:76, p:0, l:0, kcal:310, note:'🍯 fructose très élevé'},
+    {cat:'Épicerie/Condiments', n:'Sirop de Liège', u:'100g', g:65, p:1, l:0, kcal:270, note:'🍯 (spécialité belge)'},
+    {cat:'Épicerie/Condiments', n:'Mélasse', u:'100g', g:75, p:0, l:0, kcal:290, note:'🍯'},
+    {cat:'Épicerie/Condiments', n:'Confiture', u:'100g', g:60, p:0.5, l:0.1, kcal:250, note:'🍯'},
+    {cat:'Épicerie/Condiments', n:'Pâte à tartiner choco-noisette', u:'100g', g:57, p:6, l:31, kcal:540, note:'🍯 + lipides'},
+    {cat:'Épicerie/Condiments', n:'Pâte de speculoos', u:'100g', g:58, p:3, l:27, kcal:520, note:'🍯'},
+    {cat:'Épicerie/Condiments', n:'Sucre blanc / roux', u:'100g', g:100, p:0, l:0, kcal:400},
+    {cat:'Épicerie/Condiments', n:'Édulcorant / stévia', u:'100g', g:0, p:0, l:0, kcal:0, note:'~0 kcal'},
+    {cat:'Épicerie/Condiments', n:'Chocolat noir 70%', u:'100g', g:33, p:8, l:42, kcal:550},
+    {cat:'Épicerie/Condiments', n:'Chocolat au lait', u:'100g', g:55, p:7, l:32, kcal:535},
+    {cat:'Épicerie/Condiments', n:'Cacao non sucré (poudre)', u:'100g', g:11, p:20, l:14, kcal:350},
+    {cat:'Épicerie/Condiments', n:'Ketchup', u:'100g', g:24, p:1.2, l:0.2, kcal:100},
+    {cat:'Épicerie/Condiments', n:'Moutarde', u:'100g', g:5, p:6, l:9, kcal:130},
+    {cat:'Épicerie/Condiments', n:'Sauce soja', u:'100g', g:5, p:8, l:0, kcal:55, note:'sel élevé'},
+    {cat:'Épicerie/Condiments', n:'Sauce poisson (nuoc-mâm)', u:'100g', g:4, p:8, l:0, kcal:50, note:'⚠️ purines (anchois) + sel'},
+    {cat:'Épicerie/Condiments', n:'Sauce barbecue / curry', u:'100g', g:35, p:1, l:1, kcal:160, note:'🍯'},
+    {cat:'Épicerie/Condiments', n:'Sauce samouraï / andalouse', u:'100g', g:10, p:1, l:45, kcal:450},
+    {cat:'Épicerie/Condiments', n:'Sriracha / harissa', u:'100g', g:18, p:2, l:1, kcal:90},
+    {cat:'Épicerie/Condiments', n:'Vinaigrette', u:'100g', g:5, p:0.5, l:45, kcal:430},
+    {cat:'Épicerie/Condiments', n:'Pesto', u:'100g', g:5, p:4, l:45, kcal:450},
+    {cat:'Épicerie/Condiments', n:'Tapenade', u:'100g', g:5, p:2, l:30, kcal:300},
+    {cat:'Épicerie/Condiments', n:'Houmous', u:'100g', g:14, p:8, l:17, kcal:240},
+    {cat:'Épicerie/Condiments', n:'Guacamole', u:'100g', g:4, p:2, l:15, kcal:165},
+    {cat:'Épicerie/Condiments', n:'Tahini', u:'100g', g:9, p:17, l:54, kcal:600},
+    {cat:'Épicerie/Condiments', n:'Sauce tomate (cuisinée)', u:'100g', g:7, p:1.5, l:2, kcal:55},
+    {cat:'Épicerie/Condiments', n:'Concentré de tomate', u:'100g', g:15, p:4, l:0.5, kcal:80},
+    {cat:'Épicerie/Condiments', n:'Béchamel', u:'100g', g:8, p:3, l:8, kcal:115},
+    {cat:'Épicerie/Condiments', n:'Cornichons / câpres', u:'100g', g:2, p:0.7, l:0.2, kcal:15},
+    {cat:'Épicerie/Condiments', n:'Vinaigre balsamique', u:'100g', g:17, p:0.5, l:0, kcal:88},
+    {cat:'Épicerie/Condiments', n:'Miso', u:'100g', g:25, p:12, l:6, kcal:200, note:'⚠️ purines (soja fermenté) + sel'},
+    {cat:'Épicerie/Condiments', n:'Levure maltée / nutritionnelle', u:'100g', g:5, p:50, l:5, kcal:350, note:'⚠️ purines (levure) — modérer'},
+    {cat:'Épicerie/Condiments', n:'Bouillon cube', u:'unité', g:1, p:1, l:1.5, kcal:20, note:'1 cube ≈ 10g · sel élevé'},
+    {cat:'Épicerie/Condiments', n:'Farine de blé', u:'100g', g:73, p:10, l:1, kcal:350},
+    {cat:'Épicerie/Condiments', n:'Maïzena / fécule', u:'100g', g:85, p:0.3, l:0, kcal:350},
+    {cat:'Épicerie/Condiments', n:'Chapelure', u:'100g', g:72, p:13, l:5, kcal:380},
+    {cat:'Épicerie/Condiments', n:'Gomasio', u:'100g', g:5, p:18, l:50, kcal:560, note:'sésame + sel'},
+    // SUCRERIES / SNACKS / VIENNOISERIES
+    {cat:'Sucreries/Snacks', n:'Croissant', u:'unité', g:26, p:5, l:14, kcal:250, note:'1 croissant ≈ 55g'},
+    {cat:'Sucreries/Snacks', n:'Pain au chocolat', u:'unité', g:32, p:6, l:17, kcal:300, note:'1 pièce ≈ 65g'},
+    {cat:'Sucreries/Snacks', n:'Gaufre de Liège', u:'unité', g:35, p:5, l:15, kcal:300, note:'1 gaufre ≈ 80g'},
+    {cat:'Sucreries/Snacks', n:'Madeleine', u:'unité', g:13, p:1.5, l:6, kcal:115, note:'1 madeleine ≈ 25g'},
+    {cat:'Sucreries/Snacks', n:'Cookie', u:'unité', g:18, p:1.5, l:7, kcal:140, note:'1 cookie ≈ 30g'},
+    {cat:'Sucreries/Snacks', n:'Brownie', u:'unité', g:25, p:3, l:12, kcal:220, note:'1 part ≈ 45g'},
+    {cat:'Sucreries/Snacks', n:'Muffin', u:'unité', g:35, p:4, l:12, kcal:270, note:'1 muffin ≈ 70g'},
+    {cat:'Sucreries/Snacks', n:'Donut', u:'unité', g:30, p:4, l:14, kcal:260, note:'1 donut ≈ 60g'},
+    {cat:'Sucreries/Snacks', n:'Speculoos', u:'unité', g:5, p:0.3, l:1.3, kcal:35, note:'1 biscuit ≈ 6g'},
+    {cat:'Sucreries/Snacks', n:'Petit-beurre / galette', u:'unité', g:6, p:0.6, l:1, kcal:38, note:'1 biscuit ≈ 8g'},
+    {cat:'Sucreries/Snacks', n:'Barre chocolatée (type Mars)', u:'unité', g:35, p:2, l:9, kcal:230, note:'1 barre ≈ 50g · 🍯'},
+    {cat:'Sucreries/Snacks', n:'Chips', u:'100g', g:50, p:6, l:34, kcal:535, note:'sel + lipides'},
+    {cat:'Sucreries/Snacks', n:'Bonbons gélifiés', u:'100g', g:77, p:6, l:0, kcal:330, note:'🍯'},
+    {cat:'Sucreries/Snacks', n:'Nougat / caramel', u:'100g', g:70, p:5, l:15, kcal:430, note:'🍯'},
+    {cat:'Sucreries/Snacks', n:'Glace (crème glacée)', u:'100g', g:24, p:4, l:11, kcal:210, note:'🍯'},
+    {cat:'Sucreries/Snacks', n:'Sorbet', u:'100g', g:30, p:0.5, l:0.2, kcal:125, note:'🍯'},
+    // PLATS PRÉPARÉS / COMPOSÉS
+    {cat:'Plats préparés', n:'Pizza margherita', u:'100g', g:30, p:11, l:10, kcal:260},
+    {cat:'Plats préparés', n:'Pizza pepperoni / 4 fromages', u:'100g', g:28, p:12, l:14, kcal:290, note:'⚠️ purines (charcuterie)'},
+    {cat:'Plats préparés', n:'Lasagnes bolognaise', u:'100g', g:12, p:7, l:7, kcal:140, note:'⚠️ purines (viande, modéré)'},
+    {cat:'Plats préparés', n:'Spaghetti bolognaise', u:'100g', g:18, p:7, l:5, kcal:140, note:'⚠️ purines (viande, modéré)'},
+    {cat:'Plats préparés', n:'Gratin de pâtes', u:'100g', g:18, p:7, l:8, kcal:170},
+    {cat:'Plats préparés', n:'Gratin dauphinois', u:'100g', g:14, p:3, l:11, kcal:165},
+    {cat:'Plats préparés', n:'Tartiflette', u:'100g', g:12, p:6, l:13, kcal:190, note:'⚠️ purines (lardons)'},
+    {cat:'Plats préparés', n:'Quiche lorraine', u:'100g', g:20, p:9, l:18, kcal:280, note:'⚠️ purines (lardons)'},
+    {cat:'Plats préparés', n:'Hachis parmentier', u:'100g', g:13, p:7, l:6, kcal:130, note:'⚠️ purines (viande, modéré)'},
+    {cat:'Plats préparés', n:'Chili con carne', u:'100g', g:10, p:8, l:6, kcal:120, note:'⚠️ purines (viande, modéré)'},
+    {cat:'Plats préparés', n:'Chili sin carne', u:'100g', g:14, p:6, l:3, kcal:110},
+    {cat:'Plats préparés', n:'Dahl de lentilles', u:'100g', g:14, p:6, l:4, kcal:115},
+    {cat:'Plats préparés', n:'Curry de poulet', u:'100g', g:8, p:11, l:7, kcal:140},
+    {cat:'Plats préparés', n:'Blanquette / pot-au-feu', u:'100g', g:5, p:10, l:6, kcal:115, note:'⚠️ purines (viande, modéré)'},
+    {cat:'Plats préparés', n:'Carbonnade flamande', u:'100g', g:6, p:12, l:8, kcal:150, note:'⚠️ purines (bœuf) (plat belge)'},
+    {cat:'Plats préparés', n:'Waterzooi', u:'100g', g:6, p:8, l:6, kcal:115, note:'plat belge (poulet/poisson)'},
+    {cat:'Plats préparés', n:'Stoemp', u:'100g', g:15, p:3, l:5, kcal:115, note:'plat belge (purée-légumes)'},
+    {cat:'Plats préparés', n:'Vol-au-vent', u:'100g', g:14, p:9, l:14, kcal:215, note:'plat belge'},
+    {cat:'Plats préparés', n:'Moules-frites', u:'100g', g:18, p:8, l:8, kcal:175, note:'⚠️ PURINES (moules)'},
+    {cat:'Plats préparés', n:'Couscous (royal)', u:'100g', g:18, p:7, l:5, kcal:145, note:'⚠️ purines (merguez/agneau)'},
+    {cat:'Plats préparés', n:'Tajine', u:'100g', g:12, p:8, l:5, kcal:120},
+    {cat:'Plats préparés', n:'Paella', u:'100g', g:20, p:8, l:5, kcal:155, note:'⚠️ purines (fruits de mer)'},
+    {cat:'Plats préparés', n:'Risotto aux champignons', u:'100g', g:20, p:4, l:6, kcal:150},
+    {cat:'Plats préparés', n:'Riz cantonais / sauté', u:'100g', g:25, p:6, l:6, kcal:175},
+    {cat:'Plats préparés', n:'Pad thaï', u:'100g', g:22, p:7, l:7, kcal:180},
+    {cat:'Plats préparés', n:'Wok de légumes / nouilles', u:'100g', g:18, p:5, l:5, kcal:135},
+    {cat:'Plats préparés', n:'Buddha / poke bowl', u:'100g', g:15, p:7, l:5, kcal:135, note:'poke cru ⚠️ si poisson cru'},
+    {cat:'Plats préparés', n:'Sushi (maki)', u:'unité', g:6, p:1, l:0.5, kcal:35, note:'1 pièce'},
+    {cat:'Plats préparés', n:'California roll', u:'unité', g:7, p:1.5, l:1.5, kcal:50, note:'1 pièce'},
+    {cat:'Plats préparés', n:'Sashimi', u:'100g', g:0, p:22, l:5, kcal:140, note:'⚠️ purines (poisson cru)'},
+    {cat:'Plats préparés', n:'Nems / spring rolls', u:'unité', g:10, p:3, l:5, kcal:95, note:'1 nem ≈ 40g'},
+    {cat:'Plats préparés', n:'Gyoza', u:'unité', g:6, p:2, l:2, kcal:50, note:'1 gyoza ≈ 20g'},
+    {cat:'Plats préparés', n:'Samoussa', u:'unité', g:12, p:3, l:6, kcal:120, note:'1 samoussa ≈ 40g'},
+    {cat:'Plats préparés', n:'Falafel (boulette)', u:'unité', g:5, p:2, l:3, kcal:60, note:'1 boulette ≈ 20g'},
+    {cat:'Plats préparés', n:'Croque-monsieur', u:'unité', g:30, p:20, l:25, kcal:430, note:'⚠️ purines (jambon)'},
+    {cat:'Plats préparés', n:'Hot-dog', u:'unité', g:30, p:12, l:18, kcal:330, note:'⚠️ purines (saucisse)'},
+    {cat:'Plats préparés', n:'Hamburger maison', u:'unité', g:35, p:25, l:25, kcal:470, note:'⚠️ purines (viande)'},
+    {cat:'Plats préparés', n:'Kebab / durum', u:'unité', g:55, p:30, l:25, kcal:580, note:'⚠️ purines (viande)'},
+    {cat:'Plats préparés', n:'Fricadelle', u:'unité', g:10, p:9, l:18, kcal:240, note:'⚠️ purines (snack belge)'},
+    {cat:'Plats préparés', n:'Boulettes sauce tomate', u:'100g', g:8, p:12, l:10, kcal:175, note:'⚠️ purines (viande)'},
+    {cat:'Plats préparés', n:'Sandwich jambon-beurre', u:'unité', g:50, p:18, l:18, kcal:430, note:'⚠️ purines (jambon) · ≈ 200g'},
+    {cat:'Plats préparés', n:'Panini / club sandwich', u:'unité', g:45, p:20, l:20, kcal:450},
+    {cat:'Plats préparés', n:'Wrap poulet', u:'unité', g:35, p:18, l:12, kcal:330, note:'1 wrap garni ≈ 200g'},
+    {cat:'Plats préparés', n:'Salade César', u:'100g', g:6, p:8, l:12, kcal:160},
+    {cat:'Plats préparés', n:'Salade niçoise', u:'100g', g:6, p:8, l:7, kcal:120, note:'⚠️ purines (thon/anchois)'},
+    {cat:'Plats préparés', n:'Taboulé', u:'100g', g:20, p:3, l:4, kcal:130},
+    {cat:'Plats préparés', n:'Salade de pâtes', u:'100g', g:22, p:5, l:8, kcal:175},
+    {cat:'Plats préparés', n:'Soupe de légumes / minestrone', u:'100g', g:5, p:1.5, l:1.5, kcal:40, note:'≈ 100ml'},
+    {cat:'Plats préparés', n:'Velouté de potiron', u:'100g', g:6, p:1.5, l:3, kcal:55, note:'≈ 100ml'},
+    {cat:'Plats préparés', n:"Soupe à l'oignon gratinée", u:'100g', g:7, p:3, l:4, kcal:75, note:'≈ 100ml'},
+    {cat:'Plats préparés', n:'Rösti / galette de pdt', u:'100g', g:20, p:3, l:10, kcal:180},
+    {cat:'Plats préparés', n:'Tortilla espagnole', u:'100g', g:12, p:7, l:10, kcal:165},
+    {cat:'Plats préparés', n:'Pancake', u:'unité', g:15, p:3, l:4, kcal:110, note:'1 pancake ≈ 50g'},
+    {cat:'Plats préparés', n:'Crêpe', u:'unité', g:18, p:4, l:5, kcal:130, note:'1 crêpe ≈ 60g'}
   ];
 
   function getFoods() {
@@ -3862,7 +4236,8 @@ if (document.readyState === 'loading') {
     {id:'dej',       label:'🍽️ Déjeuner'},
     {id:'postseance',label:'💪 Post-séance'},
     {id:'encas',     label:'🍎 Encas'},
-    {id:'diner',     label:'🌙 Dîner'}
+    {id:'diner',     label:'🌙 Dîner'},
+    {id:'boissons',  label:'🥤 Boissons', drinks:true}
   ];
 
   function todayKey() {
@@ -3979,6 +4354,10 @@ if (document.readyState === 'loading') {
       var arr = dayMeals[slot.id] || [];
       var ms = macroOfMeal(arr);
       var isActive = (activeSlot === slot.id);
+      // Séparateur visuel avant le créneau Boissons
+      if (slot.drinks) {
+        html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin:0.8rem 0 0.5rem">Hydratation calorique · hors repas</div>';
+      }
       html += '<div style="margin-bottom:0.6rem;border:1px solid var(--border,#242528);border-radius:8px;overflow:hidden">';
       // En-tête du repas
       html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.7rem;background:var(--bg,#0f0f10)">' +
@@ -4038,32 +4417,39 @@ if (document.readyState === 'loading') {
 
   // Sélecteur d'aliment (catégorie + recherche + liste filtrée)
   function renderFoodPicker(slotId) {
-    var foods = getFoods();
+    var allFoods = getFoods();
+    // Le créneau Boissons ne montre QUE les boissons ; les repas montrent tout SAUF les boissons
+    var isDrinkSlot = (slotId === 'boissons');
+    var foods = allFoods.filter(function(f){
+      return isDrinkSlot ? (f.cat === 'Boissons') : (f.cat !== 'Boissons');
+    });
     var cats = [];
     foods.forEach(function(f){ if (cats.indexOf(f.cat)<0) cats.push(f.cat); });
 
     var h = '<div style="padding:0.6rem;background:var(--bg,#0f0f10);border-top:1px solid var(--border,#242528)">';
     // Recherche
-    h += '<input id="nh-search" type="text" placeholder="🔍 Rechercher un aliment..." value="' + searchTerm + '" style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.68rem;margin-bottom:0.5rem">';
-    // Catégories (chips)
-    h += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem">';
-    h += '<span class="nh-cat" data-cat="all" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat==='all'?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat==='all'?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">Tous</span>';
-    cats.forEach(function(c){
-      h += '<span class="nh-cat" data-cat="' + c + '" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat===c?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat===c?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">' + c + '</span>';
-    });
-    h += '</div>';
+    h += '<input id="nh-search" type="text" placeholder="🔍 Rechercher...' + (isDrinkSlot?' une boisson':' un aliment') + '" value="' + searchTerm + '" style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.68rem;margin-bottom:0.5rem">';
+    // Catégories (chips) — masquées pour le créneau Boissons (une seule catégorie)
+    if (!isDrinkSlot) {
+      h += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem">';
+      h += '<span class="nh-cat" data-cat="all" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat==='all'?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat==='all'?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">Tous</span>';
+      cats.forEach(function(c){
+        h += '<span class="nh-cat" data-cat="' + c + '" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.25rem 0.5rem;border-radius:12px;background:' + (selectedCat===c?'var(--accent,#a3e635)':'var(--surface,#16171a)') + ';color:' + (selectedCat===c?'#0f0f10':'var(--muted,#5e6068)') + ';border:1px solid var(--border,#242528)">' + c + '</span>';
+      });
+      h += '</div>';
+    }
     // Liste filtrée
     var filtered = foods.filter(function(f){
-      var okCat = (selectedCat==='all' || f.cat===selectedCat);
+      var okCat = (isDrinkSlot || selectedCat==='all' || f.cat===selectedCat);
       var okSearch = (!searchTerm || f.n.toLowerCase().indexOf(searchTerm.toLowerCase())>=0);
       return okCat && okSearch;
     });
     h += '<div style="max-height:160px;overflow-y:auto;margin-bottom:0.5rem">';
     if (filtered.length===0) {
-      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">Aucun aliment</div>';
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">Aucun ' + (isDrinkSlot?'boisson':'aliment') + '</div>';
     } else {
       filtered.forEach(function(f){
-        var realIdx = foods.indexOf(f);
+        var realIdx = allFoods.indexOf(f);
         h += '<div class="nh-pick" data-slot="' + slotId + '" data-food="' + realIdx + '" style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.5rem;cursor:pointer;border-radius:5px;margin-bottom:2px;background:var(--surface,#16171a)">' +
           '<span style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--text,#e8e9ea)">' + f.n + (f.note?' <span style="color:var(--orange,#e8a020);font-size:0.55rem">'+f.note+'</span>':'') + '</span>' +
           '<span style="font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068)">' + f.kcal + 'k/' + f.u + '</span></div>';
