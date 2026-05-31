@@ -377,17 +377,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 }
 
 @media (max-width: 400px) {
-  /* Toggle thème : sorti du footer masqué, fixé en haut à droite */
-  .sb-foot { display: block !important; position: fixed; top: env(safe-area-inset-top, 8px); right: 10px; bottom: auto; left: auto; width: auto; padding: 0; border: none; background: transparent; z-index: 350; }
+  /* Toggle thème : aligné à droite, au niveau du titre de page */
+  .sb-foot { display: block !important; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: 0.85rem; bottom: auto; left: auto; width: auto; padding: 0; border: none; background: transparent; z-index: 350; }
   .sb-foot .sb-ccc { display: none !important; }
   #theme-toggle {
     width: auto !important; margin: 0 !important;
-    padding: 0.4rem 0.5rem !important; border-radius: 8px !important;
+    padding: 0.35rem 0.55rem !important; border-radius: 8px !important;
     background: var(--surface2) !important; border: 1px solid var(--border2) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
   #theme-toggle .sn-lbl, #theme-toggle #theme-toggle-lbl { display: none !important; }
-  #theme-toggle #theme-toggle-icon { font-size: 1rem; }
+  #theme-toggle #theme-toggle-icon { font-size: 1.05rem; line-height: 1; }
+  /* Laisser de la place au toggle pour ne pas chevaucher un titre long */
+  .ptitle { padding-right: 3rem; }
 
   /* Très petits écrans : tuiles métriques en 1 colonne si vraiment étroit */
   .week-strip, .ag-grid { gap: 2px; }
