@@ -1074,7 +1074,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 
 <!-- AGENDA -->
 <div class="panel" id="panel-agenda"><div class="inner">
-  <div class="ptitle">Agenda Nutrition <span class="ptitle-sub">15 semaines · quantités</span></div>
+  <div class="ptitle">Agenda Nutrition <span class="ptitle-sub">16 semaines · quantités</span></div>
   <div class="ag-nav" id="ag-nav"></div>
   <div id="ag-display"></div>
 </div></div>
@@ -1564,6 +1564,17 @@ function weekVolume(w) {
   return { run: run, velo: velo, muscu: muscu, dplus: dplus };
 }
 
+// ── SOURCE UNIQUE du mode carb (LC/MC/HC) : pilotée par type + km + D+ ──
+// load = charge approx du jour (km course + vélo/3 + D+/100m)
+function dayCarbMode(d){
+  if(!d) return 'MC';
+  var load = (d.run||0) + (d.velo||0)/3 + (d.dplus||0)/100;
+  if(d.type==='long'||d.type==='gravel'||d.type==='course'||load>=28) return 'HC';
+  if(d.type==='repos' && !d.muscu && !(d.run>0) && !(d.velo>0)) return 'LC';
+  if(load>=12 || d.muscu || d.type==='spe') return 'MC';
+  return 'LC';
+}
+
 // ── DÉRIVATION : génère vols[] et months{} depuis PLAN_DATA ──
 function deriveVolsAndMonths() {
   applyPlanData();
@@ -1587,10 +1598,8 @@ function deriveVolsAndMonths() {
       var s = d.title;
       if (d.run > 0 && d.type !== 'gravel') s = d.title + ' ' + d.run + 'km';
       else if (d.velo > 0 && (d.type === 'velo')) s = d.title + ' ' + d.velo + 'km';
-      // Code couleur charge : LC (faible), MC (moyen), HC (haut)
-      var m = 'LC';
-      if (d.type === 'long' || d.type === 'gravel' || d.type === 'course') m = 'HC';
-      else if (d.type === 'spe' || d.type === 'ef' || d.type === 'velo' || d.muscu) m = 'MC';
+      // Mode carb : source unique (type + km + D+)
+      var m = dayCarbMode(d);
       return { d: d.label, m: m, s: s, sub: d.sub,
                gravel: (d.type === 'gravel' || d.type === 'course'),
                run: d.run, velo: d.velo, muscu: d.muscu, dplus: d.dplus || 0, type: d.type, date: d.date };
@@ -1620,7 +1629,7 @@ function getMonthWeek(weekIndex) {
 
 
 const agWeeks = [
-  {id:'S1',label:'S1',phase:'m1',meta:'18 mai · 50km',note:'',days:[
+  {id:'S1',label:'S1',phase:'m1',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Thon 130g + Pain noir 2t. + Carottes libres',colla:'Pomme + Amandes 15g',soir:'Poulet 180g + Quinoa 150g cuits + Brocolis libres'},
     {j:'Mar',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Poulet 160g + Quinoa 150g cuits + Brocolis',colla:'Skyr 150g + Noix 15g',soir:'Dinde 160g + Riz basmati 150g cuits + Courgettes'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Dinde 160g + Riz 150g cuits + Courgettes',colla:'Banane + Cajou 15g',soir:'Poulet haché 160g + Patate douce 180g rôtie + Épinards'},
@@ -1629,7 +1638,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',matin:'Porridge 100g sec + Miel 20g + Banane + Whey 30g',midi:'Saumon 150g + Haricots verts + Riz 200g cuits',colla:'Skyr 150g + Amandes 20g',soir:'Bœuf haché 5% 180g + PDT four 250g + Salade'},
     {j:'Dim',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Bœuf haché 180g + PDT 200g + Salade',colla:'Skyr 150g',soir:'Omelette 3 œufs + Concombre + Pain noir 2t.'},
   ]},
-  {id:'S2',label:'S2',phase:'m1',meta:'25 mai · 62km',note:'',days:[
+  {id:'S2',label:'S2',phase:'m1',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Thon 130g + Pain noir 2t. + Concombre',colla:'Pomme + Amandes 15g',soir:'Dinde 180g + Boulgour 150g cuits + Poivrons'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Dinde 180g + Boulgour 150g + Poivrons + Sriracha',colla:'Skyr 150g + Noix 15g',soir:'Boulettes poulet 160g + Pâtes 150g cuits + Coulis'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Boulettes poulet 160g + Pâtes 150g',colla:'Banane + Cajou 15g',soir:'Poulet 180g + Quinoa 150g cuits + Haricots verts'},
@@ -1638,7 +1647,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',matin:'Porridge 100g sec + Miel 20g + Banane + Whey 30g',midi:'Dinde 180g + Riz 200g cuits + Brocolis',colla:'Skyr 150g + Amandes 20g',soir:'Poulet rôti 200g + PDT 280g + Carottes'},
     {j:'Dim',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Poulet rôti 200g + PDT 200g + Carottes',colla:'Skyr 150g',soir:'Thon 130g + Pain noir 2t. + Concombre + Sriracha'},
   ]},
-  {id:'S3',label:'S3',phase:'m1',meta:'25 mai · 142km',note:'Charge 3 · pic bloc 1',days:[
+  {id:'S3',label:'S3',phase:'m1',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Omelette 3 œufs + Pain noir 2t. + Salade',colla:'Pomme + Amandes 15g',soir:'Poulet haché 160g + Riz 150g cuits + Haricots'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet haché 160g + Riz 150g + Haricots',colla:'Skyr 150g + Noix 15g',soir:'Dinde 180g + Quinoa 150g cuits + Courgettes'},
     {j:'Mer',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Dinde 180g + Quinoa 150g + Courgettes',colla:'Banane + Cajou 15g',soir:'Cabillaud 180g + Riz 100g cuits + Poireaux (LC allégé)'},
@@ -1647,7 +1656,7 @@ const agWeeks = [
     {j:'Sam 🚴',m:'HC',special:true,matin:'Porridge 100g + Miel 20g + Banane + Whey 30g',midi:'Bœuf 160g + Patate douce 200g + Haricots',colla:'Barres 2× + Gels 4× + Bidon isotonique (sur vélo)',soir:'Dinde wok 180g + Nouilles riz 200g cuits + Légumes'},
     {j:'Dim',m:'LC',matin:'Pancakes Avoine 70g + 2 Œufs',midi:'Dinde wok 180g + Nouilles riz 150g',colla:'Skyr 150g',soir:'Thon 130g + Œuf dur + Concombre + Salade'},
   ]},
-  {id:'S4↓',label:'S4↓',phase:'m1',meta:'8 juin · 42km · Décharge',note:'',days:[
+  {id:'S4↓',label:'S4↓',phase:'m1',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Thon 130g + Œuf dur + Salade libre + Pain noir 1t.',colla:'Pomme + Amandes 15g',soir:'Poulet 160g + Quinoa 150g cuits + Brocolis'},
     {j:'Mar',m:'LC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet 160g + Quinoa 150g + Brocolis',colla:'Skyr 150g + Noix 15g',soir:'Dinde hachée 160g + Pâtes 150g cuits + Coulis'},
     {j:'Mer',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Dinde hachée 160g + Pâtes 150g',colla:'Banane + Cajou 10g',soir:'Saumon 150g + Riz 100g cuits + Épinards (LC léger)'},
@@ -1656,7 +1665,7 @@ const agWeeks = [
     {j:'Sam',m:'MC',matin:'Porridge 80g + Banane + Whey 20g',midi:'Bœuf 160g + Haricots + Quinoa 150g cuits',colla:'Skyr 150g + Amandes 15g',soir:'Fajitas : Poulet 160g + Tortilla complète 2× + Poivrons'},
     {j:'Dim',m:'LC',matin:'Pancakes Avoine 70g + 2 Œufs',midi:'Reste Fajitas poulet',colla:'Skyr 150g',soir:'Thon 130g + Petit-suisse 100g + Concombre + Pain noir 1t.'},
   ]},
-  {id:'S5',label:'S5',phase:'m2',meta:'15 juin · 72km',note:'',days:[
+  {id:'S5',label:'S5',phase:'m2',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Thon 130g + Pain noir 2t. + Concombre',colla:'Pomme + Amandes 15g',soir:'Dinde 180g + Haricots verts libres (LC — pas féculent)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Dinde 180g + Haricots + Riz 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Boulettes poulet 160g + Quinoa 150g cuits + Épinards'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Boulettes poulet 160g + Quinoa 150g + Épinards',colla:'Banane + Cajou 15g',soir:'Poulet 180g + Pâtes 150g cuits + Brocolis'},
@@ -1665,7 +1674,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',matin:'Porridge 100g + Miel 20g + Banane + Whey 30g',midi:'Saumon 150g + Courgettes + Riz 200g cuits',colla:'Skyr 150g + Amandes 20g',soir:'Bœuf haché 5% 180g + Patate douce 200g + Haricots verts'},
     {j:'Dim',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Bœuf 180g + Patate douce 180g + Haricots',colla:'Skyr 150g',soir:'Omelette 3 œufs + Champignons + Pain noir 2t.'},
   ]},
-  {id:'S6',label:'S6',phase:'m2',meta:'22 juin · 82km',note:'',days:[
+  {id:'S6',label:'S6',phase:'m2',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Cabillaud 180g + Brocolis libres (LC)',colla:'Pomme + Amandes 15g',soir:'Cabillaud 180g + Brocolis + Riz 100g cuits (LC léger)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet haché 160g + Riz basmati 150g cuits + Brocolis',colla:'Skyr 150g + Noix 15g',soir:'Poulet haché 160g + Quinoa 150g cuits + Tomates'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Poulet haché 160g + Quinoa 150g + Tomates',colla:'Banane + Cajou 15g',soir:'Dinde 180g + Pâtes 150g cuits + Courgettes'},
@@ -1674,7 +1683,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',matin:'Porridge 100g + Miel 20g + Banane + Whey 30g',midi:'Thon 130g + Salade + Riz 200g cuits',colla:'Skyr 150g + Amandes 20g',soir:'Poulet rôti 200g + PDT 280g + Carottes'},
     {j:'Dim 🚴',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Poulet rôti 200g + PDT 200g + Carottes',colla:'Skyr 150g',soir:'Œufs durs 3 + Thon 100g + Concombre + Tomate'},
   ]},
-  {id:'S7',label:'S7',phase:'m2',meta:'29 juin · 90km · Pic M2',note:'',days:[
+  {id:'S7',label:'S7',phase:'m2',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Œufs durs 3 + Thon 100g + Salade',colla:'Pomme + Amandes 15g',soir:'Poulet 180g + Haricots verts libres (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet 180g + Haricots + Riz complet 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Dinde hachée 180g + Riz complet 150g cuits + Brocolis'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Dinde 180g + Riz 150g + Brocolis',colla:'Banane + Cajou 15g',soir:'Saumon 150g + Quinoa 150g cuits + Épinards'},
@@ -1683,7 +1692,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',special:true,matin:'Porridge 100g + Miel 20g + Banane + Whey 30g',midi:'Cabillaud 180g + Courgettes + Riz 200g cuits',colla:'Barres 2× (test sortie 30km)',soir:'Bœuf haché 5% 180g + Patate douce 220g + Salade verte'},
     {j:'Dim 🚴',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Bœuf 180g + Patate douce 180g',colla:'Skyr 150g',soir:'Omelette 3 œufs + Tomates + Pain noir 2t.'},
   ]},
-  {id:'S8↓',label:'S8↓',phase:'m2',meta:'6 juil · 55km · Décharge',note:'',days:[
+  {id:'S8↓',label:'S8↓',phase:'m2',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Omelette 3 œufs + Tomates + Pain noir 1t.',colla:'Pomme + Amandes 15g',soir:'Thon 130g + Concombre + Salade (LC)'},
     {j:'Mar',m:'LC',matin:'3 Œufs + Pain noir 2t.',midi:'Thon 130g + Salade libre',colla:'Skyr 150g + Noix 15g',soir:'Poulet 160g + Haricots verts libres (LC)'},
     {j:'Mer',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Poulet 160g + Haricots verts',colla:'Pomme + Amandes 15g',soir:'Dinde 160g + Épinards + Avocat 1/2 (LC)'},
@@ -1692,7 +1701,7 @@ const agWeeks = [
     {j:'Sam',m:'MC',matin:'Porridge 80g + Banane + Whey 20g',midi:'Saumon 150g + Brocolis + Riz 150g cuits',colla:'Skyr 150g + Amandes 15g',soir:'Dinde 180g + Riz basmati 150g cuits + Poivrons'},
     {j:'Dim',m:'LC',matin:'Pancakes Avoine 70g + 2 Œufs',midi:'Dinde 180g + Riz 100g + Poivrons',colla:'Skyr 150g',soir:'Omelette 2 œufs + Concombre + Pain noir 1t.'},
   ]},
-  {id:'S9 🇮🇹',label:'S9 🇮🇹',phase:'m3',meta:'13 juil · 82km · Toscane',note:'Bloc D+ Montefegatesi',days:[
+  {id:'S9 🇮🇹',label:'S9 🇮🇹',phase:'m3',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Café (arrivée)',midi:'Resto local / Restes voyage',colla:'Fruits locaux + Noix 15g',soir:'Poulet 160g + Légumes locaux (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain local',midi:'Poulet 160g + Légumes + Riz 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Pâtes 200g cuits + Poulet haché 160g + Coulis'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g',midi:'Pâtes 200g + Poulet haché 160g',colla:'Banane + Cajou 15g',soir:'Dinde 160g + Riz 150g cuits + Légumes grillés locaux'},
@@ -1701,7 +1710,7 @@ const agWeeks = [
     {j:'Sam',m:'MC',matin:'3 Œufs + Pain local',midi:'Reste ou Restaurant famille — steak + légumes + féculents',colla:'Pomme + Amandes 20g',soir:'Poulet 180g + Quinoa 150g cuits + Légumes (EF 16km)'},
     {j:'Dim',m:'LC',matin:'Skyr 200g + Café (voyage retour)',midi:'Sandwich : Pain noir 2t. + Poulet 120g + Moutarde',colla:'Skyr 150g',soir:'Omelette 2 œufs + Salade (retour maison)'},
   ]},
-  {id:'S10',label:'S10',phase:'m3',meta:'20 juil · 95km',note:'',days:[
+  {id:'S10',label:'S10',phase:'m3',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Omelette 2 œufs + Salade libre',colla:'Pomme + Amandes 15g',soir:'Poulet 180g + Brocolis libres (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet 180g + Brocolis + Riz basmati 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Dinde 180g + Riz basmati 150g cuits + Épinards'},
     {j:'Mer',m:'MC',matin:'Flocons 70g + Skyr 150g + Whey 20g + Banane',midi:'Dinde 180g + Riz 150g + Épinards',colla:'Banane + Cajou 15g',soir:'Poulet haché 180g + Quinoa 150g cuits + Poivrons'},
@@ -1710,7 +1719,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',special:true,matin:'Porridge 100g + Miel 20g + Banane + Whey 30g',midi:'Saumon 150g + Haricots + Riz 220g cuits',colla:'Barres 2× (sortie 33km/1400D+)',soir:'Bœuf haché 5% 180g + Patate douce 250g + Salade'},
     {j:'Dim 🚴',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Bœuf 180g + Patate douce 200g',colla:'Skyr 150g',soir:'Omelette 3 œufs + Champignons + Pain noir 2t.'},
   ]},
-  {id:'S11 🔥',label:'S11 🔥',phase:'m3',meta:'27 juil · 105km · PIC 1',note:'Vélo dimanche obligatoire',days:[
+  {id:'S11 🔥',label:'S11 🔥',phase:'m3',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Omelette 3 œufs + Pain noir 1t.',colla:'Pomme + Amandes 15g',soir:'Cabillaud 180g + Épinards libres (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Cabillaud 180g + Épinards + Riz complet 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Poulet 200g + Riz complet 150g cuits + Brocolis'},
     {j:'Mer',m:'MC',matin:'Flocons 80g + Skyr 150g + Whey 20g + Banane',midi:'Poulet 200g + Riz 150g + Brocolis',colla:'Banane + Cajou 20g',soir:'Dinde hachée 180g + Quinoa 150g cuits + Tomates'},
@@ -1719,7 +1728,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',special:true,matin:'Porridge 100g + Miel 25g + Banane + Whey 30g',midi:'Saumon 150g + Courgettes + Riz 250g cuits',colla:'Barres 2× + Gels 4× (sortie 35km/1500D+)',soir:'Pâtes blanches 300g cuits + Poulet 200g + Coulis tomate'},
     {j:'Dim 🚴',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Pâtes 200g + Poulet 160g',colla:'Skyr 150g',soir:'Omelette 2 œufs + Salade + Pain noir 2t.'},
   ]},
-  {id:'S12 🔥',label:'S12 🔥',phase:'m3',meta:'3 août · 108km · PIC 2',note:'Pic ultime',days:[
+  {id:'S12 🔥',label:'S12 🔥',phase:'m3',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g + Amandes 20g',midi:'Omelette 2 œufs + Salade libre',colla:'Pomme + Amandes 15g',soir:'Poulet 180g + Brocolis libres (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Poulet 180g + Brocolis + Riz 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Dinde 180g + Riz basmati 150g cuits + Épinards'},
     {j:'Mer',m:'MC',matin:'Flocons 80g + Skyr 150g + Whey 20g + Banane',midi:'Dinde 180g + Riz 150g + Épinards',colla:'Banane + Cajou 20g',soir:'Poulet haché 180g + Pâtes 200g cuits + Coulis'},
@@ -1728,7 +1737,7 @@ const agWeeks = [
     {j:'Sam',m:'HC',special:true,matin:'Porridge 100g + Miel 25g + Banane + Whey 30g',midi:'Saumon 150g + Haricots + Riz 250g cuits',colla:'Barres 2× + Gels 4× (sortie 38km/1800D+)',soir:'Pâtes blanches 350g cuits + Bœuf maigre 180g + Coulis'},
     {j:'Dim 🚴',m:'MC',matin:'Pancakes Avoine 80g + 2 Œufs + Whey 20g',midi:'Pâtes 200g + Bœuf 160g',colla:'Skyr 150g',soir:'Omelette 3 œufs + Champignons + Pain noir 2t.'},
   ]},
-  {id:'S13↓',label:'S13↓',phase:'tap',meta:'10 août · 60km · Décharge',note:'',days:[
+  {id:'S13↓',label:'S13↓',phase:'tap',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Omelette 3 œufs + Pain noir 1t.',colla:'Pomme + Amandes 15g',soir:'Thon 130g + Salade + Concombre (LC)'},
     {j:'Mar',m:'LC',matin:'3 Œufs + Pain noir 2t.',midi:'Thon 130g + Salade + Riz 100g cuits (très léger)',colla:'Skyr 150g + Noix 15g',soir:'Poulet 160g + Haricots verts libres (LC)'},
     {j:'Mer',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Poulet 160g + Haricots verts',colla:'Pomme + Amandes 15g',soir:'Cabillaud 180g + Brocolis libres (LC)'},
@@ -1737,7 +1746,7 @@ const agWeeks = [
     {j:'Sam',m:'MC',matin:'Porridge 80g + Banane + Whey 20g',midi:'Saumon 150g + Épinards + Riz 150g cuits',colla:'Skyr 150g + Amandes 15g',soir:'Poulet 180g + Patate douce 180g + Salade'},
     {j:'Dim',m:'LC',matin:'Pancakes Avoine 70g + 2 Œufs',midi:'Poulet 180g + Patate douce 150g',colla:'Skyr 150g',soir:'Omelette 2 œufs + Concombre + Pain noir 1t.'},
   ]},
-  {id:'S14 Taper',label:'S14',phase:'tap',meta:'17 août · 32km',note:'',days:[
+  {id:'S14 Taper',label:'S14',phase:'tap',days:[
     {j:'Lun',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Omelette 2 œufs + Salade libre',colla:'Pomme + Amandes 15g',soir:'Thon 130g + Salade + Concombre (LC)'},
     {j:'Mar',m:'MC',matin:'3 Œufs + Pain noir 2t.',midi:'Thon 130g + Salade + Riz 150g cuits',colla:'Skyr 150g + Noix 15g',soir:'Poulet 160g + Quinoa 150g cuits + Épinards'},
     {j:'Mer',m:'LC',matin:'Skyr 200g + Whey 30g',midi:'Poulet 160g + Quinoa 150g',colla:'Pomme + Amandes 15g',soir:'Cabillaud 180g + Brocolis libres (LC)'},
@@ -1746,7 +1755,7 @@ const agWeeks = [
     {j:'Sam',m:'LC',matin:'Skyr 200g + Whey 30g (prépa matériel)',midi:'Pain noir 2t. + Poulet 130g + Moutarde',colla:'Oléagineux 25g + Fruits',soir:'Pâtes blanches 200g cuits + Poulet 180g + Coulis (début charge)'},
     {j:'Dim',m:'LC',matin:'Pancakes légers Avoine 60g + 2 Œufs',midi:'Pâtes 150g + Poulet 160g',colla:'Skyr 150g',soir:'Omelette 2 œufs + Salade (mental reset)'},
   ]},
-  {id:'S15 🏔️',label:'S15 🏔',phase:'race',meta:'24-28 août — COURSE',note:'⚠️ Protocole carb-loading ultra',days:[
+  {id:'S15 🏔️',label:'S15 🏔',phase:'race',days:[
     {j:'Lun J-4',m:'MC',matin:'3 Œufs + Pain complet 2t. + Café',midi:'Poulet 160g + Riz blanc 180g cuits + Carottes cuites',colla:'Banane + Amandes 20g',soir:'Poulet 160g + Pâtes blanches 200g cuits + Coulis'},
     {j:'Mar J-3',m:'HC',matin:'Porridge blanc 100g + Miel 20g + Banane + 2 Œufs',midi:'Riz blanc 280g cuits + Poulet 160g + Légumes cuits',colla:'Pain blanc 2t. + Confiture 20g + Skyr 150g',soir:'Pâtes blanches 350g cuits + Dinde 160g + Coulis léger'},
     {j:'Mer J-2',m:'HC',special:true,matin:'Porridge blanc 120g + Miel 25g + Banane + Whey 30g + Jus fruit',midi:'Riz blanc 400g cuits + Saumon 150g + Carottes cuites ONLY (zéro fibres crues)',colla:'Pain blanc 2t. + BPC 30g + Jus orange 250ml — objectif 700g CHO',soir:'Pâtes blanches 400g cuits + Bœuf maigre 180g + Coulis clair (peu graisses)'},
@@ -1775,6 +1784,8 @@ const progData = {
         {n:'Dead bug', s:'3×10/c', note:''},
         {n:'Monster walks élastique', s:'3×12/c', note:''},
         {n:'Intrinsèques pied', s:'2×2min/p', note:''},
+        {n:'Short-foot / voûte plantaire', s:'3×30sec/p', note:'Anti-brûlures plantaires'},
+        {n:'Tibialis raises', s:'3×15', note:'Équilibre cheville'},
         {n:'Pallof press', s:'3×10/c', note:''},
       ]},
     ]
@@ -1798,6 +1809,8 @@ const progData = {
         {n:'Fentes inversées chargées', s:'3×12/j', note:''},
         {n:'Dead bug progressif', s:'3×12/c', note:''},
         {n:'Monster walks élastique', s:'4×15/c', note:''},
+        {n:'Short-foot + mobilité hallux', s:'3×30sec/p', note:'Gros orteil · amplitude'},
+        {n:'Descente excentrique (step)', s:'3×10/j', note:'Spécifique D- CCC'},
       ]},
     ]
   },
@@ -1820,6 +1833,8 @@ const progData = {
         {n:'Fentes inversées', s:'3×10/j', note:'Charges réduites'},
         {n:'Dead bug', s:'3×10/c', note:''},
         {n:'Intrinsèques pied', s:'2×2min/p', note:'Maintien'},
+        {n:'Short-foot dynamique', s:'3×40sec/p', note:'Pied · prévention'},
+        {n:'Descente pente répétée', s:'4×30sec', note:'Seasoning quads (repeated-bout)'},
       ]},
     ]
   }
@@ -1953,14 +1968,27 @@ renderWeek();
 /* ════════════════════════════════════════
    AGENDA
 ════════════════════════════════════════ */
-var agCur = (WI >= 0 && WI < agWeeks.length) ? WI : 0;
+var agCur = (WI >= 0 && WI < PLAN_DATA.length) ? WI : 0;
+
+// Mappe une semaine du plan (0..15) vers une trame de repas agWeeks
+function agMealsFor(i){
+  if (i <= 13) return agWeeks[Math.min(i, agWeeks.length - 1)];
+  if (i === 14) return agWeeks[Math.min(13, agWeeks.length - 1)]; // S15 taper -> trame affûtage
+  return agWeeks[agWeeks.length - 1];                              // S16 course -> protocole race
+}
+function agPillClass(phase){
+  if (phase === 'COURSE') return 'race';
+  if (phase === 'TAPER' || phase === 'AFFÛTAGE' || phase === 'DÉCHARGE') return 'tap';
+  return 'm2';
+}
 
 function agBuildNav() {
   var el = document.getElementById('ag-nav');
   if (!el) return;
   var html = '';
-  for (var i = 0; i < agWeeks.length; i++) {
-    html += '<button class="ag-btn' + (i === agCur ? ' active' : '') + '" data-ag="' + i + '">' + agWeeks[i].label + '</button>';
+  for (var i = 0; i < PLAN_DATA.length; i++) {
+    var lbl = 'S' + PLAN_DATA[i].num + (PLAN_DATA[i].phase === 'DÉCHARGE' ? '↓' : '');
+    html += '<button class="ag-btn' + (i === agCur ? ' active' : '') + '" data-ag="' + i + '">' + lbl + '</button>';
   }
   el.innerHTML = html;
 }
@@ -1973,22 +2001,33 @@ function agSet(i) {
 function agRender() {
   var el = document.getElementById('ag-display');
   if (!el) return;
-  var w = agWeeks[agCur];
-  var phaseNames = { m1:'Mois 1', m2:'Mois 2', m3:'Mois 3', tap:'Taper', race:'⚠️ Race Week' };
+  var pw = PLAN_DATA[agCur];
+  if (!pw) return;
+  var vw = (typeof vols !== 'undefined') ? vols[agCur] : null;
+  var meals = agMealsFor(agCur);
   var mc = { LC:'lc', MC:'mc', HC:'hc' };
   var todayInWeek = (agCur === WI);
+  // En-tête depuis PLAN_DATA (dates / volÉq / D+ / phase) — fini les métriques figées (142km, PIC…)
+  var monday = new Date(pw.monday + 'T00:00:00');
+  var sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  var dateRange = monday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) + ' – ' + sunday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+  var volTxt = vw ? (volEq(vw) + 'km éq · +' + (vw.dplus||0) + 'm D+') : '';
+  var sameDays = (meals.days.length === pw.days.length);
   var html = '<div class="ag-head">' +
-    '<div class="ag-htitle">' + w.id + '</div>' +
-    '<div class="ag-hmeta">' + w.meta + '</div>' +
-    (w.note ? '<div class="ag-hmeta" style="color:var(--accent)">' + w.note + '</div>' : '') +
-    '<span class="ag-pill ' + (w.phase==='race'?'race':w.phase) + '">' + (phaseNames[w.phase]||w.phase) + '</span>' +
-    '</div><div class="ag-grid">';
-  for (var di = 0; di < w.days.length; di++) {
-    var d = w.days[di];
-    var isToday = todayInWeek && (di === DI);
+    '<div class="ag-htitle">S' + pw.num + '</div>' +
+    '<div class="ag-hmeta">' + dateRange + (volTxt ? ' · ' + volTxt : '') + '</div>' +
+    '<span class="ag-pill ' + agPillClass(pw.phase) + '">' + pw.phase + '</span>' +
+    '</div>' +
+    '<div class="ag-hmeta" style="margin:-0.3rem 0 0.6rem">Repas = trame type · mode carb LC/MC/HC piloté par la charge du jour</div>' +
+    '<div class="ag-grid">';
+  for (var di = 0; di < meals.days.length; di++) {
+    var d = meals.days[di];
+    // Mode carb : source unique PLAN_DATA quand les jours s'alignent (sem 7j), sinon trame
+    var mode = (sameDays && pw.days[di]) ? dayCarbMode(pw.days[di]) : d.m;
+    var isToday = todayInWeek && sameDays && (di === DI);
     html += '<div class="ag-day' + (d.special?' special':'') + (isToday?' ag-today':'') + '">' +
       '<div class="ag-dhead"><div class="ag-dname">' + d.j + (isToday?' ●':'') + '</div>' +
-      '<span class="badge ' + (mc[d.m]||'mc') + '" style="font-size:0.5rem;padding:1px 5px">' + d.m + '</span></div>' +
+      '<span class="badge ' + (mc[mode]||'mc') + '" style="font-size:0.5rem;padding:1px 5px">' + mode + '</span></div>' +
       '<div class="ag-dbody">' +
       '<div class="ag-meal"><div class="ag-mlbl">🌅</div><div class="ag-mcont">' + d.matin + '</div></div>' +
       '<div class="ag-msep"></div>' +
@@ -4732,11 +4771,26 @@ if (document.readyState === 'loading') {
         });
       }
     } catch(e){}
-    var totalKcal = Math.round(bmr * 1.3 + actKcal);
+    var totalKcal0 = actKcal;
+    // Si aucune séance Garmin enregistrée aujourd'hui : estimer depuis la charge PRÉVUE du plan
+    var planned = 0, mode = 'MC', estimated = false;
+    try {
+      if (typeof PLAN_DATA !== 'undefined' && typeof WI !== 'undefined' && typeof DI !== 'undefined' && PLAN_DATA[WI] && PLAN_DATA[WI].days[DI]) {
+        var pd = PLAN_DATA[WI].days[DI];
+        mode = (typeof dayCarbMode === 'function') ? dayCarbMode(pd) : 'MC';
+        // run ≈ 0.9 kcal/kg/km · D+ ≈ 0.0094 kcal/kg/m · vélo ≈ 16 kcal/km
+        planned = Math.round(weight*(pd.run||0)*0.9 + weight*(pd.dplus||0)*0.0094 + (pd.velo||0)*16);
+      }
+    } catch(e){}
+    var actUsed = actKcal > 0 ? actKcal : planned;
+    estimated = (actKcal === 0 && planned > 0);
+    var totalKcal = Math.round(bmr * 1.3 + actUsed);
+    // Périodisation glucides : HC → plus de glucides (lipides bas), LC → moins (lipides hauts)
+    var fatPct = mode === 'HC' ? 0.22 : mode === 'LC' ? 0.33 : 0.27;
     var pTarget = Math.round(weight * 1.8);
-    var lTarget = Math.round(totalKcal * 0.25 / 9);
+    var lTarget = Math.round(totalKcal * fatPct / 9);
     var gTarget = Math.round((totalKcal - pTarget*4 - lTarget*9) / 4);
-    return {bmr:Math.round(bmr), actKcal:actKcal, kcal:totalKcal, g:gTarget, p:pTarget, l:lTarget, weight:weight};
+    return {bmr:Math.round(bmr), actKcal:actUsed, estimated:estimated, mode:mode, kcal:totalKcal, g:gTarget, p:pTarget, l:lTarget, weight:weight};
   }
 
   // ── Hydratation ──
@@ -4876,7 +4930,7 @@ if (document.readyState === 'loading') {
       '<span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700"><svg class="ic" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="3.5"/></svg> Nutrition du jour</span>' +
       '<span id="nh-newfood" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);border:1px solid var(--accent,#a3e635);border-radius:6px;padding:0.3rem 0.6rem;white-space:nowrap;flex-shrink:0">+ Aliment</span>' +
       '</div>';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:1rem">BMR Mifflin ' + t.bmr + ' kcal' + (t.actKcal>0 ? ' + ' + t.actKcal + ' kcal entraînement' : ' · pas de séance enregistrée') + ' → cible ' + t.kcal + ' kcal</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:1rem">BMR Mifflin ' + t.bmr + ' kcal' + (t.actKcal>0 ? ' + ' + t.actKcal + ' kcal effort' + (t.estimated ? ' (estimé plan)' : ' (réel Garmin)') : ' · repos') + ' → cible ' + t.kcal + ' kcal · mode carb ' + t.mode + '</div>';
 
     // Barres d'apport global
     function macroBar(label, val, goal, unit, color) {
