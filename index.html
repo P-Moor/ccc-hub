@@ -110,6 +110,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .ts-sub{font-size:0.78rem;color:var(--muted);line-height:1.5}
 .ts-done-btn{margin-top:0.6rem;padding:7px 14px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:0.72rem;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;display:inline-block}
 .ts-done-btn.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.ts-tip{margin-top:0.6rem;font-size:0.74rem;line-height:1.5;color:var(--muted);background:var(--accent-dim);border-left:2px solid var(--accent);border-radius:0 6px 6px 0;padding:0.5rem 0.6rem;display:flex;gap:0.4rem;align-items:flex-start}
+.ts-tip svg{flex-shrink:0;margin-top:1px}
 
 /* Meal today */
 .today-meal{display:flex;flex-direction:column;gap:7px}
@@ -1365,7 +1367,9 @@ function ic(name, size, color) {
     statusWarn: '<circle cx="10" cy="10" r="7"/><line x1="10" y1="6" x2="10" y2="11"/><circle cx="10" cy="14" r="0.6" fill="'+stroke+'"/>',
     statusBad: '<circle cx="10" cy="10" r="7"/><line x1="7" y1="7" x2="13" y2="13"/><line x1="13" y1="7" x2="7" y2="13"/>',
     // Étoile
-    star: '<path d="M10 2 L12.4 7.2 L18 7.8 L13.8 11.6 L15 17 L10 14.2 L5 17 L6.2 11.6 L2 7.8 L7.6 7.2 Z"/>'
+    star: '<path d="M10 2 L12.4 7.2 L18 7.8 L13.8 11.6 L15 17 L10 14.2 L5 17 L6.2 11.6 L2 7.8 L7.6 7.2 Z"/>',
+    // Ampoule (tip / conseil)
+    bulb: '<path d="M7 12.5 A5 5 0 1 1 13 12.5 C12.2 13.4 11.5 14.2 11.5 15.5 H8.5 C8.5 14.2 7.8 13.4 7 12.5 Z"/><line x1="8.5" y1="17" x2="11.5" y2="17"/><line x1="9" y1="18.7" x2="11" y2="18.7"/>'
   };
   return s + (P[name] || '') + '</svg>';
 }
@@ -2340,6 +2344,20 @@ function renderCalendar() {
 /* ════════════════════════════════════════
    TODAY TAB
 ════════════════════════════════════════ */
+// Conseil contextuel sous la séance du jour (calé sur le type + profil Pierre)
+function sessionTip(day) {
+  switch (day && day.type) {
+    case 'repos':  return "Le progrès se construit aussi au repos : mobilité hanche/cheville, hydratation, et un peu de soin du hallux.";
+    case 'muscu':  return "Soigne l'excentrique (descente) et la voûte plantaire — c'est ton assurance hallux pour les longues descentes de la CCC.";
+    case 'velo':
+    case 'gravel': return "Cross-training Z2 sans impact : du volume aérobie qui ménage les articulations et le pied.";
+    case 'long':   return "Fuel dès 45 min (~60 g de glucides/h) et marche les montées : tu protèges les quadris pour la fin.";
+    case 'spe':    return "Échauffe-toi pour de vrai, puis qualité avant quantité. Récup complète entre les blocs.";
+    case 'course': return "Jour J. Gère ton allure de départ, mange tôt et régulièrement (80–90 g/h). Tu es prêt.";
+    case 'ef':     return "Allure conversation : si tu ne peux pas parler en phrases, ralentis. Respiration nasale si possible.";
+    default:       return "Écoute tes sensations et ajuste l'intensité selon ta Body Battery du jour.";
+  }
+}
 function renderToday() {
   var wk = getWeekByIdx(WI);
 
@@ -2415,6 +2433,7 @@ function renderToday() {
         '<span class="badge ' + mc3 + '" style="margin-bottom:5px;align-self:flex-start">' + day.m + '</span>' +
         '<div class="ts-title">' + day.s + '</div>' +
         (day.sub ? '<div class="ts-sub">' + day.sub + '</div>' : '') +
+        '<div class="ts-tip">' + ic('bulb', 13, 'var(--accent)') + '<span>' + sessionTip(day) + '</span></div>' +
         '<button class="ts-done-btn' + (isDone3?' done':'') + '" data-done="' + key3 + '">' +
           (isDone3 ? '<svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5ec27a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="4,10 8,14 16,5"/></svg> Séance validée' : 'Marquer comme faite') +
         '</button>' +
