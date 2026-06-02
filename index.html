@@ -141,49 +141,56 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .more-block>summary .more-line{flex:1;height:1px;background:var(--border)}
 .more-inner{padding-top:0.6rem}
 
+/* Carte « Objectifs S{n} » repliable (aperçu mini-barre visible même replié) */
+.gauges-card>summary{list-style:none;cursor:pointer}
+.gauges-card>summary::-webkit-details-marker{display:none}
+.gauges-card .gauges-chevron{transition:transform .2s ease}
+.gauges-card[open] .gauges-chevron{transform:rotate(180deg)}
+.gauges-card[open] .gauges-mini{display:none}
+
 /* ── PLAN ── */
-.phase-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:1rem}
-.phase-seg{padding:7px 5px;border-radius:8px;text-align:center;border:1px solid var(--border)}
+.phase-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:1.2rem}
+.phase-seg{padding:9px 6px;border-radius:8px;text-align:center;border:1px solid var(--border)}
 .m1{background:var(--blue-bg)} .m2{background:var(--green-bg)} .m3{background:var(--orange-bg)} .tap{background:var(--surface2)} .ccc-seg{background:var(--red-bg);border-color:var(--red)}
-.pseg-l{font-family:'Syne',sans-serif;font-weight:700;font-size:0.68rem}
-.pseg-s{font-size:0.56rem;margin-top:2px;opacity:.7}
+.pseg-l{font-family:'Syne',sans-serif;font-weight:700;font-size:0.74rem}
+.pseg-s{font-size:0.62rem;margin-top:3px;opacity:.7}
 .m1 .pseg-l{color:var(--blue)} .m2 .pseg-l{color:var(--green)} .m3 .pseg-l{color:var(--orange)} .tap .pseg-l{color:var(--muted)} .ccc-seg .pseg-l{color:var(--red)}
 
-.vol-row{display:flex;flex-direction:column;margin-bottom:5px}
+.vol-row{display:flex;flex-direction:column;margin-bottom:6px}
 .vol-main{display:flex;align-items:center;gap:8px}
-.vlbl{font-size:0.64rem;color:var(--muted);font-family:'DM Mono',monospace;width:112px;flex-shrink:0}
-.vbar{height:4px;border-radius:2px;background:var(--surface2);flex:1;overflow:hidden}
-.vfill{height:100%;border-radius:2px;background:var(--blue);transition:width .8s ease}
-.vval{font-size:0.66rem;color:var(--text);font-weight:500;width:40px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace}
-.vevt{font-size:0.58rem;color:var(--orange);font-family:'DM Mono',monospace;padding-left:120px;margin-top:1px}
+.vlbl{font-size:0.66rem;color:var(--muted);font-family:'DM Mono',monospace;width:112px;flex-shrink:0}
+.vbar{height:5px;border-radius:3px;background:var(--surface2);flex:1;overflow:hidden}
+.vfill{height:100%;border-radius:3px;background:var(--blue);transition:width .8s ease}
+.vval{font-size:0.68rem;color:var(--text);font-weight:500;width:40px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace}
+.vevt{font-size:0.6rem;color:var(--orange);font-family:'DM Mono',monospace;padding-left:120px;margin-top:1px}
 
-.p-tabs{display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap}
-.p-tab{padding:5px 13px;font-size:0.7rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+.p-tabs{display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap}
+.p-tab{padding:7px 15px;font-size:0.78rem;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Space Grotesk',sans-serif}
 .p-tab.active{background:var(--surface2);color:var(--blue);border-color:var(--blue-bg)}
-.p-wtabs{display:flex;gap:3px;margin-bottom:7px;flex-wrap:wrap}
-.p-wtab{padding:3px 9px;font-size:0.65rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.p-wtabs{display:flex;gap:4px;margin-bottom:9px;flex-wrap:wrap}
+.p-wtab{padding:5px 12px;font-size:0.72rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
 .p-wtab.active{background:var(--surface2);color:var(--text);border-color:var(--border2)}
 
-.day-row{display:grid;grid-template-columns:68px 42px 1fr;gap:7px;align-items:start;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:3px;cursor:pointer;transition:all .12s;user-select:none}
+.day-row{display:grid;grid-template-columns:72px 46px 1fr;gap:9px;align-items:start;padding:11px 13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;margin-bottom:5px;cursor:pointer;transition:all .12s;user-select:none}
 .day-row:hover{border-color:var(--border2)}
 .day-row.special{border-color:#6b4a00;background:#1a1200}
 .day-row.done{opacity:.4}
-.dname{font-size:0.73rem;font-weight:600;display:flex;align-items:center;gap:4px}
-.dcheck{width:14px;height:14px;border:1px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.dname{font-size:0.82rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.dcheck{width:15px;height:15px;border:1px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
 .day-row.done .dcheck{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.stext{font-size:0.73rem;line-height:1.5}
-.ssub{font-size:0.62rem;color:var(--muted);margin-top:1px;line-height:1.4}
+.stext{font-size:0.85rem;line-height:1.5}
+.ssub{font-size:0.72rem;color:var(--muted);margin-top:2px;line-height:1.4}
 
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:6px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px}
-.ctitle{font-size:0.72rem;font-weight:600;margin-bottom:2px}
-.cdesc{font-size:0.63rem;color:var(--muted);line-height:1.5}
-.cwhen{font-size:0.58rem;color:var(--blue);margin-top:5px;padding-top:4px;border-top:1px solid var(--border);font-family:'DM Mono',monospace}
-.bb3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
-.bbc{background:var(--surface2);border-radius:7px;padding:7px;text-align:center;border:1px solid var(--border)}
-.bbr{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700}
-.bbl{font-size:0.57rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
-.bbv{font-size:0.61rem;color:var(--blue);margin-top:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
+.ctitle{font-size:0.8rem;font-weight:600;margin-bottom:3px}
+.cdesc{font-size:0.72rem;color:var(--muted);line-height:1.5}
+.cwhen{font-size:0.64rem;color:var(--blue);margin-top:6px;padding-top:5px;border-top:1px solid var(--border);font-family:'DM Mono',monospace}
+.bb3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.bbc{background:var(--surface2);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)}
+.bbr{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700}
+.bbl{font-size:0.62rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.bbv{font-size:0.66rem;color:var(--blue);margin-top:3px}
 
 /* ── NUTRITION ── */
 .gabarits{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:1rem}
@@ -1050,6 +1057,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <div id="reco-content"></div>
   </div>
 
+  <details class="more-block" open><summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Séance &amp; repas du jour</span><span class="more-line"></span></summary>
+  <div class="more-inner">
   <div class="today-grid">
     <div class="today-block">
       <div class="tb-head"><span>Séance du jour</span><span id="today-sess-badge"></span></div>
@@ -1060,9 +1069,16 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       <div class="tb-body"><div id="today-meal-content"></div></div>
     </div>
   </div>
+  </div>
+  </details>
 
-  <div class="sec sec-first">Cette semaine</div>
+  <details class="more-block" open><summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Cette semaine</span><span class="more-line"></span></summary>
+  <div class="more-inner">
   <div class="week-strip" id="week-strip"></div>
+  </div>
+  </details>
+
+  <div id="gauges-slot"></div>
 
   <details class="more-block" id="today-more">
     <summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Plus de détails — poids & calendrier</span><span class="more-line"></span></summary>
@@ -1095,7 +1111,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
   </div>
   <div class="p-wtabs" id="week-tabs"></div>
   <div id="week-content"></div>
-  <div class="sec">Sessions spé — Menu</div>
+  <details class="more-block"><summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Sessions spé — Menu</span><span class="more-line"></span></summary>
+  <div class="more-inner">
   <div class="cards">
     <div class="card"><div class="ctitle">⚡ VMA</div><div class="cdesc">8×400m ou 6×600m · récup trot 60-90sec</div><div class="cwhen">BB > 75</div></div>
     <div class="card"><div class="ctitle">⛰ Côtes</div><div class="cdesc">8-10×45sec · ou 4×3min longues</div><div class="cwhen">BB > 70</div></div>
@@ -1108,6 +1125,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <div class="bbc"><div class="bbr">60-75</div><div class="bbl">Body Battery</div><div class="bbv">Tempo · Prog.</div></div>
     <div class="bbc"><div class="bbr"><60</div><div class="bbl">Body Battery</div><div class="bbv">Strides → EF</div></div>
   </div>
+  </div>
+  </details>
 </div></div>
 
 <!-- NUTRITION -->
@@ -1983,6 +2002,16 @@ function getAbsOffset(month, weekInMonth) {
   for (var m = 1; m < month; m++) off += months[m].length;
   return off + weekInMonth;
 }
+// Inverse : semaine absolue (0..15) → { month, week } pour sélectionner auto la semaine courante
+function weekToMonth(abs) {
+  var off = 0;
+  for (var m = 1; m <= 4; m++) {
+    var len = months[m] ? months[m].length : 0;
+    if (abs < off + len) return { month: m, week: abs - off };
+    off += len;
+  }
+  return { month: 4, week: Math.max(0, (months[4] ? months[4].length : 1) - 1) };
+}
 
 /* ════════════════════════════════════════
    VOLUME BARS
@@ -2090,12 +2119,12 @@ function renderWeek() {
   }
 })();
 
-renderWeekTabs();
-renderWeek();
-
-/* ════════════════════════════════════════
-   AGENDA
-════════════════════════════════════════ */
+// Sélection initiale = semaine courante (WI) au lieu de Mois 1 / Semaine 1
+(function initPlanCurrentWeek(){
+  var t = (typeof WI !== 'undefined' && WI >= 0) ? weekToMonth(WI) : { month: 1, week: 0 };
+  if (typeof setMonth === 'function') { setMonth(t.month); setWeek(t.week); }
+  else { renderWeekTabs(); renderWeek(); }
+})();
 var agCur = (WI >= 0 && WI < PLAN_DATA.length) ? WI : 0;
 
 // Mappe une semaine du plan (0..15) vers une trame de repas agWeeks
@@ -4244,46 +4273,67 @@ if (document.readyState === 'loading') {
                      week.phase === 'TAPER'    ? 'var(--purple,#a78bfa)' :
                      week.phase === 'COURSE'   ? 'var(--green,#5ec27a)' : 'var(--accent,#a3e635)';
     
-    var html = '<div id="garmin-gauges-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.2rem;margin-top:1rem">';
+    // Helpers mini-barre (aperçu visible quand la carte est repliée)
+    function pctOf(v, g){ var gr = Math.round(g); return gr > 0 ? Math.round(v / gr * 100) : (v > 0 ? 100 : 0); }
+    function colOf(p){ return p >= 100 ? 'var(--green,#5ec27a)' : p >= 60 ? 'var(--accent,#a3e635)' : p >= 30 ? 'var(--orange,#e8a020)' : 'var(--muted,#7a7d85)'; }
+    function miniItem(iconName, value, goal){
+      var p = pctOf(value, goal), pc = Math.min(p, 100), col = colOf(p);
+      return '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:3px">' +
+          ic(iconName, 12, col) +
+          '<span style="font-family:DM Mono,monospace;font-size:0.56rem;color:' + col + '">' + p + '%</span>' +
+        '</div>' +
+        '<div style="height:4px;border-radius:2px;background:var(--border,#242528);overflow:hidden"><div style="width:' + pc + '%;height:100%;background:' + col + ';transition:width .6s ease"></div></div>' +
+      '</div>';
+    }
+    var miniBar = '<div class="gauges-mini" style="display:flex;gap:0.55rem;margin-top:0.75rem">' +
+      miniItem('run', runKm, week.run) +
+      miniItem('bike', veloKm, week.velo) +
+      miniItem('dumbbell', muscuCount, week.muscu) +
+      miniItem('mountain', runDplus, week.dplus) +
+      miniItem('chart', totalEquiv, goalTotalEquiv) +
+    '</div>';
     
-    // En-tête : objectifs semaine S{n} + phase
-    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.3rem;flex-wrap:wrap;gap:0.4rem">';
-    html += '<div style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700"><svg class="ic" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="0.6" fill="currentColor"/></svg> Objectifs S' + weekNum + ' <span id="btn-edit-plan" style="cursor:pointer;font-size:0.8rem;opacity:0.6;margin-left:0.3rem" title="Éditer les volumes de la semaine"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M13 3 L17 7 L7 17 H3 V13 Z"/><line x1="11" y1="5" x2="15" y2="9"/></svg></span></div>';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.68rem;color:' + phaseColor + ';text-transform:uppercase;letter-spacing:0.05em">' + week.phase + ' · ' + week.label + '</div>';
-    html += '</div>';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:1rem">semaine du ' + monday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) + ' au ' + sunday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) + '</div>';
-    
-    // Les 3 jauges discipline + 1 volume (en équivalent course)
-    html += '<div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-around;align-items:center">';
-    html += ring('run', 'Course', runKm, week.run, 'km', false);
-    html += ring('bike', 'Vélo', veloKm, week.velo, 'km', false);
-    html += ring('dumbbell', 'Muscu', muscuCount, week.muscu, 'x', false);
-    html += ring('mountain', 'D+', runDplus, week.dplus, 'm', false);
-    html += ring('chart', 'Volume éq.', totalEquiv, goalTotalEquiv, 'km', true);
-    html += '</div>';
-    html += '<div style="text-align:center;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);margin-top:0.6rem">Volume = km équivalent course · vélo converti en ratio 3:1 (' + veloKm.toFixed(0) + 'km vélo ≈ ' + veloEquiv.toFixed(0) + 'km course)</div>';
-    
-    // Ratio de charge course/vélo (en équivalent course)
+    // Corps déplié : date + bouton éditer + anneaux complets + ratio de charge
+    var full = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin:0 0 0.5rem">semaine du ' + monday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) + ' au ' + sunday.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) + '</div>';
+    full += '<div style="display:flex;justify-content:flex-end;margin-bottom:0.6rem"><span id="btn-edit-plan" style="cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068)" title="Éditer les volumes de la semaine"><svg class="ic" viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M13 3 L17 7 L7 17 H3 V13 Z"/><line x1="11" y1="5" x2="15" y2="9"/></svg> Éditer les volumes</span></div>';
+    full += '<div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-around;align-items:center">';
+    full += ring('run', 'Course', runKm, week.run, 'km', false);
+    full += ring('bike', 'Vélo', veloKm, week.velo, 'km', false);
+    full += ring('dumbbell', 'Muscu', muscuCount, week.muscu, 'x', false);
+    full += ring('mountain', 'D+', runDplus, week.dplus, 'm', false);
+    full += ring('chart', 'Volume éq.', totalEquiv, goalTotalEquiv, 'km', true);
+    full += '</div>';
+    full += '<div style="text-align:center;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);margin-top:0.6rem">Volume = km équivalent course · vélo converti en ratio 3:1 (' + veloKm.toFixed(0) + 'km vélo ≈ ' + veloEquiv.toFixed(0) + 'km course)</div>';
     if (totalEquiv > 0) {
-      html += '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border,#242528)">';
-      html += '<div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:0.4rem">';
-      html += '<span style="display:flex;align-items:center;gap:0.3rem">CHARGE ' + ic('run', 12) + ratioRun + '%</span><span style="display:flex;align-items:center;gap:0.3rem">' + ic('bike', 12) + ratioVelo + '% CHARGE</span></div>';
-      html += '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--border,#242528)">';
-      html += '<div style="width:' + ratioRun + '%;background:var(--accent,#a3e635)"></div>';
-      html += '<div style="width:' + ratioVelo + '%;background:var(--blue,#5ba3e8)"></div>';
-      html += '</div>';
+      full += '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border,#242528)">';
+      full += '<div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:0.4rem">';
+      full += '<span style="display:flex;align-items:center;gap:0.3rem">CHARGE ' + ic('run', 12) + ratioRun + '%</span><span style="display:flex;align-items:center;gap:0.3rem">' + ic('bike', 12) + ratioVelo + '% CHARGE</span></div>';
+      full += '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--border,#242528)">';
+      full += '<div style="width:' + ratioRun + '%;background:var(--accent,#a3e635)"></div>';
+      full += '<div style="width:' + ratioVelo + '%;background:var(--blue,#5ba3e8)"></div>';
+      full += '</div>';
       if (week.dplus > 0 || runDplus > 0) {
-        html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-top:0.5rem">D+ course : +' + Math.round(runDplus) + 'm / objectif ' + (week.dplus || 0) + 'm</div>';
+        full += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-top:0.5rem">D+ course : +' + Math.round(runDplus) + 'm / objectif ' + (week.dplus || 0) + 'm</div>';
       }
-      html += '</div>';
+      full += '</div>';
     }
     
-    html += '</div>';
+    var html = '<details id="garmin-gauges-card" class="gauges-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;margin-top:1rem">' +
+      '<summary style="padding:1rem 1.2rem">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">' +
+          '<span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.4rem"><svg class="ic" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="0.6" fill="currentColor"/></svg> Objectifs S' + weekNum + '</span>' +
+          '<span style="display:flex;align-items:center;gap:0.6rem"><span style="font-family:DM Mono,monospace;font-size:0.66rem;color:' + phaseColor + ';text-transform:uppercase;letter-spacing:0.05em">' + week.phase + '</span><span class="gauges-chevron" style="display:inline-flex;color:var(--muted,#5e6068)"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,8 10,13 15,8"/></svg></span></span>' +
+        '</div>' +
+        miniBar +
+      '</summary>' +
+      '<div style="padding:0 1.2rem 1.2rem">' + full + '</div>' +
+    '</details>';
     
-    // Les jauges hebdo vont dans « Plus de détails » (bloc repliable de la vue Aujourd'hui).
-    var moreInner = document.querySelector('#today-more .more-inner');
-    if (moreInner) {
-      moreInner.insertAdjacentHTML('afterbegin', html);
+    // Carte « Objectifs » = son propre bloc repliable dans le flux (aperçu mini visible quand replié).
+    var slot = document.getElementById('gauges-slot');
+    if (slot) {
+      slot.innerHTML = html;
     } else {
       var anchor = document.getElementById('garmin-activities-card') || document.getElementById('forme-block');
       if (anchor) anchor.insertAdjacentHTML('afterend', html);
