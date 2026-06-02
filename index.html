@@ -3659,10 +3659,32 @@ if (document.readyState === 'loading') {
     var txt = await askClaude(prompt, opts);
     // Nettoyer d'éventuelles balises markdown résiduelles
     txt = txt.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-    return JSON.parse(txt);
+    try {
+      return JSON.parse(txt);
+    } catch (e) {
+      // Filet 1 : extraire le 1er objet JSON présent dans le texte
+      var m = txt.match(/\{[\s\S]*\}/);
+      if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+      // Filet 2 : échec total → erreur PROPRE qui transporte le texte brut
+      var err = new Error('Réponse IA illisible (JSON invalide)');
+      err.raw = txt;
+      throw err;
+    }
   }
   window.askClaude = askClaude;
   window.askClaudeJSON = askClaudeJSON;
+
+  // ── Persona coach unifiée : SOURCE UNIQUE partagée par fil du jour, reco du matin et chat ──
+  window.CCC_PERSONA =
+    "Tu es le coach sportif IA de Pierre, ultra-traileur de 37 ans (Jupille, Belgique) préparant la CCC (101 km / 6100 m D+, 28 août 2026, dossard confirmé). " +
+    "PHYSIO : hallux limitus/rigidus aux 2 gros orteils ; sujet à la goutte (éviter purines, alcool, excès de fructose au repos — la cerise est favorable) ; " +
+    "brûlures plantaires en longue distance dès le km 25-35 = problème de chaussettes (éviter la compression excessive type Compresport ; solution validée = Injinji + BV Sport). " +
+    "Seuil lactique 169 bpm / 4:19 par km / 392 W, VO2max ~54. Transformation 105→72 kg, vise 71-72 kg. " +
+    "NUTRITION : carb cycling (high-carb sur séances longues/qualité, low-carb sur repos/easy), 1 jour de jeûne par semaine sur un jour de repos. " +
+    "Whey par défaut = Nutripure Isolat Native. Nutrition de course : Näak (partenaire CCC), Maurten, SIS, Overstim's, Aptonia. " +
+    "MATÉRIEL : rotation Adizero Boston 13 / Trabuco Max 3 / Salomon S/Lab Ultra 2 / Brooks Cascadia. NE JAMAIS recommander Hoka. " +
+    "STYLE : ferme mais bienveillant ; tu le challenges et restes franc même si c'est inconfortable ; tu contres la culpabilité d'entraînement par les DONNÉES objectives (HRV, Body Battery, readiness, TSB), jamais par des généralités rassurantes ; tu valides seulement quand c'est mérité. " +
+    "Tu réponds en français, concis et actionnable, tu tutoies Pierre. JAMAIS de conseil médical alarmant.";
 
   async function loadGarmin(forceRefresh) {
     var url = localStorage.getItem('garmin_url');
@@ -4113,8 +4135,8 @@ if (document.readyState === 'loading') {
       }
     } catch(e){}
 
-    var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg. " +
-      "Ferme mais bienveillant, tu contres la culpabilité par les données. Tutoie-le.";
+    var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+      " CONTEXTE D'USAGE : conseil du matin sur la séance du jour, au vu des données de forme.";
     var prompt = "Données forme de Pierre ce matin :\n" + JSON.stringify(ctx,null,2) +
       "\n\nRédige UN conseil court (2-3 phrases max, percutant) sur sa séance du jour au vu de ces données. " +
       "Pas de titre, pas de markdown, juste le conseil direct. Réfère-toi à sa séance prévue si pertinent.";
@@ -5654,6 +5676,7 @@ if (document.readyState === 'loading') {
   } else { start(); }
 
   window.__nutriGetFoods = getFoods;
+  window.__nutriTargets = computeTargets;
   window.__renderNutrition = function(){
     render();
     // Le fil du jour réagit aux changements de repas/hydratation
@@ -5830,6 +5853,12 @@ if (document.readyState === 'loading') {
    ════════════════════════════════════════════════════════════ */
 (function(){
   var thread = [];  // historique conversation {role, text}
+  var THREAD_KEY = 'ccc_coach_thread';
+  var pendingAction = null;  // action en attente de validation
+
+  function loadThread(){ try { var a=JSON.parse(localStorage.getItem(THREAD_KEY)||'[]'); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+  function saveThread(){ try { localStorage.setItem(THREAD_KEY, JSON.stringify(thread.slice(-60))); } catch(e){} }
+  function pushThread(role, text){ thread.push({role:role, text:text}); saveThread(); }
 
   function todayKey() {
     var d = new Date();
@@ -5839,46 +5868,72 @@ if (document.readyState === 'loading') {
   // Construit un résumé compact des données réelles pour donner du contexte à l'IA
   function buildContext() {
     var ctx = { date: todayKey() };
-    // Garmin
+    try { if (typeof DAYS_LEFT !== 'undefined') ctx.jours_avant_CCC = DAYS_LEFT; } catch(e){}
+
+    // ── Garmin : forme du jour + activités réalisées des 7 derniers jours ──
     try {
       var g = window.__garminData;
       if (g) {
-        ctx.garmin = {
+        ctx.garmin_jour = {
           body_battery: g.body_battery && g.body_battery.current,
           hrv: g.hrv && g.hrv.value,
-          sleep_h: g.sleep && g.sleep.duration_hours,
+          sommeil_h: g.sleep && g.sleep.duration_hours,
           readiness: g.readiness && g.readiness.score,
           rhr: g.rhr,
-          last_activity: g.activities && g.activities[0] ? (g.activities[0].name+' '+(g.activities[0].distance_km||'')+'km') : null
+          tsb: g.training_load && g.training_load.tsb
         };
-      }
-    } catch(e){}
-    // Semaine de plan courante
-    try {
-      if (typeof PLAN_DATA !== 'undefined') {
-        var start = new Date('2026-05-11');
-        var now = new Date(todayKey());
-        var wi = Math.floor((now - start)/(7*864e5));
-        if (wi >= 0 && wi < PLAN_DATA.length) {
-          var w = PLAN_DATA[wi];
-          var real = (window.__weekRealized ? window.__weekRealized() : {run:0,velo:0,dplus:0,muscu:0});
-          ctx.semaine = { num: w.num, phase: w.phase,
-            prevu_run_km: w.days.reduce(function(a,d){return a+(d.run||0);},0),
-            prevu_velo_km: w.days.reduce(function(a,d){return a+(d.velo||0);},0),
-            realise_run_km: real.run, realise_velo_km: real.velo,
-            realise_dplus: real.dplus, realise_muscu: real.muscu };
+        if (g.activities && g.activities.length) {
+          ctx.garmin_realise_7j = g.activities.slice(0, 7).map(function(a){
+            return { date:a.date, nom:(a.name||a.type||''), km:a.distance_km||0, min:a.duration_min||a.duration_minutes||0, dplus:a.elevation_gain_m||a.dplus||null };
+          });
         }
       }
     } catch(e){}
-    // Nutrition du jour
+
+    // ── Plan : séance du jour, séance de demain, semaine jour par jour (prévu) + réalisé (totaux) ──
+    try {
+      if (typeof PLAN_DATA !== 'undefined' && typeof WI !== 'undefined' && typeof DI !== 'undefined' && PLAN_DATA[WI]) {
+        var w = PLAN_DATA[WI];
+        var stripHtml = function(s){ return String(s==null?'':s).replace(/<[^>]*>/g,'').trim(); };
+        var dayObj = function(d){ if(!d) return null; return {
+          jour:d.label||d.j||'', type:d.type||'', titre:stripHtml(d.title)||'', sub:stripHtml(d.sub)||'',
+          run_km:d.run||0, velo_km:d.velo||0, dplus_m:d.dplus||0, muscu:!!d.muscu,
+          mode_carb:(typeof dayCarbMode==='function'?dayCarbMode(d):'MC')
+        }; };
+        // jour courant
+        if (w.days && w.days[DI]) ctx.seance_du_jour = dayObj(w.days[DI]);
+        // demain (jour suivant, éventuellement début de semaine suivante)
+        var tom = (w.days && w.days[DI+1]) ? w.days[DI+1] : (PLAN_DATA[WI+1] && PLAN_DATA[WI+1].days ? PLAN_DATA[WI+1].days[0] : null);
+        if (tom) ctx.seance_demain = dayObj(tom);
+        // réalisé (totaux semaine)
+        var real = (window.__weekRealized ? window.__weekRealized() : {run:0,velo:0,dplus:0,muscu:0});
+        ctx.semaine = {
+          num:w.num, phase:w.phase,
+          prevu_run_km: (w.days||[]).reduce(function(a,d){return a+(d.run||0);},0),
+          prevu_velo_km: (w.days||[]).reduce(function(a,d){return a+(d.velo||0);},0),
+          prevu_dplus_m: (w.days||[]).reduce(function(a,d){return a+(d.dplus||0);},0),
+          realise_run_km: real.run, realise_velo_km: real.velo, realise_dplus_m: real.dplus, realise_muscu: real.muscu,
+          jours: (w.days||[]).map(function(d){ return { j:d.label||d.j||'', type:d.type||'', run:d.run||0, velo:d.velo||0, dplus:d.dplus||0, titre:stripHtml(d.title) }; })
+        };
+      }
+    } catch(e){}
+
+    // ── Nutrition : consommé du jour + CIBLE (computeTargets) + restant ──
     try {
       var meals = JSON.parse(localStorage.getItem('ccc_meals2_'+todayKey()) || '{}');
       var kcal=0, g_=0, p_=0, l_=0;
       Object.keys(meals).forEach(function(s){ (meals[s]||[]).forEach(function(it){ kcal+=it.kcal||0; g_+=it.g||0; p_+=it.p||0; l_+=it.l||0; }); });
-      ctx.nutrition_jour = { kcal: Math.round(kcal), glucides: Math.round(g_), proteines: Math.round(p_), lipides: Math.round(l_) };
+      var conso = { kcal:Math.round(kcal), glucides:Math.round(g_), proteines:Math.round(p_), lipides:Math.round(l_) };
+      ctx.nutrition_consomme = conso;
+      var t = null; try { t = (window.__nutriTargets && window.__nutriTargets()) || null; } catch(e){}
+      if (t) {
+        ctx.nutrition_cible = { kcal:t.kcal, glucides:t.g, proteines:t.p, lipides:t.l, mode_carb:t.mode, objectif:t.objective, deficit_kcal:t.deficit||0 };
+        ctx.nutrition_restant = { kcal:Math.max(0,t.kcal-conso.kcal), glucides:Math.max(0,t.g-conso.glucides), proteines:Math.max(0,t.p-conso.proteines), lipides:Math.max(0,t.l-conso.lipides) };
+      }
     } catch(e){}
     try { ctx.nutrition_objectif = localStorage.getItem('ccc_nutri_objective') || 'prepa'; } catch(e){}
-    // Poids & composition
+
+    // ── Poids & composition ──
     try {
       var wlog = JSON.parse(localStorage.getItem('ccc_weight_log') || '[]');
       if (wlog.length) {
@@ -5886,19 +5941,11 @@ if (document.readyState === 'loading') {
         var last = wlog[wlog.length-1];
         var prev = wlog.length > 1 ? wlog[wlog.length-2] : null;
         var phaseNote = '';
-        try {
-          if (typeof PLAN_DATA !== 'undefined') {
-            var s2 = new Date('2026-05-11'), n2 = new Date(todayKey());
-            var wi2 = Math.floor((n2 - s2)/(7*864e5));
-            if (wi2 >= 0 && wi2 < PLAN_DATA.length) phaseNote = PLAN_DATA[wi2].phase;
-          }
-        } catch(e){}
+        try { if (typeof PLAN_DATA !== 'undefined' && typeof WI !== 'undefined' && PLAN_DATA[WI]) phaseNote = PLAN_DATA[WI].phase; } catch(e){}
         ctx.poids = {
-          dernier_kg: last.kg,
-          tour_taille_cm: last.tw || null,
+          dernier_kg: last.kg, tour_taille_cm: last.tw || null,
           variation_kg: prev ? Math.round((last.kg - prev.kg)*10)/10 : null,
-          cible_kg: 71,
-          phase_cycle: phaseNote,
+          cible_kg: 71, phase_cycle: phaseNote,
           note: 'Interpréter selon la phase : en charge une hausse = surtout flotte/glycogène ; en décharge la balance dit vrai. Lire la tendance, pas le chiffre du jour.'
         };
       }
@@ -5906,11 +5953,10 @@ if (document.readyState === 'loading') {
     return ctx;
   }
 
-  var SYSTEM = "Tu es le coach sportif IA de Pierre, ultra-traileur de 37 ans préparant la CCC (101km/6100m D+, 28 août 2026). " +
-    "Profil : hallux limitus aux 2 pieds, sujet à la goutte (éviter purines/alcool/fructose au repos), transformation 105→72kg, vise 71-72kg pour la CCC. " +
-    "Carb cycling, 1 jour de jeûne/semaine. Pas de Hoka. Whey = Nutripure Isolat Native. " +
-    "Tu es ferme mais bienveillant. Tu contres la culpabilité par les données objectives (HRV, Body Battery, readiness). " +
-    "Tu réponds en français, de façon concise et actionnable. Tu tutoies Pierre.";
+  var SYSTEM = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+    " CONTEXTE D'USAGE : tu réponds dans le chat de suivi. Tiens compte de la conversation récente fournie (continuité, ne repars pas de zéro). " +
+    "Tu disposes du contexte réel (séance du jour et de demain, semaine jour par jour prévu/réalisé, forme Garmin, cibles et restant nutrition) : APPUIE-TOI dessus concrètement. " +
+    "Quand Pierre demande une modification (repas, hydratation, volume), tu la PROPOSES via le champ action : tu n'écris jamais 'c'est fait', c'est l'app qui applique APRÈS validation de Pierre.";
 
   function addMsg(role, text, isLoading) {
     var div = document.createElement('div');
@@ -5933,15 +5979,23 @@ if (document.readyState === 'loading') {
     if (!msg) return;
     input.value = '';
     addMsg('user', msg);
-    thread.push({role:'user', text:msg});
+    pushThread('user', msg);
     var loading = addMsg('assistant', '', true);
 
-    // Prompt : on demande à l'IA soit une réponse conseil, soit une action structurée
+    // ── MÉMOIRE : on embarque les derniers échanges (hors message courant) dans le prompt ──
+    // (Le backend /api/claude prend un prompt unique ; la version "messages array" = item backend.)
     var ctx = buildContext();
+    var hist = thread.slice(0, -1).slice(-8);
+    var histStr = hist.length
+      ? "\n\nConversation récente (du plus ancien au plus récent) :\n" +
+        hist.map(function(m){ return (m.role==='user'?'Pierre':'Coach') + " : " + m.text; }).join("\n")
+      : "";
+
     var prompt = "Contexte actuel (données réelles de Pierre) :\n" + JSON.stringify(ctx, null, 2) +
-      "\n\nDemande de Pierre : \"" + msg + "\"\n\n" +
+      histStr +
+      "\n\nDernier message de Pierre : \"" + msg + "\"\n\n" +
       "Réponds par un objet JSON avec ces champs :\n" +
-      "- \"reply\" (string) : ta réponse en français à afficher à Pierre (conseil, confirmation, analyse)\n" +
+      "- \"reply\" (string) : ta réponse en français à afficher à Pierre (conseil, analyse). Si tu proposes une modification, explique-la SANS dire qu'elle est faite (elle attend sa validation).\n" +
       "- \"action\" (string|null) : si Pierre demande une modification concrète, l'une de : \"add_meal\", \"set_water\", \"adjust_volume\", null sinon\n" +
       "- \"params\" (object) : paramètres de l'action.\n" +
       "  · add_meal → {slot:'petitdej'|'preseance'|'dejeuner'|'postseance'|'encas'|'diner', items:[{n:nom, g:glucides, p:proteines, l:lipides, kcal:calories}]}\n" +
@@ -5953,15 +6007,85 @@ if (document.readyState === 'loading') {
       var res = await askClaudeJSON(prompt, { system: SYSTEM, max_tokens: 1024 });
       loading.remove();
       addMsg('assistant', res.reply || '(pas de réponse)');
-      thread.push({role:'assistant', text:res.reply||''});
-      if (res.action) applyAction(res.action, res.params || {});
+      pushThread('assistant', res.reply || '');
+      if (res.action) proposeAction(res.action, res.params || {});
     } catch(err) {
       loading.remove();
-      addMsg('assistant', '⚠️ Erreur : ' + err.message + '\n\nVérifie que le backend est connecté (⚙ Garmin) et que la route IA est déployée.');
+      if (err && err.raw) {
+        var fb = String(err.raw).replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+        addMsg('assistant', fb || '(réponse illisible)');
+        pushThread('assistant', fb || '');
+      } else {
+        addMsg('assistant', '⚠️ Erreur : ' + err.message + '\n\nVérifie que le backend est connecté (⚙ Garmin) et que la route IA est déployée.');
+      }
     }
   }
 
-  // Applique une action structurée renvoyée par l'IA
+  // ── Résumé lisible d'une action proposée ──
+  function actionSummary(action, params) {
+    if (action === 'add_meal' && params.items) {
+      var slot = params.slot || 'encas';
+      var lines = params.items.map(function(it){ return '· ' + (it.n||'?') + ' — ' + (it.kcal||0) + ' kcal (G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0) + ')'; });
+      var tot = params.items.reduce(function(a,it){ return a+(it.kcal||0); }, 0);
+      return { titre:'Ajouter à « ' + slot + ' »', detail: lines.join('\n') + '\nTotal : ' + tot + ' kcal' };
+    }
+    if (action === 'set_water' && params.litres != null) {
+      return { titre:'Mettre l\'hydratation du jour', detail:'→ ' + params.litres + ' L' };
+    }
+    if (action === 'adjust_volume' && params.semaine) {
+      var parts = [];
+      if (params.run != null) parts.push('run ' + params.run + ' km');
+      if (params.velo != null) parts.push('vélo ' + params.velo + ' km');
+      return { titre:'Ajuster le volume S' + params.semaine, detail:'→ ' + (parts.join(' · ') || '(aucun changement)') };
+    }
+    return null;
+  }
+
+  // ── Carte de PROPOSITION : Pierre valide avant toute écriture ──
+  function proposeAction(action, params) {
+    var sum = actionSummary(action, params);
+    if (!sum) return;  // action inconnue → on ne propose rien
+    pendingAction = { action:action, params:params };
+
+    var card = document.createElement('div');
+    card.style.cssText = 'align-self:flex-start;max-width:90%;background:var(--surface2);border:1px dashed var(--accent);border-radius:12px;padding:0.8rem 0.9rem;font-size:0.82rem;line-height:1.5;color:var(--text)';
+    var head = document.createElement('div');
+    head.style.cssText = 'font-family:DM Mono,monospace;font-size:0.62rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem';
+    head.textContent = '✋ Proposition · à valider';
+    var body = document.createElement('div');
+    body.innerHTML = '<b>' + sum.titre + '</b><br>' + sum.detail.replace(/\n/g,'<br>');
+    var btns = document.createElement('div');
+    btns.style.cssText = 'display:flex;gap:0.5rem;margin-top:0.7rem';
+    var ok = document.createElement('button');
+    ok.textContent = '✓ Appliquer';
+    ok.style.cssText = 'background:var(--accent);color:#0f0f10;border:none;border-radius:8px;padding:0.45rem 0.9rem;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif';
+    var no = document.createElement('button');
+    no.textContent = 'Annuler';
+    no.style.cssText = 'background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.9rem;font-size:0.78rem;cursor:pointer;font-family:DM Sans,sans-serif';
+
+    function settle(txt, col) {
+      btns.remove();
+      var done = document.createElement('div');
+      done.style.cssText = 'margin-top:0.6rem;font-family:DM Mono,monospace;font-size:0.7rem;color:' + col;
+      done.textContent = txt;
+      card.appendChild(done);
+      card.style.borderStyle = 'solid';
+      pendingAction = null;
+    }
+    ok.addEventListener('click', function(){
+      if (!pendingAction) return;
+      var applied = applyAction(pendingAction.action, pendingAction.params);
+      settle(applied ? '✓ Appliqué' : '⚠️ Rien à appliquer', applied ? 'var(--green,#5ec27a)' : 'var(--orange,#e8a020)');
+    });
+    no.addEventListener('click', function(){ settle('✕ Annulé', 'var(--muted,#7a7d85)'); });
+
+    btns.appendChild(ok); btns.appendChild(no);
+    card.appendChild(head); card.appendChild(body); card.appendChild(btns);
+    var t = document.getElementById('coach-thread');
+    t.appendChild(card); t.scrollTop = t.scrollHeight;
+  }
+
+  // Applique une action structurée APRÈS validation. Retourne true si quelque chose a été écrit.
   function applyAction(action, params) {
     var dk = todayKey();
     if (action === 'add_meal' && params.items) {
@@ -5976,13 +6100,15 @@ if (document.readyState === 'loading') {
       localStorage.setItem(key, JSON.stringify(meals));
       try { if (window.CCCSync) CCCSync.pushDay(dk); } catch(e){}
       if (window.__renderNutrition) window.__renderNutrition();
-      addMsg('assistant', '✓ Repas ajouté au tracker (' + params.items.length + ' aliment·s dans ' + slot + ').');
+      pushThread('assistant', '(repas ajouté : ' + params.items.length + ' aliment·s dans ' + slot + ')');
+      return true;
     }
     else if (action === 'set_water' && params.litres != null) {
       localStorage.setItem('ccc_water_'+dk, String(params.litres));
       try { if (window.CCCSync) CCCSync.pushDay(dk); } catch(e){}
       if (window.__renderNutrition) window.__renderNutrition();
-      addMsg('assistant', '✓ Hydratation mise à jour : ' + params.litres + ' L.');
+      pushThread('assistant', '(hydratation réglée à ' + params.litres + ' L)');
+      return true;
     }
     else if (action === 'adjust_volume' && params.semaine) {
       var ov = {};
@@ -5993,7 +6119,10 @@ if (document.readyState === 'loading') {
       localStorage.setItem('ccc_plan_overrides', JSON.stringify(ov));
       try { if (window.CCCSync) CCCSync.pushState('plan_overrides', ov); } catch(e){}
       addMsg('assistant', '✓ Volume S' + params.semaine + ' ajusté. Recharge la page pour voir le plan mis à jour.');
+      pushThread('assistant', '(volume S' + params.semaine + ' ajusté)');
+      return true;
     }
+    return false;
   }
 
   var QUICK = [
@@ -6020,9 +6149,28 @@ if (document.readyState === 'loading') {
         quick.appendChild(b);
       });
     }
-    // Message d'accueil
-    if (document.getElementById('coach-thread') && !document.getElementById('coach-thread').children.length) {
-      addMsg('assistant', "Salut Pierre ! Je suis ton coach. Dicte-moi un repas, une séance, demande-moi un conseil ou une analyse de ta forme. J'ai accès à tes données Garmin, ton plan et ta nutrition du jour.");
+    // Restauration du fil persistant (ou message d'accueil si vide)
+    var threadEl = document.getElementById('coach-thread');
+    if (threadEl && !threadEl.children.length) {
+      thread = loadThread();
+      if (thread.length) {
+        thread.forEach(function(m){
+          // on n'affiche pas les notes système internes entre parenthèses techniques
+          if (m.role === 'assistant' && /^\((repas ajouté|hydratation réglée|volume S)/.test(m.text)) return;
+          addMsg(m.role, m.text || '');
+        });
+        var hint = document.createElement('div');
+        hint.style.cssText = 'align-self:center;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted);margin:0.2rem 0 0.4rem;cursor:pointer';
+        hint.textContent = '🗑 effacer le fil';
+        hint.addEventListener('click', function(){
+          thread = []; try { localStorage.removeItem(THREAD_KEY); } catch(e){}
+          threadEl.innerHTML = '';
+          addMsg('assistant', "Salut Pierre ! Je suis ton coach. Dicte-moi un repas, une séance, demande-moi un conseil ou une analyse de ta forme. J'ai accès à tes données Garmin, ton plan et ta nutrition du jour.");
+        });
+        threadEl.appendChild(hint);
+      } else {
+        addMsg('assistant', "Salut Pierre ! Je suis ton coach. Dicte-moi un repas, une séance, demande-moi un conseil ou une analyse de ta forme. J'ai accès à tes données Garmin, ton plan et ta nutrition du jour.");
+      }
     }
   }
 
@@ -6146,9 +6294,9 @@ if (document.readyState === 'loading') {
     if (rf) rf.addEventListener('click', function(){ updateFil(true); });
   }
 
-  var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg, carb cycling. " +
-    "Tu suis sa journée en direct et lui donnes UN message court et vivant adapté au moment présent : l'inviter à manger/boire s'il est en retard, " +
-    "féliciter ou cadrer après une séance, rappeler la récup, etc. Ton chaleureux, direct, tutoiement. JAMAIS de conseil médical alarmant.";
+  var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+    " CONTEXTE D'USAGE : tu suis sa journée en direct et donnes UN message court et vivant adapté au moment présent " +
+    "(inviter à manger/boire si en retard, féliciter ou cadrer après une séance, rappeler la récup). Ton chaleureux et direct.";
 
   async function updateFil(force) {
     var slot = document.getElementById('fil-du-jour');
