@@ -3469,10 +3469,34 @@ if (document.readyState === 'loading') {
     var txt = await askClaude(prompt, opts);
     // Nettoyer d'éventuelles balises markdown résiduelles
     txt = txt.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-    return JSON.parse(txt);
+    try {
+      return JSON.parse(txt);
+    } catch (e) {
+      // Filet 1 : tenter d'extraire le 1er objet JSON présent dans le texte
+      var m = txt.match(/\{[\s\S]*\}/);
+      if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+      // Filet 2 : échec total → on renvoie une erreur PROPRE qui transporte le texte brut
+      // (les appelants peuvent l'afficher tel quel plutôt que de planter)
+      var err = new Error('Réponse IA illisible (JSON invalide)');
+      err.raw = txt;
+      throw err;
+    }
   }
   window.askClaude = askClaude;
   window.askClaudeJSON = askClaudeJSON;
+
+  // ── Persona coach unifiée : SOURCE UNIQUE partagée par le fil du jour, la reco du matin et le chat ──
+  // (Évite la divergence des 3 anciens system prompts. Enrichie des contraintes du profil.)
+  window.CCC_PERSONA =
+    "Tu es le coach sportif IA de Pierre, ultra-traileur de 37 ans (Jupille, Belgique) préparant la CCC (101 km / 6100 m D+, 28 août 2026, dossard confirmé). " +
+    "PHYSIO : hallux limitus/rigidus aux 2 gros orteils ; sujet à la goutte (éviter purines, alcool, excès de fructose au repos — la cerise est favorable) ; " +
+    "brûlures plantaires en longue distance dès le km 25-35 = problème de chaussettes (éviter la compression excessive type Compresport ; solution validée = Injinji + BV Sport). " +
+    "Seuil lactique 169 bpm / 4:19 par km / 392 W, VO2max ~54. Transformation 105→72 kg, vise 71-72 kg pour la course. " +
+    "NUTRITION : carb cycling (high-carb sur séances longues/qualité, low-carb sur repos/easy), 1 jour de jeûne par semaine sur un jour de repos. " +
+    "Whey par défaut = Nutripure Isolat Native. Nutrition de course : Näak (partenaire CCC), Maurten, SIS, Overstim's, Aptonia. " +
+    "MATÉRIEL : rotation Adizero Boston 13 / Trabuco Max 3 / Salomon S/Lab Ultra 2 / Brooks Cascadia. NE JAMAIS recommander Hoka. " +
+    "STYLE : ferme mais bienveillant ; tu le challenges et restes franc même si c'est inconfortable ; tu contres la culpabilité d'entraînement par les DONNÉES objectives (HRV, Body Battery, readiness), jamais par des généralités rassurantes ; tu valides seulement quand c'est mérité. " +
+    "Tu réponds en français, concis et actionnable, tu tutoies Pierre. JAMAIS de conseil médical alarmant.";
 
   async function loadGarmin(forceRefresh) {
     var url = localStorage.getItem('garmin_url');
@@ -3900,8 +3924,8 @@ if (document.readyState === 'loading') {
       }
     } catch(e){}
 
-    var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg. " +
-      "Ferme mais bienveillant, tu contres la culpabilité par les données. Tutoie-le.";
+    var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+      " CONTEXTE D'USAGE : tu rédiges le conseil du matin sur la séance du jour, au vu de ses données de forme.";
     var prompt = "Données forme de Pierre ce matin :\n" + JSON.stringify(ctx,null,2) +
       "\n\nRédige UN conseil court (2-3 phrases max, percutant) sur sa séance du jour au vu de ces données. " +
       "Pas de titre, pas de markdown, juste le conseil direct. Réfère-toi à sa séance prévue si pertinent.";
@@ -5671,11 +5695,8 @@ if (document.readyState === 'loading') {
     return ctx;
   }
 
-  var SYSTEM = "Tu es le coach sportif IA de Pierre, ultra-traileur de 37 ans préparant la CCC (101km/6100m D+, 28 août 2026). " +
-    "Profil : hallux limitus aux 2 pieds, sujet à la goutte (éviter purines/alcool/fructose au repos), transformation 105→72kg, vise 71-72kg pour la CCC. " +
-    "Carb cycling, 1 jour de jeûne/semaine. Pas de Hoka. Whey = Nutripure Isolat Native. " +
-    "Tu es ferme mais bienveillant. Tu contres la culpabilité par les données objectives (HRV, Body Battery, readiness). " +
-    "Tu réponds en français, de façon concise et actionnable. Tu tutoies Pierre.";
+  var SYSTEM = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+    " CONTEXTE D'USAGE : tu réponds aux messages de Pierre dans le chat. Tiens compte de la conversation récente fournie pour assurer la continuité (ne repars pas de zéro à chaque message).";
 
   function addMsg(role, text, isLoading) {
     var div = document.createElement('div');
@@ -5703,8 +5724,16 @@ if (document.readyState === 'loading') {
 
     // Prompt : on demande à l'IA soit une réponse conseil, soit une action structurée
     var ctx = buildContext();
+    // MÉMOIRE : on renvoie les derniers échanges (hors message courant) pour la continuité.
+    // Plafonné à 6 messages (~3 échanges) pour borner le coût en tokens.
+    var hist = thread.slice(0, -1).slice(-6);
+    var histStr = hist.length
+      ? "\n\nConversation récente (du plus ancien au plus récent) :\n" +
+        hist.map(function(m){ return (m.role==='user'?'Pierre':'Coach') + " : " + m.text; }).join("\n")
+      : "";
     var prompt = "Contexte actuel (données réelles de Pierre) :\n" + JSON.stringify(ctx, null, 2) +
-      "\n\nDemande de Pierre : \"" + msg + "\"\n\n" +
+      histStr +
+      "\n\nDernier message de Pierre : \"" + msg + "\"\n\n" +
       "Réponds par un objet JSON avec ces champs :\n" +
       "- \"reply\" (string) : ta réponse en français à afficher à Pierre (conseil, confirmation, analyse)\n" +
       "- \"action\" (string|null) : si Pierre demande une modification concrète, l'une de : \"add_meal\", \"set_water\", \"adjust_volume\", null sinon\n" +
@@ -5722,7 +5751,14 @@ if (document.readyState === 'loading') {
       if (res.action) applyAction(res.action, res.params || {});
     } catch(err) {
       loading.remove();
-      addMsg('assistant', '⚠️ Erreur : ' + err.message + '\n\nVérifie que le backend est connecté (⚙ Garmin) et que la route IA est déployée.');
+      if (err && err.raw) {
+        // L'IA a bien répondu mais pas en JSON valide : on affiche quand même son texte brut
+        var fb = String(err.raw).replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+        addMsg('assistant', fb || '(réponse illisible)');
+        thread.push({role:'assistant', text:fb||''});
+      } else {
+        addMsg('assistant', '⚠️ Erreur : ' + err.message + '\n\nVérifie que le backend est connecté (⚙ Garmin) et que la route IA est déployée.');
+      }
     }
   }
 
@@ -5911,9 +5947,9 @@ if (document.readyState === 'loading') {
     if (rf) rf.addEventListener('click', function(){ updateFil(true); });
   }
 
-  var SYS = "Tu es le coach de Pierre, ultra-traileur préparant la CCC (28 août 2026). Hallux limitus, sujet goutte, vise 71-72kg, carb cycling. " +
-    "Tu suis sa journée en direct et lui donnes UN message court et vivant adapté au moment présent : l'inviter à manger/boire s'il est en retard, " +
-    "féliciter ou cadrer après une séance, rappeler la récup, etc. Ton chaleureux, direct, tutoiement. JAMAIS de conseil médical alarmant.";
+  var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
+    " CONTEXTE D'USAGE : tu suis sa journée en direct et lui donnes UN message court et vivant adapté au moment présent " +
+    "(l'inviter à manger/boire s'il est en retard, féliciter ou cadrer après une séance, rappeler la récup, etc.). Ton chaleureux et direct.";
 
   async function updateFil(force) {
     var slot = document.getElementById('fil-du-jour');
