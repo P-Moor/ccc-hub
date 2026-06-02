@@ -488,6 +488,32 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .mc-cell.has-session.today::after { background: var(--accent); }
 .mc-cell.has-session.done::after { background: var(--green); }
 
+/* ── JOURNAL (historique consultable) ── */
+#journal-cal .mc-cell.future { color: var(--border2); cursor: default; }
+#journal-cal .mc-cell.future:hover { background: transparent; }
+#journal-cal .mc-cell.has-data::after {
+  content: ''; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); position: absolute; bottom: 3px;
+}
+#journal-cal .mc-cell.sel {
+  background: var(--accent-dim); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
+}
+#journal-cal .mc-cell.sel.has-data::after { background: var(--accent); }
+.jd-date { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.6rem; text-transform: capitalize; }
+.jd-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 1rem; }
+.jd-empty { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; padding: 1.4rem 0; }
+.jd-slot { margin-bottom: 0.7rem; }
+.jd-slot:last-child { margin-bottom: 0; }
+.jd-slot-h { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; margin-bottom: 0.25rem; }
+.jd-item { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.72rem; color: var(--text); padding: 3px 0; border-bottom: 1px solid var(--border); }
+.jd-item:last-child { border-bottom: none; }
+.jd-item .q { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.6rem; }
+.jd-item .k { font-family: 'DM Mono', monospace; color: var(--muted); white-space: nowrap; }
+.jd-tot { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--border2); }
+.jd-chip { font-family: 'DM Mono', monospace; font-size: 0.6rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 7px; color: var(--muted); }
+.jd-chip b { color: var(--text); font-weight: 600; }
+
 /* Adjust today-hero for clock */
 .today-hero { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; }
 
@@ -1029,6 +1055,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <button class="sn" id="sn-agenda"     data-tab="agenda"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><line x1="2" y1="8" x2="18" y2="8"/><line x1="7" y1="2" x2="7" y2="5"/><line x1="13" y1="2" x2="13" y2="5"/><line x1="6" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="14" y2="12"/><line x1="6" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="14" y2="15"/></svg></span><span class="sn-lbl">Agenda</span></button>
     <button class="sn" id="sn-renfo"      data-tab="renfo"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="4" y2="10"/><rect x="4" y="7" width="2" height="6" rx="1"/><line x1="6" y1="10" x2="14" y2="10"/><rect x="14" y="7" width="2" height="6" rx="1"/><line x1="16" y1="10" x2="19" y2="10"/><rect x="3" y="8.5" width="1" height="3" rx="0.5"/><rect x="16" y="8.5" width="1" height="3" rx="0.5"/></svg></span><span class="sn-lbl">Renfo</span></button>
     <button class="sn" id="sn-coach"      data-tab="coach"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/><circle cx="7" cy="8.5" r="0.8" fill="currentColor"/><circle cx="10" cy="8.5" r="0.8" fill="currentColor"/><circle cx="13" cy="8.5" r="0.8" fill="currentColor"/></svg></span><span class="sn-lbl">Coach</span></button>
+    <button class="sn" id="sn-journal"    data-tab="journal"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4 C8 2.5 5 2.5 3 3.2 V16 C5 15.3 8 15.3 10 16.8"/><path d="M10 4 C12 2.5 15 2.5 17 3.2 V16 C15 15.3 12 15.3 10 16.8"/><line x1="10" y1="4" x2="10" y2="16.8"/></svg></span><span class="sn-lbl">Journal</span></button>
   </nav>
   <div class="sb-foot">
     <button id="theme-toggle" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:0.5rem;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;margin-bottom:0.6rem;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:all .15s">
@@ -1265,6 +1292,13 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <textarea id="coach-input" rows="2" placeholder="Ex : j'ai mangé 2 œufs et du skyr ce matin · ajoute 15km mardi · comment je me sens aujourd'hui ?" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.7rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:0.85rem;resize:none"></textarea>
     <button id="coach-send" style="background:var(--accent);border:none;color:#0f0f10;width:44px;height:44px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="16" x2="10" y2="4"/><polyline points="5,9 10,4 15,9"/></svg></button>
   </div>
+</div></div>
+
+<!-- JOURNAL (historique consultable) -->
+<div class="panel" id="panel-journal"><div class="inner">
+  <div class="ptitle">Journal <span class="ptitle-sub">historique · repas &amp; hydratation</span></div>
+  <div id="journal-cal"></div>
+  <div id="journal-day"></div>
 </div></div>
 
 </main>
@@ -6497,6 +6531,7 @@ if (document.readyState === 'loading') {
       try { if (window.__renderGauges) window.__renderGauges(); } catch(e){}
       try { if (window.__renderWeight) window.__renderWeight(); } catch(e){}
       try { if (window.__updateFilDuJour) window.__updateFilDuJour(false); } catch(e){}
+      try { if (window.__renderJournal) window.__renderJournal(); } catch(e){}
     }
   }
 
@@ -7164,6 +7199,169 @@ if (document.readyState === 'loading') {
     t.addEventListener('click', function(){ open=!open; try{ localStorage.setItem(KEY, open?'1':'0'); }catch(e){} apply(); });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   JOURNAL — historique consultable (LECTURE SEULE)
+   Calendrier mensuel : jours avec données surlignés/cliquables.
+   Clic sur un jour → récap repas par créneau + macros + eau.
+   Lit ccc_meals2_{date} et ccc_water_{date} (déjà synchro serveur via CCCSync).
+════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var JOURS  = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var DOW    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var SLOTS  = [
+    ['petitdej',  '🌅 Petit-déj'],
+    ['preseance', '⚡ Pré-séance'],
+    ['dej',       '🍽️ Déjeuner'],
+    ['postseance','💪 Post-séance'],
+    ['encas',     '🍎 Encas'],
+    ['diner',     '🌙 Dîner'],
+    ['boissons',  '🥤 Boissons']
+  ];
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function dkOf(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function todayDk(){ return dkOf(new Date()); }
+
+  var now = new Date();
+  var jY = now.getFullYear(), jM = now.getMonth();
+  var jSel = todayDk();
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function dayMeals(dk){ try { var s = localStorage.getItem('ccc_meals2_' + dk); if (s) return JSON.parse(s); } catch(e){} return {}; }
+  function dayWater(dk){ var w = localStorage.getItem('ccc_water_' + dk); return (w != null && w !== '' && w !== '0') ? w : null; }
+  function hasData(dk){
+    var m = dayMeals(dk);
+    for (var k in m){ if (m[k] && m[k].length) return true; }
+    return dayWater(dk) != null;
+  }
+
+  function renderCal(){
+    var el = document.getElementById('journal-cal'); if (!el) return;
+    var first = new Date(jY, jM, 1);
+    var dim = new Date(jY, jM+1, 0).getDate();
+    var sd = first.getDay(); sd = sd === 0 ? 6 : sd - 1;
+    var tdk = todayDk();
+
+    var h = '<div class="mini-cal"><div class="mc-head">' +
+      '<div class="mc-month">' + MONTHS[jM] + ' ' + jY + '</div>' +
+      '<div class="mc-nav">' +
+        '<button class="mc-arrow" data-jcal="-1">‹</button>' +
+        '<button class="mc-arrow" data-jcal="1">›</button>' +
+      '</div></div><div class="mc-grid">';
+    for (var i = 0; i < 7; i++) h += '<div class="mc-dh">' + DOW[i] + '</div>';
+
+    var prevLast = new Date(jY, jM, 0).getDate();
+    for (var i = 0; i < sd; i++) h += '<div class="mc-cell other">' + (prevLast - sd + i + 1) + '</div>';
+
+    for (var day = 1; day <= dim; day++){
+      var dk = jY + '-' + pad(jM+1) + '-' + pad(day);
+      var future = dk > tdk;
+      var cls = ['mc-cell'];
+      if (future) cls.push('future');
+      if (dk === tdk) cls.push('today');
+      if (dk === jSel) cls.push('sel');
+      if (!future && hasData(dk)) cls.push('has-data');
+      var attr = future ? '' : ' data-jday="' + dk + '"';
+      h += '<div class="' + cls.join(' ') + '"' + attr + '>' + day + '</div>';
+    }
+
+    var total = sd + dim;
+    var padCells = (7 - (total % 7)) % 7;
+    for (var i = 1; i <= padCells; i++) h += '<div class="mc-cell other">' + i + '</div>';
+
+    h += '</div></div>';
+    el.innerHTML = h;
+  }
+
+  function fmtDate(dk){
+    var p = dk.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return JOURS[d.getDay()] + ' ' + (+p[2]) + ' ' + MONTHS[+p[1]-1] + ' ' + p[0];
+  }
+
+  function renderDay(){
+    var el = document.getElementById('journal-day'); if (!el) return;
+    var dk = jSel;
+    var meals = dayMeals(dk);
+    var water = dayWater(dk);
+
+    var tG = 0, tP = 0, tL = 0, tK = 0, any = false;
+    var body = '';
+    SLOTS.forEach(function(s){
+      var arr = meals[s[0]] || [];
+      if (!arr.length) return;
+      any = true;
+      body += '<div class="jd-slot"><div class="jd-slot-h">' + s[1] + '</div>';
+      arr.forEach(function(it){
+        var g = it.g||0, p = it.p||0, l = it.l||0, k = it.kcal||0;
+        tG += g; tP += p; tL += l; tK += k;
+        body += '<div class="jd-item"><span>' + esc(it.food) + ' <span class="q">' + esc(it.qty) + '</span></span>' +
+                '<span class="k">' + Math.round(k) + ' kcal</span></div>';
+      });
+      body += '</div>';
+    });
+
+    var h = '<div class="jd-date">' + esc(fmtDate(dk)) + '</div>';
+
+    if (!any && water == null){
+      h += '<div class="jd-card"><div class="jd-empty">Aucune donnée enregistrée ce jour-là.</div></div>';
+      el.innerHTML = h;
+      return;
+    }
+
+    h += '<div class="jd-card">' + body +
+      '<div class="jd-tot">' +
+        '<span class="jd-chip"><b>' + Math.round(tK) + '</b> kcal</span>' +
+        '<span class="jd-chip">Gluc <b>' + Math.round(tG) + '</b> g</span>' +
+        '<span class="jd-chip">Prot <b>' + Math.round(tP) + '</b> g</span>' +
+        '<span class="jd-chip">Lip <b>' + Math.round(tL) + '</b> g</span>' +
+        (water != null ? '<span class="jd-chip">💧 Eau <b>' + esc(water) + '</b> L</span>' : '') +
+      '</div></div>';
+    el.innerHTML = h;
+  }
+
+  function render(){ renderCal(); renderDay(); }
+  window.__renderJournal = render;
+
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document.body){
+      if (t.hasAttribute){
+        if (t.hasAttribute('data-jcal')){
+          var dir = parseInt(t.getAttribute('data-jcal'), 10);
+          jM += dir;
+          if (jM < 0){ jM = 11; jY--; }
+          if (jM > 11){ jM = 0; jY++; }
+          renderCal();
+          return;
+        }
+        if (t.hasAttribute('data-jday')){
+          jSel = t.getAttribute('data-jday');
+          render();
+          return;
+        }
+        if (t.hasAttribute('data-tab') && t.getAttribute('data-tab') === 'journal'){
+          // Onglet ouvert : on tire les données serveur puis on rafraîchit
+          setTimeout(function(){
+            try { if (window.CCCSync && CCCSync.reconcile) CCCSync.reconcile(); } catch(e){}
+            render();
+          }, 50);
+          return;
+        }
+      }
+      t = t.parentNode;
+    }
+  });
+
+  function init(){ render(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
 </script>
