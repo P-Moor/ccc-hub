@@ -1287,6 +1287,8 @@ function ic(name, size, color) {
     trophy: '<path d="M6 3 H14 V7 A4 4 0 0 1 6 7 Z"/><path d="M6 4 H3.5 V6 A2.5 2.5 0 0 0 6 8.5"/><path d="M14 4 H16.5 V6 A2.5 2.5 0 0 1 14 8.5"/><line x1="10" y1="11" x2="10" y2="14"/><path d="M7 17 H13 L12.5 14 H7.5 Z"/>',
     // Lever de soleil (petit-déj)
     sunrise: '<path d="M3 15 H17"/><path d="M6 15 A4 4 0 0 1 14 15"/><line x1="10" y1="4" x2="10" y2="7"/><line x1="4" y1="8" x2="5.5" y2="9.5"/><line x1="16" y1="8" x2="14.5" y2="9.5"/>',
+    // Soleil plein (midi)
+    sun: '<circle cx="10" cy="10" r="3.4"/><line x1="10" y1="1.5" x2="10" y2="3.5"/><line x1="10" y1="16.5" x2="10" y2="18.5"/><line x1="1.5" y1="10" x2="3.5" y2="10"/><line x1="16.5" y1="10" x2="18.5" y2="10"/><line x1="4" y1="4" x2="5.4" y2="5.4"/><line x1="14.6" y1="14.6" x2="16" y2="16"/><line x1="16" y1="4" x2="14.6" y2="5.4"/><line x1="5.4" y1="14.6" x2="4" y2="16"/>',
     // Pomme (encas/fruit)
     apple: '<path d="M10 6 C7 4 4 6 4.5 10 C5 14 8 16 10 16 C12 16 15 14 15.5 10 C16 6 13 4 10 6 Z"/><path d="M10 6 C10 4 11 3 13 3"/>',
     // Engrenage (réglages)
@@ -2318,7 +2320,7 @@ function renderToday() {
     if (!wk) {
       heroEl.innerHTML = '<div class="today-hero">' +
         '<div><div class="th-label">Statut</div>' +
-        '<div class="th-title">' + (WI < 0 ? 'Plan démarre le 18 mai 2026' : 'CCC terminé 🏆') + '</div></div>' +
+        '<div class="th-title">' + (WI < 0 ? 'Plan démarre le 18 mai 2026' : 'CCC terminé ' + ic('trophy',18,'var(--accent)')) + '</div></div>' +
         '<div class="live-clock"><div class="lc-time" id="lc-time">--:--:--</div><div class="lc-date" id="lc-date">—</div></div>' +
         '</div>';
     } else {
@@ -2327,7 +2329,7 @@ function renderToday() {
       for (var i = 0; i < wk.days.length; i++) { if (done[WI + '-' + i]) doneCount++; }
       heroEl.innerHTML = '<div class="today-hero">' +
         '<div>' +
-        '<div class="th-label">📍 Semaine ' + (WI+1) + ' sur ' + vols.length + '</div>' +
+        '<div class="th-label">' + ic('pin',12) + ' Semaine ' + (WI+1) + ' sur ' + vols.length + '</div>' +
         '<div class="th-title">' + wk.w + '</div>' +
         '<div class="th-sub">' + doneCount + '/' + wk.days.length + ' séances validées</div>' +
         '<div class="th-pills">' +
@@ -2403,13 +2405,13 @@ function renderToday() {
       var mc4 = agDay.m === 'LC' ? 'lc' : agDay.m === 'HC' ? 'hc' : 'mc';
       mealEl.innerHTML = '<div class="today-meal">' +
         '<span class="badge ' + mc4 + '" style="margin-bottom:5px;align-self:flex-start">' + agDay.m + '</span>' +
-        '<div class="tm-row"><div class="tm-label">🌅 Matin</div><div class="tm-val">' + agDay.matin + '</div></div>' +
+        '<div class="tm-row"><div class="tm-label">' + ic('sunrise',12) + ' Matin</div><div class="tm-val">' + agDay.matin + '</div></div>' +
         '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">☀️ Midi</div><div class="tm-val">' + agDay.midi + '</div></div>' +
+        '<div class="tm-row"><div class="tm-label">' + ic('sun',12) + ' Midi</div><div class="tm-val">' + agDay.midi + '</div></div>' +
         '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">🍎 Collation</div><div class="tm-val">' + agDay.colla + '</div></div>' +
+        '<div class="tm-row"><div class="tm-label">' + ic('apple',12) + ' Collation</div><div class="tm-val">' + agDay.colla + '</div></div>' +
         '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">🌙 Soir</div><div class="tm-val">' + agDay.soir + '</div></div>' +
+        '<div class="tm-row"><div class="tm-label">' + ic('moon',12) + ' Soir</div><div class="tm-val">' + agDay.soir + '</div></div>' +
         '</div>';
     } else {
       mealEl.innerHTML = '<div style="color:var(--muted);font-size:0.68rem">Données indisponibles.</div>';
@@ -3630,14 +3632,14 @@ if (document.readyState === 'loading') {
     }
     
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.6rem;margin-top:0.7rem">';
-    if (leadKey !== 'bb') html += metric('🔋', 'Body Battery', bb.current, '/100', (bb.highest != null ? 'max ' + bb.highest : null), null, 'bb');
-    html += metric('❤️', 'HRV', hrv.value, 'ms', hrv.status || null, null, 'hrv');
-    html += metric('😴', 'Sommeil', sleepVal, '', sleepExtra || null, null, 'sleep');
-    html += metric('💓', 'RHR', data.rhr, 'bpm', null, null, 'rhr');
-    if (read.score != null && leadKey !== 'readiness') html += metric('🎯', 'Readiness', read.score, '/100', read.level || null, null, 'readiness');
-    if (stress.avg != null) html += metric('😰', 'Stress', stress.avg, '/100', stress.max != null ? 'max ' + stress.max : null, null, 'stress');
-    if (tl.tsb != null) html += metric('📈', 'TSB', Math.round(tl.tsb), '', tl.status || null, null, 'tsb');
-    if (vo2.running != null) html += metric('🫁', 'VO2max', vo2.running.toFixed(1), '', 'running', null, 'vo2max');
+    if (leadKey !== 'bb') html += metric(ic('battery',13), 'Body Battery', bb.current, '/100', (bb.highest != null ? 'max ' + bb.highest : null), null, 'bb');
+    html += metric(ic('heart',13), 'HRV', hrv.value, 'ms', hrv.status || null, null, 'hrv');
+    html += metric(ic('moon',13), 'Sommeil', sleepVal, '', sleepExtra || null, null, 'sleep');
+    html += metric(ic('pulse',13), 'RHR', data.rhr, 'bpm', null, null, 'rhr');
+    if (read.score != null && leadKey !== 'readiness') html += metric(ic('target',13), 'Readiness', read.score, '/100', read.level || null, null, 'readiness');
+    if (stress.avg != null) html += metric(ic('stress',13), 'Stress', stress.avg, '/100', stress.max != null ? 'max ' + stress.max : null, null, 'stress');
+    if (tl.tsb != null) html += metric(ic('chart',13), 'TSB', Math.round(tl.tsb), '', tl.status || null, null, 'tsb');
+    if (vo2.running != null) html += metric(ic('lung',13), 'VO2max', vo2.running.toFixed(1), '', 'running', null, 'vo2max');
     html += '</div>';
     
     container.innerHTML = leadHtml + html;
@@ -4278,9 +4280,13 @@ if (document.readyState === 'loading') {
     
     html += '</div>';
     
-    var anchor = document.getElementById('garmin-activities-card') || document.getElementById('forme-block');
-    if (anchor) {
-      anchor.insertAdjacentHTML('afterend', html);
+    // Les jauges hebdo vont dans « Plus de détails » (bloc repliable de la vue Aujourd'hui).
+    var moreInner = document.querySelector('#today-more .more-inner');
+    if (moreInner) {
+      moreInner.insertAdjacentHTML('afterbegin', html);
+    } else {
+      var anchor = document.getElementById('garmin-activities-card') || document.getElementById('forme-block');
+      if (anchor) anchor.insertAdjacentHTML('afterend', html);
     }
   }
   
@@ -5270,8 +5276,7 @@ if (document.readyState === 'loading') {
 
     html += '</div>';
 
-    var anchor = document.getElementById('garmin-gauges-card') ||
-                 document.getElementById('garmin-activities-card') ||
+    var anchor = document.getElementById('garmin-activities-card') ||
                  document.getElementById('forme-block');
     if (anchor) { anchor.insertAdjacentHTML('afterend', html); attachHandlers(); }
   }
@@ -5445,8 +5450,7 @@ if (document.readyState === 'loading') {
     var tries = 0;
     var iv = setInterval(function(){
       tries++;
-      var anchor = document.getElementById('garmin-gauges-card') ||
-                   document.getElementById('garmin-activities-card') ||
+      var anchor = document.getElementById('garmin-activities-card') ||
                    document.getElementById('forme-block');
       if (anchor || tries > 20) { clearInterval(iv); render(); }
     }, 300);
@@ -5477,7 +5481,6 @@ if (document.readyState === 'loading') {
   var CARDS = [
     'forme-block',
     'garmin-activities-card',
-    'garmin-gauges-card',
     'nutri-hydra-card'
   ];
 
