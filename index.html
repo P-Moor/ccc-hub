@@ -1031,6 +1031,13 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .wkc-shop-item{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;color:var(--text)}
 .wkc-shop-item.checked{opacity:0.45;text-decoration:line-through}
 
+/* Cartes activité cliquables → vue détail */
+.act-row:hover{background:var(--surface2,#1c1d21)}
+.act-row:active{opacity:0.7}
+.act-row:hover .act-go,.act-row:active .act-go{background:var(--accent,#a3e635);color:#0f0f10}
+#act-detail-overlay{animation:adFade .18s ease}
+@keyframes adFade{from{opacity:0}to{opacity:1}}
+
 </style>
 </head>
 <body>
@@ -4239,7 +4246,7 @@ if (document.readyState === 'loading') {
     
     acts.forEach(function(a, i) {
       var borderStyle = i < acts.length - 1 ? 'border-bottom:1px solid var(--border,#242528);' : '';
-      html += '<div style="display:flex;gap:0.9rem;align-items:flex-start;padding:0.8rem 0;' + borderStyle + '">';
+      html += '<div class="act-row" data-act-idx="' + i + '" style="display:flex;gap:0.9rem;align-items:flex-start;padding:0.8rem 0;cursor:pointer;border-radius:8px;transition:background .12s;' + borderStyle + '">';
       
       // Colonne 1 — carré date
       html += dateSquare(a.date);
@@ -4248,7 +4255,7 @@ if (document.readyState === 'loading') {
       html += '<div style="flex:1 1 auto;min-width:0">' +
               '<div style="font-size:0.9rem;font-weight:600;color:var(--text,#e8e9ea)">' + (a.name || a.type || 'Activité') + '</div>' +
               '<div style="font-family:DM Mono,monospace;font-size:0.68rem;color:var(--muted,#5e6068);margin-top:0.15rem">' + (a.type || '') + (a.elevation_gain ? ' · +' + a.elevation_gain + 'm D+' : '') + '</div>' +
-              '<div style="font-size:0.75rem;line-height:1.4;color:var(--accent,#a3e635);margin-top:0.4rem;font-style:italic;opacity:0.85">💬 ' + activityComment(a) + '</div>' +
+              '<div style="font-size:0.75rem;line-height:1.4;color:var(--accent,#a3e635);margin-top:0.4rem;font-style:italic;opacity:0.85;display:flex;align-items:flex-start;gap:0.35rem">' + ic('chat',13,'var(--accent,#a3e635)') + '<span>' + activityComment(a) + '</span></div>' +
               '</div>';
       
       // Colonne 3 — stats
@@ -4258,8 +4265,13 @@ if (document.readyState === 'loading') {
               '<div style="color:var(--muted,#5e6068)">' + (a.avg_hr || '–') + ' bpm</div>' +
               '</div>';
       
+      // Colonne 4 — chevron rond (affordance « cliquable »)
+      html += '<div class="act-go" style="flex:0 0 auto;align-self:center;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--accent,#a3e635);display:flex;align-items:center;justify-content:center;color:var(--accent,#a3e635);transition:all .12s"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,5 13,10 8,15"/></svg></div>';
+      
       html += '</div>';
     });
+    
+    html += '<div data-act-history="1" style="text-align:center;margin-top:0.9rem;cursor:pointer"><span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:DM Mono,monospace;font-size:0.68rem;color:var(--accent,#a3e635);padding:0.5rem 0.95rem;border:1px solid var(--accent,#a3e635);border-radius:8px">Voir tout l\'historique <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,5 13,10 8,15"/></svg></span></div>';
     
     html += '</div>';
     
@@ -7511,6 +7523,294 @@ if (document.readyState === 'loading') {
   function init(){ render(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+</script>
+<script>
+/* ═══ VUE DÉTAIL ACTIVITÉ (niveau Strava) — module autonome ═══ */
+(function(){
+  "use strict";
+
+  function pad2(n){ return n<10 ? '0'+n : ''+n; }
+  function num(v){ return (v==null||!isFinite(v)) ? null : v; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function ICON(name,size,color){ return (typeof window.ic==='function') ? window.ic(name,size,color) : ''; }
+
+  function fmtPace(s){ if(s==null||!isFinite(s)||s<=0) return '–'; s=Math.round(s); return Math.floor(s/60)+':'+pad2(s%60); }
+  function fmtDurMin(min){ if(min==null||!isFinite(min)) return '–'; var t=Math.round(min*60),h=Math.floor(t/3600),m=Math.floor((t%3600)/60),s=t%60; return h>0 ? h+'h'+pad2(m) : m+':'+pad2(s); }
+  function fmtSec(s){ if(s==null||!isFinite(s)) return '–'; s=Math.round(s); var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60; return h>0 ? h+'h'+pad2(m) : m+':'+pad2(x); }
+
+  var MONTHS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var JOURS=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  function dateFr(s){ var p=(s||'').split('-'); if(p.length<3) return s||''; var d=new Date(+p[0],+p[1]-1,+p[2]); var jr=isNaN(d)?'':JOURS[d.getDay()]+' '; return jr+(+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0]; }
+
+  function typeIcon(t){ t=(t||'').toLowerCase(); if(t.indexOf('cycl')>=0||t.indexOf('ride')>=0||t.indexOf('bik')>=0||t.indexOf('gravel')>=0) return 'bike'; if(t.indexOf('strength')>=0||t.indexOf('muscu')>=0) return 'dumbbell'; return 'run'; }
+  function typeLabel(t){ var x=(t||'').toLowerCase(); if(x.indexOf('trail')>=0) return 'Trail'; if(x.indexOf('treadmill')>=0) return 'Tapis'; if(x.indexOf('gravel')>=0) return 'Gravel'; if(x.indexOf('cycl')>=0||x.indexOf('ride')>=0||x.indexOf('bik')>=0) return 'Vélo'; if(x.indexOf('strength')>=0||x.indexOf('muscu')>=0) return 'Renfo'; if(x.indexOf('run')>=0||x.indexOf('cours')>=0) return 'Course'; return t||'Activité'; }
+
+  var ZC={1:'var(--blue,#5ba3e8)',2:'var(--green,#5ec27a)',3:'var(--accent,#a3e635)',4:'var(--orange,#e8a020)',5:'var(--red,#ef4444)'};
+
+  var SVG_BACK='<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="16" y1="10" x2="5" y2="10"/><polyline points="10,5 5,10 10,15"/></svg>';
+  var SVG_WAVE='<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M2 10 C3.5 6 6 6 7.5 10 C9 14 11.5 14 13 10 C14 7.2 15.5 7 17.5 9"/></svg>';
+
+  function dsample(arr,maxN){ if(!arr||arr.length<=maxN) return arr?arr.slice():[]; var out=[],step=arr.length/maxN; for(var i=0;i<maxN;i++) out.push(arr[Math.floor(i*step)]); out.push(arr[arr.length-1]); return out; }
+
+  function chartLine(xs,ys,opts){
+    opts=opts||{}; var W=320,H=opts.h||84,pL=3,pR=3,pT=8,pB=6;
+    var n=Math.min(xs.length,ys.length); if(n<2) return '';
+    var valid=[]; for(var k=0;k<n;k++){ if(ys[k]!=null&&isFinite(ys[k])) valid.push(ys[k]); }
+    if(valid.length<2) return '';
+    var mn=Math.min.apply(null,valid),mx=Math.max.apply(null,valid),rng=(mx-mn)||1;
+    var x0=xs[0],x1=xs[n-1],rX=(x1-x0)||1;
+    function PX(x){ return pL+(x-x0)/rX*(W-pL-pR); }
+    function PY(y){ var t=(y-mn)/rng; if(opts.invert) t=1-t; return pT+(1-t)*(H-pT-pB); }
+    var d='',st=false;
+    for(var j=0;j<n;j++){ if(ys[j]==null||!isFinite(ys[j])) continue; d+=(st?'L':'M')+PX(xs[j]).toFixed(1)+' '+PY(ys[j]).toFixed(1)+' '; st=true; }
+    var col=opts.color||'var(--accent,#a3e635)',fill='';
+    if(opts.area){ var d2=d+'L'+PX(xs[n-1]).toFixed(1)+' '+(H-pB)+' L'+PX(xs[0]).toFixed(1)+' '+(H-pB)+' Z'; fill='<path d="'+d2+'" fill="'+col+'" opacity="0.16"/>'; }
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:'+H+'px;display:block">'+fill+'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+  }
+
+  function naBlock(msg){ return '<div style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--muted,#5e6068);background:var(--surface,#16171a);border:1px dashed var(--border2,#2a2b30);border-radius:10px;padding:0.9rem;text-align:center">'+esc(msg)+'</div>'; }
+
+  function statTile(label,value,unit){
+    return '<div style="background:var(--surface2,#1c1d21);border:1px solid var(--border,#242528);border-radius:10px;padding:0.7rem 0.5rem;text-align:center">'+
+      '<div style="font-family:DM Mono,monospace;font-size:1.1rem;font-weight:500;color:var(--text,#e8e9ea);line-height:1.1">'+value+(unit?'<span style="font-size:0.58rem;color:var(--muted,#5e6068);margin-left:1px">'+unit+'</span>':'')+'</div>'+
+      '<div style="font-family:Syne,sans-serif;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted,#5e6068);margin-top:0.25rem">'+esc(label)+'</div>'+
+    '</div>';
+  }
+
+  function secHead(iconHtml,title){ return '<div style="font-family:Syne,sans-serif;font-size:0.95rem;font-weight:700;margin:1.3rem 0 0.7rem;display:flex;align-items:center;gap:0.45rem">'+iconHtml+esc(title)+'</div>'; }
+
+  function chartCard(title,iconHtml,xs,ys,opts){
+    var valid=ys.filter(function(v){return v!=null&&isFinite(v);}); if(valid.length<2) return '';
+    var mn=Math.min.apply(null,valid),mx=Math.max.apply(null,valid),lbl;
+    if(opts.pace) lbl=fmtPace(mn)+'–'+fmtPace(mx); else lbl=Math.round(mn)+(opts.unit||'')+'→'+Math.round(mx)+(opts.unit||'');
+    return '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.7rem 0.8rem;margin-bottom:0.6rem">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem">'+
+        '<span style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--text,#e8e9ea);display:inline-flex;align-items:center;gap:0.35rem">'+iconHtml+title+'</span>'+
+        '<span style="font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+(opts.note?opts.note+' · ':'')+lbl+'</span>'+
+      '</div>'+chartLine(xs,ys,opts)+'</div>';
+  }
+
+  function curvesBlock(act){
+    var s=act.streams;
+    if(!s || !(s.altitude_m||s.hr_bpm||s.pace_s_per_km)) return naBlock('Courbes non disponibles — nécessite le détail backend');
+    var xs=(s.distance_km&&s.distance_km.length)?dsample(s.distance_km,300):dsample(s.time_s||[],300);
+    if(xs.length<2){ var L=(s.altitude_m||s.hr_bpm||s.pace_s_per_km||[]).length,tmp=[]; for(var i=0;i<L;i++) tmp.push(i); xs=dsample(tmp,300); }
+    var out='';
+    if(s.altitude_m&&s.altitude_m.length) out+=chartCard('Altitude',ICON('mountain',13),xs,dsample(s.altitude_m,300),{area:true,color:'var(--accent,#a3e635)',unit:'m'});
+    if(s.pace_s_per_km&&s.pace_s_per_km.length) out+=chartCard('Allure',SVG_WAVE,xs,dsample(s.pace_s_per_km,300),{invert:true,color:'var(--blue,#5ba3e8)',pace:true,note:'haut = + rapide'});
+    if(s.hr_bpm&&s.hr_bpm.length) out+=chartCard('Fréquence cardiaque',ICON('heart',13),xs,dsample(s.hr_bpm,300),{color:'var(--red,#ef4444)',unit:''});
+    return out||naBlock('Courbes non disponibles');
+  }
+
+  function splitsBlock(act){
+    var sp=act.splits; if(!sp||!sp.length) return naBlock('Splits par km non disponibles — nécessite le détail backend');
+    var ps=[]; sp.forEach(function(s){ if(s.pace_s_per_km!=null&&isFinite(s.pace_s_per_km)) ps.push(s.pace_s_per_km); });
+    var mn=ps.length?Math.min.apply(null,ps):0,mx=ps.length?Math.max.apply(null,ps):1,rg=(mx-mn)||1;
+    var out='<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;overflow:hidden">';
+    sp.forEach(function(s,i){
+      var p=s.pace_s_per_km, w=(p!=null&&isFinite(p))?(0.18+0.82*(mx-p)/rg):0;
+      var bd=i<sp.length-1?'border-bottom:1px solid var(--border,#242528);':'';
+      out+='<div style="display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0.6rem;'+bd+'">'+
+        '<span style="flex:0 0 22px;font-family:DM Mono,monospace;font-size:0.64rem;color:var(--muted,#5e6068)">'+(s.km!=null?s.km:(i+1))+'</span>'+
+        '<div style="flex:1 1 auto;min-width:0;position:relative;height:18px;background:var(--surface2,#1c1d21);border-radius:4px;overflow:hidden">'+
+          '<div style="position:absolute;left:0;top:0;bottom:0;width:'+(w*100).toFixed(0)+'%;background:var(--accent,#a3e635);opacity:0.35"></div>'+
+          '<span style="position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:DM Mono,monospace;font-size:0.62rem;color:var(--text,#e8e9ea)">'+fmtPace(p)+'</span>'+
+        '</div>'+
+        '<span style="flex:0 0 46px;text-align:right;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068)">'+(s.avg_hr!=null?s.avg_hr+'bpm':'–')+'</span>'+
+        '<span style="flex:0 0 40px;text-align:right;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068)">'+(s.elev_gain!=null?'+'+Math.round(s.elev_gain)+'m':'–')+'</span>'+
+      '</div>';
+    });
+    return out+'</div>';
+  }
+
+  function zonesBlock(act){
+    var z=act.hr_zones; if(!z||!z.length) return naBlock('Zones FC non disponibles — nécessite le détail backend');
+    var tot=0; z.forEach(function(o){ tot+=o.seconds||0; }); tot=tot||1;
+    var out='<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.8rem;display:flex;flex-direction:column;gap:0.5rem">';
+    z.forEach(function(o){
+      var sec=o.seconds||0,pct=Math.round(sec/tot*100),col=ZC[o.zone]||'var(--muted,#5e6068)';
+      var rng=(o.min_bpm!=null)?(' <span style="color:var(--muted,#5e6068)">'+o.min_bpm+'–'+(o.max_bpm||'')+'</span>'):'';
+      out+='<div><div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.62rem;margin-bottom:0.2rem">'+
+        '<span style="color:'+col+'">'+esc(o.label||('Z'+o.zone))+rng+'</span>'+
+        '<span style="color:var(--muted,#5e6068)">'+fmtSec(sec)+' · '+pct+'%</span></div>'+
+        '<div style="height:8px;border-radius:4px;background:var(--surface2,#1c1d21);overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+col+'"></div></div></div>';
+    });
+    return out+'</div>';
+  }
+
+  function extraBlock(act){
+    var t=[];
+    if(act.avg_cadence_spm!=null) t.push(statTile('Cadence',Math.round(act.avg_cadence_spm),'spm'));
+    if(act.avg_gap_s_per_km!=null) t.push(statTile('Allure GAP',fmtPace(act.avg_gap_s_per_km),'/km'));
+    if(act.avg_power_w!=null) t.push(statTile('Puissance',Math.round(act.avg_power_w),'W'));
+    if(!t.length) return '';
+    return secHead(SVG_WAVE,'Cadence & allure ajustée')+'<div style="display:grid;grid-template-columns:repeat('+Math.min(t.length,3)+',1fr);gap:0.5rem">'+t.join('')+'</div>';
+  }
+
+  function analyseBlock(){
+    return secHead(ICON('chat',16),'Analyse de course')+
+      '<div style="background:var(--accent-dim,rgba(163,230,53,0.08));border:1px solid var(--accent,#a3e635);border-radius:12px;padding:1rem">'+
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">'+
+          '<span style="font-family:Syne,sans-serif;font-weight:700;color:var(--accent,#a3e635);display:inline-flex;align-items:center;gap:0.4rem">'+ICON('bulb',16,'var(--accent,#a3e635)')+'Lecture du coach</span>'+
+          '<span style="font-family:DM Mono,monospace;font-size:0.54rem;text-transform:uppercase;letter-spacing:0.05em;background:var(--accent,#a3e635);color:#0f0f10;padding:2px 7px;border-radius:10px">bientôt</span>'+
+        '</div>'+
+        '<div style="font-size:0.78rem;line-height:1.5;color:var(--muted,#5e6068)">À venir : analyse qualitative générée par le coach IA — qualité de la séance, écart prévu / réalisé, état de fatigue et reco pour la suite.</div>'+
+      '</div>';
+  }
+
+  function buildBody(act){
+    var dist=num(act.distance_km);
+    var paceS=(act.avg_pace_s_per_km!=null)?act.avg_pace_s_per_km:((act.duration_min&&dist)?(act.duration_min*60/dist):null);
+    var fc=(act.avg_hr!=null?act.avg_hr:'–')+(act.max_hr!=null?' / '+act.max_hr:'');
+    var h='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.2rem">';
+    h+=statTile('Distance',(dist!=null?dist:'–'),'km');
+    h+=statTile('Allure',fmtPace(paceS),'/km');
+    h+=statTile('D+',(act.elevation_gain!=null?act.elevation_gain:'–'),'m');
+    h+=statTile('Durée',fmtDurMin(act.duration_min),'');
+    h+=statTile('FC moy/max',fc,'');
+    if(act.calories!=null) h+=statTile('Calories',Math.round(act.calories),'kcal');
+    else if(act.te_aerobic!=null) h+=statTile('TE aéro',act.te_aerobic,'');
+    else h+=statTile('Type',typeLabel(act.type),'');
+    h+='</div>';
+    h+=secHead(ICON('chart',16),'Courbes')+curvesBlock(act);
+    h+=secHead(ICON('flag',16),'Splits par km')+splitsBlock(act);
+    h+=secHead(ICON('heart',16),'Zones cardiaques')+zonesBlock(act);
+    h+=extraBlock(act);
+    h+=analyseBlock();
+    return h;
+  }
+
+  var SVG_CHEV='<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,5 13,10 8,15"/></svg>';
+  var _histList=[];
+
+  function syncScrollLock(){ document.body.style.overflow=(document.getElementById('act-detail-overlay')||document.getElementById('act-history-overlay'))?'hidden':''; }
+  function closeDetail(){ var o=document.getElementById('act-detail-overlay'); if(o&&o.parentNode) o.parentNode.removeChild(o); syncScrollLock(); }
+  function closeHistory(){ var o=document.getElementById('act-history-overlay'); if(o&&o.parentNode) o.parentNode.removeChild(o); syncScrollLock(); }
+  function onKey(e){ if(e.key==='Escape'||e.keyCode===27){ if(document.getElementById('act-detail-overlay')) closeDetail(); else if(document.getElementById('act-history-overlay')) closeHistory(); } }
+
+  // Ouvre la vue détail pour un OBJET activité (réutilisable depuis Aujourd'hui ou l'Historique)
+  function openDetailForAct(act){
+    if(!act) return;
+    var old=document.getElementById('act-detail-overlay'); if(old&&old.parentNode) old.parentNode.removeChild(old);
+    var name=act.name||typeLabel(act.type)||'Activité';
+    var sub=typeLabel(act.type)+(act.date?' · '+dateFr(act.date):'');
+    if(act.start_time){ var d=new Date(act.start_time); if(!isNaN(d)) sub+=' · '+pad2(d.getHours())+'h'+pad2(d.getMinutes()); }
+    var ov=document.createElement('div');
+    ov.id='act-detail-overlay';
+    ov.setAttribute('style','position:fixed;inset:0;background:var(--bg,#0f0f10);z-index:10060;display:flex;flex-direction:column');
+    ov.innerHTML=
+      '<div style="position:sticky;top:0;background:var(--bg,#0f0f10);border-bottom:1px solid var(--border,#242528);display:flex;align-items:center;gap:0.7rem;padding:calc(env(safe-area-inset-top,0px) + 0.7rem) 1rem 0.7rem;z-index:2">'+
+        '<button id="ad-close" aria-label="Retour" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2,#2a2b30);background:var(--surface,#16171a);color:var(--text,#e8e9ea);display:flex;align-items:center;justify-content:center;cursor:pointer">'+SVG_BACK+'</button>'+
+        '<div style="min-width:0;flex:1 1 auto">'+
+          '<div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:var(--text,#e8e9ea);display:flex;align-items:center;gap:0.4rem"><span style="display:inline-flex;flex:0 0 auto">'+ICON(typeIcon(act.type),16)+'</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(name)+'</span></div>'+
+          '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-top:0.1rem">'+esc(sub)+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div id="ad-body" style="flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem 1rem calc(env(safe-area-inset-bottom,0px) + 2rem)"></div>';
+    document.body.appendChild(ov);
+    syncScrollLock();
+    document.getElementById('ad-body').innerHTML=buildBody(act);
+    document.getElementById('ad-close').addEventListener('click',closeDetail);
+    fetchDetail(act);
+  }
+
+  window.openActivityDetail=function(idx){
+    var gd=window.__garminData||{}, acts=gd.activities||[];
+    openDetailForAct(acts[idx]);
+  };
+
+  function fetchDetail(act){
+    try{
+      if(!act.id) return;
+      if(act.splits||act.streams||act.hr_zones) return;
+      var url=localStorage.getItem('garmin_url'), tok=localStorage.getItem('garmin_token');
+      if(!url||!tok||typeof fetch!=='function') return;
+      var base=url.replace(/\/+$/,'');
+      var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+      var to=setTimeout(function(){ if(ctrl){ try{ctrl.abort();}catch(e){} } },12000);
+      fetch(base+'/api/activity/'+encodeURIComponent(act.id),{headers:{'Authorization':'Bearer '+tok},signal:ctrl?ctrl.signal:undefined})
+        .then(function(r){ clearTimeout(to); if(!r.ok) throw 0; return r.json(); })
+        .then(function(detail){
+          if(!detail||typeof detail!=='object') return;
+          for(var k in detail){ if(Object.prototype.hasOwnProperty.call(detail,k)) act[k]=detail[k]; }
+          var body=document.getElementById('ad-body');
+          if(body && document.getElementById('act-detail-overlay')) body.innerHTML=buildBody(act);
+        })
+        .catch(function(){});
+    }catch(e){}
+  }
+
+  // ─── Vue HISTORIQUE (liste complète groupée par mois) ───
+  function histDateSquare(dateStr){
+    var p=(dateStr||'').split('-'); var day=p[2]||'?'; var mon=p[1]?((MONTHS[+p[1]-1]||'').replace('.','').slice(0,3)).toUpperCase():'';
+    return '<div style="flex:0 0 auto;width:42px;height:42px;background:var(--surface2,#1c1d21);border:1px solid var(--border,#242528);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center">'+
+      '<div style="font-family:Syne,sans-serif;font-size:1rem;font-weight:800;line-height:1;color:var(--text,#e8e9ea)">'+day+'</div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.5rem;font-weight:500;letter-spacing:0.03em;color:var(--muted,#5e6068)">'+mon+'</div>'+
+    '</div>';
+  }
+  var MONTHS_FULL=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  function monthLabel(ym){ var p=ym.split('-'); var mn=MONTHS_FULL[+p[1]-1]||''; mn=mn.charAt(0).toUpperCase()+mn.slice(1); return mn+' '+(p[0]||''); }
+
+  function buildHistory(list){
+    if(!list||!list.length) return naBlock('Aucune activité à afficher.');
+    var out='';
+    if(window.__historyFull!==true){
+      out+='<div style="font-family:DM Mono,monospace;font-size:0.62rem;line-height:1.5;color:var(--muted,#5e6068);background:var(--surface,#16171a);border:1px dashed var(--border2,#2a2b30);border-radius:8px;padding:0.7rem;margin-bottom:0.4rem">Historique limité aux 7 derniers jours (fenêtre Garmin actuelle). L\'historique complet arrivera avec la synchro serveur.</div>';
+    }
+    var curYM=null;
+    list.forEach(function(a,i){
+      var ym=(a.date||'').slice(0,7);
+      if(ym!==curYM){ curYM=ym; out+='<div style="font-family:Syne,sans-serif;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted,#5e6068);margin:1.1rem 0 0.5rem">'+esc(monthLabel(ym))+'</div>'; }
+      out+='<div class="hist-row" data-hist-idx="'+i+'" style="display:flex;gap:0.7rem;align-items:center;padding:0.55rem 0.3rem;border-bottom:1px solid var(--border,#242528);cursor:pointer;border-radius:8px">'+
+        histDateSquare(a.date)+
+        '<div style="flex:1 1 auto;min-width:0">'+
+          '<div style="font-size:0.85rem;font-weight:600;color:var(--text,#e8e9ea);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.name||typeLabel(a.type)||'Activité')+'</div>'+
+          '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-top:0.1rem;display:flex;align-items:center;gap:0.3rem">'+ICON(typeIcon(a.type),12)+typeLabel(a.type)+(a.elevation_gain?' · +'+a.elevation_gain+'m':'')+'</div>'+
+        '</div>'+
+        '<div style="flex:0 0 auto;text-align:right;font-family:DM Mono,monospace;font-size:0.66rem;white-space:nowrap">'+
+          '<div style="color:var(--accent,#a3e635);font-weight:500">'+(a.distance_km!=null?a.distance_km+' km':'–')+'</div>'+
+          '<div style="color:var(--muted,#5e6068);font-size:0.6rem;margin-top:0.15rem">'+fmtDurMin(a.duration_min)+' · '+(a.avg_hr!=null?a.avg_hr+'bpm':'–')+'</div>'+
+        '</div>'+
+        '<div style="flex:0 0 auto;color:var(--muted,#5e6068);display:inline-flex">'+SVG_CHEV+'</div>'+
+      '</div>';
+    });
+    return out;
+  }
+
+  window.openActivityHistory=function(){
+    var gd=window.__garminData||{};
+    _histList=(gd.activities||[]).slice().sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
+    var old=document.getElementById('act-history-overlay'); if(old&&old.parentNode) old.parentNode.removeChild(old);
+    var ov=document.createElement('div');
+    ov.id='act-history-overlay';
+    ov.setAttribute('style','position:fixed;inset:0;background:var(--bg,#0f0f10);z-index:10052;display:flex;flex-direction:column');
+    ov.innerHTML=
+      '<div style="position:sticky;top:0;background:var(--bg,#0f0f10);border-bottom:1px solid var(--border,#242528);display:flex;align-items:center;gap:0.7rem;padding:calc(env(safe-area-inset-top,0px) + 0.7rem) 1rem 0.7rem;z-index:2">'+
+        '<button id="ah-close" aria-label="Retour" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2,#2a2b30);background:var(--surface,#16171a);color:var(--text,#e8e9ea);display:flex;align-items:center;justify-content:center;cursor:pointer">'+SVG_BACK+'</button>'+
+        '<div style="min-width:0;flex:1 1 auto">'+
+          '<div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:var(--text,#e8e9ea)">Historique</div>'+
+          '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-top:0.1rem">'+_histList.length+' activité'+(_histList.length>1?'s':'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div id="ah-body" style="flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0.8rem 1rem calc(env(safe-area-inset-bottom,0px) + 2rem)"></div>';
+    document.body.appendChild(ov);
+    syncScrollLock();
+    document.getElementById('ah-body').innerHTML=buildHistory(_histList);
+    document.getElementById('ah-close').addEventListener('click',closeHistory);
+  };
+
+  document.addEventListener('keydown',onKey);
+
+  // Délégation unique : "Voir tout" → Historique · ligne historique → détail · carte Aujourd'hui → détail
+  document.addEventListener('click',function(e){
+    if(!e.target||!e.target.closest) return;
+    if(e.target.closest('[data-act-history]')){ if(window.openActivityHistory) window.openActivityHistory(); return; }
+    var hr=e.target.closest('[data-hist-idx]');
+    if(hr){ var hi=parseInt(hr.getAttribute('data-hist-idx'),10); if(!isNaN(hi)&&_histList[hi]) openDetailForAct(_histList[hi]); return; }
+    var row=e.target.closest('[data-act-idx]');
+    if(row){ var idx=parseInt(row.getAttribute('data-act-idx'),10); if(!isNaN(idx)&&window.openActivityDetail) window.openActivityDetail(idx); return; }
+  });
 })();
 </script>
 </body>
