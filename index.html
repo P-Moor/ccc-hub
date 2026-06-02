@@ -81,6 +81,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 
 /* ── SEC ── */
 .sec{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:1.5rem 0 0.65rem;padding-bottom:0.35rem;border-bottom:1px solid var(--border)}
+.sec-toggle{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;cursor:pointer;user-select:none}
+.acc-head{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;width:100%;cursor:pointer;user-select:none;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.9rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text)}
+.acc-chev{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);font-weight:400;white-space:nowrap}
 .sec-first{margin-top:0}
 
 /* ── BADGE ── */
@@ -1052,14 +1055,17 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
     </div>
     <div class="today-block">
       <div class="tb-head"><span>Repas du jour</span><span id="today-meal-badge"></span></div>
-      <div class="tb-body"><div id="today-meal-content"></div></div>
+      <div class="tb-body"><div id="nutri-directive-dash"></div><div id="today-meal-content"></div></div>
     </div>
   </div>
 </div></div>
 
 <!-- PLAN -->
 <div class="panel" id="panel-plan"><div class="inner">
-  <div id="sessions-edit-module" style="margin-bottom:1.4rem"></div>
+  <div class="acc-wrap" style="margin-bottom:1.4rem">
+    <button type="button" class="acc-head" id="sed-acc-head" aria-expanded="false">🔧 Ajuster mes séances<span class="acc-chev" id="sed-acc-chev">▸ déplier</span></button>
+    <div id="sed-acc-body" style="display:none;margin-top:0.6rem"><div id="sessions-edit-module"></div></div>
+  </div>
   <div class="ptitle">Plan d'entraînement <span class="ptitle-sub">16 semaines · CCC 28 août 2026</span></div>
   <div class="sec sec-first">Vue d'ensemble</div>
   <div class="phase-bar">
@@ -1079,7 +1085,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
   </div>
   <div class="p-wtabs" id="week-tabs"></div>
   <div id="week-content"></div>
-  <div class="sec">Sessions spé — Menu</div>
+  <div class="sec sec-toggle" id="spe-acc-head">Sessions spé — Menu<span class="acc-chev" id="spe-acc-chev">▸ déplier</span></div>
+  <div id="spe-acc-body" style="display:none">
   <div class="cards">
     <div class="card"><div class="ctitle">⚡ VMA</div><div class="cdesc">8×400m ou 6×600m · récup trot 60-90sec</div><div class="cwhen">BB > 75</div></div>
     <div class="card"><div class="ctitle">⛰ Côtes</div><div class="cdesc">8-10×45sec · ou 4×3min longues</div><div class="cwhen">BB > 70</div></div>
@@ -1092,11 +1099,13 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
     <div class="bbc"><div class="bbr">60-75</div><div class="bbl">Body Battery</div><div class="bbv">Tempo · Prog.</div></div>
     <div class="bbc"><div class="bbr"><60</div><div class="bbl">Body Battery</div><div class="bbv">Strides → EF</div></div>
   </div>
+  </div>
 </div></div>
 
 <!-- NUTRITION -->
 <div class="panel" id="panel-nutrition"><div class="inner">
   <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.4</b> · séances ajustables (échange/édition)</div>
+  <div id="nutri-directive-full"></div>
   <div class="rec-mod" id="recipes-module"></div>
   <div class="wkc-mod" id="weekplan-module"></div>
   <div class="ptitle" id="matrices-toggle" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem">Matrices Nutritionnelles <span class="ptitle-sub">Carb cycling · quantités</span> <span id="matrices-chev" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">▸ déplier</span></div>
@@ -2072,8 +2081,27 @@ function renderWeek() {
   }
 })();
 
-renderWeekTabs();
-renderWeek();
+// Auto-sélection du mois + semaine courants (au lieu de toujours démarrer sur Mois 1 / S1)
+(function selectCurrentWeek(){
+  try {
+    if (typeof WI === 'number' && WI >= 0 && typeof months !== 'undefined') {
+      var off = 0, found = false;
+      for (var m = 1; months[m]; m++) {
+        var len = months[m].length;
+        if (WI < off + len) { curMonth = m; curWeekInMonth = WI - off; found = true; break; }
+        off += len;
+      }
+      if (!found) { // au-delà du plan -> dernier mois / dernière semaine
+        var last = 1; while (months[last+1]) last++;
+        curMonth = last; curWeekInMonth = months[last].length - 1;
+      }
+      var tabs = document.querySelectorAll('#month-tabs .p-tab');
+      for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', i === curMonth-1);
+    }
+  } catch(e){}
+  renderWeekTabs();
+  renderWeek();
+})();
 
 /* ════════════════════════════════════════
    AGENDA
@@ -5378,6 +5406,7 @@ if (document.readyState === 'loading') {
         setNutriObjective(el.getAttribute('data-obj'));
         render();
         if (window.__updateFilDuJour) { try { window.__updateFilDuJour(false); } catch(e){} }
+        if (window.__updateNutriDirective) { try { window.__updateNutriDirective(true); } catch(e){} }
       });
     });
 
@@ -5442,6 +5471,7 @@ if (document.readyState === 'loading') {
   } else { start(); }
 
   window.__nutriGetFoods = getFoods;
+  window.__nutriTargets = computeTargets;
   window.__renderNutrition = function(){
     render();
     // Le fil du jour réagit aux changements de repas/hydratation
@@ -6871,7 +6901,7 @@ if (document.readyState === 'loading') {
     if(cWI<0) cWI=0; if(cWI>P.length-1) cWI=P.length-1;
     var wk=P[cWI];
     var ov=getOv();
-    var h='<div class="sed-head"><h3>🔧 Ajuster mes séances</h3><span class="sed-act'+(swapMode?' on':'')+'" id="sed-swap">🔄 Échanger</span></div>';
+    var h='<div class="sed-head" style="justify-content:flex-end"><span class="sed-act'+(swapMode?' on':'')+'" id="sed-swap">🔄 Échanger</span></div>';
     h+='<div class="sed-head" style="margin-bottom:0.7rem"><div class="sed-nav"><button id="sed-prev">‹</button><span class="sed-wk">S'+wk.num+' · '+esc(wk.phase)+'</span><button id="sed-next">›</button></div></div>';
     if(swapMode) h+='<div class="sed-hint">'+(pick?'Touche la 2e séance à échanger.':'Touche une 1re séance à échanger.')+'</div>';
     // modes présents cette semaine -> note contextuelle (le 1er jour HC sinon le mode du jour)
@@ -6998,6 +7028,140 @@ if (document.readyState === 'loading') {
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   ACCORDÉONS ONGLET PLAN — « Ajuster mes séances » + « Sessions spé »
+   Repliés par défaut, état mémorisé. Même esprit que l'accordéon Matrices.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  function wire(headId, bodyId, chevId, key){
+    var head=document.getElementById(headId), body=document.getElementById(bodyId), chev=document.getElementById(chevId);
+    if(!head||!body) return;
+    var open=false; try{ open=localStorage.getItem(key)==='1'; }catch(e){}
+    function apply(){ body.style.display=open?'':'none'; head.classList.toggle('open',open); head.setAttribute('aria-expanded',open?'true':'false'); if(chev) chev.textContent=open?'▾ replier':'▸ déplier'; }
+    apply();
+    head.addEventListener('click', function(){ open=!open; try{ localStorage.setItem(key, open?'1':'0'); }catch(e){} apply(); });
+  }
+  function init(){
+    wire('sed-acc-head','sed-acc-body','sed-acc-chev','ccc_acc_sed');
+    wire('spe-acc-head','spe-acc-body','spe-acc-chev','ccc_acc_spe');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+/* ════════════════════════════════════════════════════════════
+   DIRECTIVE NUTRITION IA — extrait dashboard + version onglet Nutrition
+   1 moteur (computeTargets) → l'IA EXPLIQUE la cible, elle ne la recalcule pas.
+   Couleur par mode carb (HC vert / MC orange / LC bleu). Cache par signature.
+   1 seul appel IA (JSON {court, detaille}), repli statique si IA indispo.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  function dk(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  var OBJ_LABEL={prepa:'Prépa course',seche:'Sèche',maintien:'Maintien',quotidien:'Quotidien'};
+  var MODE_LABEL={HC:'High-carb',MC:'Medium-carb',LC:'Low-carb'};
+
+  function targets(){ try{ return (window.__nutriTargets && window.__nutriTargets()) || null; }catch(e){ return null; } }
+  function plannedSession(){
+    try{
+      if(typeof PLAN_DATA!=='undefined' && typeof WI!=='undefined' && typeof DI!=='undefined' && PLAN_DATA[WI] && PLAN_DATA[WI].days[DI]){
+        var d=PLAN_DATA[WI].days[DI];
+        return { titre:(d.title||d.s||''), run:d.run||0, velo:d.velo||0, dplus:d.dplus||0 };
+      }
+    }catch(e){}
+    return null;
+  }
+  function color(mode){ return mode==='HC' ? 'var(--accent,#a3e635)' : mode==='LC' ? 'var(--blue,#5ba3e8)' : 'var(--orange,#e8a020)'; }
+  function dot(mode){ return mode==='HC' ? '🟢' : mode==='LC' ? '🔵' : '🟠'; }
+
+  // Repli statique (esprit modeNote) si l'IA est indisponible
+  function fbShort(t){
+    if(t.mode==='HC') return "Grosse charge : on FUEL. Glucides hauts autour de la séance, zéro déficit aujourd'hui.";
+    if(t.mode==='LC') return "Repos / easy : glucides bas, protéines hautes, légumes à volonté."+(t.deficit>0?" Fenêtre de déficit léger.":"");
+    return "Charge modérée : équilibre, glucides autour de la séance.";
+  }
+  function fbLong(t){
+    var base = fbShort(t);
+    return base+" Cible du jour : ~"+t.g+" g de glucides, "+t.p+" g de protéines, "+t.l+" g de lipides pour "+t.kcal+" kcal.";
+  }
+
+  var SYS=(window.CCC_PERSONA || "Tu es le coach nutrition de Pierre. Tutoie, sois concis.") +
+    " CONTEXTE D'USAGE : tu rédiges la DIRECTIVE NUTRITION DU JOUR. Les chiffres (kcal/macros) sont DÉJÀ calculés par l'app et te sont fournis : tu ne les recalcules pas, tu les EXPLIQUES et tu donnes la stratégie concrète (quoi privilégier, timing autour de la séance, fuel ou déficit). Tu réconcilies l'objectif et la séance du jour.";
+
+  function buildPrompt(t, sess){
+    var ctx={
+      objectif: OBJ_LABEL[t.objective]||t.objective,
+      mode_carb_du_jour: MODE_LABEL[t.mode]||t.mode,
+      cible_du_jour:{ kcal:t.kcal, glucides_g:t.g, proteines_g:t.p, lipides_g:t.l },
+      deficit_kcal: t.deficit||0,
+      maintenance_kcal: t.maintenance,
+      seance_prevue: sess
+    };
+    return "Données du jour (cibles DÉJÀ calculées par l'app, NE PAS recalculer) :\n"+JSON.stringify(ctx,null,2)+
+      "\n\nRéponds en JSON, sans markdown, avec exactement deux champs :\n"+
+      "- \"court\" : 1-2 phrases percutantes (la consigne clé : fuel/déficit, glucides oui/non, + timing).\n"+
+      "- \"detaille\" : 3-4 phrases qui expliquent la logique (objectif × séance), ce qu'il faut privilégier, le timing autour de la séance, et si on est en fuel ou en déficit.";
+  }
+
+  function renderInto(slot, t, txt, full){
+    if(!slot) return;
+    var col=color(t.mode);
+    var head=dot(t.mode)+' '+(MODE_LABEL[t.mode]||t.mode)+' · '+(OBJ_LABEL[t.objective]||t.objective);
+    slot.innerHTML=
+      '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-left:3px solid '+col+';border-radius:10px;padding:0.7rem 0.9rem;margin-bottom:'+(full?'1rem':'0.7rem')+'">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem">'+
+      '<span>Nutrition du jour · '+head+'</span>'+
+      '<span class="nutri-dir-refresh" style="cursor:pointer;color:'+col+'">rafraîchir</span></div>'+
+      '<div style="font-size:0.85rem;line-height:1.5;color:var(--text,#e8e9ea)">'+String(txt).replace(/\n/g,'<br>')+'</div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068);margin-top:0.45rem">🎯 '+t.kcal+' kcal · '+t.g+' g gluc · '+t.p+' g prot · '+t.l+' g lip'+(t.estimated?' (estimé plan)':'')+'</div>'+
+      '</div>';
+    var rf=slot.querySelector('.nutri-dir-refresh');
+    if(rf) rf.addEventListener('click', function(){ run(true); });
+  }
+
+  async function generate(t, sess){
+    if(typeof window.askClaudeJSON!=='function' || !localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token'))
+      return { court:fbShort(t), detaille:fbLong(t) };
+    try{
+      var r=await window.askClaudeJSON(buildPrompt(t,sess), { system:SYS, max_tokens:400 });
+      return { court:((r.court||'').trim()||fbShort(t)), detaille:((r.detaille||'').trim()||fbLong(t)) };
+    }catch(e){ return { court:fbShort(t), detaille:fbLong(t) }; }
+  }
+
+  function sig(t, sess){ return [dk(),t.objective,t.mode,t.kcal,t.g,t.p,t.l,(sess?sess.titre+sess.run+sess.velo:'-')].join('|'); }
+
+  async function run(force){
+    var dashSlot=document.getElementById('nutri-directive-dash');
+    var fullSlot=document.getElementById('nutri-directive-full');
+    if(!dashSlot && !fullSlot) return;
+    var t=targets(); if(!t) return;
+    var sess=plannedSession();
+    var s=sig(t,sess);
+    var cacheKey='ccc_nutri_dir_'+dk();
+    var cache=null; try{ cache=JSON.parse(localStorage.getItem(cacheKey)||'null'); }catch(e){}
+    if(!force && cache && cache.sig===s){
+      if(dashSlot) renderInto(dashSlot, t, cache.court, false);
+      if(fullSlot) renderInto(fullSlot, t, cache.detaille, true);
+      return;
+    }
+    var out=await generate(t, sess);
+    if(dashSlot) renderInto(dashSlot, t, out.court, false);
+    if(fullSlot) renderInto(fullSlot, t, out.detaille, true);
+    try{ localStorage.setItem(cacheKey, JSON.stringify({sig:s, court:out.court, detaille:out.detaille})); }catch(e){}
+  }
+
+  window.__updateNutriDirective=run;
+
+  function hook(){
+    setTimeout(function(){ run(false); }, 1800);  // laisse Garmin + nutrition charger
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) run(false); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', hook);
+  else hook();
 })();
 </script>
 </body>
