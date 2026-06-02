@@ -925,6 +925,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 .rec-actions{display:flex;gap:0.5rem;margin-top:0.6rem}
 .rec-act{font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;padding:0.3rem 0.6rem;border-radius:6px;border:1px solid var(--border);color:var(--muted)}
 .rec-empty{font-size:0.78rem;color:var(--muted);text-align:center;padding:0.8rem;border:1px dashed var(--border);border-radius:8px}
+.rec-filter{display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.9rem}
+.rec-fchip{cursor:pointer;font-family:'DM Mono',monospace;font-size:0.62rem;padding:0.3rem 0.7rem;border-radius:12px;background:var(--surface2,#1c1d21);color:var(--muted);border:1px solid var(--border)}
+.rec-fchip.on{background:var(--accent);color:#0f0f10;border-color:var(--accent)}
+.rec-group{margin-bottom:0.4rem}
+.rec-group-head{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.3rem;cursor:pointer;border-bottom:1px solid var(--border)}
+.rec-group-head .gemo{font-size:0.95rem;flex-shrink:0}
+.rec-group-head .glbl{font-family:'Syne',sans-serif;font-weight:600;font-size:0.92rem;color:var(--text);flex:1;min-width:0}
+.rec-group-head .gcount{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);background:var(--surface2,#1c1d21);border:1px solid var(--border);border-radius:10px;padding:0.1rem 0.45rem}
+.rec-group-chev{color:var(--muted);transition:transform .2s;flex-shrink:0}
+.rec-group.open .rec-group-chev{transform:rotate(90deg)}
+.rec-group-body{display:none;padding-top:0.6rem}
+.rec-group.open .rec-group-body{display:block}
 
 /* ── Module Composer de la semaine ── */
 .wkc-mod{margin-bottom:1.6rem}
@@ -1061,9 +1073,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
 
 <!-- NUTRITION -->
 <div class="panel" id="panel-nutrition"><div class="inner">
+  <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.3</b> · plan ↔ repas synchronisés</div>
   <div class="rec-mod" id="recipes-module"></div>
   <div class="wkc-mod" id="weekplan-module"></div>
-  <div class="ptitle">Matrices Nutritionnelles <span class="ptitle-sub">Carb cycling · quantités</span></div>
+  <div class="ptitle" id="matrices-toggle" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem">Matrices Nutritionnelles <span class="ptitle-sub">Carb cycling · quantités</span> <span id="matrices-chev" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">▸ déplier</span></div>
+  <div id="matrices-body" style="display:none">
   <div class="cleg">
     <span class="cleg-lbl">Lien plan →</span>
     <span class="badge lc">LC</span><span style="font-size:0.63rem;color:var(--muted)">Low Carb</span>
@@ -1120,6 +1134,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;background:v
       <div class="astep"><div class="asnum">3</div><div class="aslbl">Châssis</div><div class="ascont">Légume libre → Pousses d'épinards</div></div>
     </div>
     <div class="ares"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5ec27a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="4,10 8,14 16,5"/></svg> Repas récup parfait — 4 minutes, zéro décision.</div>
+  </div>
   </div>
 </div></div>
 
@@ -4802,6 +4817,50 @@ if (document.readyState === 'loading') {
   }
   function saveDayMeals(dk, obj) { try { localStorage.setItem('ccc_meals2_' + dk, JSON.stringify(obj)); } catch(e){} try { if (window.CCCSync) CCCSync.pushDay(dk); } catch(e){} }
 
+  // ── PONT plan → repas du jour (SOURCE DE VÉRITÉ UNIQUE) ──
+  // Le composer planifie par recette (pdej/dej/coll/diner) ; on matérialise ces
+  // recettes dans les créneaux RÉELS de l'accueil, pré-remplis. Non destructif :
+  // on ne touche pas aux saisies manuelles/extras, et on ne re-cale un créneau que
+  // si la recette planifiée a changé (marqueur ccc_plan_synced_<date>).
+  var PLAN_SLOT_MAP = { pdej:'petitdej', dej:'dej', coll:'encas', diner:'diner' };
+  function syncPlanToDay(dk) {
+    var plan = {}, recs = [];
+    try { plan = JSON.parse(localStorage.getItem('ccc_weekplan')||'{}') || {}; } catch(e){}
+    try { recs = JSON.parse(localStorage.getItem('ccc_recipes')||'[]') || []; } catch(e){}
+    var byId = {}; recs.forEach(function(r){ byId[r.id]=r; });
+    var dayPlan = plan[dk] || {};
+    var meals = getDayMeals(dk);
+    var mk = {}; try { mk = JSON.parse(localStorage.getItem('ccc_plan_synced_'+dk)||'{}') || {}; } catch(e){}
+    var changed = false;
+    for (var ps in PLAN_SLOT_MAP) {
+      if (!PLAN_SLOT_MAP.hasOwnProperty(ps)) continue;
+      var canon = PLAN_SLOT_MAP[ps];
+      var rid = dayPlan[ps] || null;
+      var r = rid ? byId[rid] : null;
+      if (mk[ps] === rid) continue; // déjà calé sur cette recette → on laisse les ajustements perso
+      var arr = (meals[canon] || []).filter(function(x){ return !(x && x._plan === ps); }); // retire notre ancienne injection
+      if (r) {
+        (r.items||[]).forEach(function(it){
+          arr.push({ food:it.food, qty:it.qty, g:it.g, p:it.p, l:it.l, kcal:it.kcal, _plan:ps, _rid:rid, _rname:r.name });
+        });
+      }
+      meals[canon] = arr; mk[ps] = rid; changed = true;
+    }
+    if (changed) { saveDayMeals(dk, meals); try { localStorage.setItem('ccc_plan_synced_'+dk, JSON.stringify(mk)); } catch(e){} }
+    return changed;
+  }
+  // Force un re-calage complet (bouton) : efface le marqueur puis resynchronise.
+  function resyncPlanToDay(dk) {
+    var meals = getDayMeals(dk), changed = false;
+    for (var ps in PLAN_SLOT_MAP) { if (!PLAN_SLOT_MAP.hasOwnProperty(ps)) continue;
+      var canon = PLAN_SLOT_MAP[ps];
+      if (meals[canon]) { var b = meals[canon].length; meals[canon] = meals[canon].filter(function(x){ return !(x && x._plan === ps); }); if (meals[canon].length!==b) changed=true; }
+    }
+    if (changed) saveDayMeals(dk, meals);
+    try { localStorage.removeItem('ccc_plan_synced_'+dk); } catch(e){}
+    syncPlanToDay(dk);
+  }
+
   // ── Objectif nutritionnel courant (sélecteur) ──
   var NUTRI_OBJECTIVES = [
     {id:'prepa',     label:'Prépa course', desc:'Fuel-for-work · glucides périodisés'},
@@ -4990,6 +5049,7 @@ if (document.readyState === 'loading') {
     if (existing) existing.remove();
 
     var dk = todayKey();
+    try { syncPlanToDay(dk); } catch(e){}
     var dayMeals = getDayMeals(dk);
     var t = computeTargets();
 
@@ -5033,29 +5093,23 @@ if (document.readyState === 'loading') {
         '<div style="height:7px;border-radius:4px;background:var(--border,#242528);overflow:hidden">' +
         '<div style="width:' + pct + '%;height:100%;background:' + barCol + ';transition:width 0.4s ease"></div></div></div>';
     }
-    // ── Plan du jour (remonté du composer de la semaine) ──
+    // ── Statut « repas calés sur le plan » + re-calage manuel ──
     var _wkplan = {}, _recs = [];
     try { _wkplan = JSON.parse(localStorage.getItem('ccc_weekplan')||'{}') || {}; } catch(e){}
     try { _recs = JSON.parse(localStorage.getItem('ccc_recipes')||'[]') || []; } catch(e){}
     var _byId = {}; _recs.forEach(function(r){ _byId[r.id]=r; });
     var _todayPlan = _wkplan[dk] || {};
-    var _pslots = [{id:'pdej',label:'P-déj'},{id:'dej',label:'Déj'},{id:'coll',label:'Collation'},{id:'diner',label:'Dîner'}];
-    function _rkcal(r){ var s=0; if(r)(r.items||[]).forEach(function(i){ s+=i.kcal||0; }); return Math.round(s); }
-    function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    var _planned = _pslots.filter(function(s){ return _todayPlan[s.id] && _byId[_todayPlan[s.id]]; });
-    html += '<div style="background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem 0.7rem;margin-bottom:0.9rem">';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">📋 Plan du jour</div>';
-    if (!_planned.length) {
-      html += '<div style="font-family:DM Mono,monospace;font-size:0.63rem;color:var(--muted,#5e6068)">Aucun repas planifié — compose ta semaine dans l\'onglet Nutrition.</div>';
+    var _plannedCount = 0;
+    for (var _ps in PLAN_SLOT_MAP) { if (PLAN_SLOT_MAP.hasOwnProperty(_ps) && _todayPlan[_ps] && _byId[_todayPlan[_ps]]) _plannedCount++; }
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.55rem 0.7rem;margin-bottom:0.9rem">';
+    if (_plannedCount) {
+      html += '<span style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--text,#e8e9ea)">📋 ' + _plannedCount + ' repas calés sur le plan <span style="color:var(--muted,#5e6068)">· mode ' + t.mode + '</span></span>';
+      html += '<span id="nh-resync" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--accent,#a3e635);border:1px solid var(--accent,#a3e635);border-radius:6px;padding:0.25rem 0.5rem;white-space:nowrap">↻ Re-caler</span>';
     } else {
-      var _ptot = 0;
-      _planned.forEach(function(s){ var r=_byId[_todayPlan[s.id]], k=_rkcal(r); _ptot+=k;
-        html += '<div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.66rem;padding:0.18rem 0"><span style="color:var(--text,#e8e9ea)"><span style="color:var(--muted,#5e6068)">'+s.label+'</span> '+_esc(r.name)+'</span><span style="color:var(--muted,#5e6068)">'+k+'k</span></div>';
-      });
-      html += '<div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.6rem;margin-top:0.3rem;padding-top:0.3rem;border-top:1px solid var(--border,#242528)"><span style="color:var(--muted,#5e6068)">Total planifié</span><span style="color:var(--accent,#a3e635)">'+_ptot+' kcal</span></div>';
+      html += '<span style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068)">Aucun repas planifié — compose ta semaine dans l\'onglet Nutrition.</span>';
     }
     html += '</div>';
-    // ── Adhérence (rempli vs cible) ──
+    // ── Adhérence (mangé/calé vs cible) ──
     var _adh = t.kcal>0 ? Math.round(sum.kcal/t.kcal*100) : 0;
     var _adhCol = (_adh>=85 && _adh<=110) ? 'var(--green,#5ec27a)' : (_adh>110 ? 'var(--orange,#e8a020)' : 'var(--muted,#5e6068)');
     var _adhLbl = _adh<85 ? 'sous la cible' : (_adh>110 ? 'au-dessus' : 'dans la cible');
@@ -5181,20 +5235,45 @@ if (document.readyState === 'loading') {
   }
 
   // Petit prompt quantité après sélection
+  // Saisie quantité : grammes, unités, ou NOMBRE DE PIÈCES (noisettes, amandes…) → conversion en g.
+  // Les pièces ne s'appliquent qu'aux Oléagineux (évite huile d'olive/noix, etc.).
+  var PIECE_G = {'noisette':1.3,'amande':1.2,'cajou':1.4,'cerneau':2.5,'pistache':0.7,'noix':5};
+  function pieceWeightFor(food){
+    if (!food || food.cat !== 'Oléagineux') return null;
+    var k = (food.n||'').toLowerCase();
+    for (var key in PIECE_G){ if (k.indexOf(key)>=0) return {g:PIECE_G[key], key:key}; }
+    return null;
+  }
+  function foodQtyPrompt(f){
+    if (f.u === 'unité') {
+      var q = prompt(f.n + ' — nombre d\'unités :', '1'); if (q===null) return null;
+      var n = parseFloat(q); if (isNaN(n) || n<=0) return null;
+      return {factor:n, qty:'×'+n};
+    }
+    var pw = pieceWeightFor(f);
+    if (pw) {
+      var q2 = prompt(f.n + ' — nombre (ex 10) ou grammes (ex 20g) :', '10'); if (q2===null) return null;
+      var gm = String(q2).match(/^([\d.]+)\s*g/i), grams, label;
+      if (gm) { grams = parseFloat(gm[1]); label = Math.round(grams)+'g'; }
+      else { var c = parseFloat(q2); if (isNaN(c)||c<=0) return null; grams = c*pw.g; label = c+' '+pw.key+(c>1?'s':'')+' (≈'+Math.round(grams)+'g)'; }
+      return {factor:grams/100, qty:label};
+    }
+    var q3 = prompt(f.n + ' — quantité (g) :', '100'); if (q3===null) return null;
+    var g3 = parseFloat(q3); if (isNaN(g3)||g3<=0) return null;
+    return {factor:g3/100, qty:g3+'g'};
+  }
+  try { window.__foodQtyPrompt = foodQtyPrompt; } catch(e){}
+
   function addFood(slotId, foodIdx) {
     var foods = getFoods();
     var f = foods[foodIdx];
     if (!f) return;
-    var unitLabel = (f.u==='unité') ? 'nombre d\'unités' : 'quantité en grammes';
-    var def = (f.u==='unité') ? '1' : '100';
-    var q = prompt(f.n + ' — ' + unitLabel + ' :', def);
-    if (q === null) return;
-    var qty = parseFloat(q);
-    if (isNaN(qty) || qty <= 0) return;
-    var factor = (f.u==='unité') ? qty : qty/100;
+    var r = foodQtyPrompt(f);
+    if (!r) return;
+    var factor = r.factor;
     var meal = {
       food: f.n,
-      qty: (f.u==='unité') ? '×'+qty : qty+'g',
+      qty: r.qty,
       g: f.g*factor, p: f.p*factor, l: f.l*factor,
       kcal: Math.round(f.kcal*factor)
     };
@@ -5216,6 +5295,9 @@ if (document.readyState === 'loading') {
     // Bouton "+ Aliment" (création d'un aliment custom)
     var nfBtn = document.getElementById('nh-newfood');
     if (nfBtn) nfBtn.addEventListener('click', function(){ openNewFoodModal(); });
+
+    var rsBtn = document.getElementById('nh-resync');
+    if (rsBtn) rsBtn.addEventListener('click', function(){ try { resyncPlanToDay(todayKey()); } catch(e){} render(); });
 
     // Sélecteur d'objectif
     document.querySelectorAll('.nh-obj').forEach(function(el){
@@ -6184,7 +6266,7 @@ if (document.readyState === 'loading') {
 ════════════════════════════════════════════════════════════ */
 (function(){
   'use strict';
-  var KEY = 'ccc_recipes';
+  var KEY = 'ccc_recipes', SEED_V = 2;
   var openIds = {};
   var draft = null, editingId = null, ingSearch = '';
 
@@ -6195,7 +6277,24 @@ if (document.readyState === 'loading') {
   function load(){
     var a = null;
     try { a = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ a = null; }
-    if (!Array.isArray(a)) { a = seed(); save(a); }
+    if (!Array.isArray(a)) {
+      a = seed(); save(a);
+      try { localStorage.setItem(KEY + '_v', String(SEED_V)); } catch(e){}
+      return a;
+    }
+    // Migration NON-DESTRUCTIVE : ajoute les nouveaux combos signatures absents
+    // (par nom) + backfill le créneau manquant, sans toucher aux recettes perso.
+    var v = 0; try { v = parseInt(localStorage.getItem(KEY + '_v') || '0', 10); } catch(e){}
+    if (v < SEED_V) {
+      var names = {}; a.forEach(function(r){ names[(r.name||'').toLowerCase()] = true; });
+      var changed = false;
+      seed().forEach(function(s){
+        if (!names[s.name.toLowerCase()]) { a.push(s); changed = true; }
+        else { a.forEach(function(r){ if (r.name && r.name.toLowerCase()===s.name.toLowerCase() && !r.slot){ r.slot = s.slot; changed = true; } }); }
+      });
+      if (changed) save(a);
+      try { localStorage.setItem(KEY + '_v', String(SEED_V)); } catch(e){}
+    }
     return a;
   }
   function tot(r){
@@ -6204,62 +6303,120 @@ if (document.readyState === 'loading') {
     return {g:Math.round(s.g), p:Math.round(s.p), l:Math.round(s.l), kcal:Math.round(s.kcal)};
   }
 
-  // Combos signatures de Pierre (macros de référence pré-calculées)
+  // Bibliothèque signature de Pierre (tirée de ses habitudes Papa Inshape).
+  // slot: pdej | dej | coll | diner | any   ·   mode: LC | MC | HC | any
   function seed(){
     return [
-      {id:uid(), name:'Collation signature', type:'combo', mode:'any', note:'Tous les jours',
-        items:[{food:'Skyr nature',qty:'150g',g:6,p:16,l:0,kcal:95},
-               {food:'Amandes',qty:'20g',g:2,p:4,l:10,kcal:115},
-               {food:'Myrtilles / framboises',qty:'80g',g:9,p:1,l:0,kcal:45}], steps:[]},
-      {id:uid(), name:'Petit-déj LC œufs-avocat', type:'combo', mode:'LC', note:'',
-        items:[{food:'Œufs',qty:'×3',g:1,p:19,l:15,kcal:215},
-               {food:'Avocat',qty:'½',g:1,p:1,l:11,kcal:120}], steps:[]},
-      {id:uid(), name:'Déj MC poulet-basmati', type:'combo', mode:'MC', note:'Express midi',
-        items:[{food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},
-               {food:'Riz basmati',qty:'70g cru',g:54,p:5,l:1,kcal:245},
-               {food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}], steps:[]},
-      {id:uid(), name:'Bowl HC pâtes-poulet', type:'recipe', mode:'HC', note:'Veille de longue',
-        items:[{food:'Pâtes',qty:'70g cru',g:50,p:9,l:1,kcal:250},
-               {food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},
-               {food:'Brocolis',qty:'150g',g:7,p:4,l:0,kcal:50}],
-        steps:['Cuire les pâtes 9 min','Poêler le poulet 6-8 min','Vapeur brocolis 6 min','Assembler + filet d\'huile d\'olive']}
+      // ── Petits-déjeuners ──
+      {id:uid(), name:'Petit-déj LC œufs-avocat', type:'combo', mode:'LC', slot:'pdej', note:'',
+        items:[{food:'Œufs',qty:'×3',g:1,p:19,l:15,kcal:215},{food:'Avocat',qty:'½',g:1,p:1,l:11,kcal:120}], steps:[]},
+      {id:uid(), name:'Petit-déj MC flocons-skyr', type:'combo', mode:'MC', slot:'pdej', note:'',
+        items:[{food:'Flocons d\'avoine',qty:'60g',g:40,p:8,l:4,kcal:225},{food:'Skyr nature',qty:'150g',g:6,p:16,l:0,kcal:95},{food:'Banane',qty:'×1',g:27,p:1,l:0,kcal:105}], steps:[]},
+      {id:uid(), name:'Porridge HC pré-longue', type:'recipe', mode:'HC', slot:'pdej', note:'Matin de longue',
+        items:[{food:'Flocons d\'avoine',qty:'80g',g:53,p:11,l:5,kcal:300},{food:'Miel',qty:'20g',g:16,p:0,l:0,kcal:60},{food:'Banane',qty:'×1',g:27,p:1,l:0,kcal:105},{food:'Whey',qty:'30g',g:1,p:25,l:1,kcal:110}],
+        steps:['Porridge flocons + eau/lait 3-4 min','Ajouter miel + banane','Whey hors du feu (ne pas cuire la protéine)']},
+      {id:uid(), name:'Omelette 3 œufs + légumes', type:'combo', mode:'LC', slot:'pdej', note:'',
+        items:[{food:'Œufs',qty:'×3',g:1,p:19,l:15,kcal:215},{food:'Courgettes',qty:'100g',g:3,p:1,l:0,kcal:20},{food:'Épinards',qty:'80g',g:1,p:2,l:0,kcal:18}], steps:[]},
+      // ── Collations ──
+      {id:uid(), name:'Collation signature', type:'combo', mode:'any', slot:'coll', note:'Tous les jours',
+        items:[{food:'Skyr nature',qty:'150g',g:6,p:16,l:0,kcal:95},{food:'Amandes',qty:'10 amandes (≈12g)',g:1,p:3,l:6,kcal:70},{food:'Myrtilles / framboises',qty:'80g',g:9,p:1,l:0,kcal:45}], steps:[]},
+      {id:uid(), name:'Skyr-whey récup', type:'combo', mode:'any', slot:'coll', note:'Post-séance',
+        items:[{food:'Skyr nature',qty:'150g',g:6,p:16,l:0,kcal:95},{food:'Whey',qty:'30g',g:1,p:25,l:1,kcal:110}], steps:[]},
+      {id:uid(), name:'Oléagineux + banane', type:'combo', mode:'MC', slot:'coll', note:'',
+        items:[{food:'Amandes',qty:'15 amandes (≈18g)',g:2,p:4,l:9,kcal:105},{food:'Banane',qty:'×1',g:27,p:1,l:0,kcal:105}], steps:[]},
+      {id:uid(), name:'Poignée d\'amandes', type:'combo', mode:'LC', slot:'coll', note:'',
+        items:[{food:'Amandes',qty:'20 amandes (≈24g)',g:2,p:5,l:12,kcal:140}], steps:[]},
+      // ── Déjeuners ──
+      {id:uid(), name:'Déj LC poulet-légumes', type:'combo', mode:'LC', slot:'dej', note:'Zéro féculent',
+        items:[{food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},{food:'Brocolis',qty:'150g',g:7,p:4,l:0,kcal:50},{food:'Huile d\'olive',qty:'1 c.à.s',g:0,p:0,l:10,kcal:90}], steps:[]},
+      {id:uid(), name:'Déj MC poulet-basmati', type:'combo', mode:'MC', slot:'dej', note:'Express midi',
+        items:[{food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},{food:'Riz basmati',qty:'70g cru',g:54,p:5,l:1,kcal:245},{food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}], steps:[]},
+      {id:uid(), name:'Déj MC thon-riz express', type:'combo', mode:'MC', slot:'dej', note:'',
+        items:[{food:'Thon en boîte',qty:'120g',g:0,p:30,l:1,kcal:140},{food:'Petit-suisse 0% / light',qty:'60g',g:2,p:8,l:0,kcal:45},{food:'Riz basmati',qty:'70g cru',g:54,p:5,l:1,kcal:245},{food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}], steps:[]},
+      {id:uid(), name:'Déj HC poulet-pâtes', type:'combo', mode:'HC', slot:'dej', note:'',
+        items:[{food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},{food:'Pâtes',qty:'70g cru',g:50,p:9,l:1,kcal:250},{food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}], steps:[]},
+      // ── Dîners ──
+      {id:uid(), name:'Dîner LC poisson-légumes', type:'combo', mode:'LC', slot:'diner', note:'Zéro féculent',
+        items:[{food:'Cabillaud',qty:'180g',g:0,p:32,l:2,kcal:145},{food:'Haricots verts',qty:'150g',g:6,p:3,l:0,kcal:45},{food:'Huile d\'olive',qty:'1 c.à.s',g:0,p:0,l:10,kcal:90}], steps:[]},
+      {id:uid(), name:'Dîner MC bœuf-quinoa', type:'combo', mode:'MC', slot:'diner', note:'',
+        items:[{food:'Bœuf haché 5%',qty:'160g',g:0,p:36,l:8,kcal:220},{food:'Quinoa',qty:'50g cru',g:32,p:7,l:3,kcal:185},{food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}], steps:[]},
+      {id:uid(), name:'Dîner MC saumon-riz', type:'combo', mode:'MC', slot:'diner', note:'Oméga-3',
+        items:[{food:'Saumon',qty:'150g',g:0,p:31,l:20,kcal:310},{food:'Riz basmati',qty:'70g cru',g:54,p:5,l:1,kcal:245},{food:'Brocolis',qty:'150g',g:7,p:4,l:0,kcal:50}], steps:[]},
+      {id:uid(), name:'Dîner HC + plaisir contrôlé', type:'recipe', mode:'HC', slot:'diner', note:'Veille de grosse séance',
+        items:[{food:'Blanc de poulet',qty:'150g',g:0,p:46,l:5,kcal:250},{food:'Pâtes',qty:'90g cru',g:64,p:12,l:1,kcal:320},{food:'Courgettes',qty:'150g',g:5,p:2,l:0,kcal:30}],
+        steps:['Cuire les pâtes al dente','Poêler le poulet','Légumes vapeur','1 carré de chocolat noir en plaisir contrôlé']}
     ];
   }
 
-  // ── Rendu de la bibliothèque ──
+  // ── Filtre par mode + sections dépliables par créneau ──
+  var filterMode = 'all';
+  var SEC_KEY = 'ccc_rec_sections';
+  function loadSections(){ var o=null; try{ o=JSON.parse(localStorage.getItem(SEC_KEY)||'null'); }catch(e){} return (o&&typeof o==='object')?o:{}; }
+  function saveSections(o){ try{ localStorage.setItem(SEC_KEY, JSON.stringify(o)); }catch(e){} }
+  var GROUPS = [
+    {slot:'pdej',    label:'Petits-déjeuners', emo:'🌅'},
+    {slot:'coll',    label:'Collations',       emo:'🥨'},
+    {slot:'dej',     label:'Déjeuners',        emo:'🍽️'},
+    {slot:'diner',   label:'Dîners',           emo:'🌙'},
+    {slot:'__other', label:'Autres',           emo:'📦'}
+  ];
+  function inGroup(r, g){ if (g.slot==='__other') return (!r.slot || r.slot==='any'); return r.slot===g.slot; }
+  function passFilter(r){ return filterMode==='all' || r.mode===filterMode || r.mode==='any'; }
+
+  function cardHtml(r){
+    var modeLbl = {any:'Tous', LC:'LC', MC:'MC', HC:'HC'};
+    var t = tot(r), open = !!openIds[r.id];
+    var h = '<div class="rec-card' + (open?' open':'') + '">';
+    h += '<div class="rec-card-head" data-toggle="' + r.id + '">';
+    h += '<svg class="rec-chev" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,4 13,10 7,16"/></svg>';
+    h += '<span class="nm">' + esc(r.name) + '</span>';
+    h += '<span class="rec-badge">' + (r.type==='recipe'?'Recette':'Combo') + '</span>';
+    if (r.mode && r.mode!=='any') h += '<span class="rec-badge">' + modeLbl[r.mode] + '</span>';
+    h += '<span class="rec-kcal">' + t.kcal + ' kcal</span>';
+    h += '</div>';
+    h += '<div class="rec-body">';
+    (r.items||[]).forEach(function(i){
+      h += '<div class="rec-ing"><span>' + esc(i.food) + ' <span style="color:var(--muted)">' + esc(i.qty) + '</span></span><span class="mac">' + Math.round(i.kcal) + 'k · P' + Math.round(i.p) + '</span></div>';
+    });
+    if (r.type==='recipe' && r.steps && r.steps.length) {
+      h += '<div class="rec-steps">';
+      r.steps.forEach(function(s, idx){ h += '<div class="rec-step"><span class="n">' + (idx+1) + '.</span><span>' + esc(s) + '</span></div>'; });
+      h += '</div>';
+    }
+    h += '<div class="rec-tot">⚡ ' + t.kcal + ' kcal · 🍚 ' + t.g + 'g · 🥩 ' + t.p + 'g · 🥑 ' + t.l + 'g</div>';
+    if (r.note) h += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted);margin-top:0.4rem">' + esc(r.note) + '</div>';
+    h += '<div class="rec-actions"><span class="rec-act" data-edit="' + r.id + '">Éditer</span><span class="rec-act" data-del="' + r.id + '" style="color:var(--red,#e05260)">Supprimer</span></div>';
+    h += '</div></div>';
+    return h;
+  }
+
+  // ── Rendu de la bibliothèque (groupée par créneau + filtrable) ──
   function render(){
     var el = document.getElementById('recipes-module');
     if (!el) return;
     var list = load();
-    var modeLbl = {any:'Tous', LC:'LC', MC:'MC', HC:'HC'};
     var h = '<div class="rec-head"><h3>📒 Mes recettes &amp; combos</h3><span class="rec-add" id="rec-add">+ Créer</span></div>';
-    if (!list.length) {
-      h += '<div class="rec-empty">Aucune recette. Crée ton premier combo.</div>';
-    }
-    list.forEach(function(r){
-      var t = tot(r), open = !!openIds[r.id];
-      h += '<div class="rec-card' + (open?' open':'') + '">';
-      h += '<div class="rec-card-head" data-toggle="' + r.id + '">';
-      h += '<svg class="rec-chev" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,4 13,10 7,16"/></svg>';
-      h += '<span class="nm">' + esc(r.name) + '</span>';
-      h += '<span class="rec-badge">' + (r.type==='recipe'?'Recette':'Combo') + '</span>';
-      if (r.mode && r.mode!=='any') h += '<span class="rec-badge">' + modeLbl[r.mode] + '</span>';
-      h += '<span class="rec-kcal">' + t.kcal + ' kcal</span>';
-      h += '</div>';
-      h += '<div class="rec-body">';
-      (r.items||[]).forEach(function(i){
-        h += '<div class="rec-ing"><span>' + esc(i.food) + ' <span style="color:var(--muted)">' + esc(i.qty) + '</span></span><span class="mac">' + Math.round(i.kcal) + 'k · P' + Math.round(i.p) + '</span></div>';
-      });
-      if (r.type==='recipe' && r.steps && r.steps.length) {
-        h += '<div class="rec-steps">';
-        r.steps.forEach(function(s, idx){ h += '<div class="rec-step"><span class="n">' + (idx+1) + '.</span><span>' + esc(s) + '</span></div>'; });
-        h += '</div>';
-      }
-      h += '<div class="rec-tot">⚡ ' + t.kcal + ' kcal · 🍚 ' + t.g + 'g · 🥩 ' + t.p + 'g · 🥑 ' + t.l + 'g</div>';
-      if (r.note) h += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted);margin-top:0.4rem">' + esc(r.note) + '</div>';
-      h += '<div class="rec-actions"><span class="rec-act" data-edit="' + r.id + '">Éditer</span><span class="rec-act" data-del="' + r.id + '" style="color:var(--red,#e05260)">Supprimer</span></div>';
+    h += '<div class="rec-filter">';
+    [['all','Tous'],['LC','LC'],['MC','MC'],['HC','HC']].forEach(function(m){
+      h += '<span class="rec-fchip' + (filterMode===m[0]?' on':'') + '" data-fmode="' + m[0] + '">' + m[1] + '</span>';
+    });
+    h += '</div>';
+    if (!list.length) { h += '<div class="rec-empty">Aucune recette. Crée ton premier combo.</div>'; el.innerHTML = h; bind(); return; }
+    var sec = loadSections(), shown = 0;
+    GROUPS.forEach(function(g){
+      var items = list.filter(function(r){ return inGroup(r,g) && passFilter(r); });
+      if (!items.length) return;
+      shown += items.length;
+      var open = !!sec[g.slot]; // replié par défaut
+      h += '<div class="rec-group' + (open?' open':'') + '">';
+      h += '<div class="rec-group-head" data-section="' + g.slot + '">';
+      h += '<svg class="rec-group-chev" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,4 13,10 7,16"/></svg>';
+      h += '<span class="gemo">' + g.emo + '</span><span class="glbl">' + g.label + '</span><span class="gcount">' + items.length + '</span>';
+      h += '</div><div class="rec-group-body">';
+      items.forEach(function(r){ h += cardHtml(r); });
       h += '</div></div>';
     });
+    if (!shown) h += '<div class="rec-empty">Aucune recette pour ce filtre.</div>';
     el.innerHTML = h;
     bind();
   }
@@ -6269,6 +6426,12 @@ if (document.readyState === 'loading') {
     if (!el) return;
     var add = document.getElementById('rec-add');
     if (add) add.onclick = function(){ openModal(null); };
+    el.querySelectorAll('[data-fmode]').forEach(function(x){
+      x.onclick = function(){ filterMode = x.getAttribute('data-fmode'); render(); };
+    });
+    el.querySelectorAll('[data-section]').forEach(function(x){
+      x.onclick = function(){ var s = loadSections(), k = x.getAttribute('data-section'); s[k] = !s[k]; saveSections(s); render(); };
+    });
     el.querySelectorAll('[data-toggle]').forEach(function(x){
       x.onclick = function(){ var id = x.getAttribute('data-toggle'); openIds[id] = !openIds[id]; render(); };
     });
@@ -6289,7 +6452,7 @@ if (document.readyState === 'loading') {
   function optChip(group, val, on, label){
     return '<span class="rec-opt" data-group="' + group + '" data-val="' + val + '" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.62rem;padding:0.35rem 0.6rem;border-radius:8px;background:' + (on?'var(--accent,#a3e635)':'var(--surface2,#1c1d21)') + ';color:' + (on?'#0f0f10':'var(--muted,#888)') + ';border:1px solid ' + (on?'var(--accent,#a3e635)':'var(--border,#242528)') + '">' + label + '</span>';
   }
-  function newDraft(){ return {id:null, name:'', type:'combo', mode:'any', note:'', items:[], steps:[]}; }
+  function newDraft(){ return {id:null, name:'', type:'combo', mode:'any', slot:'any', note:'', items:[], steps:[]}; }
   function openModal(id){
     editingId = id;
     if (id) { var r = load().filter(function(x){ return x.id===id; })[0]; draft = r ? JSON.parse(JSON.stringify(r)) : newDraft(); }
@@ -6308,6 +6471,7 @@ if (document.readyState === 'loading') {
     h += fieldLbl('Nom') + '<input id="rec-name" value="' + esc(draft.name) + '" placeholder="ex Bowl récup" style="' + INP + '">';
     h += fieldLbl('Type') + '<div style="display:flex;gap:0.4rem;margin-bottom:0.7rem">' + optChip('type','combo',draft.type==='combo','Combo (compact)') + optChip('type','recipe',draft.type==='recipe','Recette (étapes)') + '</div>';
     h += fieldLbl('Mode carb') + '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.7rem">' + ['any','LC','MC','HC'].map(function(m){ return optChip('mode',m,draft.mode===m,m==='any'?'Indifférent':m); }).join('') + '</div>';
+    h += fieldLbl('Créneau') + '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.7rem">' + [['any','Indifférent'],['pdej','P-déj'],['dej','Déj'],['coll','Collation'],['diner','Dîner']].map(function(o){ return optChip('slot',o[0],draft.slot===o[0],o[1]); }).join('') + '</div>';
     h += fieldLbl('Ingrédients');
     if (draft.items.length) {
       h += '<div style="margin-bottom:0.5rem">';
@@ -6339,7 +6503,7 @@ if (document.readyState === 'loading') {
     var steps = document.getElementById('rec-steps'); if (steps) steps.oninput = function(){ draft.steps = steps.value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean); };
     o.querySelectorAll('.rec-opt').forEach(function(x){
       x.onclick = function(){ var g = x.getAttribute('data-group'), v = x.getAttribute('data-val');
-        if (g==='type') draft.type = v; else if (g==='mode') draft.mode = v; renderModal(); };
+        if (g==='type') draft.type = v; else if (g==='mode') draft.mode = v; else if (g==='slot') draft.slot = v; renderModal(); };
     });
     var is = document.getElementById('rec-ingsearch');
     if (is) is.oninput = function(){ ingSearch = is.value; renderModal(); var n = document.getElementById('rec-ingsearch'); if (n) { n.focus(); try { n.setSelectionRange(n.value.length, n.value.length); } catch(e){} } };
@@ -6354,6 +6518,13 @@ if (document.readyState === 'loading') {
     var sv = document.getElementById('rec-save'); if (sv) sv.onclick = saveDraft;
   }
   function addIngredient(f){
+    if (window.__foodQtyPrompt) {
+      var r = window.__foodQtyPrompt(f);
+      if (!r) return; // annulé ou invalide
+      draft.items.push({food:f.n, qty:r.qty, g:f.g*r.factor, p:f.p*r.factor, l:f.l*r.factor, kcal:Math.round(f.kcal*r.factor)});
+      ingSearch = ''; renderModal(); return;
+    }
+    // Fallback si le helper n'est pas dispo
     var isUnit = (f.u==='unité');
     var q = prompt(f.n + ' — ' + (isUnit?'nombre d\'unités':'quantité (g)') + ' :', isUnit?'1':'100');
     if (q===null) return;
@@ -6398,6 +6569,34 @@ if (document.readyState === 'loading') {
   function carbMode(d){ try { return (typeof dayCarbMode==='function') ? dayCarbMode(d) : 'MC'; } catch(e){ return 'MC'; } }
   function recipes(){ var a=null; try { a=JSON.parse(localStorage.getItem('ccc_recipes')||'null'); } catch(e){} return Array.isArray(a)?a:[]; }
   function recById(id){ if(!id) return null; var r=recipes().filter(function(x){ return x.id===id; }); return r[0]||null; }
+
+  // ── Pré-remplissage : choisit un repas de la bibliothèque selon mode + créneau ──
+  var AF_KEY = 'ccc_weekplan_autofilled';
+  function loadAF(){ var o=null; try{ o=JSON.parse(localStorage.getItem(AF_KEY)||'null'); }catch(e){} return (o&&typeof o==='object')?o:{}; }
+  function saveAF(o){ try{ localStorage.setItem(AF_KEY, JSON.stringify(o)); }catch(e){} }
+  function pickDefault(mode, slot, idx){
+    var lib = recipes();
+    var cand = lib.filter(function(r){ return (r.slot===slot || r.slot==='any' || !r.slot) && (r.mode===mode || r.mode==='any'); });
+    var exact = cand.filter(function(r){ return r.mode===mode && r.slot===slot; });
+    var pool = exact.length ? exact : cand;
+    if (!pool.length) return null;
+    return pool[idx % pool.length];
+  }
+  function autofillWeek(){
+    var P = plan(); if (!P.length) return false;
+    var wk = P[cWI], pl = loadPlan(), changed = false;
+    (wk.days||[]).forEach(function(d, di){
+      var mode = carbMode(d);
+      if (!pl[d.date]) pl[d.date] = {};
+      SLOTS.forEach(function(sl){
+        if (pl[d.date][sl.id]) return; // ne JAMAIS écraser un choix existant
+        var r = pickDefault(mode, sl.id, di);
+        if (r) { pl[d.date][sl.id] = r.id; changed = true; }
+      });
+    });
+    if (changed) savePlan(pl);
+    return changed;
+  }
   function foods(){ try { return (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){ return []; } }
   function loadPlan(){ var o=null; try { o=JSON.parse(localStorage.getItem(WK_KEY)||'null'); } catch(e){} return (o&&typeof o==='object')?o:{}; }
   function savePlan(o){ try { localStorage.setItem(WK_KEY, JSON.stringify(o)); } catch(e){} }
@@ -6414,9 +6613,14 @@ if (document.readyState === 'loading') {
     var P=plan(); if(!P.length){ el.innerHTML=''; return; }
     if(cWI===null) cWI=curWeekIdx();
     if(cWI<0) cWI=0; if(cWI>P.length-1) cWI=P.length-1;
-    var wk=P[cWI], pl=loadPlan();
+    var wk=P[cWI];
+    // Pré-remplissage AUTO (une seule fois) si la semaine est entièrement vide et qu'on a une bibliothèque
+    var pl=loadPlan();
+    var hasAny=(wk.days||[]).some(function(d){ var a=pl[d.date]||{}; return SLOTS.some(function(sl){ return a[sl.id]; }); });
+    var af=loadAF();
+    if(!hasAny && !af['S'+wk.num] && recipes().length){ autofillWeek(); af['S'+wk.num]=true; saveAF(af); pl=loadPlan(); }
     var h='<div class="wkc-head"><h3>🗓️ Composer la semaine</h3><span class="wkc-shop" id="wkc-shop">🛒 Liste de courses</span></div>';
-    h+='<div class="wkc-head" style="margin-bottom:0.7rem"><div class="wkc-nav"><button id="wkc-prev">‹</button><span class="wkc-wk">S'+wk.num+' · '+esc(wk.phase)+'</span><button id="wkc-next">›</button></div></div>';
+    h+='<div class="wkc-head" style="margin-bottom:0.7rem"><div class="wkc-nav"><button id="wkc-prev">‹</button><span class="wkc-wk">S'+wk.num+' · '+esc(wk.phase)+'</span><button id="wkc-next">›</button></div><span class="wkc-shop" id="wkc-fill">✨ Pré-remplir</span></div>';
     (wk.days||[]).forEach(function(d){
       var mode=carbMode(d), asn=pl[d.date]||{}, dayKcal=0;
       SLOTS.forEach(function(sl){ dayKcal+=tot(recById(asn[sl.id])); });
@@ -6440,6 +6644,7 @@ if (document.readyState === 'loading') {
     var prev=document.getElementById('wkc-prev'); if(prev) prev.onclick=function(){ cWI--; render(); };
     var next=document.getElementById('wkc-next'); if(next) next.onclick=function(){ cWI++; render(); };
     var shop=document.getElementById('wkc-shop'); if(shop) shop.onclick=openShop;
+    var fill=document.getElementById('wkc-fill'); if(fill) fill.onclick=function(){ autofillWeek(); render(); };
     el.querySelectorAll('.wkc-slot').forEach(function(x){
       x.onclick=function(){ openPicker(x.getAttribute('data-date'), x.getAttribute('data-slot')); };
     });
@@ -6542,6 +6747,25 @@ if (document.readyState === 'loading') {
   window.__renderWeekplan=render;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', render);
   else render();
+})();
+
+
+/* ════════════════════════════════════════════════════════════
+   ACCORDÉON — Matrices Nutritionnelles (replié par défaut, état persistant)
+════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var KEY='ccc_matrices_open';
+  function init(){
+    var t=document.getElementById('matrices-toggle'), b=document.getElementById('matrices-body'), c=document.getElementById('matrices-chev');
+    if(!t||!b) return;
+    var open=false; try{ open=localStorage.getItem(KEY)==='1'; }catch(e){}
+    function apply(){ b.style.display=open?'block':'none'; if(c) c.textContent=open?'▾ replier':'▸ déplier'; }
+    apply();
+    t.addEventListener('click', function(){ open=!open; try{ localStorage.setItem(KEY, open?'1':'0'); }catch(e){} apply(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 </body>
