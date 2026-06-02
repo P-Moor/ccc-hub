@@ -2124,19 +2124,46 @@ function renderWeekRecap() {
   var wk = months[curMonth] && months[curMonth][curWeekInMonth];
   if (!wk) { el.innerHTML = ''; return; }
   var abs = getAbsOffset(curMonth, curWeekInMonth);
+  var days = wk.days || [];
   var done = getDone();
   var P = { run:0, velo:0, muscu:0, dplus:0 };
   var R = { run:0, velo:0, muscu:0, dplus:0 };
-  var nDays = 0, nDone = 0;
-  for (var i = 0; i < wk.days.length; i++) {
-    var d = wk.days[i];
+  var nDays = days.length, nDone = 0;
+  for (var i = 0; i < days.length; i++) {
+    var d = days[i];
     var mu = (d.muscu ? 1 : 0) || (d.type === 'muscu' ? 1 : 0);
-    var hasLoad = (d.run || 0) > 0 || (d.velo || 0) > 0 || mu > 0;
-    if (hasLoad) nDays++;
     P.run += d.run || 0; P.velo += d.velo || 0; P.dplus += d.dplus || 0; P.muscu += mu;
-    if (done[abs + '-' + i]) {
-      R.run += d.run || 0; R.velo += d.velo || 0; R.dplus += d.dplus || 0; R.muscu += mu;
-      if (hasLoad) nDone++;
+    if (done[abs + '-' + i]) nDone++;
+  }
+  // Plage de dates de la semaine + détection « semaine en cours » (fenêtre Garmin = 7 derniers jours)
+  var monday = days.length ? days[0].date : null;
+  var sunday = days.length ? days[days.length - 1].date : null;
+  function _ds(t){ function p(n){ return n < 10 ? '0' + n : '' + n; } return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()); }
+  var todayS = _ds(new Date());
+  var isCurrent = !!(monday && sunday && todayS >= monday && todayS <= sunday);
+  var gd = window.__garminData;
+  var useGarmin = !!(isCurrent && gd && gd.activities && gd.activities.length);
+  // Réalisé : Garmin pour la semaine en cours (IDENTIQUE à « Objectifs »), sinon séances cochées ✓
+  if (useGarmin) {
+    gd.activities.forEach(function(a) {
+      var ad = (a.date || '').slice(0, 10);
+      if (!(ad >= monday && ad <= sunday)) return;
+      var t = (a.type || '').toLowerCase();
+      if (t.indexOf('cycl') >= 0 || t.indexOf('ride') >= 0 || t.indexOf('gravel') >= 0 || t.indexOf('biking') >= 0) {
+        R.velo += (a.distance_km || 0);
+      } else if (t.indexOf('strength') >= 0 || t.indexOf('muscu') >= 0 || (t.indexOf('training') >= 0 && t.indexOf('treadmill') < 0)) {
+        R.muscu += 1;
+      } else if (t.indexOf('run') >= 0 || t.indexOf('cours') >= 0 || t.indexOf('treadmill') >= 0 || t.indexOf('trail') >= 0 || t.indexOf('hiking') >= 0) {
+        R.run += (a.distance_km || 0); R.dplus += (a.elevation_gain || 0);
+      }
+    });
+  } else {
+    for (var k = 0; k < days.length; k++) {
+      var dk2 = days[k];
+      var muk = (dk2.muscu ? 1 : 0) || (dk2.type === 'muscu' ? 1 : 0);
+      if (done[abs + '-' + k]) {
+        R.run += dk2.run || 0; R.velo += dk2.velo || 0; R.dplus += dk2.dplus || 0; R.muscu += muk;
+      }
     }
   }
   var pVol = Math.round(P.run + P.velo / 3), rVol = Math.round(R.run + R.velo / 3);
@@ -2168,7 +2195,7 @@ function renderWeekRecap() {
       bar('mountain', 'D+', R.dplus, P.dplus, 'm') +
       bar('chart', 'Vol', rVol, pVol, 'km') +
     '</div>' +
-    '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted);margin-top:0.6rem;text-align:center">réalisé = séances cochées ✓ · vol = km équivalent course</div>' +
+    '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted);margin-top:0.6rem;text-align:center">' + (useGarmin ? 'réalisé = activités Garmin de la semaine' : 'réalisé = séances cochées ✓') + ' · vol = km équivalent course</div>' +
   '</div>';
   el.innerHTML = html;
 }
