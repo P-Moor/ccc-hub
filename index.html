@@ -6181,6 +6181,7 @@ if (document.readyState === 'loading') {
 
   window.__nutriGetFoods = getFoods;
   window.__nutriTargets = computeTargets;
+  window.__nutriAddFood = saveCustomFood;
   window.__renderNutrition = function(){
     render();
     // Le fil du jour réagit aux changements de repas/hydratation
@@ -6591,7 +6592,7 @@ if (document.readyState === 'loading') {
   }
 
   // ── CONNEXION BASE ALIMENTAIRE : recale les macros d'un repas proposé sur la base ~430 aliments ──
-  function normFood(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+  function normFood(s){ return String(s||'').toLowerCase().replace(/œ/g,'oe').replace(/æ/g,'ae').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
   function matchFoodDB(name){
     var foods = []; try { foods = (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){}
     if (!foods.length) return null;
@@ -6608,15 +6609,40 @@ if (document.readyState === 'loading') {
     });
     return bestScore >= 40 ? best : null;
   }
-  function unitGrams(u){ var m = String(u||'').match(/([\d.]+)\s*g/i); return m ? parseFloat(m[1]) : null; }
+  // Équivalent en grammes d'une "unité" de l'aliment : depuis u ('100g') ou, à défaut, depuis la note (« ≈ 60g »).
+  function gramsPerUnit(f){
+    if (!f) return null;
+    var m = String(f.u||'').match(/([\d.]+)\s*g/i);
+    if (m) return parseFloat(m[1]);
+    var mn = String(f.note||'').match(/[≈~]\s*([\d.]+)\s*g/i);
+    if (mn) return parseFloat(mn[1]);
+    return null;
+  }
+  // Recherche dans la base pour l'autocomplétion (top n par score), hors boissons par défaut.
+  function searchFoodsDB(q, n){
+    var foods = []; try { foods = (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){}
+    var nq = normFood(q); if (!nq) return [];
+    var scored = [];
+    foods.forEach(function(f){
+      if (!f || !f.n) return;
+      var fn = normFood(f.n), score = 0;
+      if (fn === nq) score = 100;
+      else if (fn.indexOf(nq) === 0) score = 80;
+      else if (fn.indexOf(nq) >= 0) score = 60;
+      else { var c = 0; nq.split(' ').forEach(function(w){ if (w.length > 2 && fn.indexOf(w) >= 0) c++; }); if (c) score = 20 + c*10; }
+      if (score > 0) scored.push({ f: f, s: score });
+    });
+    scored.sort(function(a,b){ return b.s - a.s; });
+    return scored.slice(0, n || 6).map(function(x){ return x.f; });
+  }
   // Recalcule les macros d'un item pour une quantité en grammes.
-  // Base si match scalable (macros = base × grammes/unité) ; sinon estimation IA rescalée. Mute l'item, le renvoie.
+  // Base si match (macros = base × grammes/équivalent-unité) ; sinon estimation IA rescalée. Mute l'item, le renvoie.
   function applyGrams(it, grams){
     grams = (grams > 0) ? grams : 0;
     var f = matchFoodDB(it.n);
-    var ug = f ? unitGrams(f.u) : null;
-    if (f && grams > 0 && ug) {
-      var k = grams / ug;
+    var gpu = f ? gramsPerUnit(f) : null;
+    if (f && grams > 0 && gpu) {
+      var k = grams / gpu;
       it.food = f.n; it._src = 'base'; it._note = f.note || '';
       it.g = Math.round(f.g*k); it.p = Math.round(f.p*k); it.l = Math.round(f.l*k*10)/10; it.kcal = Math.round(f.kcal*k);
     } else {
@@ -6793,11 +6819,11 @@ if (document.readyState === 'loading') {
 
       params.items.forEach(function(it){ list.appendChild(makeRow(it)); });
 
-      // Ligne d'ajout manuel : nom (recalé sur la base) + grammes
+      // Ligne d'ajout : recherche dans la base (autocomplétion) + grammes
       var addRow = document.createElement('div');
       addRow.style.cssText = 'display:flex;align-items:center;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap';
       var addName = document.createElement('input');
-      addName.type = 'text'; addName.placeholder = '+ ajouter un aliment (ex : skyr)';
+      addName.type = 'text'; addName.placeholder = '+ chercher dans ta base (ex : skyr)';
       addName.style.cssText = 'flex:1;min-width:130px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.35rem;font-size:0.74rem';
       var addG = document.createElement('input');
       addG.type = 'number'; addG.inputMode = 'numeric'; addG.min = '0'; addG.placeholder = 'g';
@@ -6805,21 +6831,95 @@ if (document.readyState === 'loading') {
       var addBtn = document.createElement('button');
       addBtn.textContent = '+';
       addBtn.style.cssText = 'background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.85rem;font-weight:700';
-      function doAdd(){
-        var nm0 = (addName.value || '').trim(); if (!nm0) return;
-        var g0 = parseFloat(addG.value); g0 = (isFinite(g0) && g0 > 0) ? g0 : 0;
-        var it = groundMealItems([{ n: nm0, grams: g0, g:0, p:0, l:0, kcal:0 }])[0];
-        params.items.push(it);
-        list.appendChild(makeRow(it));
-        refreshTotal();
-        addName.value = ''; addG.value = ''; addName.focus();
+      // Dropdown de suggestions issues de la base
+      var sugg = document.createElement('div');
+      sugg.style.cssText = 'display:none;flex-direction:column;margin-top:0.3rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)';
+      function clearSugg(){ sugg.style.display = 'none'; sugg.innerHTML = ''; }
+      function pushItem(it){ params.items.push(it); list.appendChild(makeRow(it)); refreshTotal(); addName.value = ''; addG.value = ''; clearSugg(); }
+      // Ajout d'un aliment de la base (macros depuis la base, quantité en grammes)
+      function addBaseFood(f){
+        var entered = parseFloat(addG.value);
+        var gpu = gramsPerUnit(f);
+        var isUnitFood = !/g/i.test(f.u || '');
+        var grams = (isFinite(entered) && entered > 0) ? entered : (isUnitFood && gpu ? gpu : 100);
+        var it = applyGrams({ n: f.n, _ai: { grams: grams, g:0, p:0, l:0, kcal:0 } }, grams);
+        pushItem(it);
       }
-      addBtn.addEventListener('click', doAdd);
-      addName.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
-      addG.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+      // Ajout libre (texte non trouvé dans la base → estimé)
+      // Mini-formulaire : créer un aliment dans la base (macros /100g) puis l'ajouter au repas
+      function showCreateForm(name){
+        sugg.innerHTML = '';
+        var box = document.createElement('div');
+        box.style.cssText = 'padding:0.55rem 0.6rem;display:flex;flex-direction:column;gap:0.4rem';
+        var ttl = document.createElement('div');
+        ttl.style.cssText = 'font-family:DM Mono,monospace;font-size:0.62rem;color:var(--accent)';
+        ttl.textContent = '➕ Créer « ' + name + ' » dans ta base · valeurs pour 100 g';
+        var grid = document.createElement('div');
+        grid.style.cssText = 'display:flex;gap:0.35rem;flex-wrap:wrap';
+        function field(ph){
+          var i = document.createElement('input');
+          i.type = 'number'; i.inputMode = 'decimal'; i.min = '0'; i.placeholder = ph;
+          i.style.cssText = 'width:64px;flex:1;min-width:58px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.35rem;font-family:DM Mono,monospace;font-size:0.72rem;text-align:right';
+          return i;
+        }
+        var fK = field('kcal'), fG = field('Gluc'), fP = field('Prot'), fL = field('Lip');
+        grid.appendChild(fK); grid.appendChild(fG); grid.appendChild(fP); grid.appendChild(fL);
+        var save = document.createElement('button');
+        save.textContent = 'Créer & ajouter';
+        save.style.cssText = 'align-self:flex-start;background:var(--accent);color:#0f0f10;border:none;border-radius:7px;padding:0.4rem 0.85rem;font-size:0.74rem;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif';
+        save.addEventListener('click', function(){
+          var kcal = parseFloat(fK.value) || 0;
+          var food = { cat:'Perso', n: name, u:'100g',
+            g: parseFloat(fG.value)||0, p: parseFloat(fP.value)||0, l: parseFloat(fL.value)||0, kcal: kcal, custom: true };
+          try { if (window.__nutriAddFood) window.__nutriAddFood(food); } catch(e){}
+          // ajout immédiat au repas (matchera la base fraîchement créée)
+          var entered = parseFloat(addG.value);
+          var grams = (isFinite(entered) && entered > 0) ? entered : 100;
+          pushItem(applyGrams({ n: name, _ai: { grams: grams, g:0, p:0, l:0, kcal:0 } }, grams));
+        });
+        box.appendChild(ttl); box.appendChild(grid); box.appendChild(save);
+        sugg.appendChild(box);
+        sugg.style.display = 'flex';
+        fK.focus();
+      }
+
+      function renderSugg(){
+        var q = (addName.value || '').trim();
+        if (q.length < 2) { clearSugg(); return; }
+        var matches = searchFoodsDB(q, 6);
+        sugg.innerHTML = '';
+        matches.forEach(function(f){
+          var opt = document.createElement('div');
+          opt.style.cssText = 'display:flex;justify-content:space-between;gap:0.5rem;padding:0.4rem 0.55rem;cursor:pointer;border-bottom:1px solid var(--border)';
+          opt.innerHTML = '<span style="font-size:0.72rem;color:var(--text)">' + f.n + (f.note ? ' <span style="color:var(--orange,#e8a020);font-size:0.55rem">⚠️</span>' : '') + '</span><span style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted);white-space:nowrap">' + f.kcal + 'k/' + f.u + '</span>';
+          opt.addEventListener('click', function(){ addBaseFood(f); });
+          sugg.appendChild(opt);
+        });
+        // Toujours proposer la création si pas de correspondance exacte
+        var exact = matches.some(function(f){ return normFood(f.n) === normFood(q); });
+        if (!exact) {
+          var add = document.createElement('div');
+          add.style.cssText = 'padding:0.45rem 0.55rem;cursor:pointer;color:var(--accent);font-family:DM Mono,monospace;font-size:0.66rem;border-top:' + (matches.length ? '1px solid var(--border)' : 'none');
+          add.textContent = '➕ « ' + q + ' » pas dans ta base — créer';
+          add.addEventListener('click', function(){ showCreateForm(q); });
+          sugg.appendChild(add);
+        }
+        sugg.style.display = 'flex';
+      }
+      addName.addEventListener('input', renderSugg);
+      addBtn.addEventListener('click', function(){
+        // priorité au 1er résultat de base si dispo, sinon proposer la création
+        var q = (addName.value||'').trim(); if (!q) return;
+        var m = searchFoodsDB(q, 1);
+        if (m.length && normFood(m[0].n) === normFood(q)) addBaseFood(m[0]);
+        else if (m.length) addBaseFood(m[0]);
+        else showCreateForm(q);
+      });
+      addName.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); var q=(addName.value||'').trim(); if(!q) return; var m = searchFoodsDB(q, 1); if (m.length) addBaseFood(m[0]); else showCreateForm(q); } });
+      addG.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); var q=(addName.value||'').trim(); if(!q) return; var m = searchFoodsDB(q, 1); if (m.length) addBaseFood(m[0]); else showCreateForm(q); } });
       addRow.appendChild(addName); addRow.appendChild(addG); addRow.appendChild(addBtn);
 
-      body.appendChild(list); body.appendChild(addRow); body.appendChild(totalEl); refreshTotal();
+      body.appendChild(list); body.appendChild(addRow); body.appendChild(sugg); body.appendChild(totalEl); refreshTotal();
     } else {
       body.innerHTML = '<b>' + sum.titre + '</b><br>' + sum.detail.replace(/\n/g,'<br>');
     }
