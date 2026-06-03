@@ -8576,7 +8576,7 @@ if (document.readyState === 'loading') {
     h+=statTile('Durée',fmtDurMin(act.duration_min),'');
     h+=statTile('FC moy/max',fc,'');
     if(act.calories!=null) h+=statTile('Calories',Math.round(act.calories),'kcal');
-    else if(act.te_aerobic!=null) h+=statTile('TE aéro',act.te_aerobic,'');
+    else if(act.te_aerobic!=null) h+=statTile('TE aéro',(Math.round(act.te_aerobic*10)/10),'');
     else h+=statTile('Type',typeLabel(act.type),'');
     h+='</div>';
     h+=secHead(ICON('chart',16),'Courbes')+curvesBlock(act);
