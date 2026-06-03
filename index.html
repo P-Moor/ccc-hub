@@ -1203,7 +1203,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 <!-- NUTRITION -->
 <div class="panel" id="panel-nutrition"><div class="inner">
-  <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.5</b> · recherche Open Food Facts (millions de produits)</div>
+  <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.6</b> · recherche OFF fiabilisée (code-barres + Search-a-licious)</div>
   <div class="rec-mod" id="recipes-module"></div>
   <div class="wkc-mod" id="weekplan-module"></div>
   <div class="ptitle" id="matrices-toggle" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem">Matrices Nutritionnelles <span class="ptitle-sub">Carb cycling · quantités</span> <span id="matrices-chev" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">▸ déplier</span></div>
@@ -5856,7 +5856,7 @@ if (document.readyState === 'loading') {
     // ── Bloc Open Food Facts (recherche en ligne, toutes marques) ──
     h += '<div style="border-top:1px dashed var(--border,#242528);margin-top:0.3rem;padding-top:0.5rem">';
     var offTerm = (searchTerm||'').trim();
-    var btnLabel = offTerm ? ('🌐 Chercher « ' + offTerm + ' » dans Open Food Facts') : '🌐 Tape un nom puis cherche dans Open Food Facts';
+    var btnLabel = offTerm ? ('🌐 Chercher « ' + offTerm + ' » dans Open Food Facts') : '🌐 Nom ou code-barres → Open Food Facts';
     h += '<div class="nh-off-search" style="text-align:center;cursor:pointer;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--accent,#a3e635);padding:0.4rem;border:1px solid var(--border,#242528);border-radius:6px;background:var(--surface,#16171a)">' + btnLabel + '</div>';
     if (offLoading) {
       h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">⏳ Recherche en ligne…</div>';
@@ -5921,55 +5921,99 @@ if (document.readyState === 'loading') {
   // ════════════════════════════════════════
   function offNum(v){ var n = parseFloat(v); return (isNaN(n)||!isFinite(n)) ? 0 : n; }
   function offRound(n){ return Math.round(n*10)/10; }
+  // Lecture tolérante d'un nutriment : gère l'objet imbriqué (nut['x']) ET le format aplati (p['nutriments.x'])
+  function offNut(p, key){
+    var nut = p.nutriments || {};
+    if (nut[key] != null) return offNum(nut[key]);
+    if (p['nutriments.'+key] != null) return offNum(p['nutriments.'+key]);
+    return 0;
+  }
+  // Nom tolérant : string OU objet multilingue {fr:..,en:..} OU product_name_fr
+  function offName(p){
+    var n = p.product_name_fr || p.product_name || p.product_name_en || '';
+    if (n && typeof n === 'object') { n = n.fr || n.en || n[Object.keys(n)[0]] || ''; }
+    return String(n||'').trim();
+  }
+  function offBrand(p){
+    var b = p.brands || p.brands_tags || '';
+    if (b && typeof b === 'object') b = b[0] || '';
+    return String(b||'').split(',')[0].replace(/^en:/,'').trim();
+  }
   function mapOffProduct(p){
     if (!p) return null;
-    var nut = p.nutriments || {};
-    var kcal = offNum(nut['energy-kcal_100g']);
-    if (!kcal && nut['energy_100g']) kcal = offRound(offNum(nut['energy_100g'])/4.184); // kJ → kcal de secours
-    var name = (p.product_name_fr || p.product_name || '').trim();
+    var kcal = offNut(p, 'energy-kcal_100g');
+    if (!kcal) { var kj = offNut(p, 'energy_100g') || offNut(p, 'energy-kj_100g'); if (kj) kcal = offRound(kj/4.184); }
+    var name = offName(p);
     if (!name || !kcal) return null; // on écarte les produits sans nom ou sans calories
-    var brand = (p.brands || '').split(',')[0].trim();
+    var brand = offBrand(p);
     var full = brand ? (name + ' · ' + brand) : name;
     if (p.quantity) full += ' (' + String(p.quantity).trim() + ')';
     return {
       cat: 'Open Food Facts',
       n: full,
       u: '100g',
-      g: offRound(offNum(nut['carbohydrates_100g'])),
-      p: offRound(offNum(nut['proteins_100g'])),
-      l: offRound(offNum(nut['fat_100g'])),
+      g: offRound(offNut(p, 'carbohydrates_100g')),
+      p: offRound(offNut(p, 'proteins_100g')),
+      l: offRound(offNut(p, 'fat_100g')),
       kcal: Math.round(kcal),
       off: true,
-      code: p.code || ''
+      code: p.code || p._id || ''
     };
+  }
+  function offFetchJson(url){
+    var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+    var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 9000) : null;
+    return fetch(url, ctrl ? {signal:ctrl.signal} : undefined)
+      .then(function(r){ if(to) clearTimeout(to); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .catch(function(e){ if(to) clearTimeout(to); throw e; });
+  }
+  function offFinish(mapped, term){
+    offResults = mapped;
+    offLoading = false;
+    if (!mapped.length) offError = 'Aucun produit exploitable pour « ' + term + ' ».';
+    render();
   }
   function searchOFF(term){
     term = (term||'').trim();
     if (term.length < 2) { offError = 'Tape au moins 2 lettres.'; render(); return; }
     offLoading = true; offError = ''; offResults = []; offQueryDone = term;
     render();
-    var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(term) +
-              '&search_simple=1&action=process&json=1&page_size=25&lc=fr' +
-              '&fields=product_name,product_name_fr,brands,nutriments,quantity,code';
-    var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
-    var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 9000) : null;
-    fetch(url, ctrl ? {signal:ctrl.signal} : undefined)
-      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    var FIELDS = 'code,product_name,product_name_fr,brands,quantity,nutriments';
+
+    // ── Niveau 1 : code-barres (que des chiffres, 6-14) → lecture directe v2 (ultra-fiable) ──
+    if (/^[0-9]{6,14}$/.test(term)) {
+      offFetchJson('https://world.openfoodfacts.org/api/v2/product/' + term + '.json?fields=' + FIELDS)
+        .then(function(d){
+          var m = (d && d.product) ? mapOffProduct(d.product) : null;
+          offFinish(m ? [m] : [], term);
+        })
+        .catch(function(){ offLoading=false; offError='Code-barres introuvable ou réseau indisponible.'; render(); });
+      return;
+    }
+
+    // ── Niveau 2 : Search-a-licious (nouvelle recherche texte, stable + CORS) ──
+    var sal = 'https://search.openfoodfacts.org/search?q=' + encodeURIComponent(term) +
+              '&page_size=25&lang=fr&fields=' + FIELDS;
+    offFetchJson(sal)
       .then(function(data){
-        if (to) clearTimeout(to);
-        var list = (data && data.products) ? data.products : [];
+        var list = (data && (data.hits || data.products || data.results)) || [];
         var mapped = [];
         for (var i=0;i<list.length;i++){ var m = mapOffProduct(list[i]); if (m) mapped.push(m); }
-        offResults = mapped;
-        offLoading = false;
-        if (!mapped.length) offError = 'Aucun produit exploitable pour « ' + term +' ».';
-        render();
+        if (mapped.length) { offFinish(mapped, term); return; }
+        throw new Error('vide'); // si 0 résultat exploitable, on tente le secours
       })
-      .catch(function(e){
-        if (to) clearTimeout(to);
-        offLoading = false;
-        offError = 'Recherche en ligne indisponible (réseau ?). Réessaie.';
-        render();
+      .catch(function(){
+        // ── Niveau 3 : ancien search.pl en dernier recours ──
+        var legacy = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(term) +
+                     '&search_simple=1&action=process&json=1&page_size=25&lc=fr&fields=' + FIELDS;
+        offFetchJson(legacy)
+          .then(function(data){
+            var list = (data && data.products) ? data.products : [];
+            var mapped = [];
+            for (var i=0;i<list.length;i++){ var m = mapOffProduct(list[i]); if (m) mapped.push(m); }
+            offFinish(mapped, term);
+          })
+          .catch(function(){ offLoading=false; offError='Recherche en ligne indisponible. Réessaie dans un instant (ou tape le code-barres).'; render(); });
       });
   }
   function offIsFav(code){
