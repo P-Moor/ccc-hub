@@ -182,6 +182,40 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .day-row.done .dcheck{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .stext{font-size:0.85rem;line-height:1.5}
 .ssub{font-size:0.72rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.dmeta{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:3px}
+.day-exp{display:inline-block;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--blue);margin-top:5px;cursor:pointer;user-select:none}
+.day-exp.open{color:var(--accent)}
+.wk-role{font-family:'DM Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0.7rem;margin-bottom:8px;background:var(--surface);border-radius:7px;font-weight:700}
+.day-detail{background:var(--surface2,#1c1d21);border:1px solid var(--border);border-top:none;border-radius:0 0 9px 9px;margin:-7px 0 7px;padding:0.75rem 0.9rem}
+.dd-type{font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.5rem}
+.dd-zone{font-family:'DM Mono',monospace;font-size:0.56rem;font-weight:400;color:var(--accent);background:var(--bg,#0f0f10);padding:0.15rem 0.45rem;border-radius:6px}
+.dd-chips{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem}
+.dd-chip{display:inline-flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);background:var(--bg,#0f0f10);padding:0.2rem 0.45rem;border-radius:6px}
+.dd-renfo{margin-top:0.3rem}
+.dd-renfo-h{display:flex;align-items:center;gap:0.35rem;font-family:'Syne',sans-serif;font-size:0.7rem;color:var(--text);margin-bottom:0.4rem}
+.dd-exo{display:flex;justify-content:space-between;gap:0.6rem;padding:0.32rem 0;border-bottom:1px solid var(--border)}
+.dd-exo-n{font-size:0.7rem;color:var(--text)}
+.dd-exo-d{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);text-align:right;flex-shrink:0}
+.dd-renfo-note{font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--muted);margin-top:0.45rem;font-style:italic}
+.dd-brief{margin-top:0.5rem}
+.dd-b-obj{font-size:0.7rem;color:var(--text);line-height:1.45;background:var(--bg,#0f0f10);border-radius:7px;padding:0.5rem 0.6rem;margin-bottom:0.6rem}
+.dd-b-h{font-family:'DM Mono',monospace;font-size:0.56rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent);margin:0.55rem 0 0.3rem}
+.dd-b-h.warn-h{color:var(--orange)}
+.dd-b-list{margin:0;padding-left:1.05rem;list-style:disc}
+.dd-b-list li{font-size:0.68rem;color:var(--text);line-height:1.5;margin-bottom:0.28rem}
+.dd-b-list.warn li{color:var(--muted)}
+.dd-b-fuel{font-size:0.68rem;color:var(--text);line-height:1.45;background:rgba(224,138,40,0.08);border-left:2px solid var(--orange);border-radius:6px;padding:0.45rem 0.6rem;margin-top:0.55rem}
+.dd-note{font-size:0.68rem;color:var(--text);margin-top:0.5rem;padding-left:0.5rem;border-left:2px solid var(--accent);line-height:1.4}
+.dd-mode{font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted);margin-top:0.6rem;line-height:1.4;display:flex;align-items:flex-start;gap:0.3rem}
+.dd-actions{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid var(--border)}
+.dd-act{display:inline-flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text);background:var(--bg,#0f0f10);border:1px solid var(--border);border-radius:7px;padding:0.35rem 0.6rem;cursor:pointer;user-select:none}
+.dd-act:hover{border-color:var(--accent);color:var(--accent)}
+.wk-reset{text-align:center;margin:0.3rem 0 0.6rem}
+.wk-reset .dd-act{color:var(--red,#e05260)}
+.plan-pick-day{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.7rem;border:1px solid var(--border);border-radius:9px;margin-bottom:0.45rem;background:var(--surface);cursor:pointer}
+.plan-pick-day:hover{border-color:var(--accent)}
+.plan-rep{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.7rem;border:1px solid var(--border);border-radius:9px;margin-bottom:0.5rem;background:var(--surface);cursor:pointer;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text)}
+.plan-rep:hover{border-color:var(--accent)}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
@@ -1091,6 +1125,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       </div>
     </div>
     <div id="metrics-content"></div>
+    <div id="today-ressenti-block" style="margin-top:0.6rem"></div>
     <div id="reco-content"></div>
   </div>
 
@@ -1148,7 +1183,6 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
   <div class="p-wtabs" id="week-tabs"></div>
   <div id="week-content"></div>
   <div id="week-recap"></div>
-  <div id="sessions-edit-module" style="margin-top:1.4rem;margin-bottom:1.4rem"></div>
   <details class="more-block"><summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Sessions spé — Menu</span><span class="more-line"></span></summary>
   <div class="more-inner">
   <div class="cards">
@@ -1548,6 +1582,33 @@ document.addEventListener('click', function(e) {
       toggleDone(t.getAttribute('data-done'));
       return;
     }
+    if (t.hasAttribute && t.hasAttribute('data-expand')) {
+      var _k = t.getAttribute('data-expand');
+      var _dd = document.getElementById('dd-' + _k);
+      if (_dd) {
+        var _op = (_dd.style.display === 'none' || !_dd.style.display);
+        _dd.style.display = _op ? 'block' : 'none';
+        t.textContent = _op ? 'détail ▴' : 'détail ▾';
+        if (t.classList) t.classList.toggle('open', _op);
+      }
+      return;
+    }
+    if (t.hasAttribute && t.hasAttribute('data-act-edit')) {
+      if (window.CCCSessions) CCCSessions.openEdit(t.getAttribute('data-act-edit'));
+      return;
+    }
+    if (t.hasAttribute && t.hasAttribute('data-act-swap')) {
+      if (typeof planSwapPicker === 'function') planSwapPicker(t.getAttribute('data-act-swap'));
+      return;
+    }
+    if (t.hasAttribute && t.hasAttribute('data-act-replace')) {
+      if (typeof planReplacePicker === 'function') planReplacePicker(t.getAttribute('data-act-replace'));
+      return;
+    }
+    if (t.hasAttribute && t.hasAttribute('data-act-reset')) {
+      if (typeof planResetWeek === 'function') planResetWeek();
+      return;
+    }
     if (t.hasAttribute && t.hasAttribute('data-month')) {
       setMonth(parseInt(t.getAttribute('data-month'), 10));
       return;
@@ -1676,8 +1737,12 @@ function chReset() {
 // PLAN_DATA — SOURCE UNIQUE DE VÉRITÉ (séances structurées)
 // Volume = somme des séances. Tout en dérive : vols, months, jauges.
 // ═══════════════════════════════════════════════════════════
-var PLAN_DATA = [{"num":1,"phase":"CHARGE 1","tag":"charge","e":"","monday":"2026-05-11","label":"11 mai","days":[{"date":"2026-05-11","label":"Lun 11","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-05-12","label":"Mar 12","type":"ef","run":10,"velo":0,"muscu":0,"dplus":120,"title":"EF","sub":"Z1-Z2 · plat"},{"date":"2026-05-13","label":"Mer 13","type":"spe","run":9,"velo":0,"muscu":0,"dplus":300,"title":"Spé","sub":"Côtes / qualité selon BB"},{"date":"2026-05-14","label":"Jeu 14","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs"},{"date":"2026-05-15","label":"Ven 15","type":"ef","run":8,"velo":0,"muscu":0,"dplus":80,"title":"EF","sub":"Z1 · allure conversation"},{"date":"2026-05-16","label":"Sam 16","type":"long","run":31,"velo":0,"muscu":0,"dplus":800,"title":"Sortie longue","sub":"D+ · marcher les montées"},{"date":"2026-05-17","label":"Dim 17","type":"velo","run":0,"velo":50,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2"}]},{"num":2,"phase":"CHARGE 2","tag":"charge","e":"","monday":"2026-05-18","label":"18 mai","days":[{"date":"2026-05-18","label":"Lun 18","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-05-19","label":"Mar 19","type":"ef","run":13,"velo":0,"muscu":0,"dplus":180,"title":"EF","sub":"Z1-Z2 · plat"},{"date":"2026-05-20","label":"Mer 20","type":"spe","run":12,"velo":0,"muscu":0,"dplus":450,"title":"Spé","sub":"Côtes / qualité selon BB"},{"date":"2026-05-21","label":"Jeu 21","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs"},{"date":"2026-05-22","label":"Ven 22","type":"ef","run":10,"velo":0,"muscu":0,"dplus":100,"title":"EF","sub":"Z1 · allure conversation"},{"date":"2026-05-23","label":"Sam 23","type":"long","run":37,"velo":0,"muscu":0,"dplus":1000,"title":"Sortie longue","sub":"D+ · marcher les montées"},{"date":"2026-05-24","label":"Dim 24","type":"velo","run":0,"velo":55,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2"}]},{"num":3,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-05-25","label":"25 mai","days":[{"date":"2026-05-25","label":"Lun 25","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-05-26","label":"Mar 26","type":"ef","run":15,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1-Z2 · plat"},{"date":"2026-05-27","label":"Mer 27","type":"spe","run":13,"velo":0,"muscu":0,"dplus":500,"title":"Spé","sub":"Côtes / qualité selon BB"},{"date":"2026-05-28","label":"Jeu 28","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs"},{"date":"2026-05-29","label":"Ven 29","type":"ef","run":11,"velo":0,"muscu":0,"dplus":120,"title":"EF","sub":"Z1 · allure conversation"},{"date":"2026-05-30","label":"Sam 30","type":"long","run":43,"velo":0,"muscu":0,"dplus":1200,"title":"Sortie longue","sub":"D+ · marcher les montées"},{"date":"2026-05-31","label":"Dim 31","type":"velo","run":0,"velo":60,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2"}]},{"num":4,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-06-01","label":"1 juin","days":[{"date":"2026-06-01","label":"Lun 1","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup + hallux"},{"date":"2026-06-02","label":"Mar 2","type":"ef","run":14,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 pur · max 135bpm"},{"date":"2026-06-03","label":"Mer 3","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Voûte, mollet excentrique, tibial"},{"date":"2026-06-04","label":"Jeu 4","type":"ef","run":8,"velo":0,"muscu":0,"dplus":100,"title":"EF easy","sub":"Jambes fraîches"},{"date":"2026-06-05","label":"Ven 5","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique descente"},{"date":"2026-06-06","label":"Sam 6","type":"long","run":18,"velo":0,"muscu":0,"dplus":350,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge"},{"date":"2026-06-07","label":"Dim 7","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger"}]},{"num":5,"phase":"CHARGE 1","tag":"gravel","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"14\" r=\"3\"/><circle cx=\"15\" cy=\"14\" r=\"3\"/><path d=\"M5 14 L8 7 L13 7\"/><path d=\"M8 7 L11 14\"/><path d=\"M15 14 L11 7\"/><circle cx=\"8\" cy=\"7\" r=\"0.5\" fill=\"currentColor\"/></svg> Gravel 13/6","monday":"2026-06-08","label":"8 juin","days":[{"date":"2026-06-08","label":"Lun 8","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Semaine gravel"},{"date":"2026-06-09","label":"Mar 9","type":"ef","run":18,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1 · jambes fraîches"},{"date":"2026-06-10","label":"Mer 10","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo léger 30min","sub":"Charges légères pré-event"},{"date":"2026-06-11","label":"Jeu 11","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos ou marche 30min","sub":"Pré-gravel"},{"date":"2026-06-12","label":"Ven 12","type":"ef","run":8,"velo":0,"muscu":0,"dplus":50,"title":"Strides 6×80m","sub":"Activation légère"},{"date":"2026-06-13","label":"Sam 13","type":"gravel","run":0,"velo":81,"muscu":0,"dplus":0,"title":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"14\" r=\"3\"/><circle cx=\"15\" cy=\"14\" r=\"3\"/><path d=\"M5 14 L8 7 L13 7\"/><path d=\"M8 7 L11 14\"/><path d=\"M15 14 L11 7\"/><circle cx=\"8\" cy=\"7\" r=\"0.5\" fill=\"currentColor\"/></svg> Gravel 93km — événement","sub":"Effort long Z2 · fuel 60g/h"},{"date":"2026-06-14","label":"Dim 14","type":"ef","run":18,"velo":9,"muscu":0,"dplus":150,"title":"EF récup","sub":"Footing souple post-gravel"}]},{"num":6,"phase":"CHARGE 2","tag":"charge","e":"","monday":"2026-06-15","label":"15 juin","days":[{"date":"2026-06-15","label":"Lun 15","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-06-16","label":"Mar 16","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2"},{"date":"2026-06-17","label":"Mer 17","type":"spe","run":13,"velo":0,"muscu":0,"dplus":500,"title":"Spé côtes","sub":"Répétitions montée · qualité"},{"date":"2026-06-18","label":"Jeu 18","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + voûte"},{"date":"2026-06-19","label":"Ven 19","type":"ef","run":11,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation"},{"date":"2026-06-20","label":"Sam 20","type":"long","run":40,"velo":0,"muscu":0,"dplus":1100,"title":"Sortie longue VERT (Ardennes)","sub":"Marcher les montées · bâtons"},{"date":"2026-06-21","label":"Dim 21","type":"velo","run":0,"velo":55,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2"}]},{"num":7,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-06-22","label":"22 juin","days":[{"date":"2026-06-22","label":"Lun 22","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-06-23","label":"Mar 23","type":"ef","run":16,"velo":0,"muscu":0,"dplus":300,"title":"EF","sub":"Z1-Z2"},{"date":"2026-06-24","label":"Mer 24","type":"spe","run":15,"velo":0,"muscu":0,"dplus":650,"title":"Spé côtes","sub":"Répétitions montée · qualité"},{"date":"2026-06-25","label":"Jeu 25","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente"},{"date":"2026-06-26","label":"Ven 26","type":"ef","run":13,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation"},{"date":"2026-06-27","label":"Sam 27","type":"long","run":48,"velo":0,"muscu":0,"dplus":1300,"title":"Sortie longue + GUT-TRAINING","sub":"Fuel 60g/h · bâtons"},{"date":"2026-06-28","label":"Dim 28","type":"velo","run":0,"velo":60,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2"}]},{"num":8,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-06-29","label":"29 juin","days":[{"date":"2026-06-29","label":"Lun 29","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup"},{"date":"2026-06-30","label":"Mar 30","type":"ef","run":16,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 pur · max 135bpm"},{"date":"2026-07-01","label":"Mer 1","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Focus voûte + hallux"},{"date":"2026-07-02","label":"Jeu 2","type":"ef","run":10,"velo":0,"muscu":0,"dplus":100,"title":"EF easy","sub":"Jambes fraîches"},{"date":"2026-07-03","label":"Ven 3","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique"},{"date":"2026-07-04","label":"Sam 4","type":"long","run":22,"velo":0,"muscu":0,"dplus":400,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge"},{"date":"2026-07-05","label":"Dim 5","type":"velo","run":0,"velo":40,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger"}]},{"num":9,"phase":"CHARGE 1","tag":"toscane","e":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Toscane","monday":"2026-07-06","label":"6 juil","days":[{"date":"2026-07-06","label":"Lun 6","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-07-07","label":"Mar 7","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2"},{"date":"2026-07-08","label":"Mer 8","type":"spe","run":14,"velo":0,"muscu":0,"dplus":600,"title":"Spé côtes","sub":"Répétitions montée"},{"date":"2026-07-09","label":"Jeu 9","type":"muscu","run":10,"velo":0,"muscu":1,"dplus":300,"title":"EF + Renfo","sub":"Pré-camp"},{"date":"2026-07-10","label":"Ven 10","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos · voyage Toscane","sub":""},{"date":"2026-07-11","label":"Sam 11","type":"long","run":16,"velo":0,"muscu":0,"dplus":900,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> EF sentiers + D+","sub":"Découverte terrain · bâtons"},{"date":"2026-07-12","label":"Dim 12","type":"long","run":21,"velo":0,"muscu":0,"dplus":1400,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Sortie D+ montagne","sub":"Simulation CCC"}]},{"num":10,"phase":"CHARGE 2","tag":"toscane","e":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Toscane","monday":"2026-07-13","label":"13 juil","days":[{"date":"2026-07-13","label":"Lun 13","type":"ef","run":14,"velo":0,"muscu":0,"dplus":800,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> EF sentiers","sub":"Z1 · terrain technique"},{"date":"2026-07-14","label":"Mar 14","type":"spe","run":20,"velo":0,"muscu":0,"dplus":1500,"title":"Sortie D+ montagne","sub":"Côtes longues · bâtons"},{"date":"2026-07-15","label":"Mer 15","type":"ef","run":10,"velo":0,"muscu":0,"dplus":400,"title":"Récup active Z1","sub":"Jambes légères"},{"date":"2026-07-16","label":"Jeu 16","type":"long","run":26,"velo":0,"muscu":0,"dplus":1500,"title":"Sortie longue / gros D+","sub":"Simulation CCC · fuel 75g/h"},{"date":"2026-07-17","label":"Ven 17","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos ou rando famille","sub":""},{"date":"2026-07-18","label":"Sam 18","type":"long","run":24,"velo":0,"muscu":0,"dplus":1300,"title":"Sortie longue vallonnée","sub":"Le gros morceau · back-to-back"},{"date":"2026-07-19","label":"Dim 19","type":"velo","run":0,"velo":40,"muscu":1,"dplus":0,"title":"Vélo récup + renfo","sub":"Mobilité hallux · voyage"}]},{"num":11,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-07-20","label":"20 juil","days":[{"date":"2026-07-20","label":"Lun 20","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Récup post-camp"},{"date":"2026-07-21","label":"Mar 21","type":"ef","run":18,"velo":0,"muscu":0,"dplus":350,"title":"EF","sub":"Z1-Z2 · jambes encore lourdes"},{"date":"2026-07-22","label":"Mer 22","type":"spe","run":16,"velo":0,"muscu":0,"dplus":700,"title":"Spé côtes","sub":"Qualité selon BB"},{"date":"2026-07-23","label":"Jeu 23","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente"},{"date":"2026-07-24","label":"Ven 24","type":"ef","run":14,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 · conversation"},{"date":"2026-07-25","label":"Sam 25","type":"long","run":52,"velo":0,"muscu":0,"dplus":1600,"title":"SORTIE LONGUE PIC + GUT-TRAINING","sub":"Fuel 85g/h · bâtons · marcher montées"},{"date":"2026-07-26","label":"Dim 26","type":"velo","run":5,"velo":50,"muscu":0,"dplus":80,"title":"EF récup + Vélo","sub":"Back-to-back léger jambes fatiguées"}]},{"num":12,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-07-27","label":"27 juil","days":[{"date":"2026-07-27","label":"Lun 27","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup"},{"date":"2026-07-28","label":"Mar 28","type":"ef","run":16,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 pur · max 135bpm"},{"date":"2026-07-29","label":"Mer 29","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Focus voûte + hallux"},{"date":"2026-07-30","label":"Jeu 30","type":"ef","run":12,"velo":0,"muscu":0,"dplus":150,"title":"EF easy","sub":"Jambes fraîches"},{"date":"2026-07-31","label":"Ven 31","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique"},{"date":"2026-08-01","label":"Sam 1","type":"long","run":24,"velo":0,"muscu":0,"dplus":400,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge"},{"date":"2026-08-02","label":"Dim 2","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger"}]},{"num":13,"phase":"CHARGE 1","tag":"charge","e":"","monday":"2026-08-03","label":"3 août","days":[{"date":"2026-08-03","label":"Lun 3","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux"},{"date":"2026-08-04","label":"Mar 4","type":"ef","run":14,"velo":0,"muscu":0,"dplus":300,"title":"EF","sub":"Z1-Z2"},{"date":"2026-08-05","label":"Mer 5","type":"spe","run":13,"velo":0,"muscu":0,"dplus":700,"title":"Spé côtes","sub":"Répétitions montée · qualité"},{"date":"2026-08-06","label":"Jeu 6","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente"},{"date":"2026-08-07","label":"Ven 7","type":"ef","run":10,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation"},{"date":"2026-08-08","label":"Sam 8","type":"long","run":40,"velo":0,"muscu":0,"dplus":1400,"title":"Sortie longue VERT (Ardennes)","sub":"Fuel 90g/h · bâtons"},{"date":"2026-08-09","label":"Dim 9","type":"long","run":12,"velo":0,"muscu":0,"dplus":500,"title":"Back-to-back (Ardennes J2)","sub":"Jambes fatiguées · spécifique CCC"}]},{"num":14,"phase":"AFFÛTAGE","tag":"taper","e":"","monday":"2026-08-10","label":"10 août","days":[{"date":"2026-08-10","label":"Lun 10","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Début transition"},{"date":"2026-08-11","label":"Mar 11","type":"ef","run":12,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2"},{"date":"2026-08-12","label":"Mer 12","type":"spe","run":12,"velo":0,"muscu":0,"dplus":350,"title":"Spé côtes COURTE","sub":"Maintien vivacité montée"},{"date":"2026-08-13","label":"Jeu 13","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo léger","sub":"Charges réduites"},{"date":"2026-08-14","label":"Ven 14","type":"ef","run":10,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation"},{"date":"2026-08-15","label":"Sam 15","type":"long","run":28,"velo":0,"muscu":0,"dplus":500,"title":"Sortie longue réduite","sub":"Vert maintenu · terrain spé"},{"date":"2026-08-16","label":"Dim 16","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training léger"}]},{"num":15,"phase":"TAPER","tag":"taper","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"13\" height=\"13\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"6\" r=\"2\"/><circle cx=\"5\" cy=\"14\" r=\"2\"/><line x1=\"6.7\" y1=\"7\" x2=\"17\" y2=\"14\"/><line x1=\"6.7\" y1=\"13\" x2=\"17\" y2=\"6\"/></svg> Affûtage","monday":"2026-08-17","label":"17 août","days":[{"date":"2026-08-17","label":"Lun 17","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Affûtage"},{"date":"2026-08-18","label":"Mar 18","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF + 4 strides","sub":"Garder le pied vif"},{"date":"2026-08-19","label":"Mer 19","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + chaleur","sub":"Sauna/couches 20-30min"},{"date":"2026-08-20","label":"Jeu 20","type":"spe","run":10,"velo":0,"muscu":1,"dplus":300,"title":"Rappel Z2 + 3×1min Z3","sub":"Vivacité sans fatigue + renfo léger"},{"date":"2026-08-21","label":"Ven 21","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos/marche + chaleur","sub":"Acclimatation"},{"date":"2026-08-22","label":"Sam 22","type":"long","run":22,"velo":0,"muscu":0,"dplus":600,"title":"Sortie vallonnée","sub":"Dernière longue · terrain spécifique"},{"date":"2026-08-23","label":"Dim 23","type":"velo","run":0,"velo":20,"muscu":0,"dplus":0,"title":"Vélo léger","sub":"Déliage"}]},{"num":16,"phase":"COURSE","tag":"course","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><path d=\"M2 16 L8 5 L11 11 L13 7 L18 16 Z\"/></svg> CCC Ven 28","monday":"2026-08-24","label":"24 août","days":[{"date":"2026-08-24","label":"Lun 24","type":"ef","run":9,"velo":0,"muscu":0,"dplus":150,"title":"EF easy + 4 strides","sub":"Jambes vives"},{"date":"2026-08-25","label":"Mar 25","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + chaleur finale","sub":"Hydratation, sommeil"},{"date":"2026-08-26","label":"Mer 26","type":"ef","run":6,"velo":0,"muscu":0,"dplus":100,"title":"EF + 3×30s allure","sub":"Activation · début carb-load"},{"date":"2026-08-27","label":"Jeu 27","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + voyage Chamonix","sub":"Carb-load 8-12 g/kg"},{"date":"2026-08-28","label":"Ven 28","type":"course","run":15,"velo":0,"muscu":0,"dplus":0,"title":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><path d=\"M2 16 L8 5 L11 11 L13 7 L18 16 Z\"/></svg> CCC — 101km / 6100m D+","sub":"LE JOUR J · 80-90g CHO/h"},{"date":"2026-08-29","label":"Sam 29","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Récup totale","sub":"Tu l'as fait"},{"date":"2026-08-30","label":"Dim 30","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Marche légère","sub":"Savoure"}]}];
+var PLAN_DATA = [{"num":1,"phase":"CHARGE 1","tag":"charge","e":"","monday":"2026-05-11","label":"11 mai","days":[{"date":"2026-05-11","label":"Lun 11","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-05-12","label":"Mar 12","type":"ef","run":10,"velo":0,"muscu":0,"dplus":120,"title":"EF","sub":"Z1-Z2 · plat","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-13","label":"Mer 13","type":"spe","run":9,"velo":0,"muscu":0,"dplus":300,"title":"Spé","sub":"Côtes / qualité selon BB","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-05-14","label":"Jeu 14","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-05-15","label":"Ven 15","type":"ef","run":8,"velo":0,"muscu":0,"dplus":80,"title":"EF","sub":"Z1 · allure conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-16","label":"Sam 16","type":"long","run":31,"velo":0,"muscu":0,"dplus":800,"title":"Sortie longue","sub":"D+ · marcher les montées","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-05-17","label":"Dim 17","type":"velo","run":0,"velo":50,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge1"},{"num":2,"phase":"CHARGE 2","tag":"charge","e":"","monday":"2026-05-18","label":"18 mai","days":[{"date":"2026-05-18","label":"Lun 18","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-05-19","label":"Mar 19","type":"ef","run":13,"velo":0,"muscu":0,"dplus":180,"title":"EF","sub":"Z1-Z2 · plat","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-20","label":"Mer 20","type":"spe","run":12,"velo":0,"muscu":0,"dplus":450,"title":"Spé","sub":"Côtes / qualité selon BB","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-05-21","label":"Jeu 21","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-05-22","label":"Ven 22","type":"ef","run":10,"velo":0,"muscu":0,"dplus":100,"title":"EF","sub":"Z1 · allure conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-23","label":"Sam 23","type":"long","run":37,"velo":0,"muscu":0,"dplus":1000,"title":"Sortie longue","sub":"D+ · marcher les montées","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-05-24","label":"Dim 24","type":"velo","run":0,"velo":55,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge2"},{"num":3,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-05-25","label":"25 mai","days":[{"date":"2026-05-25","label":"Lun 25","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-05-26","label":"Mar 26","type":"ef","run":15,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1-Z2 · plat","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-27","label":"Mer 27","type":"spe","run":13,"velo":0,"muscu":0,"dplus":500,"title":"Spé","sub":"Côtes / qualité selon BB","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-05-28","label":"Jeu 28","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"4 blocs","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-05-29","label":"Ven 29","type":"ef","run":11,"velo":0,"muscu":0,"dplus":120,"title":"EF","sub":"Z1 · allure conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-05-30","label":"Sam 30","type":"long","run":43,"velo":0,"muscu":0,"dplus":1200,"title":"Sortie longue","sub":"D+ · marcher les montées","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-05-31","label":"Dim 31","type":"velo","run":0,"velo":60,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge3"},{"num":4,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-06-01","label":"1 juin","days":[{"date":"2026-06-01","label":"Lun 1","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup + hallux","seanceType":"repos","zone":""},{"date":"2026-06-02","label":"Mar 2","type":"ef","run":14,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 pur · max 135bpm","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-06-03","label":"Mer 3","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Voûte, mollet excentrique, tibial","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-06-04","label":"Jeu 4","type":"ef","run":8,"velo":0,"muscu":0,"dplus":100,"title":"EF easy","sub":"Jambes fraîches","seanceType":"recup","zone":"Z1 · <140 bpm"},{"date":"2026-06-05","label":"Ven 5","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique descente","seanceType":"renfo","zone":"","renfoRef":"descente"},{"date":"2026-06-06","label":"Sam 6","type":"long","run":18,"velo":0,"muscu":0,"dplus":350,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-06-07","label":"Dim 7","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger","seanceType":"velo","zone":"Z2 cardio"}],"role":"decharge"},{"num":5,"phase":"CHARGE 1","tag":"gravel","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"14\" r=\"3\"/><circle cx=\"15\" cy=\"14\" r=\"3\"/><path d=\"M5 14 L8 7 L13 7\"/><path d=\"M8 7 L11 14\"/><path d=\"M15 14 L11 7\"/><circle cx=\"8\" cy=\"7\" r=\"0.5\" fill=\"currentColor\"/></svg> Gravel 13/6","monday":"2026-06-08","label":"8 juin","days":[{"date":"2026-06-08","label":"Lun 8","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Semaine gravel","seanceType":"repos","zone":""},{"date":"2026-06-09","label":"Mar 9","type":"ef","run":18,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1 · jambes fraîches","seanceType":"recup","zone":"Z1 · <140 bpm"},{"date":"2026-06-10","label":"Mer 10","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo léger 30min","sub":"Charges légères pré-event","seanceType":"renfo","zone":"","renfoRef":"leger"},{"date":"2026-06-11","label":"Jeu 11","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos ou marche 30min","sub":"Pré-gravel","seanceType":"repos","zone":""},{"date":"2026-06-12","label":"Ven 12","type":"ef","run":8,"velo":0,"muscu":0,"dplus":50,"title":"Strides 6×80m","sub":"Activation légère","seanceType":"strides","zone":"Z4 brefs · technique"},{"date":"2026-06-13","label":"Sam 13","type":"gravel","run":0,"velo":81,"muscu":0,"dplus":0,"title":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"14\" r=\"3\"/><circle cx=\"15\" cy=\"14\" r=\"3\"/><path d=\"M5 14 L8 7 L13 7\"/><path d=\"M8 7 L11 14\"/><path d=\"M15 14 L11 7\"/><circle cx=\"8\" cy=\"7\" r=\"0.5\" fill=\"currentColor\"/></svg> Gravel 93km — événement","sub":"Effort long Z2 · fuel 60g/h","seanceType":"gravel","zone":"Z2 · effort long"},{"date":"2026-06-14","label":"Dim 14","type":"ef","run":18,"velo":9,"muscu":0,"dplus":150,"title":"EF récup","sub":"Footing souple post-gravel","seanceType":"recup","zone":"Z1 · <140 bpm"}],"role":"charge1"},{"num":6,"phase":"CHARGE 2","tag":"charge","e":"","monday":"2026-06-15","label":"15 juin","days":[{"date":"2026-06-15","label":"Lun 15","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-06-16","label":"Mar 16","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-06-17","label":"Mer 17","type":"spe","run":13,"velo":0,"muscu":0,"dplus":500,"title":"Spé côtes","sub":"Répétitions montée · qualité","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-06-18","label":"Jeu 18","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + voûte","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-06-19","label":"Ven 19","type":"ef","run":11,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-06-20","label":"Sam 20","type":"long","run":40,"velo":0,"muscu":0,"dplus":1100,"title":"Sortie longue VERT (Ardennes)","sub":"Marcher les montées · bâtons","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-06-21","label":"Dim 21","type":"velo","run":0,"velo":55,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge2"},{"num":7,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-06-22","label":"22 juin","days":[{"date":"2026-06-22","label":"Lun 22","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-06-23","label":"Mar 23","type":"ef","run":16,"velo":0,"muscu":0,"dplus":300,"title":"EF","sub":"Z1-Z2","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-06-24","label":"Mer 24","type":"spe","run":15,"velo":0,"muscu":0,"dplus":650,"title":"Spé côtes","sub":"Répétitions montée · qualité","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-06-25","label":"Jeu 25","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-06-26","label":"Ven 26","type":"ef","run":13,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-06-27","label":"Sam 27","type":"long","run":48,"velo":0,"muscu":0,"dplus":1300,"title":"Sortie longue + GUT-TRAINING","sub":"Fuel 60g/h · bâtons","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-06-28","label":"Dim 28","type":"velo","run":0,"velo":60,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training cardio Z2","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge3"},{"num":8,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-06-29","label":"29 juin","days":[{"date":"2026-06-29","label":"Lun 29","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup","seanceType":"repos","zone":""},{"date":"2026-06-30","label":"Mar 30","type":"ef","run":16,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 pur · max 135bpm","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-01","label":"Mer 1","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Focus voûte + hallux","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-07-02","label":"Jeu 2","type":"ef","run":10,"velo":0,"muscu":0,"dplus":100,"title":"EF easy","sub":"Jambes fraîches","seanceType":"recup","zone":"Z1 · <140 bpm"},{"date":"2026-07-03","label":"Ven 3","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-07-04","label":"Sam 4","type":"long","run":22,"velo":0,"muscu":0,"dplus":400,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-07-05","label":"Dim 5","type":"velo","run":0,"velo":40,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger","seanceType":"velo","zone":"Z2 cardio"}],"role":"decharge"},{"num":9,"phase":"CHARGE 1","tag":"toscane","e":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Toscane","monday":"2026-07-06","label":"6 juil","days":[{"date":"2026-07-06","label":"Lun 6","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-07-07","label":"Mar 7","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-08","label":"Mer 8","type":"spe","run":14,"velo":0,"muscu":0,"dplus":600,"title":"Spé côtes","sub":"Répétitions montée","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-07-09","label":"Jeu 9","type":"muscu","run":10,"velo":0,"muscu":1,"dplus":300,"title":"EF + Renfo","sub":"Pré-camp","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-07-10","label":"Ven 10","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos · voyage Toscane","sub":"","seanceType":"repos","zone":""},{"date":"2026-07-11","label":"Sam 11","type":"long","run":16,"velo":0,"muscu":0,"dplus":900,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> EF sentiers + D+","sub":"Découverte terrain · bâtons","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-07-12","label":"Dim 12","type":"long","run":21,"velo":0,"muscu":0,"dplus":1400,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Sortie D+ montagne","sub":"Simulation CCC","seanceType":"long","zone":"Z2 · 140-155 · marche montées"}],"role":"charge1"},{"num":10,"phase":"CHARGE 2","tag":"toscane","e":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> Toscane","monday":"2026-07-13","label":"13 juil","days":[{"date":"2026-07-13","label":"Lun 13","type":"ef","run":14,"velo":0,"muscu":0,"dplus":650,"title":"<svg viewBox=\"0 0 20 14\" width=\"16\" height=\"11\" style=\"vertical-align:-1px;border-radius:2px;flex-shrink:0\"><rect x=\"0\" width=\"6.66\" height=\"14\" fill=\"#5ec27a\"/><rect x=\"6.66\" width=\"6.66\" height=\"14\" fill=\"#f4f4f0\"/><rect x=\"13.33\" width=\"6.66\" height=\"14\" fill=\"#ef4444\"/></svg> EF sentiers","sub":"Z1 · terrain technique","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-14","label":"Mar 14","type":"spe","run":20,"velo":0,"muscu":0,"dplus":1230,"title":"Sortie D+ montagne","sub":"Côtes longues · bâtons","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-07-15","label":"Mer 15","type":"ef","run":10,"velo":0,"muscu":0,"dplus":330,"title":"Récup active Z1","sub":"Jambes légères","seanceType":"recup","zone":"Z1 · <140 bpm"},{"date":"2026-07-16","label":"Jeu 16","type":"long","run":26,"velo":0,"muscu":0,"dplus":1230,"title":"Sortie longue / gros D+","sub":"Simulation CCC · fuel 75g/h","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-07-17","label":"Ven 17","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos ou rando famille","sub":"","seanceType":"repos","zone":""},{"date":"2026-07-18","label":"Sam 18","type":"long","run":24,"velo":0,"muscu":0,"dplus":1060,"title":"Sortie longue vallonnée","sub":"Le gros morceau · back-to-back","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-07-19","label":"Dim 19","type":"velo","run":0,"velo":40,"muscu":1,"dplus":0,"title":"Vélo récup + renfo","sub":"Mobilité hallux · voyage","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge2"},{"num":11,"phase":"CHARGE 3","tag":"charge","e":"","monday":"2026-07-20","label":"20 juil","days":[{"date":"2026-07-20","label":"Lun 20","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Récup post-camp","seanceType":"repos","zone":""},{"date":"2026-07-21","label":"Mar 21","type":"ef","run":18,"velo":0,"muscu":0,"dplus":350,"title":"EF","sub":"Z1-Z2 · jambes encore lourdes","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-22","label":"Mer 22","type":"spe","run":16,"velo":0,"muscu":0,"dplus":700,"title":"Spé côtes","sub":"Qualité selon BB","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-07-23","label":"Jeu 23","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-07-24","label":"Ven 24","type":"ef","run":14,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 · conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-25","label":"Sam 25","type":"long","run":52,"velo":0,"muscu":0,"dplus":1600,"title":"SORTIE LONGUE PIC + GUT-TRAINING","sub":"Fuel 85g/h · bâtons · marcher montées","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-07-26","label":"Dim 26","type":"velo","run":5,"velo":50,"muscu":0,"dplus":80,"title":"EF récup + Vélo","sub":"Back-to-back léger jambes fatiguées","seanceType":"velo","zone":"Z2 cardio"}],"role":"charge3"},{"num":12,"phase":"DÉCHARGE","tag":"decharge","e":"","monday":"2026-07-27","label":"27 juil","days":[{"date":"2026-07-27","label":"Lun 27","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 20min","sub":"Décharge · récup","seanceType":"repos","zone":""},{"date":"2026-07-28","label":"Mar 28","type":"ef","run":16,"velo":0,"muscu":0,"dplus":200,"title":"EF","sub":"Z1 pur · max 135bpm","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-07-29","label":"Mer 29","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"Focus voûte + hallux","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-07-30","label":"Jeu 30","type":"ef","run":12,"velo":0,"muscu":0,"dplus":150,"title":"EF easy","sub":"Jambes fraîches","seanceType":"recup","zone":"Z1 · <140 bpm"},{"date":"2026-07-31","label":"Ven 31","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio 40min","sub":"2e séance · excentrique","seanceType":"renfo","zone":"","renfoRef":"general"},{"date":"2026-08-01","label":"Sam 1","type":"long","run":24,"velo":0,"muscu":0,"dplus":400,"title":"Sortie longue ALLÉGÉE","sub":"D+ modéré · vraie décharge","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-08-02","label":"Dim 2","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo récup","sub":"Cross-training léger","seanceType":"velo","zone":"Z2 cardio"}],"role":"decharge"},{"num":13,"phase":"CHARGE 1","tag":"charge","e":"","monday":"2026-08-03","label":"3 août","days":[{"date":"2026-08-03","label":"Lun 3","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Gainage, hallux","seanceType":"repos","zone":""},{"date":"2026-08-04","label":"Mar 4","type":"ef","run":14,"velo":0,"muscu":0,"dplus":300,"title":"EF","sub":"Z1-Z2","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-08-05","label":"Mer 5","type":"spe","run":13,"velo":0,"muscu":0,"dplus":700,"title":"Spé côtes","sub":"Répétitions montée · qualité","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-08-06","label":"Jeu 6","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo / Plio + PIED","sub":"4 blocs + descente","seanceType":"renfo","zone":"","renfoRef":"pied"},{"date":"2026-08-07","label":"Ven 7","type":"ef","run":10,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-08-08","label":"Sam 8","type":"long","run":40,"velo":0,"muscu":0,"dplus":1400,"title":"Sortie longue VERT (Ardennes)","sub":"Fuel 90g/h · bâtons","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-08-09","label":"Dim 9","type":"long","run":12,"velo":0,"muscu":0,"dplus":500,"title":"Back-to-back (Ardennes J2)","sub":"Jambes fatiguées · spécifique CCC","seanceType":"long","zone":"Z2 · 140-155 · marche montées"}],"role":"rappel"},{"num":14,"phase":"AFFÛTAGE","tag":"taper","e":"","monday":"2026-08-10","label":"10 août","days":[{"date":"2026-08-10","label":"Lun 10","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Début transition","seanceType":"repos","zone":""},{"date":"2026-08-11","label":"Mar 11","type":"ef","run":12,"velo":0,"muscu":0,"dplus":250,"title":"EF","sub":"Z1-Z2","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-08-12","label":"Mer 12","type":"spe","run":12,"velo":0,"muscu":0,"dplus":350,"title":"Spé côtes COURTE","sub":"Maintien vivacité montée","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166"},{"date":"2026-08-13","label":"Jeu 13","type":"muscu","run":0,"velo":0,"muscu":1,"dplus":0,"title":"Renfo léger","sub":"Charges réduites","seanceType":"renfo","zone":"","renfoRef":"leger"},{"date":"2026-08-14","label":"Ven 14","type":"ef","run":10,"velo":0,"muscu":0,"dplus":150,"title":"EF","sub":"Z1 · conversation","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-08-15","label":"Sam 15","type":"long","run":28,"velo":0,"muscu":0,"dplus":500,"title":"Sortie longue réduite","sub":"Vert maintenu · terrain spé","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-08-16","label":"Dim 16","type":"velo","run":0,"velo":35,"muscu":0,"dplus":0,"title":"Vélo","sub":"Cross-training léger","seanceType":"velo","zone":"Z2 cardio"}],"role":"affutage"},{"num":15,"phase":"TAPER","tag":"taper","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"13\" height=\"13\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><circle cx=\"5\" cy=\"6\" r=\"2\"/><circle cx=\"5\" cy=\"14\" r=\"2\"/><line x1=\"6.7\" y1=\"7\" x2=\"17\" y2=\"14\"/><line x1=\"6.7\" y1=\"13\" x2=\"17\" y2=\"6\"/></svg> Affûtage","monday":"2026-08-17","label":"17 août","days":[{"date":"2026-08-17","label":"Lun 17","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + mobilité 15min","sub":"Affûtage","seanceType":"repos","zone":""},{"date":"2026-08-18","label":"Mar 18","type":"ef","run":14,"velo":0,"muscu":0,"dplus":250,"title":"EF + 4 strides","sub":"Garder le pied vif","seanceType":"strides","zone":"Z4 brefs · technique"},{"date":"2026-08-19","label":"Mer 19","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + chaleur","sub":"Sauna/couches 20-30min","seanceType":"repos","zone":""},{"date":"2026-08-20","label":"Jeu 20","type":"spe","run":10,"velo":0,"muscu":1,"dplus":300,"title":"Rappel Z2 + 3×1min Z3","sub":"Vivacité sans fatigue + renfo léger","seanceType":"cotes","zone":"Z2-Z3 montées · 155-166","renfoRef":"leger"},{"date":"2026-08-21","label":"Ven 21","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos/marche + chaleur","sub":"Acclimatation","seanceType":"repos","zone":""},{"date":"2026-08-22","label":"Sam 22","type":"long","run":22,"velo":0,"muscu":0,"dplus":600,"title":"Sortie vallonnée","sub":"Dernière longue · terrain spécifique","seanceType":"long","zone":"Z2 · 140-155 · marche montées"},{"date":"2026-08-23","label":"Dim 23","type":"velo","run":0,"velo":20,"muscu":0,"dplus":0,"title":"Vélo léger","sub":"Déliage","seanceType":"velo","zone":"Z2 cardio"}],"role":"taper"},{"num":16,"phase":"COURSE","tag":"course","e":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><path d=\"M2 16 L8 5 L11 11 L13 7 L18 16 Z\"/></svg> CCC Ven 28","monday":"2026-08-24","label":"24 août","days":[{"date":"2026-08-24","label":"Lun 24","type":"ef","run":9,"velo":0,"muscu":0,"dplus":150,"title":"EF easy + 4 strides","sub":"Jambes vives","seanceType":"strides","zone":"Z4 brefs · technique"},{"date":"2026-08-25","label":"Mar 25","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + chaleur finale","sub":"Hydratation, sommeil","seanceType":"repos","zone":""},{"date":"2026-08-26","label":"Mer 26","type":"ef","run":6,"velo":0,"muscu":0,"dplus":100,"title":"EF + 3×30s allure","sub":"Activation · début carb-load","seanceType":"ef","zone":"Z1-Z2 · 140-155"},{"date":"2026-08-27","label":"Jeu 27","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Repos + voyage Chamonix","sub":"Carb-load 8-12 g/kg","seanceType":"repos","zone":""},{"date":"2026-08-28","label":"Ven 28","type":"course","run":15,"velo":0,"muscu":0,"dplus":0,"title":"<svg class=\"ic\" viewBox=\"0 0 20 20\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;flex-shrink:0\"><path d=\"M2 16 L8 5 L11 11 L13 7 L18 16 Z\"/></svg> CCC — 101km / 6100m D+","sub":"LE JOUR J · 80-90g CHO/h","seanceType":"course","zone":"gestion · Z1-Z2"},{"date":"2026-08-29","label":"Sam 29","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Récup totale","sub":"Tu l'as fait","seanceType":"repos","zone":""},{"date":"2026-08-30","label":"Dim 30","type":"repos","run":0,"velo":0,"muscu":0,"dplus":0,"title":"Marche légère","sub":"Savoure","seanceType":"repos","zone":""}],"role":"course"}];
 
+
+
+// ── RENFO_BLOCKS — contenu d'exos par séance renfo (stub, remplaçable par la future biblio Renfo) ──
+var RENFO_BLOCKS = {"general": {"nom": "Renfo / Plio — général", "exos": [{"n": "Squat excentrique", "d": "4×6 · descente lente 4s"}, {"n": "Fentes bulgares", "d": "3×8/jambe · contrôle"}, {"n": "Hip thrust", "d": "4×10 · pause haute 1s"}, {"n": "Nordic curl", "d": "3×5 · excentrique"}, {"n": "Gainage (planche + côté)", "d": "3× 45s"}]}, "pied": {"nom": "Renfo + PIED (hallux/voûte)", "exos": [{"n": "Squat excentrique", "d": "4×6 · descente lente"}, {"n": "Mollet excentrique (marche/genou tendu)", "d": "3×12 · lent"}, {"n": "Tibial antérieur (toe raises)", "d": "3×15"}, {"n": "Voûte plantaire (short foot)", "d": "3×10 tenues 5s"}, {"n": "Mobilité hallux (flexion/extension)", "d": "2×15/pied · doux"}]}, "descente": {"nom": "Renfo — focus descente (excentrique)", "exos": [{"n": "Squat excentrique tempo", "d": "4×6 · 5s descente"}, {"n": "Step-down contrôlé", "d": "3×8/jambe"}, {"n": "Fentes marchées en descente", "d": "3×10/jambe"}, {"n": "Mollet excentrique", "d": "3×12"}, {"n": "Gainage anti-rotation", "d": "3×30s"}]}, "leger": {"nom": "Renfo léger (pré-event)", "exos": [{"n": "Mobilité hanches + chevilles", "d": "8-10 min"}, {"n": "Gainage", "d": "2×40s"}, {"n": "Squat poids de corps", "d": "2×12 · activation"}, {"n": "Hip thrust léger", "d": "2×12"}]}};
 
 // ── Overrides utilisateur appliqués sur PLAN_DATA (édition volumes/séances) ──
 // Format : { "weekNum": { run: X, velo: Y, muscu: Z } } → redistribue les séances
@@ -1784,7 +1849,7 @@ function deriveVolsAndMonths() {
     // vols entry (compat avec le code existant : l, v, run, velo, muscu, e, phase)
     newVols.push({
       l: lbl, v: total, run: vol.run, velo: vol.velo, muscu: vol.muscu, dplus: vol.dplus,
-      e: w.e || '', phase: w.phase, num: w.num
+      e: w.e || '', phase: w.phase, num: w.num, role: w.role || ''
     });
     // months entry (compat : w label + days avec d/m/s/sub)
     var bloc = Math.floor((w.num - 1) / 4) + 1;
@@ -1798,9 +1863,10 @@ function deriveVolsAndMonths() {
       var m = dayCarbMode(d);
       return { d: d.label, m: m, s: s, sub: d.sub,
                gravel: (d.type === 'gravel' || d.type === 'course'),
-               run: d.run, velo: d.velo, muscu: d.muscu, dplus: d.dplus || 0, type: d.type, date: d.date };
+               run: d.run, velo: d.velo, muscu: d.muscu, dplus: d.dplus || 0, type: d.type, date: d.date,
+               seanceType: d.seanceType || d.type, zone: d.zone || '', renfoRef: d.renfoRef || null, title: d.title || '' };
     });
-    newMonths[bloc].push({ w: lbl, days: mDays, num: w.num });
+    newMonths[bloc].push({ w: lbl, days: mDays, num: w.num, role: w.role || '' });
   });
   return { vols: newVols, months: newMonths };
 }
@@ -2134,6 +2200,229 @@ function setWeek(i) {
   for (var j = 0; j < tabs.length; j++) tabs[j].classList.toggle('active', j === i);
   renderWeek();
 }
+// Libellé humain d'un type de séance
+function seanceLabel(st){
+  var L={repos:'Repos / mobilité',recup:'Récupération',ef:'Endurance fondamentale (EF)',long:'Sortie longue',cotes:'Côtes / D+ spécifique',seuil:'Seuil / Tempo',vma:'VMA / Fractionné',strides:'Strides / activation',velo:'Vélo · cross-training',gravel:'Gravel · event',course:'COURSE — CCC',renfo:'Renfo / Plio',mixte:'Course + Renfo'};
+  return L[st]||st;
+}
+// Détail d'une séance (panneau déplié) : type + zone FC + métriques + exos renfo
+// Estimation durée d'une séance course (approx, allure EF)
+function estDuree(km){ var m=Math.round(km*6); var h=Math.floor(m/60), mn=m%60; return h>0?(h+'h'+(mn<10?'0':'')+mn):(mn+' min'); }
+// Brief détaillé et personnalisé d'une séance (ce que Pierre doit faire ce jour-là)
+function seanceBrief(d){
+  var st=d.seanceType||d.type, km=d.run||0, dp=d.dplus||0, vk=d.velo||0;
+  function sec(t,items){ return '<div class="dd-b-h">'+t+'</div><ul class="dd-b-list">'+items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'; }
+  function warn(items){ return '<div class="dd-b-h warn-h">⚠︎ À surveiller (ton profil)</div><ul class="dd-b-list warn">'+items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'; }
+  function obj(t){ return '<div class="dd-b-obj">🎯 '+t+'</div>'; }
+  function fuel(t){ return '<div class="dd-b-fuel">⛽ '+t+'</div>'; }
+  var H_PIED='Hallux : foulée courte, cadence haute (≈175) ; en côte raide, marche puissante plutôt que forcer la poussée d\'orteil. Chaussures à drop modéré (pas de Hoka).';
+  var H_GOUTTE='Hydratation constante (la déshydratation favorise les crises) ; fructose avec prudence sur les ravitos.';
+  var h='<div class="dd-brief">';
+
+  if(st==='ef'){
+    h+=obj('Construire la caisse aérobie (capillarisation, économie de course) — la base de l\'ultra. Aucune fatigue résiduelle.');
+    h+=sec('Déroulé · '+km+' km · ≈'+estDuree(km),[
+      '10 min de mise en route progressive en Z1.',
+      'Corps : '+km+' km en Z1-Z2 (140-155 bpm), allure conversationnelle — tu peux parler en phrases complètes.',
+      'Relâché, foulée courte et rapide. Marche les côtes raides dès que la FC dépasse ~155.',
+      '5 min retour au calme + mobilité hallux/chevilles.']);
+    h+=warn([H_PIED,'Piège classique : ne PAS dériver en tempo. Si Body Battery < 60, raccourcis ou footing très doux.']);
+    h+=fuel('Jour LC/MC selon le plan : pas besoin de fueling pendant, hydrate avant/après.');
+  }
+  else if(st==='recup'){
+    h+=obj('Récupération active : drainer, faire circuler — surtout pas progresser.');
+    h+=sec('Déroulé · '+km+' km · ≈'+estDuree(km),[
+      km+' km en Z1 strict (<140 bpm), allure très lente, sans ego.',
+      'Terrain plat et souple si possible.',
+      '10 min de mobilité / étirements doux en fin.']);
+    h+=warn([H_PIED,'Jambes lourdes ? Marche une partie. Le but est de récupérer, pas de faire du volume.']);
+  }
+  else if(st==='long'){
+    h+=obj('LA séance reine : endurance spécifique CCC, résistance des jambes en descente (excentrique), et répétition du ravitaillement + gestion mentale.');
+    h+=sec('Déroulé · '+km+' km · ~'+dp+' m D+',[
+      'Petit-déj HC 2-3 h avant. Départ tranquille.',
+      'Allure Z2 (140-155), tu peux monter en Z3 dans les côtes.',
+      '⬆️ Montées : tu MARCHES dès que ça raidit (bâtons si tu en as), mains sur les cuisses, petits pas — c\'est la stratégie CCC ET ça protège l\'hallux.',
+      '⬇️ Descentes : technique ++ — foulée courte, cadence haute, anticipe, laisse rouler sans freiner brutalement. C\'est là que tu blindes l\'excentrique (le nerf de la guerre sur CCC).',
+      'Check FC + nutrition toutes les 30-40 min.',
+      'Dernier tiers : si la forme est là, engage un peu — sans jamais sur-régime.']);
+    h+=fuel('RÉPÉTITION COURSE : vise 60-90 g de glucides/h (commence vers 60 g/h vu ta sensibilité, monte selon tolérance), bois 500-750 ml/h. Teste EXACTEMENT tes produits course (gels, barres, boisson). C\'est ton labo avant le gravel 93 km.');
+    h+=warn([H_PIED,H_GOUTTE,'Dos : gainage avant de partir, garde une posture haute quand la fatigue tasse en fin de sortie.','Pieds : chaussettes testées + anti-ampoules, laçage qui ne comprime pas l\'avant-pied.']);
+  }
+  else if(st==='cotes'){
+    h+=obj('Puissance en montée et spécificité D+ CCC — avec peu d\'impact (la montée traumatise peu).');
+    h+=sec('Déroulé · ~'+dp+' m D+',[
+      '15-20 min d\'échauffement Z1-Z2 + 3-4 lignes droites.',
+      'Format court (côte raide) : 8-10 × 45 s engagé — sur le très raide, marche puissante et gainée (= spécifique CCC) ; récup en trottinant la descente.',
+      'Format long (pente 5-8 %) : 4-6 × 3 min en Z3-Z4 ; récup descente relâchée.',
+      'Ajuste le nombre de répétitions au D+ visé du jour (~'+dp+' m).',
+      'Descentes de récup = travail technique, relâché. 10 min retour au calme.']);
+    h+=warn([H_PIED,'Body Battery > 70 pour faire la séance, sinon reporte ou allège. Descentes contrôlées (pas de bourrinage).']);
+    h+=fuel('Séance qualité : petite collation glucidique avant si le matin, hydrate bien.');
+  }
+  else if(st==='seuil'){
+    h+=obj('Relever le seuil et apprendre à tenir une allure soutenue longtemps — utile sur les relances et bosses roulantes de la CCC.');
+    h+=sec('Déroulé',[
+      '15-20 min Z1-Z2 + 3 lignes droites.',
+      'Corps : 2 × 15-20 min en Z3-Z4, autour de 162-169 bpm (juste sous / au seuil), 3-5 min de trot entre les deux.',
+      'Allure « confortablement dure » — soutenu mais pas en apnée.',
+      '10 min retour au calme.']);
+    h+=warn([H_PIED,'Body Battery 60-75 ok. Terrain légèrement vallonné = idéal. Ne dépasse pas franchement 169.']);
+    h+=fuel('Glucides autour de la séance (mode MC/HC selon le plan).');
+  }
+  else if(st==='vma'){
+    h+=obj('Cylindrée et VO2max — peu de volume, beaucoup de qualité. Améliore l\'économie de course.');
+    h+=sec('Déroulé',[
+      '20 min d\'échauffement progressif + gammes + 4 lignes.',
+      'Corps : 8 × 400 m (ou 6 × 600 m) à allure VMA, ressenti 9/10, récup trot 60-90 s.',
+      'Sur 400 m la FC monte avec retard : fie-toi à l\'allure/ressenti, pas au cardio.',
+      '10 min retour au calme.']);
+    h+=warn([H_PIED,'Body Battery > 75 OBLIGATOIRE. Échauffement long non négociable (tendons/hallux). Sol pas trop dur ; si gêne au pied, bascule en côtes (moins traumatisant).']);
+  }
+  else if(st==='strides'){
+    h+=obj('Réveiller la foulée et garder le pied vif, sans créer de fatigue.');
+    h+=sec('Déroulé · '+(km||'')+(km?' km':''),[
+      'Footing facile en Z1-Z2.',
+      '6-8 × 80 m en accélération progressive (jamais de sprint max), retour marché complet.',
+      'Relâché, sur terrain plat.']);
+    h+=warn([H_PIED,'Parfait quand Body Battery < 60 ou en activation avant une grosse séance.']);
+  }
+  else if(st==='velo'){
+    h+=obj('Volume aérobie SANS impact (préserve hallux et articulations) — récup active ou complément de charge.');
+    h+=sec('Déroulé · '+vk+' km',[
+      'Récup : Z1-Z2 souple, cadence 85-95.',
+      'Qualité : inclure du dénivelé / travail de force (cadence basse 60-70 en bosse).']);
+    h+=warn(['Le vélo ne remplace PAS l\'excentrique de descente : c\'est un complément, pas un substitut à la sortie longue trail.',H_GOUTTE]);
+    h+=fuel('Fueling selon la durée ; au-delà d\'1h30, glucides réguliers.');
+  }
+  else if(st==='gravel'){
+    h+=obj('Banc d\'essai n°1 : ravitaillement + gestion d\'effort sur longue durée. La répétition générale CCC côté estomac.');
+    h+=sec('Déroulé · '+(vk||'93')+' km',[
+      'Effort majoritaire en Z2, idéalement en négatif (plus fort sur la 2e moitié).',
+      'Ne pars pas trop vite.']);
+    h+=fuel('LE test : applique ta stratégie course (60-90 g glucides/h, 500-750 ml/h, fructose prudent) et NOTE tout ce qui passe / ne passe pas. Teste exactement tes produits du jour J.');
+    h+=warn([H_GOUTTE,'Débrief nutrition à chaud juste après (ce qui a calé, ce qui a tenu).']);
+  }
+  else if(st==='course'){
+    h+=obj('CCC — 101 km / 6100 m D+. Objectif : finir en gérant, pas en subissant.');
+    h+=sec('Plan de course',[
+      'Pacing prudent sur les 30 premiers km.',
+      'Marche TOUTES les montées dès le départ (économie d\'énergie).',
+      'Nutrition dès la 1re heure, sans interruption ; hydratation constante.',
+      'Descentes techniques et relâchées.']);
+    h+=warn(['Rien de nouveau le jour J : uniquement ce que tu as testé à l\'entraînement et sur le gravel.',H_GOUTTE]);
+  }
+  else if(st==='renfo'){
+    h+=obj('Durabilité : chaîne postérieure + pied (hallux/voûte) pour encaisser les descentes de la CCC. Qualité > charge.');
+    h+=sec('Consignes d\'exécution',[
+      'Tempo excentrique lent (3-4 s à la descente) sur les exercices de jambes.',
+      'Amplitude complète, gainage actif, on ne triche pas sur la technique.',
+      'Récup 60-90 s entre les séries.']);
+    h+=warn([H_PIED,'Si courbatures importantes, réduis le volume plutôt que la qualité.']);
+  }
+  else if(st==='repos'){
+    h+=obj('Repos = là où tu progresses vraiment. Récupération complète.');
+    h+=sec('Déroulé',[
+      'Pas de course.',
+      '15-20 min de mobilité : hanches, chevilles, mobilité hallux (flexion/extension douce), gainage léger, étirements.',
+      'Marche tranquille ok.']);
+    h+=warn(['Dors et hydrate. Si Body Battery très bas, vrai repos total (zéro mobilité intense).']);
+  }
+  else {
+    h+=sec('Déroulé',[ (km>0?(km+' km'):'')+(dp>0?(' · '+dp+' m D+'):'') || 'Séance libre.' ]);
+  }
+  h+='</div>';
+  return h;
+}
+function dayDetailHTML(d){
+  var st = d.seanceType || d.type;
+  var h = '';
+  h += '<div class="dd-type">' + seanceLabel(st) + (d.zone?'<span class="dd-zone">'+d.zone+'</span>':'') + '</div>';
+  var chips=[];
+  if(d.run>0)  chips.push('<span class="dd-chip">'+ic('run',11)+' '+d.run+' km</span>');
+  if(d.velo>0) chips.push('<span class="dd-chip">'+ic('bike',11)+' '+d.velo+' km</span>');
+  if(d.dplus>0)chips.push('<span class="dd-chip">'+ic('mountain',11)+' '+d.dplus+' m D+</span>');
+  if(d.muscu)  chips.push('<span class="dd-chip">'+ic('dumbbell',11)+' renfo</span>');
+  if(chips.length) h += '<div class="dd-chips">'+chips.join('')+'</div>';
+  h += seanceBrief(d);
+  var ref = d.renfoRef;
+  if(ref && typeof RENFO_BLOCKS!=='undefined' && RENFO_BLOCKS[ref]){
+    var blk=RENFO_BLOCKS[ref];
+    h += '<div class="dd-renfo"><div class="dd-renfo-h">'+ic('dumbbell',12)+' '+blk.nom+'</div>';
+    blk.exos.forEach(function(ex){ h+='<div class="dd-exo"><span class="dd-exo-n">'+ex.n+'</span><span class="dd-exo-d">'+ex.d+'</span></div>'; });
+    h += '<div class="dd-renfo-note">Contenu provisoire — alimentera la future biblio Renfo.</div></div>';
+  }
+  if(d.sub) h += '<div class="dd-note">'+d.sub+'</div>';
+  // Note nutrition contextuelle (mode du jour)
+  var mn = (d.m==='HC') ? ic('dot',9,'var(--orange)')+' Jour HC — grosse séance : on fuel (glucides hauts), pas de sèche.'
+         : (d.m==='LC') ? ic('dot',9,'var(--blue)')+' Jour LC — repos / intensité basse : moment idéal pour alléger.'
+         : ic('dot',9,'var(--green)')+' Jour MC — charge modérée : équilibre, glucides autour de la séance.';
+  h += '<div class="dd-mode">'+mn+'</div>';
+  // Barre d'actions (réutilise le module édition/échange)
+  if(d.date){
+    h += '<div class="dd-actions">' +
+      '<span class="dd-act" data-act-edit="'+d.date+'">'+ic('pencil',12)+' Modifier</span>' +
+      '<span class="dd-act" data-act-swap="'+d.date+'">'+ic('swap',12)+' Permuter</span>' +
+      '<span class="dd-act" data-act-replace="'+d.date+'">'+ic('refresh',12)+' Remplacer</span>' +
+      '</div>';
+  }
+  return h;
+}
+// ── Overlays d'action du planning (réutilisent window.CCCSessions) ──
+function __planOverlay(innerHTML){
+  var wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10004;padding:1rem';
+  wrap.innerHTML='<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.2rem;max-width:420px;width:100%;max-height:90vh;overflow-y:auto">'+innerHTML+'</div>';
+  document.body.appendChild(wrap);
+  wrap.addEventListener('click',function(e){ if(e.target===wrap) wrap.remove(); });
+  return wrap;
+}
+function __planClean(s){ return String(s==null?'':s).replace(/<svg[\s\S]*?<\/svg>/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
+function __planFindWeek(date){ for(var i=0;i<PLAN_DATA.length;i++){ var dd=PLAN_DATA[i].days; for(var j=0;j<dd.length;j++){ if(dd[j].date===date) return {w:PLAN_DATA[i], idx:j}; } } return null; }
+function planSwapPicker(date){
+  if(!window.CCCSessions) return;
+  var f=__planFindWeek(date); if(!f) return;
+  var cur=f.w.days[f.idx];
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem"><span style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem">Permuter '+__planClean(cur.label)+'</span><span id="plan-ov-x" style="cursor:pointer;color:var(--muted);display:inline-flex">'+ic('close',15)+'</span></div>';
+  h+='<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem">Choisis le jour avec lequel échanger :</div>';
+  f.w.days.forEach(function(d,j){
+    if(j===f.idx) return;
+    h+='<div class="plan-pick-day" data-pick="'+d.date+'"><div style="flex:1;min-width:0"><div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted)">'+__planClean(d.label)+'</div><div style="font-family:Syne,sans-serif;font-weight:600;font-size:0.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(__planClean(d.title)||d.type)+'</div></div>'+ic('swap',14)+'</div>';
+  });
+  var ov=__planOverlay(h);
+  ov.querySelector('#plan-ov-x').onclick=function(){ ov.remove(); };
+  ov.querySelectorAll('[data-pick]').forEach(function(x){ x.onclick=function(){ CCCSessions.doSwap(date, x.getAttribute('data-pick')); }; });
+}
+function planReplacePicker(date){
+  if(!window.CCCSessions) return;
+  var d=CCCSessions.dayByDate(date); if(!d) return;
+  var run=d.run||0, velo=d.velo||0;
+  var veloEq = run>0 ? Math.round(run*3) : velo;
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem"><span style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem">Remplacer '+__planClean(d.label)+'</span><span id="plan-ov-x" style="cursor:pointer;color:var(--muted);display:inline-flex">'+ic('close',15)+'</span></div>';
+  h+='<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem">Conversion rapide (ratio vélo 3:1) — le plan de base reste intact.</div>';
+  h+='<div class="plan-rep" data-rep="velo">'+ic('bike',14)+' <span>Vélo équivalent · '+veloEq+' km</span></div>';
+  h+='<div class="plan-rep" data-rep="repos">'+ic('dot',14,'var(--blue)')+' <span>Repos / récup</span></div>';
+  h+='<div class="plan-rep" data-rep="edit">'+ic('pencil',14)+' <span>Modifier en détail…</span></div>';
+  var ov=__planOverlay(h);
+  ov.querySelector('#plan-ov-x').onclick=function(){ ov.remove(); };
+  ov.querySelectorAll('[data-rep]').forEach(function(x){ x.onclick=function(){
+    var mode=x.getAttribute('data-rep');
+    if(mode==='edit'){ ov.remove(); CCCSessions.openEdit(date); return; }
+    var o=CCCSessions.getOv();
+    if(mode==='velo') o[date]={type:'velo',run:0,velo:veloEq,muscu:0,dplus:0,title:'Vélo équivalent',sub:'Remplace la séance · ratio 3:1'};
+    else o[date]={type:'repos',run:0,velo:0,muscu:0,dplus:0,title:'Repos',sub:'Séance remplacée'};
+    CCCSessions.saveOv(o); location.reload();
+  }; });
+}
+function planResetWeek(){
+  if(!window.CCCSessions) return;
+  var wk=(typeof months!=='undefined'&&months[curMonth])?months[curMonth][curWeekInMonth]:null;
+  if(!wk) return;
+  if(!confirm("Rétablir les séances d'origine pour cette semaine ?")) return;
+  var o=CCCSessions.getOv();
+  wk.days.forEach(function(d){ if(d.date) delete o[d.date]; });
+  CCCSessions.saveOv(o); location.reload();
+}
 function renderWeek() {
   var el = document.getElementById('week-content');
   if (!el) return;
@@ -2141,17 +2430,37 @@ function renderWeek() {
   var abs = getAbsOffset(curMonth, curWeekInMonth);
   var done = getDone();
   var html = '';
+  if (wk.role) {
+    var RL={charge1:'Charge 1 · crescendo',charge2:'Charge 2 · crescendo',charge3:'Charge 3 · pic du cycle',decharge:'Décharge · récup + renfo',rappel:'Rappel / B2B',affutage:'Affûtage',taper:'Taper',course:'Course'};
+    var rcol=(wk.role==='decharge')?'var(--blue)':(wk.role==='charge3'||wk.role==='rappel')?'var(--orange)':(wk.role==='taper'||wk.role==='affutage'||wk.role==='course')?'var(--accent)':'var(--green)';
+    html += '<div class="wk-role" style="border-left:3px solid '+rcol+'"><span style="color:'+rcol+'">'+(RL[wk.role]||wk.role)+'</span></div>';
+  }
   for (var i = 0; i < wk.days.length; i++) {
     var d = wk.days[i];
     var mc = d.m === 'LC' ? 'lc' : d.m === 'HC' ? 'hc' : 'mc';
     var key = abs + '-' + i;
     var isDone = !!done[key];
+    var mb=[];
+    if(d.run>0) mb.push(d.run+'km');
+    if(d.velo>0) mb.push(d.velo+'km vélo');
+    if(d.dplus>0) mb.push(d.dplus+'m D+');
+    var meta=mb.join(' · ');
     html += '<div class="day-row' + (d.gravel?' special':'') + (isDone?' done':'') + '" data-done="' + key + '">' +
       '<div class="dname"><div class="dcheck">' + (isDone?'<svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5ec27a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="4,10 8,14 16,5"/></svg>':'') + '</div>' + d.d + '</div>' +
       '<span class="badge ' + mc + '">' + d.m + '</span>' +
-      '<div><div class="stext">' + d.s + '</div>' + (d.sub?'<div class="ssub">' + d.sub + '</div>':'') + '</div>' +
+      '<div><div class="stext">' + d.s + '</div>' + (d.sub?'<div class="ssub">' + d.sub + '</div>':'') +
+        (meta?'<div class="dmeta">'+meta+'</div>':'') +
+        '<span class="day-exp" data-expand="'+key+'">détail ▾</span>' +
+      '</div>' +
       '</div>';
+    html += '<div class="day-detail" id="dd-'+key+'" style="display:none">' + dayDetailHTML(d) + '</div>';
   }
+  // Rétablir le plan de base si des overrides existent cette semaine
+  try {
+    var _ov = (window.CCCSessions ? CCCSessions.getOv() : {});
+    var _has = wk.days.some(function(x){ return _ov[x.date]; });
+    if (_has) html += '<div class="wk-reset"><span class="dd-act" data-act-reset="1">'+ic('refresh',12)+' Rétablir le plan de base (cette semaine)</span></div>';
+  } catch(e) {}
   el.innerHTML = html;
   // Le module « Échanger/modifier » suit la semaine sélectionnée dans le Plan
   try { if (window.__sedSetWeek) window.__sedSetWeek(getAbsOffset(curMonth, curWeekInMonth)); } catch(e) {}
@@ -4052,78 +4361,69 @@ if (document.readyState === 'loading') {
   function renderReco(data) {
     var container = document.getElementById('reco-content');
     if (!container) return;
-    
-    var hrv      = (data.hrv || {}).value;
-    var sleepScr = (data.sleep || {}).score;
-    var sleepHr  = (data.sleep || {}).duration_hours;
-    var readScr  = (data.readiness || {}).score;
-    var bb       = (data.body_battery || {}).current;
-    
-    var red = 0, orange = 0;
-    var flags = [];
-    
-    if (sleepHr != null && sleepHr < 6)       { red++;    flags.push('sommeil ' + sleepHr + 'h'); }
-    else if (sleepHr != null && sleepHr < 7)  { orange++; flags.push('sommeil ' + sleepHr + 'h'); }
-    
-    if (sleepScr != null && sleepScr < 50)     { red++;    flags.push('score sommeil ' + sleepScr); }
-    else if (sleepScr != null && sleepScr < 70){ orange++; flags.push('score sommeil ' + sleepScr); }
-    
-    if (readScr != null && readScr < 30)       { red++;    flags.push('readiness ' + readScr); }
-    else if (readScr != null && readScr < 50)  { orange++; flags.push('readiness ' + readScr); }
-    
-    if (bb != null && bb < 30) { orange++; flags.push('BB ' + bb); }
-    
-    var title, text, color;
-    if (red >= 2) {
-      color = 'var(--red, #ef4444)';
-      title = '' + ic("statusBad",13,"#ef4444") + ' Coach — Adapter aujourd\'hui';
-      text  = 'Signaux rouges (' + flags.join(', ') + '). Récupère sérieusement aujourd\'hui : footing easy zone 2 max, ou repos. Pas de séance dure. Un ultra se gagne sur 300+ jours qui s\'enchaînent.';
-    } else if (red >= 1 || orange >= 2) {
-      color = 'var(--orange, #e8a020)';
-      title = '' + ic("statusWarn",13,"#e8a020") + ' Coach — Push avec lucidité';
-      text  = 'Métriques mitigées (' + flags.join(', ') + '). Tu peux faire ta séance avec curseur 80–90% : réduis intensité ou volume. Pas zéro, pas full — la dose juste.';
-    } else if (orange >= 1) {
-      color = 'var(--accent, #a3e635)';
-      title = '' + ic("statusGood",13,"#5ec27a") + ' Coach — GO mais reste lucide';
-      text  = 'Globalement OK avec un petit signal à surveiller (' + flags.join(', ') + '). Séance prévue OK, mais reste à l\'écoute pendant l\'effort.';
-    } else {
-      color = 'var(--accent, #a3e635)';
-      title = '' + ic("statusGood",13,"#5ec27a") + ' Coach — Feu vert';
-      text  = 'Toutes les métriques sont dans le vert. Tu peux dérouler ta séance prévue comme planifié.';
+
+    var v = null;
+    try { if (window.evalReadiness && window.gatherReadinessInputs) v = window.evalReadiness(window.gatherReadinessInputs(data)); } catch(e){}
+    if (!v) {
+      container.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);font-style:italic;margin-top:1rem">Forme du jour indisponible (moteur readiness non charge).</div>';
+      return;
     }
-    
-    container.innerHTML = 
-      '<div style="background:rgba(163,230,53,0.04);border:1px solid ' + color + ';border-left:3px solid ' + color + ';padding:0.8rem 1rem;border-radius:8px;margin-top:1rem">' +
-      '<div style="font-family:DM Mono,monospace;font-size:0.7rem;color:' + color + ';text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">' + title + '</div>' +
-      '<div style="font-size:0.85rem;line-height:1.5;color:var(--text,#e8e9ea)">' + text + '</div>' +
-      '<div id="reco-ai" style="margin-top:0.7rem"></div>' +
+
+    var col = v.niveau === 'rouge'  ? 'var(--red, #ef4444)'
+            : v.niveau === 'orange' ? 'var(--orange, #e8a020)'
+            : v.niveau === 'pic'    ? '#f5c451'
+            :                         'var(--accent, #a3e635)';
+    var icoName = v.niveau === 'rouge' ? 'statusBad' : v.niveau === 'orange' ? 'statusWarn' : 'statusGood';
+    var icoCol  = v.niveau === 'rouge' ? '#ef4444' : v.niveau === 'orange' ? '#e8a020' : v.niveau === 'pic' ? '#f5c451' : '#5ec27a';
+    var titres  = { rouge:'Recup critique', orange:'Vigilance', vert:'Feu vert', pic:'Pic de forme' };
+
+    var flagsHtml = (v.flags || []).map(function(f){
+      return '<div style="display:flex;gap:0.45rem;align-items:flex-start;font-size:0.74rem;line-height:1.4;margin-top:0.35rem">' +
+        '<span style="flex-shrink:0">' + f.emoji + '</span>' +
+        '<div><span style="font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.05rem 0.3rem;text-transform:uppercase;letter-spacing:0.04em">' + f.module + '</span> ' +
+        '<b>' + f.label + '</b><br><span style="color:var(--muted)">' + f.raison + '</span></div></div>';
+    }).join('');
+
+    var carbHtml = v.carb_switch
+      ? '<div style="background:rgba(91,163,232,0.08);border:1px dashed var(--blue,#5ba3e8);border-radius:8px;padding:0.4rem 0.6rem;font-size:0.74rem;margin-top:0.5rem">Carb switch : ' + v.carb_switch.de + ' &rarr; <b>' + v.carb_switch.vers + '</b></div>'
+      : '';
+
+    container.innerHTML =
+      '<div style="background:rgba(163,230,53,0.04);border:1px solid ' + col + ';border-left:3px solid ' + col + ';padding:0.8rem 1rem;border-radius:8px;margin-top:1rem">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">' +
+          '<div style="font-family:DM Mono,monospace;font-size:0.7rem;color:' + col + ';text-transform:uppercase;letter-spacing:0.05em">' + ic(icoName,13,icoCol) + ' ' + (titres[v.niveau]||'') + '</div>' +
+          '<div style="font-family:DM Mono,monospace;font-size:0.78rem;color:' + col + '"><b>' + v.score + '</b><span style="color:var(--muted);font-size:0.6rem">/100</span></div>' +
+        '</div>' +
+        '<div style="font-size:0.85rem;line-height:1.5;color:var(--text,#e8e9ea)">' + v.consigne + '</div>' +
+        '<div style="font-size:0.76rem;color:var(--muted);margin-top:0.25rem">Seance : <b style="color:var(--text,#e8e9ea)">' + v.seance_recommandee + '</b></div>' +
+        carbHtml + flagsHtml +
+        '<div id="reco-ai" style="margin-top:0.7rem"></div>' +
       '</div>';
 
-    // Couche IA : conseil personnalisé enrichi (avec cache journalier)
-    enrichRecoWithAI(data, flags, color);
+    enrichRecoWithAI(data, v, col);
   }
+  window.__refreshReco = function(){ try { if (window.__garminData && typeof renderReco === 'function') renderReco(window.__garminData); } catch(e){} };
 
   // Génère un conseil IA personnalisé, mis en cache une fois par jour
-  async function enrichRecoWithAI(data, flags, color) {
+  async function enrichRecoWithAI(data, verdict, color) {
     var slot = document.getElementById('reco-ai');
     if (!slot) return;
-    if (typeof window.askClaude !== 'function') return;          // pas d'IA dispo
+    if (typeof window.askClaude !== 'function') return;
     if (!localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) return;
 
     var dk = (function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
     var cacheKey = 'ccc_reco_ai_' + dk;
-    // Cache : réutilise le conseil du jour s'il existe
     var cached = null;
     try { cached = localStorage.getItem(cacheKey); } catch(e){}
     if (cached) { showAIReco(slot, cached, color); return; }
 
-    // Indicateur discret de génération
-    slot.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);font-style:italic">le coach analyse…</div>';
+    slot.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);font-style:italic">le coach analyse...</div>';
 
-    // Contexte
-    var ctx = { hrv:(data.hrv||{}).value, body_battery:(data.body_battery||{}).current,
-      sommeil_h:(data.sleep||{}).duration_hours, readiness:(data.readiness||{}).score,
-      rhr:data.rhr, flags:flags };
+    var ctx = {
+      verdict_moteur: { niveau:verdict.niveau, score:verdict.score, consigne:verdict.consigne, seance:verdict.seance_recommandee,
+        flags:(verdict.flags||[]).map(function(f){return f.label;}), carb_switch:verdict.carb_switch, no_run:verdict.no_run },
+      forme: { hrv:(data.hrv||{}).value, body_battery:(data.body_battery||{}).current, sommeil_h:(data.sleep||{}).duration_hours, rhr:data.rhr }
+    };
     try {
       if (typeof PLAN_DATA !== 'undefined') {
         var start=new Date('2026-05-11'), now=new Date(dk);
@@ -4135,18 +4435,17 @@ if (document.readyState === 'loading') {
             prevu_run_km: w.days.reduce(function(a,d){return a+(d.run||0);},0),
             prevu_velo_km: w.days.reduce(function(a,d){return a+(d.velo||0);},0),
             realise_run_km: real.run, realise_velo_km: real.velo, realise_dplus: real.dplus };
-          // séance du jour
           var dd=w.days.filter(function(x){return x.date===dk;})[0];
           if (dd) ctx.seance_prevue={titre:dd.title, run:dd.run, velo:dd.velo};
         }
       }
     } catch(e){}
 
-    var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur préparant la CCC. Tutoie, sois concis.") +
-      " CONTEXTE D'USAGE : conseil du matin sur la séance du jour, au vu des données de forme.";
-    var prompt = "Données forme de Pierre ce matin :\n" + JSON.stringify(ctx,null,2) +
-      "\n\nRédige UN conseil court (2-3 phrases max, percutant) sur sa séance du jour au vu de ces données. " +
-      "Pas de titre, pas de markdown, juste le conseil direct. Réfère-toi à sa séance prévue si pertinent.";
+    var SYS = (window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur preparant la CCC. Tutoie, sois concis.") +
+      " CONTEXTE D'USAGE : le moteur deterministe a DEJA tranche la forme du jour ; ton role est d'HABILLER ce verdict (l'expliquer, l'adapter a sa seance), pas de le contredire ni de le recalculer.";
+    var prompt = "Verdict du moteur + donnees de Pierre ce matin :\n" + JSON.stringify(ctx,null,2) +
+      "\n\nLe moteur a tranche : niveau \" " + verdict.niveau + " \" (" + verdict.consigne + "). " +
+      "En 2-3 phrases percutantes, personnalise ce verdict pour Pierre : pourquoi, et comment ajuster concretement sa seance prevue. Ne contredis pas le verdict. Pas de titre, pas de markdown.";
     try {
       var txt = await window.askClaude(prompt, { system: SYS, max_tokens: 300 });
       txt = (txt||'').trim();
@@ -4155,7 +4454,7 @@ if (document.readyState === 'loading') {
         showAIReco(slot, txt, color);
       } else { slot.innerHTML = ''; }
     } catch(err) {
-      slot.innerHTML = '';  // en cas d'erreur, on garde juste le conseil par règles
+      slot.innerHTML = '';
     }
   }
 
@@ -5962,6 +6261,15 @@ if (document.readyState === 'loading') {
         };
       }
     } catch(e){}
+    // -- Readiness : verdict du moteur deterministe (le deterministe decide, l'IA interprete) --
+    try {
+      if (window.evalReadiness && window.gatherReadinessInputs) {
+        var rv = window.evalReadiness(window.gatherReadinessInputs());
+        ctx.readiness = { niveau:rv.niveau, score:rv.score, consigne:rv.consigne, seance_reco:rv.seance_recommandee,
+          no_run:rv.no_run, carb_switch:rv.carb_switch, flags:(rv.flags||[]).map(function(f){return f.label;}) };
+      }
+    } catch(e){}
+
     return ctx;
   }
 
@@ -7336,6 +7644,7 @@ if (document.readyState === 'loading') {
     };
   }
 
+  window.CCCSessions = { openEdit: openEdit, doSwap: doSwap, getOv: getOv, saveOv: saveOv, dayByDate: dayByDate, snapshot: snapshot };
   window.__renderSessionsEdit=render;
   // Permet aux onglets du Plan de piloter la semaine affichée par ce module (sync)
   window.__sedSetWeek=function(idx){ if(typeof idx==='number' && idx>=0){ cWI=idx; pick=null; render(); } };
@@ -7811,6 +8120,144 @@ if (document.readyState === 'loading') {
     var row=e.target.closest('[data-act-idx]');
     if(row){ var idx=parseInt(row.getAttribute('data-act-idx'),10); if(!isNaN(idx)&&window.openActivityDetail) window.openActivityDetail(idx); return; }
   });
+})();
+</script>
+<script>
+/* ============================================================
+   MOTEUR READINESS DETERMINISTE (porte du labo) + saisie subjective
+   Le deterministe decide, l'IA interprete. Expose sur window.
+   ============================================================ */
+(function(){
+  'use strict';
+  function rkDay(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  var READINESS_CONFIG = {
+    hrv:{critique:60,vigilance:75,pic:90}, bb_pic:85, sommeil_score_pic:85, sommeil_h_min:6,
+    douleur_stop:3, douleur_watch:2, rpe_eleve:7, poids_cible:71,
+    w:{hrv:0.40,sommeil:0.25,bb:0.20,rhr:0.15}, rhr:{bon:40,mauvais:60}, hrv_norm:{bas:50,haut:95}
+  };
+  function clamp01(x){ return Math.max(0,Math.min(1,x)); }
+  var SEV = { rouge:3, orange:2, vert:1, info:0 };
+
+  function compositeScore(i,C){
+    var parts=[];
+    if(i.hrv!=null) parts.push(['hrv',clamp01((i.hrv-C.hrv_norm.bas)/(C.hrv_norm.haut-C.hrv_norm.bas))*100,C.w.hrv]);
+    if(i.score_sommeil!=null) parts.push(['s',clamp01(i.score_sommeil/100)*100,C.w.sommeil]);
+    if(i.body_battery!=null) parts.push(['bb',clamp01(i.body_battery/100)*100,C.w.bb]);
+    if(i.fc_repos!=null) parts.push(['rhr',clamp01((C.rhr.mauvais-i.fc_repos)/(C.rhr.mauvais-C.rhr.bon))*100,C.w.rhr]);
+    var totW=parts.reduce(function(a,p){return a+p[2];},0)||1;
+    return Math.round(parts.reduce(function(a,p){return a+p[1]*p[2];},0)/totW);
+  }
+
+  function evalReadiness(input,config){
+    var C=Object.assign({},READINESS_CONFIG,config||{}); var i=input||{}; var flags=[];
+    function add(code,emoji,label,sev,module,raison,action){ flags.push({code:code,emoji:emoji,label:label,severite:sev,module:module,raison:raison,action:action}); }
+    if(i.hrv!=null){
+      if(i.hrv<C.hrv.critique) add('hrv_critique','\uD83D\uDD34','Recup critique','rouge','Daily Readiness','HRV '+i.hrv+'ms < '+C.hrv.critique,'Repos force ou mobilite legere seulement');
+      else if(i.hrv<C.hrv.vigilance) add('hrv_vigilance','\uD83D\uDFE1','Vigilance','orange','Daily Readiness','HRV '+i.hrv+'ms ('+C.hrv.critique+'-'+(C.hrv.vigilance-1)+')','Seance legere Z2 max, reduire l\'intensite');
+    }
+    if(i.heures_sommeil!=null && i.heures_sommeil<C.sommeil_h_min) add('sommeil_court','\uD83D\uDCA4','Sommeil court','orange','Daily Readiness',i.heures_sommeil+'h < '+C.sommeil_h_min+'h','Pas de seance intensive — recup prioritaire');
+    var noRun=false;
+    if(i.douleur!=null){
+      var z=i.zone_douleur&&i.zone_douleur.toLowerCase();
+      var estOrteil=z&&(z.indexOf('orteil')>=0||z.indexOf('hallux')>=0||z.indexOf('pied')>=0);
+      if(i.douleur>C.douleur_stop){ noRun=true; add('douleur_stop','\uD83E\uDDB6',estOrteil?'Orteil STOP':'Douleur STOP','orange','Body Map','Douleur '+i.douleur+'/10'+(i.zone_douleur?' — '+i.zone_douleur:'')+' > '+C.douleur_stop,'Stoppe la course -> renfo haut du corps / mobilite'); }
+      else if(i.douleur>=C.douleur_watch && estOrteil) add('douleur_watch','\u26A0\uFE0F','Surveillance orteil','info','Body Map','Douleur '+i.douleur+'/10 — '+i.zone_douleur+' (hallux rigidus)','Privilegier sans impact (velo, renfo) ; surveiller a l\'effort');
+    }
+    if(i.rpe!=null && i.hrv!=null && i.rpe>=C.rpe_eleve && i.hrv<C.hrv.vigilance) add('surmenage','\u26A1','Surmenage probable','orange','Moteur Hybride','RPE '+i.rpe+' eleve + HRV '+i.hrv+'ms abaissee','Alerte surentrainement -> nutrition anti-inflammatoire, reduire la charge');
+    var negatif=flags.some(function(f){return f.severite==='rouge'||f.severite==='orange';});
+    var pic=false;
+    if(!negatif && i.hrv!=null && i.body_battery!=null && i.score_sommeil!=null && i.hrv>C.hrv.pic && i.body_battery>C.bb_pic && i.score_sommeil>C.sommeil_score_pic){ pic=true; add('pic_forme','\uD83C\uDFC6','Pic de forme','info','Daily Readiness','HRV '+i.hrv+' + BB '+i.body_battery+' + sommeil '+i.score_sommeil,'SEANCE CLEF — fenetre de performance maximale, ose le gros bloc'); }
+    var niveau;
+    if(pic) niveau='pic';
+    else { var worst=flags.reduce(function(m,f){return Math.max(m,SEV[f.severite]||0);},SEV.vert); niveau=worst>=SEV.rouge?'rouge':worst>=SEV.orange?'orange':'vert'; }
+    var seance;
+    if(niveau==='rouge') seance='Repos force ou mobilite legere uniquement';
+    else if(niveau==='pic') seance='Seance clef — vise la qualite maximale';
+    else if(niveau==='orange') seance=noRun?'Pas de course -> renfo haut du corps / mobilite':'Seance allegee, Z2 max, intensite reduite';
+    else seance='Entrainement valide selon le programme';
+    if(noRun && niveau!=='rouge') seance='Pas de course -> renfo haut du corps / mobilite';
+    var carb_switch=null;
+    var seanceSaute = niveau==='rouge' || flags.some(function(f){return f.code==='sommeil_court';}) || (noRun && i.type_seance && /trail|course|run|long|fractionn/i.test(i.type_seance));
+    if(i.nutrition_prevue && /high/i.test(i.nutrition_prevue) && seanceSaute) carb_switch={de:'High Carb',vers:'Low Carb',raison:'Seance dure compromise -> pas de surcharge glucidique inutile'};
+    var ordre=['hrv_critique','surmenage','douleur_stop','sommeil_court','hrv_vigilance','pic_forme','douleur_watch'];
+    var dominant=ordre.map(function(c){return flags.filter(function(f){return f.code===c;})[0];}).filter(Boolean)[0];
+    var consigne=dominant?dominant.action:'Tout est au vert — deroule ta seance prevue.';
+    if(carb_switch) consigne+=' \u00B7 Bascule Low Carb.';
+    return { date:i.date||null, niveau:niveau, score:compositeScore(i,C), consigne:consigne, seance_recommandee:seance, flags:flags, carb_switch:carb_switch, no_run:noRun };
+  }
+
+  var CARB_MAP = { HC:'High Carb', LC:'Low Carb', MC:'Modere' };
+  function gatherReadinessInputs(garmin){
+    var g = garmin || window.__garminData || {};
+    var subj={}; try{ subj=JSON.parse(localStorage.getItem('ccc_subjectif_'+rkDay())||'{}'); }catch(e){}
+    var seance='',carb='';
+    try{
+      if(typeof PLAN_DATA!=='undefined' && typeof WI!=='undefined' && typeof DI!=='undefined' && PLAN_DATA[WI] && PLAN_DATA[WI].days && PLAN_DATA[WI].days[DI]){
+        var d=PLAN_DATA[WI].days[DI];
+        seance=String(d.title||d.type||'').replace(/<[^>]*>/g,'').trim();
+        carb=(typeof dayCarbMode==='function')?dayCarbMode(d):'';
+        carb=CARB_MAP[carb]||carb;
+      }
+    }catch(e){}
+    return {
+      date:rkDay(),
+      hrv: g.hrv&&g.hrv.value, body_battery: g.body_battery&&g.body_battery.current,
+      score_sommeil: g.sleep&&g.sleep.score, heures_sommeil: g.sleep&&g.sleep.duration_hours,
+      fc_repos: g.rhr,
+      douleur: (subj.douleur!=null?subj.douleur:null), zone_douleur: subj.zone||null, rpe:(subj.rpe!=null?subj.rpe:null),
+      type_seance: seance, nutrition_prevue: carb
+    };
+  }
+
+  window.evalReadiness = evalReadiness;
+  window.READINESS_CONFIG = READINESS_CONFIG;
+  window.gatherReadinessInputs = gatherReadinessInputs;
+
+  /* -- Saisie subjective du jour (douleur + zone + RPE) -- */
+  function renderHero(){
+    var host=document.getElementById('today-ressenti-block'); if(!host) return;
+    var key='ccc_subjectif_'+rkDay();
+    var subj={}; try{ subj=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+    var dol=(subj.douleur!=null?subj.douleur:0), zone=subj.zone||'RAS', rpe=(subj.rpe!=null?subj.rpe:5);
+    var ZGRP=[
+      ['Pied',['Gros orteil / hallux (D)','Gros orteil / hallux (G)','Avant-pied / métatarses','Voûte plantaire (aponévrosite)','Talon','Brûlure plantaire / ampoule']],
+      ['Cheville et jambe',['Tendon d\'Achille','Cheville (entorse)','Tibia (périostite / fracture de fatigue)','Mollet','Face externe jambe']],
+      ['Genou',['Rotule (sd fémoro-patellaire)','Tendon rotulien','Face externe (essuie-glace / TFL)','Interne / ménisque']],
+      ['Cuisse',['Quadriceps','Ischio-jambiers','Adducteurs']],
+      ['Hanche / bassin / dos',['Hanche / moyen fessier','Aine / psoas','Bassin / sacro-iliaque','Lombaires / bas du dos']]
+    ];
+    function ozo(z){ return '<option value="'+z+'"'+(z===zone?' selected':'')+'>'+z+'</option>'; }
+    var opts=ozo('RAS');
+    ZGRP.forEach(function(g){ opts+='<optgroup label="'+g[0]+'">'; g[1].forEach(function(z){ opts+=ozo(z); }); opts+='</optgroup>'; });
+    opts+=ozo('Autre');
+    host.innerHTML =
+      '<style>#today-ressenti-block input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:var(--surface2,#1c1d21);outline:none;border:1px solid var(--border,#242528)}#today-ressenti-block input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange,#e8a020);cursor:pointer;border:3px solid var(--bg,#0f0f10)}#today-ressenti-block input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--orange,#e8a020);cursor:pointer;border:3px solid var(--bg,#0f0f10)}#today-ressenti-block select{width:100%;background:var(--surface2,#1c1d21);color:var(--text,#e8e9ea);border:1px solid var(--border,#242528);border-radius:8px;padding:0.45rem 0.5rem;font-family:DM Sans,sans-serif;font-size:0.78rem}</style>'+
+      '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-left:3px solid var(--orange,#e8a020);border-radius:10px;padding:0.75rem 0.9rem;margin-bottom:1rem">'+
+        '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#7a7d85);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.55rem">\u270D\uFE0F Ressenti du jour <span style="opacity:0.7">\u00B7 ce que la montre ne sait pas</span></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-bottom:0.25rem"><span>Douleur <span id="rk-dol-v" style="color:var(--orange,#e8a020);font-family:DM Mono,monospace">'+dol+'</span>/10</span></div>'+
+        '<input type="range" id="rk-dol" min="0" max="10" value="'+dol+'">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.6rem">'+
+          '<div><div style="font-size:0.7rem;color:var(--muted,#7a7d85);margin-bottom:0.25rem">Zone</div><select id="rk-zone">'+opts+'</select></div>'+
+          '<div><div style="font-size:0.74rem;margin-bottom:0.25rem">RPE seance <span id="rk-rpe-v" style="color:var(--orange,#e8a020);font-family:DM Mono,monospace">'+rpe+'</span>/10</div><input type="range" id="rk-rpe" min="0" max="10" value="'+rpe+'"></div>'+
+        '</div>'+
+      '</div>';
+    function save(){
+      var o={ douleur:+document.getElementById('rk-dol').value, zone:document.getElementById('rk-zone').value, rpe:+document.getElementById('rk-rpe').value };
+      try{ localStorage.setItem(key, JSON.stringify(o)); }catch(e){}
+      var dv=document.getElementById('rk-dol-v'); if(dv) dv.textContent=o.douleur;
+      var rv=document.getElementById('rk-rpe-v'); if(rv) rv.textContent=o.rpe;
+      try{ if(window.__refreshReco) window.__refreshReco(); }catch(e){}
+      try{ if(window.CCCSync) CCCSync.pushDay(rkDay()); }catch(e){}
+      try{ if(window.CCCSync && CCCSync.pushState) CCCSync.pushState('subjectif_'+rkDay(), o); }catch(e){}
+    }
+    document.getElementById('rk-dol').addEventListener('input',save);
+    document.getElementById('rk-rpe').addEventListener('input',save);
+    document.getElementById('rk-zone').addEventListener('change',save);
+  }
+  window.__renderReadinessHero = renderHero;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',renderHero);
+  else renderHero();
 })();
 </script>
 </body>
