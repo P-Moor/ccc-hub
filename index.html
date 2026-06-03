@@ -1203,7 +1203,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 <!-- NUTRITION -->
 <div class="panel" id="panel-nutrition"><div class="inner">
-  <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.4</b> · séances ajustables (échange/édition)</div>
+  <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.03em">CCC Hub · Nutrition <b style="color:var(--accent)">v2.5</b> · recherche Open Food Facts (millions de produits)</div>
   <div class="rec-mod" id="recipes-module"></div>
   <div class="wkc-mod" id="weekplan-module"></div>
   <div class="ptitle" id="matrices-toggle" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem">Matrices Nutritionnelles <span class="ptitle-sub">Carb cycling · quantités</span> <span id="matrices-chev" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">▸ déplier</span></div>
@@ -5569,6 +5569,11 @@ if (document.readyState === 'loading') {
   var activeSlot = null;
   var searchTerm = '';
   var selectedCat = 'all';
+  // Recherche Open Food Facts (en ligne, toutes marques)
+  var offResults = [];
+  var offLoading = false;
+  var offError = '';
+  var offQueryDone = '';
 
   function macroOfMeal(arr) {
     var s = {g:0,p:0,l:0,kcal:0};
@@ -5848,6 +5853,33 @@ if (document.readyState === 'loading') {
       });
     }
     h += '</div>';
+    // ── Bloc Open Food Facts (recherche en ligne, toutes marques) ──
+    h += '<div style="border-top:1px dashed var(--border,#242528);margin-top:0.3rem;padding-top:0.5rem">';
+    var offTerm = (searchTerm||'').trim();
+    var btnLabel = offTerm ? ('🌐 Chercher « ' + offTerm + ' » dans Open Food Facts') : '🌐 Tape un nom puis cherche dans Open Food Facts';
+    h += '<div class="nh-off-search" style="text-align:center;cursor:pointer;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--accent,#a3e635);padding:0.4rem;border:1px solid var(--border,#242528);border-radius:6px;background:var(--surface,#16171a)">' + btnLabel + '</div>';
+    if (offLoading) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.5rem">⏳ Recherche en ligne…</div>';
+    } else if (offError) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--orange,#e8a020);text-align:center;padding:0.4rem">' + offError + '</div>';
+    }
+    if (offResults.length) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin:0.4rem 0 0.2rem">' + offResults.length + ' résultats · « ' + offQueryDone + ' » · valeurs /100g</div>';
+      h += '<div style="max-height:200px;overflow-y:auto">';
+      offResults.forEach(function(f, i){
+        var fav = offIsFav(f.code);
+        h += '<div style="display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.5rem;border-radius:5px;margin-bottom:2px;background:var(--surface,#16171a)">' +
+          '<div class="nh-off-pick" data-slot="' + slotId + '" data-off="' + i + '" style="flex:1;min-width:0;cursor:pointer">' +
+            '<div style="font-family:DM Mono,monospace;font-size:0.64rem;color:var(--text,#e8e9ea);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.n + '</div>' +
+            '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted,#5e6068)">' + f.kcal + 'k · G' + f.g + ' P' + f.p + ' L' + f.l + ' /100g</div>' +
+          '</div>' +
+          '<span class="nh-off-fav" data-off="' + i + '" style="cursor:pointer;font-size:0.85rem;flex-shrink:0" title="Garder en favori">' + (fav?'⭐':'☆') + '</span>' +
+        '</div>';
+      });
+      h += '</div>';
+    }
+    h += '<div style="font-family:DM Mono,monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-align:center;margin-top:0.3rem">Données : Open Food Facts (ODbL)</div>';
+    h += '</div>';
     h += '<div class="nh-cancel" style="text-align:center;cursor:pointer;font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);padding:0.3rem">Fermer</div>';
     h += '</div>';
     return h;
@@ -5882,6 +5914,94 @@ if (document.readyState === 'loading') {
     return {factor:g3/100, qty:g3+'g'};
   }
   try { window.__foodQtyPrompt = foodQtyPrompt; } catch(e){}
+
+  // ════════════════════════════════════════
+  // OPEN FOOD FACTS — recherche en ligne (toutes marques, millions de produits)
+  // API publique, sans clé. Licence ODbL. Données par 100g.
+  // ════════════════════════════════════════
+  function offNum(v){ var n = parseFloat(v); return (isNaN(n)||!isFinite(n)) ? 0 : n; }
+  function offRound(n){ return Math.round(n*10)/10; }
+  function mapOffProduct(p){
+    if (!p) return null;
+    var nut = p.nutriments || {};
+    var kcal = offNum(nut['energy-kcal_100g']);
+    if (!kcal && nut['energy_100g']) kcal = offRound(offNum(nut['energy_100g'])/4.184); // kJ → kcal de secours
+    var name = (p.product_name_fr || p.product_name || '').trim();
+    if (!name || !kcal) return null; // on écarte les produits sans nom ou sans calories
+    var brand = (p.brands || '').split(',')[0].trim();
+    var full = brand ? (name + ' · ' + brand) : name;
+    if (p.quantity) full += ' (' + String(p.quantity).trim() + ')';
+    return {
+      cat: 'Open Food Facts',
+      n: full,
+      u: '100g',
+      g: offRound(offNum(nut['carbohydrates_100g'])),
+      p: offRound(offNum(nut['proteins_100g'])),
+      l: offRound(offNum(nut['fat_100g'])),
+      kcal: Math.round(kcal),
+      off: true,
+      code: p.code || ''
+    };
+  }
+  function searchOFF(term){
+    term = (term||'').trim();
+    if (term.length < 2) { offError = 'Tape au moins 2 lettres.'; render(); return; }
+    offLoading = true; offError = ''; offResults = []; offQueryDone = term;
+    render();
+    var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(term) +
+              '&search_simple=1&action=process&json=1&page_size=25&lc=fr' +
+              '&fields=product_name,product_name_fr,brands,nutriments,quantity,code';
+    var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+    var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 9000) : null;
+    fetch(url, ctrl ? {signal:ctrl.signal} : undefined)
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(data){
+        if (to) clearTimeout(to);
+        var list = (data && data.products) ? data.products : [];
+        var mapped = [];
+        for (var i=0;i<list.length;i++){ var m = mapOffProduct(list[i]); if (m) mapped.push(m); }
+        offResults = mapped;
+        offLoading = false;
+        if (!mapped.length) offError = 'Aucun produit exploitable pour « ' + term +' ».';
+        render();
+      })
+      .catch(function(e){
+        if (to) clearTimeout(to);
+        offLoading = false;
+        offError = 'Recherche en ligne indisponible (réseau ?). Réessaie.';
+        render();
+      });
+  }
+  function offIsFav(code){
+    if (!code) return false;
+    var cf = getCustomFoods();
+    for (var i=0;i<cf.length;i++){ if (cf[i].code===code) return true; }
+    return false;
+  }
+  function addOffFood(slotId, idx){
+    var f = offResults[idx];
+    if (!f) return;
+    var r = foodQtyPrompt(f);
+    if (!r) return;
+    var factor = r.factor;
+    var meal = { food: f.n, qty: r.qty, g: f.g*factor, p: f.p*factor, l: f.l*factor, kcal: Math.round(f.kcal*factor) };
+    var dk = todayKey();
+    var day = getDayMeals(dk);
+    if (!day[slotId]) day[slotId] = [];
+    day[slotId].push(meal);
+    saveDayMeals(dk, day);
+    activeSlot = null; searchTerm=''; selectedCat='all';
+    offResults=[]; offQueryDone=''; offError='';
+    render();
+  }
+  function favOffFood(idx){
+    var f = offResults[idx];
+    if (!f) return;
+    if (offIsFav(f.code)) return;
+    // On enregistre une copie « propre » dans les favoris (aliments custom)
+    saveCustomFood({ cat:'Open Food Facts', n:f.n, u:f.u, g:f.g, p:f.p, l:f.l, kcal:f.kcal, code:f.code });
+    render();
+  }
 
   function addFood(slotId, foodIdx) {
     var foods = getFoods();
@@ -5931,11 +6051,12 @@ if (document.readyState === 'loading') {
       el.addEventListener('click', function(){
         activeSlot = el.getAttribute('data-slot');
         searchTerm=''; selectedCat='all';
+        offResults=[]; offError=''; offQueryDone=''; offLoading=false;
         render();
       });
     });
     var cancel = document.querySelector('.nh-cancel');
-    if (cancel) cancel.addEventListener('click', function(){ activeSlot=null; render(); });
+    if (cancel) cancel.addEventListener('click', function(){ activeSlot=null; offResults=[]; offError=''; offQueryDone=''; render(); });
 
     var search = document.getElementById('nh-search');
     if (search) {
@@ -5953,6 +6074,20 @@ if (document.readyState === 'loading') {
     document.querySelectorAll('.nh-pick').forEach(function(el){
       el.addEventListener('click', function(){
         addFood(el.getAttribute('data-slot'), parseInt(el.getAttribute('data-food'),10));
+      });
+    });
+    // Open Food Facts : lancer la recherche en ligne
+    var offBtn = document.querySelector('.nh-off-search');
+    if (offBtn) offBtn.addEventListener('click', function(){ searchOFF(searchTerm); });
+    document.querySelectorAll('.nh-off-pick').forEach(function(el){
+      el.addEventListener('click', function(){
+        addOffFood(el.getAttribute('data-slot'), parseInt(el.getAttribute('data-off'),10));
+      });
+    });
+    document.querySelectorAll('.nh-off-fav').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        favOffFood(parseInt(el.getAttribute('data-off'),10));
       });
     });
     document.querySelectorAll('.nh-del').forEach(function(el){
