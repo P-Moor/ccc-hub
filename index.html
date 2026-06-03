@@ -6969,7 +6969,7 @@ if (document.readyState === 'loading') {
     running = true;
     var changed = false;
     try {
-      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log'];
+      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides'];
       var res = await Promise.all(keys.map(function(k){ return reconcileState(k).catch(function(){ return false; }); }));
       if (res.some(Boolean)) changed = true;
 
@@ -6989,6 +6989,21 @@ if (document.readyState === 'loading') {
           var loc = localDay(d);
           var locEmpty = isEmpty(loc.meals) && isEmpty(loc.water);
           if (locEmpty || !lt || newer(srv.updated_at, lt)) { writeDayLocal(d, srv); changed = true; }
+        });
+        // MIROIR : pousse vers le serveur tout jour LOCAL non encore présent (ou plus récent).
+        // => le serveur devient une sauvegarde COMPLÈTE ; ne pousse jamais du vide par-dessus des données.
+        var seen = {};
+        for (var lk in localStorage) {
+          if (lk.indexOf('ccc_meals2_') === 0) seen[lk.slice(11)] = 1;
+          else if (lk.indexOf('ccc_water_') === 0) seen[lk.slice(10)] = 1;
+        }
+        Object.keys(seen).forEach(function(d){
+          var locd = localDay(d);
+          if (isEmpty(locd.meals) && isEmpty(locd.water)) return;
+          var srvd = days[d];
+          var lt2 = getTs('journal:' + d);
+          if (!srvd || (isEmpty(srvd.meals) && isEmpty(srvd.water))) { pushDay(d); return; }
+          if (lt2 && newer(lt2, srvd.updated_at)) { pushDay(d); }
         });
       } catch(e){}
     } finally {
