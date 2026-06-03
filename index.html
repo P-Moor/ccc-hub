@@ -6744,8 +6744,10 @@ if (document.readyState === 'loading') {
         row.style.cssText = 'border-bottom:1px solid var(--border);padding-bottom:0.45rem';
         var top = document.createElement('div');
         top.style.cssText = 'display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap';
-        var nm = document.createElement('span');
-        nm.style.cssText = 'flex:1;min-width:90px;font-size:0.8rem';
+        var nm = document.createElement('input');
+        nm.type = 'text'; nm.value = (it.n || '');
+        nm.placeholder = 'nom de l\'aliment';
+        nm.style.cssText = 'flex:1;min-width:120px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.32rem 0.4rem;font-size:0.78rem';
         var gin = document.createElement('input');
         gin.type = 'number'; gin.inputMode = 'numeric'; gin.min = '0';
         gin.value = (it.grams != null ? it.grams : '');
@@ -6761,11 +6763,21 @@ if (document.readyState === 'loading') {
         var warn = document.createElement('div');
         warn.style.cssText = 'font-family:DM Mono,monospace;font-size:0.6rem;color:var(--orange,#e8a020);margin-top:0.15rem';
         function renderRow(){
-          nm.innerHTML = (it.n || '?') + ' <span style="font-family:DM Mono,monospace;font-size:0.56rem;color:' + (it._src==='base'?'var(--green,#5ec27a)':'var(--muted)') + '">' + (it._src==='base'?'✓ base':'≈ estimé') + '</span>';
-          macros.textContent = (it.kcal||0) + ' kcal · G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0);
+          var tg = (it._src==='base') ? '✓ base' : '≈ estimé';
+          macros.textContent = tg + ' · ' + (it.kcal||0) + ' kcal · G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0);
           warn.textContent = it._note ? ('⚠️ ' + it._note) : '';
         }
         renderRow();
+        // Correction du NOM : re-matche la base au changement (on remet à zéro l'estimation IA d'origine
+        // pour qu'un aliment renommé soit jugé sur son nouveau nom, pas sur l'ancienne estimation).
+        nm.addEventListener('change', function(){
+          var v = (nm.value || '').trim();
+          if (!v) { nm.value = it.n || ''; return; }
+          it.n = v;
+          it._ai = { grams: it.grams, g: 0, p: 0, l: 0, kcal: 0 };
+          applyGrams(it, it.grams || 0);
+          renderRow(); refreshTotal();
+        });
         gin.addEventListener('input', function(){
           var v = parseFloat(gin.value);
           applyGrams(it, (isFinite(v) && v > 0) ? v : 0);
