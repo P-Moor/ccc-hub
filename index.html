@@ -6732,46 +6732,82 @@ if (document.readyState === 'loading') {
     head.textContent = '✋ Proposition · à valider';
     var body = document.createElement('div');
     if (action === 'add_meal' && Array.isArray(params.items) && params.items.length) {
-      body.innerHTML = '<b>Ajouter un repas</b> <span style="font-size:0.66rem;color:var(--muted)">· ajuste les grammes si besoin</span>';
+      body.innerHTML = '<b>Composer le repas</b> <span style="font-size:0.66rem;color:var(--muted)">· ajuste, retire ✕ ou ajoute +</span>';
       var list = document.createElement('div');
       list.style.cssText = 'margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem';
       var totalEl = document.createElement('div');
       totalEl.style.cssText = 'font-family:DM Mono,monospace;font-size:0.74rem;color:var(--text);margin-top:0.5rem;font-weight:700';
-      function refreshTotal(){ var t = params.items.reduce(function(a,it){ return a+(it.kcal||0); }, 0); totalEl.textContent = 'Total : ' + t + ' kcal'; }
-      params.items.forEach(function(it){
+      function refreshTotal(){ var t = params.items.reduce(function(a,it){ return a+(it.kcal||0); }, 0); totalEl.textContent = 'Total : ' + t + ' kcal · ' + params.items.length + ' aliment·s'; }
+
+      function makeRow(it){
         var row = document.createElement('div');
         row.style.cssText = 'border-bottom:1px solid var(--border);padding-bottom:0.45rem';
         var top = document.createElement('div');
         top.style.cssText = 'display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap';
         var nm = document.createElement('span');
-        nm.style.cssText = 'flex:1;min-width:100px;font-size:0.8rem';
-        nm.innerHTML = (it.n || '?') + ' <span style="font-family:DM Mono,monospace;font-size:0.56rem;color:' + (it._src==='base'?'var(--green,#5ec27a)':'var(--muted)') + '">' + (it._src==='base'?'✓ base':'≈ estimé') + '</span>';
+        nm.style.cssText = 'flex:1;min-width:90px;font-size:0.8rem';
         var gin = document.createElement('input');
         gin.type = 'number'; gin.inputMode = 'numeric'; gin.min = '0';
         gin.value = (it.grams != null ? it.grams : '');
-        gin.style.cssText = 'width:64px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.3rem;font-family:DM Mono,monospace;font-size:0.74rem;text-align:right';
+        gin.style.cssText = 'width:58px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.3rem;font-family:DM Mono,monospace;font-size:0.74rem;text-align:right';
         var unit = document.createElement('span');
         unit.textContent = 'g'; unit.style.cssText = 'font-family:DM Mono,monospace;font-size:0.66rem;color:var(--muted)';
-        top.appendChild(nm); top.appendChild(gin); top.appendChild(unit);
+        var del = document.createElement('button');
+        del.textContent = '✕'; del.title = 'Retirer cet aliment';
+        del.style.cssText = 'background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:0.95rem;padding:0 0.25rem;line-height:1';
+        top.appendChild(nm); top.appendChild(gin); top.appendChild(unit); top.appendChild(del);
         var macros = document.createElement('div');
         macros.style.cssText = 'font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted);margin-top:0.2rem';
-        function renderMacros(){ macros.textContent = (it.kcal||0) + ' kcal · G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0); }
-        renderMacros();
+        var warn = document.createElement('div');
+        warn.style.cssText = 'font-family:DM Mono,monospace;font-size:0.6rem;color:var(--orange,#e8a020);margin-top:0.15rem';
+        function renderRow(){
+          nm.innerHTML = (it.n || '?') + ' <span style="font-family:DM Mono,monospace;font-size:0.56rem;color:' + (it._src==='base'?'var(--green,#5ec27a)':'var(--muted)') + '">' + (it._src==='base'?'✓ base':'≈ estimé') + '</span>';
+          macros.textContent = (it.kcal||0) + ' kcal · G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0);
+          warn.textContent = it._note ? ('⚠️ ' + it._note) : '';
+        }
+        renderRow();
         gin.addEventListener('input', function(){
           var v = parseFloat(gin.value);
           applyGrams(it, (isFinite(v) && v > 0) ? v : 0);
-          renderMacros(); refreshTotal();
+          renderRow(); refreshTotal();
         });
-        row.appendChild(top); row.appendChild(macros);
-        if (it._note) {
-          var w = document.createElement('div');
-          w.style.cssText = 'font-family:DM Mono,monospace;font-size:0.6rem;color:var(--orange,#e8a020);margin-top:0.15rem';
-          w.textContent = '⚠️ ' + it._note;
-          row.appendChild(w);
-        }
-        list.appendChild(row);
-      });
-      body.appendChild(list); body.appendChild(totalEl); refreshTotal();
+        del.addEventListener('click', function(){
+          var i = params.items.indexOf(it); if (i >= 0) params.items.splice(i, 1);
+          row.remove(); refreshTotal();
+        });
+        row.appendChild(top); row.appendChild(macros); row.appendChild(warn);
+        return row;
+      }
+
+      params.items.forEach(function(it){ list.appendChild(makeRow(it)); });
+
+      // Ligne d'ajout manuel : nom (recalé sur la base) + grammes
+      var addRow = document.createElement('div');
+      addRow.style.cssText = 'display:flex;align-items:center;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap';
+      var addName = document.createElement('input');
+      addName.type = 'text'; addName.placeholder = '+ ajouter un aliment (ex : skyr)';
+      addName.style.cssText = 'flex:1;min-width:130px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.35rem;font-size:0.74rem';
+      var addG = document.createElement('input');
+      addG.type = 'number'; addG.inputMode = 'numeric'; addG.min = '0'; addG.placeholder = 'g';
+      addG.style.cssText = 'width:58px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.35rem;font-family:DM Mono,monospace;font-size:0.74rem;text-align:right';
+      var addBtn = document.createElement('button');
+      addBtn.textContent = '+';
+      addBtn.style.cssText = 'background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.85rem;font-weight:700';
+      function doAdd(){
+        var nm0 = (addName.value || '').trim(); if (!nm0) return;
+        var g0 = parseFloat(addG.value); g0 = (isFinite(g0) && g0 > 0) ? g0 : 0;
+        var it = groundMealItems([{ n: nm0, grams: g0, g:0, p:0, l:0, kcal:0 }])[0];
+        params.items.push(it);
+        list.appendChild(makeRow(it));
+        refreshTotal();
+        addName.value = ''; addG.value = ''; addName.focus();
+      }
+      addBtn.addEventListener('click', doAdd);
+      addName.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+      addG.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+      addRow.appendChild(addName); addRow.appendChild(addG); addRow.appendChild(addBtn);
+
+      body.appendChild(list); body.appendChild(addRow); body.appendChild(totalEl); refreshTotal();
     } else {
       body.innerHTML = '<b>' + sum.titre + '</b><br>' + sum.detail.replace(/\n/g,'<br>');
     }
@@ -6829,7 +6865,7 @@ if (document.readyState === 'loading') {
   // Applique une action structurée APRÈS validation. Retourne true si quelque chose a été écrit.
   function applyAction(action, params) {
     var dk = todayKey();
-    if (action === 'add_meal' && params.items) {
+    if (action === 'add_meal' && params.items && params.items.length) {
       var key = 'ccc_meals2_'+dk;
       var meals = {};
       try { meals = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e){}
