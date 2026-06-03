@@ -1330,6 +1330,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
   <div id="coach-thread" style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1rem;min-height:200px"></div>
   <div id="coach-quick" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.8rem"></div>
   <div style="display:flex;gap:0.5rem;align-items:flex-end;position:sticky;bottom:0;background:var(--bg);padding:0.5rem 0">
+    <input id="coach-photo-input" type="file" accept="image/*" capture="environment" style="display:none">
+    <button id="coach-photo" title="Analyser une photo de repas" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:44px;height:44px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 L6 6 L7.5 4 L12.5 4 L14 6 L17 6 A1 1 0 0 1 18 7 L18 15 A1 1 0 0 1 17 16 L3 16 A1 1 0 0 1 2 15 L2 7 A1 1 0 0 1 3 6 Z"/><circle cx="10" cy="11" r="3"/></svg></button>
     <textarea id="coach-input" rows="2" placeholder="Ex : j'ai mangé 2 œufs et du skyr ce matin · ajoute 15km mardi · comment je me sens aujourd'hui ?" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.7rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:0.85rem;resize:none"></textarea>
     <button id="coach-send" style="background:var(--accent);border:none;color:#0f0f10;width:44px;height:44px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="16" x2="10" y2="4"/><polyline points="5,9 10,4 15,9"/></svg></button>
   </div>
@@ -2900,7 +2902,15 @@ function renderToday() {
         '<div class="tm-row"><div class="tm-label">' + ic('apple',12) + ' Collation</div><div class="tm-val">' + agDay.colla + '</div></div>' +
         '<div class="tm-sep"></div>' +
         '<div class="tm-row"><div class="tm-label">' + ic('moon',12) + ' Soir</div><div class="tm-val">' + agDay.soir + '</div></div>' +
+        '<div class="tm-sep"></div>' +
+        '<div style="font-size:0.62rem;color:var(--muted);line-height:1.4;margin-top:2px">💡 Suggestion du plan — tu composes tes vrais repas dans l\'onglet Nutrition.</div>' +
+        '<button id="tm-copy-plan" style="margin-top:7px;align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.42rem 0.85rem;font-size:0.72rem;cursor:pointer;font-family:DM Mono,monospace">📋 Copier vers le jour</button>' +
         '</div>';
+      var cpb = document.getElementById('tm-copy-plan');
+      if (cpb) cpb.addEventListener('click', function(){
+        if (window.__copyPlanToDay) { window.__copyPlanToDay(); }
+        cpb.textContent = '✓ Copié — voir l\'onglet Nutrition'; cpb.disabled = true; cpb.style.opacity = '0.6';
+      });
     } else {
       mealEl.innerHTML = '<div style="color:var(--muted);font-size:0.68rem">Données indisponibles.</div>';
     }
@@ -2910,6 +2920,7 @@ function renderToday() {
 renderToday();
 renderCalendar();
 updateBadge();
+window.__renderToday = renderToday;
 
 /* Service worker */
 if ('serviceWorker' in navigator) {
@@ -3952,6 +3963,7 @@ if (document.readyState === 'loading') {
       max_tokens: opts.max_tokens || 1024,
       json_mode: !!opts.json_mode
     };
+    if (opts.image) { body.image = opts.image; body.image_media_type = opts.image_media_type || 'image/jpeg'; }
     var r = await fetch(url + '/api/claude', {
       method: 'POST',
       headers: {
@@ -5674,7 +5686,7 @@ if (document.readyState === 'loading') {
     if (existing) existing.remove();
 
     var dk = todayKey();
-    try { syncPlanToDay(dk); } catch(e){}
+    // Plus d'auto-préremplissage : Pierre compose lui-même. Copie du plan uniquement via le bouton opt-in (window.__copyPlanToDay).
     var dayMeals = getDayMeals(dk);
     var t = computeTargets();
 
@@ -6173,6 +6185,30 @@ if (document.readyState === 'loading') {
     if (window.__updateFilDuJour) { try { window.__updateFilDuJour(false); } catch(e){} }
   };
 
+  // ── Copie opt-in du plan vers les repas du jour (sur demande, jamais automatique) ──
+  window.__copyPlanToDay = function(){
+    try { resyncPlanToDay(todayKey()); } catch(e){}
+    render();
+    if (window.__renderToday) { try { window.__renderToday(); } catch(e){} }
+  };
+
+  // ── Nettoyage unique : retire les repas auto-injectés (_plan) du jour pour partir propre ──
+  // (Ne touche JAMAIS aux aliments saisis manuellement ni à l'historique des autres jours.) Une seule fois.
+  (function(){
+    try {
+      if (localStorage.getItem('ccc_prefill_off_v1')) return;
+      var dk = todayKey(), meals = getDayMeals(dk), changed = false;
+      Object.keys(meals).forEach(function(s){
+        if (!Array.isArray(meals[s])) return;
+        var b = meals[s].length;
+        meals[s] = meals[s].filter(function(x){ return !(x && x._plan); });
+        if (meals[s].length !== b) changed = true;
+      });
+      if (changed) saveDayMeals(dk, meals);
+      localStorage.setItem('ccc_prefill_off_v1','1');
+    } catch(e){}
+  })();
+
 })();
 
 
@@ -6497,7 +6533,8 @@ if (document.readyState === 'loading') {
       "- \"reply\" (string) : ta réponse en français à afficher à Pierre (conseil, analyse). Si tu proposes une modification, explique-la SANS dire qu'elle est faite (elle attend sa validation).\n" +
       "- \"action\" (string|null) : si Pierre demande une modification concrète, l'une de : \"add_meal\", \"set_water\", \"adjust_volume\", null sinon\n" +
       "- \"params\" (object) : paramètres de l'action.\n" +
-      "  · add_meal → {slot:'petitdej'|'preseance'|'dejeuner'|'postseance'|'encas'|'diner', items:[{n:nom, g:glucides, p:proteines, l:lipides, kcal:calories}]}\n" +
+      "  · add_meal → {slot:'petitdej'|'preseance'|'dej'|'postseance'|'encas'|'diner', items:[{n:nom générique de l'aliment ('blanc de poulet', 'skyr', 'riz basmati cuit'…), grams:quantité estimée en grammes, g:glucides, p:proteines, l:lipides, kcal:calories}]}\n" +
+      "    (Donne des noms d'aliments GÉNÉRIQUES — ils seront recalés sur la base nutritionnelle de Pierre. g/p/l/kcal = ton estimation de secours si l'aliment n'est pas dans la base.)\n" +
       "  · set_water → {litres:nombre}\n" +
       "  · adjust_volume → {semaine:numéro, run:km, velo:km}\n" +
       "Si c'est juste une question/discussion, action=null. Sois précis sur les macros si Pierre décrit un repas.";
@@ -6507,7 +6544,12 @@ if (document.readyState === 'loading') {
       loading.remove();
       addMsg('assistant', res.reply || '(pas de réponse)');
       pushThread('assistant', res.reply || '');
-      if (res.action) proposeAction(res.action, res.params || {});
+      if (res.action) {
+        if (res.action === 'add_meal' && res.params && res.params.items) {
+          res.params.items = groundMealItems(res.params.items);
+        }
+        proposeAction(res.action, res.params || {});
+      }
     } catch(err) {
       loading.remove();
       if (err && err.raw) {
@@ -6524,9 +6566,15 @@ if (document.readyState === 'loading') {
   function actionSummary(action, params) {
     if (action === 'add_meal' && params.items) {
       var slot = params.slot || 'encas';
-      var lines = params.items.map(function(it){ return '· ' + (it.n||'?') + ' — ' + (it.kcal||0) + ' kcal (G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0) + ')'; });
+      var lines = params.items.map(function(it){
+        var tag = it._src === 'base' ? ' · ✓ base' : ' · ≈ estimé';
+        return '· ' + (it.n||'?') + (it.qty ? (' (' + it.qty + ')') : '') + ' — ' + (it.kcal||0) + ' kcal (G' + (it.g||0) + '/P' + (it.p||0) + '/L' + (it.l||0) + ')' + tag;
+      });
       var tot = params.items.reduce(function(a,it){ return a+(it.kcal||0); }, 0);
-      return { titre:'Ajouter à « ' + slot + ' »', detail: lines.join('\n') + '\nTotal : ' + tot + ' kcal' };
+      var detail = lines.join('\n') + '\nTotal : ' + tot + ' kcal';
+      var notes = params.items.filter(function(it){ return it._note; }).map(function(it){ return '⚠️ ' + (it.n||'') + ' : ' + it._note; });
+      if (notes.length) detail += '\n' + notes.join('\n');
+      return { titre:'Ajouter à « ' + slot + ' »', detail: detail };
     }
     if (action === 'set_water' && params.litres != null) {
       return { titre:'Mettre l\'hydratation du jour', detail:'→ ' + params.litres + ' L' };
@@ -6538,6 +6586,124 @@ if (document.readyState === 'loading') {
       return { titre:'Ajuster le volume S' + params.semaine, detail:'→ ' + (parts.join(' · ') || '(aucun changement)') };
     }
     return null;
+  }
+
+  // ── CONNEXION BASE ALIMENTAIRE : recale les macros d'un repas proposé sur la base ~430 aliments ──
+  function normFood(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+  function matchFoodDB(name){
+    var foods = []; try { foods = (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){}
+    if (!foods.length) return null;
+    var q = normFood(name); if (!q) return null;
+    var best = null, bestScore = 0;
+    foods.forEach(function(f){
+      if (!f || !f.n) return;
+      var fn = normFood(f.n), score = 0;
+      if (fn === q) score = 100;
+      else if (fn.indexOf(q) === 0 || q.indexOf(fn) === 0) score = 70;
+      else if (fn.indexOf(q) >= 0 || q.indexOf(fn) >= 0) score = 50;
+      else { var common = 0; q.split(' ').forEach(function(w){ if (w.length > 2 && fn.indexOf(w) >= 0) common++; }); if (common) score = 20 + common*10; }
+      if (score > bestScore) { bestScore = score; best = f; }
+    });
+    return bestScore >= 40 ? best : null;
+  }
+  function unitGrams(u){ var m = String(u||'').match(/([\d.]+)\s*g/i); return m ? parseFloat(m[1]) : null; }
+  // Renvoie une copie des items avec macros recalées sur la base quand c'est possible (sinon estimation IA)
+  function groundMealItems(items){
+    if (!Array.isArray(items)) return items;
+    return items.map(function(it){
+      var f = matchFoodDB(it.n);
+      var grams = (typeof it.grams === 'number' && it.grams > 0) ? it.grams : null;
+      var ug = f ? unitGrams(f.u) : null;
+      if (f && grams && ug) {
+        var k = grams / ug;
+        return { n: it.n, food: f.n, qty: Math.round(grams) + 'g',
+          g: Math.round(f.g*k), p: Math.round(f.p*k), l: Math.round(f.l*k*10)/10, kcal: Math.round(f.kcal*k),
+          _src: 'base', _note: f.note || '' };
+      }
+      // pas de match scalable → on garde l'estimation IA (mais on remonte l'alerte purine si la base en a une)
+      return { n: it.n, food: it.n, qty: grams ? (grams + 'g') : '1',
+        g: it.g||0, p: it.p||0, l: it.l||0, kcal: it.kcal||0,
+        _src: 'estime', _note: (f && f.note) ? f.note : '' };
+    });
+  }
+
+  // ── Créneaux valides (alignés sur le tracker) + normalisation des libellés IA ──
+  var COACH_SLOTS = [
+    {id:'petitdej', label:'🌅 Petit-déj'}, {id:'preseance', label:'⚡ Pré-séance'},
+    {id:'dej', label:'🍽️ Déjeuner'}, {id:'postseance', label:'💪 Post-séance'},
+    {id:'encas', label:'🍎 Encas'}, {id:'diner', label:'🌙 Dîner'}
+  ];
+  function normalizeSlot(s){
+    var x = String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+    if (['petitdej','preseance','dej','postseance','encas','diner'].indexOf(x) >= 0) return x;
+    if (/pre.?se|avant.*se|pre.?work/.test(x)) return 'preseance';
+    if (/post.?se|apres.*se|recup|post.?work/.test(x)) return 'postseance';
+    if (/petit|matin|breakf|p-?dej|pdej/.test(x)) return 'petitdej';
+    if (/dejeun|midi|lunch/.test(x)) return 'dej';
+    if (/diner|soir|dinner/.test(x)) return 'diner';
+    if (/encas|collation|snack|gouter/.test(x)) return 'encas';
+    return 'encas';
+  }
+
+  // ── MODULE PHOTO REPAS : photo → compression → analyse vision → grounding base → validation ──
+  function compressImage(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var max = 1024, w = img.width, h = img.height;
+          if (w >= h && w > max) { h = Math.round(h*max/w); w = max; }
+          else if (h > w && h > max) { w = Math.round(w*max/h); h = max; }
+          try {
+            var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+            cv.getContext('2d').drawImage(img, 0, 0, w, h);
+            var dataUrl = cv.toDataURL('image/jpeg', 0.72);
+            resolve({ base64: (dataUrl.split(',')[1] || ''), mediaType: 'image/jpeg' });
+          } catch(e){ reject(e); }
+        };
+        img.onerror = function(){ reject(new Error('image illisible')); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ reject(new Error('lecture du fichier échouée')); };
+      reader.readAsDataURL(file);
+    });
+  }
+  async function analyzePhoto(b64, mt){
+    var SYS_PHOTO = (window.CCC_PERSONA || "Tu es le coach nutrition de Pierre.") +
+      " CONTEXTE D'USAGE : tu analyses une PHOTO de repas. Identifie les aliments visibles et estime les quantités en grammes. Donne des noms d'aliments GÉNÉRIQUES (ils seront recalés sur la base nutritionnelle de Pierre).";
+    var prompt = "Analyse cette photo de repas. Réponds en JSON, sans markdown, avec :\n" +
+      "- \"comment\" (string) : une phrase courte décrivant le plat.\n" +
+      "- \"slot\" (string) : le créneau probable parmi 'petitdej','preseance','dej','postseance','encas','diner'.\n" +
+      "- \"items\" (array) : [{n:nom générique de l'aliment, grams:quantité estimée en grammes, g:glucides, p:proteines, l:lipides, kcal:calories}].\n" +
+      "Si tu ne reconnais aucun aliment exploitable, items=[] et explique-le dans comment.";
+    return await askClaudeJSON(prompt, { system: SYS_PHOTO, image: b64, image_media_type: mt, max_tokens: 1024 });
+  }
+  async function handlePhotoFile(file){
+    if (!file) return;
+    if (typeof window.askClaudeJSON !== 'function' || !localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) {
+      addMsg('assistant', '⚠️ Backend non configuré (⚙ Garmin) — impossible d\'analyser la photo.'); return;
+    }
+    addMsg('user', '📷 Photo de repas envoyée');
+    var loading = addMsg('assistant', '', true);
+    try {
+      var img = await compressImage(file);
+      var res = await analyzePhoto(img.base64, img.mediaType);
+      loading.remove();
+      var comment = (res && res.comment) ? res.comment : 'Analyse terminée.';
+      addMsg('assistant', comment); pushThread('assistant', comment);
+      var items = (res && Array.isArray(res.items)) ? res.items : [];
+      if (!items.length) {
+        addMsg('assistant', "Je n'ai pas reconnu d'aliment exploitable — réessaie avec une photo plus nette, ou décris-moi le repas."); return;
+      }
+      items = groundMealItems(items);
+      proposeAction('add_meal', { slot: (res && res.slot) || 'encas', items: items });
+    } catch(err) {
+      loading.remove();
+      var msg = (err && err.raw) ? 'réponse IA illisible' : ((err && err.message) ? err.message : 'erreur');
+      if (/502|400|413/.test(msg)) msg += ' — le backend doit accepter les images (api.py ≥ 2.4 déployé ?).';
+      addMsg('assistant', '⚠️ Analyse photo impossible : ' + msg);
+    }
   }
 
   // ── Carte de PROPOSITION : Pierre valide avant toute écriture ──
@@ -6553,6 +6719,25 @@ if (document.readyState === 'loading') {
     head.textContent = '✋ Proposition · à valider';
     var body = document.createElement('div');
     body.innerHTML = '<b>' + sum.titre + '</b><br>' + sum.detail.replace(/\n/g,'<br>');
+
+    // Sélecteur de créneau (repas) : Pierre peut corriger avant d'appliquer
+    var slotSel = null;
+    if (action === 'add_meal') {
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-top:0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:DM Mono,monospace;font-size:0.68rem;color:var(--muted)';
+      wrap.appendChild(document.createTextNode('Créneau :'));
+      slotSel = document.createElement('select');
+      slotSel.style.cssText = 'background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:0.3rem 0.4rem;font-family:DM Mono,monospace;font-size:0.7rem';
+      var cur = normalizeSlot(params.slot);
+      COACH_SLOTS.forEach(function(s){
+        var o = document.createElement('option'); o.value = s.id; o.textContent = s.label;
+        if (s.id === cur) o.selected = true;
+        slotSel.appendChild(o);
+      });
+      wrap.appendChild(slotSel);
+      body.appendChild(wrap);
+    }
+
     var btns = document.createElement('div');
     btns.style.cssText = 'display:flex;gap:0.5rem;margin-top:0.7rem';
     var ok = document.createElement('button');
@@ -6573,6 +6758,7 @@ if (document.readyState === 'loading') {
     }
     ok.addEventListener('click', function(){
       if (!pendingAction) return;
+      if (slotSel && pendingAction.params) pendingAction.params.slot = slotSel.value;
       var applied = applyAction(pendingAction.action, pendingAction.params);
       settle(applied ? '✓ Appliqué' : '⚠️ Rien à appliquer', applied ? 'var(--green,#5ec27a)' : 'var(--orange,#e8a020)');
     });
@@ -6594,7 +6780,7 @@ if (document.readyState === 'loading') {
       var slot = params.slot || 'encas';
       if (!meals[slot]) meals[slot] = [];
       params.items.forEach(function(it){
-        meals[slot].push({ food:it.n, n:it.n, qty:1, g:it.g||0, p:it.p||0, l:it.l||0, kcal:it.kcal||0 });
+        meals[slot].push({ food: it.food || it.n, n: it.n, qty: it.qty || 1, g: it.g||0, p: it.p||0, l: it.l||0, kcal: it.kcal||0, _src: it._src || 'estime' });
       });
       localStorage.setItem(key, JSON.stringify(meals));
       try { if (window.CCCSync) CCCSync.pushDay(dk); } catch(e){}
@@ -6638,6 +6824,13 @@ if (document.readyState === 'loading') {
     if (input) input.addEventListener('keydown', function(e){
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCoach(); }
     });
+    // Bouton photo de repas
+    var photoBtn = document.getElementById('coach-photo');
+    var photoInput = document.getElementById('coach-photo-input');
+    if (photoBtn && photoInput) {
+      photoBtn.addEventListener('click', function(){ photoInput.click(); });
+      photoInput.addEventListener('change', function(){ var f = photoInput.files && photoInput.files[0]; photoInput.value=''; if (f) handlePhotoFile(f); });
+    }
     var quick = document.getElementById('coach-quick');
     if (quick) {
       QUICK.forEach(function(q){
