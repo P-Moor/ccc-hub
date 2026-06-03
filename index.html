@@ -8584,12 +8584,18 @@ if (document.readyState === 'loading') {
     return L.join('\n');
   }
 
+  function mdLite(t){
+    var s=esc(t);
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--accent,#a3e635);font-family:Syne,sans-serif;font-weight:700">$1</strong>');
+    return s.split(/\n{2,}/).map(function(p){ return '<p style="margin:0 0 0.7rem;line-height:1.55">'+p.replace(/\n/g,'<br>')+'</p>'; }).join('');
+  }
+
   function analyseContent(act){
     var cached=null; try{ cached=localStorage.getItem('ccc_act_analysis_'+act.id); }catch(e){}
     var hasBackend=localStorage.getItem('garmin_url')&&localStorage.getItem('garmin_token');
     if(cached){
-      return '<div style="font-size:0.82rem;line-height:1.55;color:var(--text,#e8e9ea);white-space:pre-wrap">'+esc(cached)+'</div>'+
-        '<button onclick="window.__analyzeActivity()" style="margin-top:0.8rem;font-family:DM Mono,monospace;font-size:0.58rem;background:none;border:1px solid var(--border2,#2a2b30);color:var(--muted,#5e6068);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer">↻ Régénérer</button>';
+      return '<div style="font-size:0.82rem;color:var(--text,#e8e9ea)">'+mdLite(cached)+'</div>'+
+        '<button onclick="window.__analyzeActivity()" style="margin-top:0.4rem;font-family:DM Mono,monospace;font-size:0.58rem;background:none;border:1px solid var(--border2,#2a2b30);color:var(--muted,#5e6068);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer">↻ Régénérer</button>';
     }
     if(hasBackend&&act.id){
       return '<div style="font-size:0.78rem;line-height:1.5;color:var(--muted,#5e6068);margin-bottom:0.8rem">Analyse qualitative de la séance par ton coach : qualité de l\'effort, répartition des zones, régularité de l\'allure, et reco pour la suite.</div>'+
@@ -8673,7 +8679,7 @@ if (document.readyState === 'loading') {
     if(inner) inner.innerHTML='<div style="font-size:0.8rem;color:var(--muted,#5e6068)">⏳ Analyse en cours… le coach lit ta séance.</div>';
     try{
       var sys=(window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur qui prépare la CCC 2026 (101 km / 6100 m D+). Tu tutoies, tu es concret, lucide et bienveillant.")+
-        " Analyse UNE séance d'entraînement à partir des données fournies. Sois concis (5 à 8 phrases), en texte fluide (pas de listes à puces) : qualité globale de la séance, répartition de l'effort (zones FC), régularité de l'allure si pertinent (splits), un point fort, et UNE recommandation concrète pour la suite (récup ou prochaine séance). N'invente AUCUNE donnée absente.";
+        " Analyse UNE séance d'entraînement à partir des données fournies. Structure ta réponse en sections courtes (1 à 3 phrases chacune), chaque section introduite par un libellé en gras entre doubles astérisques suivi d'un tiret, et sépare les sections par une LIGNE VIDE. Utilise uniquement les sections pertinentes parmi : **Effort** (qualité globale + zones FC), **Allure** (régularité et splits — seulement si la séance a une allure/distance), **Point fort**, **Reco** (UNE action concrète pour la suite, récup ou prochaine séance). Phrases fluides à l'intérieur de chaque section, surtout PAS de listes à puces. N'invente AUCUNE donnée absente.";
       var txt=await window.askClaude(buildActivityAnalysisPrompt(act), { system: sys, max_tokens: 500 });
       txt=(txt||'').trim();
       if(!txt) throw new Error('réponse vide');
