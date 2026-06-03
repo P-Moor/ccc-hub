@@ -8554,14 +8554,57 @@ if (document.readyState === 'loading') {
     return secHead(SVG_WAVE,'Cadence & allure ajustée')+'<div style="display:grid;grid-template-columns:repeat('+Math.min(t.length,3)+',1fr);gap:0.5rem">'+t.join('')+'</div>';
   }
 
-  function analyseBlock(){
+  function buildActivityAnalysisPrompt(act){
+    var th=(window.__garminData||{}).thresholds||{};
+    var L=[];
+    L.push('SÉANCE : '+(act.name||typeLabel(act.type)||'activité')+' ('+typeLabel(act.type)+(act.date?', '+act.date:'')+')');
+    if(act.distance_km!=null && act.distance_km>0) L.push('Distance : '+act.distance_km+' km');
+    if(act.duration_min!=null) L.push('Durée : '+fmtDurMin(act.duration_min));
+    var paceS=(act.avg_pace_s_per_km!=null)?act.avg_pace_s_per_km:((act.duration_min&&act.distance_km)?(act.duration_min*60/act.distance_km):null);
+    if(paceS && act.distance_km>0) L.push('Allure moyenne : '+fmtPace(paceS)+'/km');
+    if(act.avg_hr!=null) L.push('FC moyenne : '+act.avg_hr+' bpm'+(act.max_hr!=null?' (max '+act.max_hr+')':''));
+    if(act.elevation_gain!=null && act.elevation_gain>0) L.push('D+ : '+act.elevation_gain+' m');
+    if(act.te_aerobic!=null) L.push('TE aérobie : '+(Math.round(act.te_aerobic*10)/10));
+    if(act.calories!=null) L.push('Calories : '+Math.round(act.calories));
+    if(act.hr_zones&&act.hr_zones.length){
+      var tot=0; act.hr_zones.forEach(function(z){tot+=z.seconds||0;}); tot=tot||1;
+      L.push('Répartition FC par zone : '+act.hr_zones.map(function(z){return (z.label||('Z'+z.zone))+' '+Math.round((z.seconds||0)/tot*100)+'%';}).join(', '));
+    }
+    if(act.splits&&act.splits.length){
+      var ps=act.splits.filter(function(s){return s.pace_s_per_km!=null&&isFinite(s.pace_s_per_km);}).map(function(s){return s.pace_s_per_km;});
+      if(ps.length){
+        L.push('Allure par km : '+act.splits.map(function(s){return fmtPace(s.pace_s_per_km);}).join(' / '));
+        L.push('(plus rapide '+fmtPace(Math.min.apply(null,ps))+', plus lent '+fmtPace(Math.max.apply(null,ps))+')');
+      }
+    }
+    var rep=[];
+    if(th.lt_bpm) rep.push('seuil ~'+th.lt_bpm+' bpm');
+    if(th.lt_pace_min_km) rep.push('allure seuil ~'+fmtPace(Math.round(th.lt_pace_min_km*60))+'/km');
+    if(rep.length) L.push('Repères physio de Pierre : '+rep.join(', ')+'.');
+    return L.join('\n');
+  }
+
+  function analyseContent(act){
+    var cached=null; try{ cached=localStorage.getItem('ccc_act_analysis_'+act.id); }catch(e){}
+    var hasBackend=localStorage.getItem('garmin_url')&&localStorage.getItem('garmin_token');
+    if(cached){
+      return '<div style="font-size:0.82rem;line-height:1.55;color:var(--text,#e8e9ea);white-space:pre-wrap">'+esc(cached)+'</div>'+
+        '<button onclick="window.__analyzeActivity()" style="margin-top:0.8rem;font-family:DM Mono,monospace;font-size:0.58rem;background:none;border:1px solid var(--border2,#2a2b30);color:var(--muted,#5e6068);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer">↻ Régénérer</button>';
+    }
+    if(hasBackend&&act.id){
+      return '<div style="font-size:0.78rem;line-height:1.5;color:var(--muted,#5e6068);margin-bottom:0.8rem">Analyse qualitative de la séance par ton coach : qualité de l\'effort, répartition des zones, régularité de l\'allure, et reco pour la suite.</div>'+
+        '<button onclick="window.__analyzeActivity()" style="font-family:Syne,sans-serif;font-weight:700;font-size:0.82rem;background:var(--accent,#a3e635);color:#0f0f10;border:none;border-radius:10px;padding:0.6rem 1.1rem;cursor:pointer">✨ Analyser cette séance</button>';
+    }
+    return '<div style="font-size:0.78rem;line-height:1.5;color:var(--muted,#5e6068)">Connecte le backend (⚙ Garmin) pour générer l\'analyse de séance par le coach IA.</div>';
+  }
+
+  function analyseBlock(act){
     return secHead(ICON('chat',16),'Analyse de course')+
       '<div style="background:var(--accent-dim,rgba(163,230,53,0.08));border:1px solid var(--accent,#a3e635);border-radius:12px;padding:1rem">'+
-        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">'+
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.7rem;flex-wrap:wrap">'+
           '<span style="font-family:Syne,sans-serif;font-weight:700;color:var(--accent,#a3e635);display:inline-flex;align-items:center;gap:0.4rem">'+ICON('bulb',16,'var(--accent,#a3e635)')+'Lecture du coach</span>'+
-          '<span style="font-family:DM Mono,monospace;font-size:0.54rem;text-transform:uppercase;letter-spacing:0.05em;background:var(--accent,#a3e635);color:#0f0f10;padding:2px 7px;border-radius:10px">bientôt</span>'+
         '</div>'+
-        '<div style="font-size:0.78rem;line-height:1.5;color:var(--muted,#5e6068)">À venir : analyse qualitative générée par le coach IA — qualité de la séance, écart prévu / réalisé, état de fatigue et reco pour la suite.</div>'+
+        '<div id="ad-analyse-inner">'+analyseContent(act)+'</div>'+
       '</div>';
   }
 
@@ -8583,12 +8626,13 @@ if (document.readyState === 'loading') {
     h+=secHead(ICON('flag',16),'Splits par km')+splitsBlock(act);
     h+=secHead(ICON('heart',16),'Zones cardiaques')+zonesBlock(act);
     h+=extraBlock(act);
-    h+=analyseBlock();
+    h+=analyseBlock(act);
     return h;
   }
 
   var SVG_CHEV='<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,5 13,10 8,15"/></svg>';
   var _histList=[];
+  var _detailAct=null;
 
   function syncScrollLock(){ document.body.style.overflow=(document.getElementById('act-detail-overlay')||document.getElementById('act-history-overlay'))?'hidden':''; }
   function closeDetail(){ var o=document.getElementById('act-detail-overlay'); if(o&&o.parentNode) o.parentNode.removeChild(o); syncScrollLock(); }
@@ -8598,6 +8642,7 @@ if (document.readyState === 'loading') {
   // Ouvre la vue détail pour un OBJET activité (réutilisable depuis Aujourd'hui ou l'Historique)
   function openDetailForAct(act){
     if(!act) return;
+    _detailAct=act;
     var old=document.getElementById('act-detail-overlay'); if(old&&old.parentNode) old.parentNode.removeChild(old);
     var name=act.name||typeLabel(act.type)||'Activité';
     var sub=typeLabel(act.type)+(act.date?' · '+dateFr(act.date):'');
@@ -8620,6 +8665,27 @@ if (document.readyState === 'loading') {
     document.getElementById('ad-close').addEventListener('click',closeDetail);
     fetchDetail(act);
   }
+
+  window.__analyzeActivity = async function(){
+    var act=_detailAct;
+    if(!act||!act.id) return;
+    var inner=document.getElementById('ad-analyse-inner');
+    if(inner) inner.innerHTML='<div style="font-size:0.8rem;color:var(--muted,#5e6068)">⏳ Analyse en cours… le coach lit ta séance.</div>';
+    try{
+      var sys=(window.CCC_PERSONA || "Tu es le coach de Pierre, ultra-traileur qui prépare la CCC 2026 (101 km / 6100 m D+). Tu tutoies, tu es concret, lucide et bienveillant.")+
+        " Analyse UNE séance d'entraînement à partir des données fournies. Sois concis (5 à 8 phrases), en texte fluide (pas de listes à puces) : qualité globale de la séance, répartition de l'effort (zones FC), régularité de l'allure si pertinent (splits), un point fort, et UNE recommandation concrète pour la suite (récup ou prochaine séance). N'invente AUCUNE donnée absente.";
+      var txt=await window.askClaude(buildActivityAnalysisPrompt(act), { system: sys, max_tokens: 500 });
+      txt=(txt||'').trim();
+      if(!txt) throw new Error('réponse vide');
+      try{ localStorage.setItem('ccc_act_analysis_'+act.id, txt); }catch(e){}
+    }catch(e){
+      if(inner) inner.innerHTML='<div style="font-size:0.78rem;color:var(--red,#ef4444);line-height:1.4">Analyse impossible : '+esc(e.message||'erreur')+'</div>'+
+        '<button onclick="window.__analyzeActivity()" style="margin-top:0.6rem;font-family:DM Mono,monospace;font-size:0.58rem;background:none;border:1px solid var(--border2,#2a2b30);color:var(--muted,#5e6068);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer">Réessayer</button>';
+      return;
+    }
+    var inner2=document.getElementById('ad-analyse-inner');
+    if(inner2) inner2.innerHTML=analyseContent(act);
+  };
 
   window.openActivityDetail=function(idx){
     var gd=window.__garminData||{}, acts=gd.activities||[];
