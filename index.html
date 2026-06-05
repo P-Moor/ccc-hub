@@ -4079,6 +4079,7 @@ if (document.readyState === 'loading') {
     window.__renderGauges = function(){ try { if (window.__garminData) renderGauges(window.__garminData); } catch(e){} };
     renderMetrics(data);
     renderReco(data);
+    try { if (window.__recordRecup) window.__recordRecup(data); } catch(e){}
     renderActivities(data);
     renderGauges(data);
     // Re-render du module nutrition si présent (pour MAJ calories activité + bonus hydra)
@@ -4323,6 +4324,7 @@ if (document.readyState === 'loading') {
     html += '<div style="font-family:-apple-system,sans-serif;font-size:0.84rem;color:var(--text,#e8e9ea);line-height:1.5">' + m.interp + '</div>';
     if (m.feedback) html += '<div style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--muted,#5e6068);margin-top:0.5rem">Garmin : ' + m.feedback + '</div>';
     html += '</div>';
+    if (mkey === 'readiness') html += '<button id="recup-more" style="width:100%;margin-top:1rem;padding:0.7rem;background:var(--accent,#a3e635);color:#0f0f10;border:none;border-radius:8px;font-family:Syne,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">Plus de détails sur la récup →</button>';
     
     html += '</div></div>';
     
@@ -4330,6 +4332,8 @@ if (document.readyState === 'loading') {
     var overlay = document.getElementById('metric-detail-overlay');
     document.getElementById('metric-close').addEventListener('click', function(){ overlay.remove(); });
     overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+    var moreBtn = document.getElementById('recup-more');
+    if (moreBtn) moreBtn.addEventListener('click', function(){ overlay.remove(); if (window.openRecupDetail) window.openRecupDetail(data); });
   }
   
   // Mini-graphe sparkline SVG pour l'historique HRV
@@ -7551,7 +7555,7 @@ if (document.readyState === 'loading') {
     running = true;
     var changed = false;
     try {
-      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides'];
+      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist'];
       var res = await Promise.all(keys.map(function(k){ return reconcileState(k).catch(function(){ return false; }); }));
       if (res.some(Boolean)) changed = true;
 
@@ -8927,6 +8931,154 @@ if (document.readyState === 'loading') {
   window.__renderReadinessHero = renderHero;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',renderHero);
   else renderHero();
+})();
+</script>
+<script>
+/* ============================================================
+   RÉCUP — Vue détaillée (depuis la fiche Training Readiness)
+   Métriques du jour regroupées + tendances 7/30/90 j + synthèse IA.
+   Auto-enregistre un snapshot quotidien (persisté via CCCSync.pushState).
+   Module isolé : ne modifie aucune fonction existante.
+   ============================================================ */
+(function(){
+  'use strict';
+  function dkNow(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function loadHist(){ try { var a=JSON.parse(localStorage.getItem('ccc_recup_hist')||'[]'); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+
+  window.__recordRecup = function(data){
+    try {
+      if (!data) return;
+      var s=data.sleep||{}, hrv=data.hrv||{}, bb=data.body_battery||{}, st=data.stress||{};
+      var snap = {
+        date: dkNow(),
+        hrv: hrv.value!=null?hrv.value:null,
+        rhr: data.rhr!=null?data.rhr:null,
+        bb: bb.current!=null?bb.current:null,
+        sleep_score: s.score!=null?s.score:null,
+        sleep_h: s.duration_hours!=null?s.duration_hours:null,
+        deep: s.deep_min!=null?s.deep_min:null, light: s.light_min!=null?s.light_min:null,
+        rem: s.rem_min!=null?s.rem_min:null, awake: s.awake_min!=null?s.awake_min:null,
+        stress: st.avg!=null?st.avg:null
+      };
+      if (snap.hrv==null && snap.rhr==null && snap.bb==null && snap.sleep_score==null && snap.stress==null) return;
+      var arr = loadHist().filter(function(x){ return x && x.date !== snap.date; });
+      arr.push(snap);
+      arr.sort(function(a,b){ return a.date<b.date?-1:1; });
+      if (arr.length>200) arr = arr.slice(arr.length-200);
+      localStorage.setItem('ccc_recup_hist', JSON.stringify(arr));
+      try { if (window.CCCSync && CCCSync.pushState) CCCSync.pushState('recup_hist', arr); } catch(e){}
+    } catch(e){}
+  };
+
+  function seriesFor(arr, key, rangeDays){
+    var c=new Date(); c.setDate(c.getDate()-rangeDays);
+    var ck = c.getFullYear()+'-'+String(c.getMonth()+1).padStart(2,'0')+'-'+String(c.getDate()).padStart(2,'0');
+    return arr.filter(function(x){ return x.date>=ck && x[key]!=null; }).map(function(x){ return x[key]; });
+  }
+
+  function miniTrend(vals, unit, col){
+    if (!vals || vals.length<2) return '<div style="font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068);font-style:italic">Tendance dispo dès quelques jours de données.</div>';
+    var max=Math.max.apply(null,vals), min=Math.min.apply(null,vals), range=(max-min)||1;
+    var w=320,h=42,pad=4;
+    var pts=vals.map(function(v,i){ var x=pad+(i/(vals.length-1))*(w-2*pad); var y=h-pad-((v-min)/range)*(h-2*pad); return x.toFixed(1)+','+y.toFixed(1); }).join(' ');
+    col = col || 'var(--accent,#a3e635)';
+    return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="display:block"><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '<div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted,#5e6068)"><span>min '+min+unit+'</span><span>'+vals.length+' j</span><span>max '+max+unit+'</span></div>';
+  }
+
+  function phaseBar(s){
+    var deep=s.deep_min||0, light=s.light_min||0, rem=s.rem_min||0, awake=s.awake_min||0;
+    var total=deep+light+rem+awake; if(!total) return '';
+    function seg(min,c){ return '<div style="width:'+(min/total*100).toFixed(1)+'%;background:'+c+'"></div>'; }
+    return '<div style="display:flex;height:12px;border-radius:4px;overflow:hidden;margin:0.3rem 0">'+seg(deep,'#2d4a8a')+seg(light,'#5ba3e8')+seg(rem,'#a3e635')+seg(awake,'#3a3b3f')+'</div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted,#5e6068)">Profond '+deep+'m · Léger '+light+'m · REM '+rem+'m · Éveil '+awake+'m</div>';
+  }
+
+  var RANGE = 30;
+  var TRENDS = [
+    ['hrv','HRV','ms','var(--accent,#a3e635)'],
+    ['rhr','FC repos','bpm','#ef6b6b'],
+    ['sleep_score','Score sommeil','','#5ba3e8'],
+    ['bb','Body Battery','','#f5c451'],
+    ['stress','Stress','','#e8a020']
+  ];
+
+  function renderTrends(){
+    var arr = loadHist();
+    var html='';
+    TRENDS.forEach(function(t){
+      var vals = seriesFor(arr, t[0], RANGE);
+      html += '<div style="margin-bottom:0.7rem"><div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--muted,#5e6068);text-transform:uppercase;margin-bottom:0.2rem">'+t[1]+'</div>'+miniTrend(vals, t[2], t[3])+'</div>';
+    });
+    var el=document.getElementById('recup-trends'); if(el) el.innerHTML=html;
+  }
+
+  function aiSynth(arr){
+    var el=document.getElementById('recup-ai'); if(!el) return;
+    if (typeof window.askClaude!=='function'){ el.innerHTML=''; return; }
+    if (!localStorage.getItem('garmin_url')||!localStorage.getItem('garmin_token')){ el.innerHTML=''; return; }
+    var dk=dkNow(), ck='ccc_recup_ai_'+dk, cached=null;
+    try{ cached=localStorage.getItem(ck); }catch(e){}
+    if (cached){ el.innerHTML=cached; return; }
+    var recent = arr.slice(-14);
+    if (recent.length<2){ el.innerHTML='<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);font-style:italic">La synthèse s\'affinera avec quelques jours de données.</div>'; return; }
+    el.innerHTML='<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);font-style:italic">le coach analyse ta récup...</div>';
+    var SYS=(window.CCC_PERSONA || 'Tu es le coach de Pierre, ultra-traileur preparant la CCC. Tutoie, sois concis.')+' Tu fais une SYNTHESE RECUPERATION sur plusieurs jours (tendance), pas un bilan ponctuel.';
+    var prompt='Historique recup recent de Pierre (1 entree/jour, JSON) :\n'+JSON.stringify(recent)+'\n\nEn 2-3 phrases, analyse la TENDANCE de recuperation (sommeil, HRV, FC repos, stress) sur la periode et donne 1 conseil concret pour les prochains jours. Pas de markdown, pas de titre.';
+    window.askClaude(prompt, { system: SYS, max_tokens: 280 }).then(function(txt){
+      txt=(txt||'').trim();
+      if (txt){ try{ localStorage.setItem(ck, txt); }catch(e){} el.innerHTML=txt; }
+      else el.innerHTML='';
+    }).catch(function(){ el.innerHTML=''; });
+  }
+
+  window.openRecupDetail = function(data){
+    data = data || window.__garminData || {};
+    try { window.__recordRecup(data); } catch(e){}
+    var arr = loadHist();
+    var old=document.getElementById('recup-overlay'); if(old) old.remove();
+    var s=data.sleep||{}, hrv=data.hrv||{}, bb=data.body_battery||{}, st=data.stress||{};
+    function row(label, val, extra){
+      return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:0.4rem 0;border-bottom:1px solid var(--border,#242528)"><span style="font-size:0.8rem">'+label+'</span><span style="font-family:DM Mono,monospace;font-size:0.8rem;color:var(--text,#e8e9ea)">'+val+(extra?' <span style="color:var(--muted,#5e6068);font-size:0.62rem">'+extra+'</span>':'')+'</span></div>';
+    }
+    var sleepH = s.duration_hours!=null ? (Math.floor(s.duration_hours)+'h'+String(Math.round((s.duration_hours%1)*60)).padStart(2,'0')) : '–';
+    var rangesHtml = ['7','30','90'].map(function(r){
+      var on = (r==='30');
+      var lbl = r==='90'?'3 mois':r==='30'?'1 mois':'7 j';
+      return '<button data-range="'+r+'" style="font-family:DM Mono,monospace;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:6px;border:1px solid var(--border,#242528);background:'+(on?'var(--accent,#a3e635)':'transparent')+';color:'+(on?'#0f0f10':'var(--muted,#5e6068)')+';cursor:pointer">'+lbl+'</button>';
+    }).join('');
+    var html='<div id="recup-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10003;padding:1rem">'+
+      '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.4rem;max-width:460px;width:100%;max-height:88vh;overflow-y:auto">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem"><div style="font-family:Syne,sans-serif;font-size:1.15rem;font-weight:700">🛌 Récupération</div>'+
+          '<span id="recup-close" style="cursor:pointer;color:var(--muted,#5e6068)"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="5" x2="15" y2="15"/><line x1="15" y1="5" x2="5" y2="15"/></svg></span></div>'+
+        '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem">Aujourd\'hui</div>'+
+        '<div style="background:var(--bg,#0f0f10);border-radius:8px;padding:0.6rem 0.8rem;margin-bottom:1rem">'+
+          row('😴 Sommeil', sleepH, (s.score!=null?'score '+s.score:'')) + (phaseBar(s)?('<div style="padding:0.2rem 0 0.4rem">'+phaseBar(s)+'</div>'):'') +
+          row('❤️ HRV', (hrv.value!=null?hrv.value+' ms':'–'), (hrv.status||'')) +
+          row('💓 FC repos', (data.rhr!=null?data.rhr+' bpm':'–'), '') +
+          row('🔋 Body Battery', (bb.current!=null?bb.current+'/100':'–'), (bb.highest!=null?'max '+bb.highest:'')) +
+          row('😰 Stress', (st.avg!=null?st.avg+'/100':'–'), (st.max!=null?'max '+st.max:'')) +
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem"><div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);text-transform:uppercase;letter-spacing:0.05em">Tendances</div>'+
+          '<div id="recup-ranges" style="display:flex;gap:0.3rem">'+rangesHtml+'</div></div>'+
+        '<div id="recup-trends"></div>'+
+        '<div style="margin-top:1rem;padding:0.8rem;background:var(--bg,#0f0f10);border-radius:8px"><div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);text-transform:uppercase;margin-bottom:0.3rem">Synthèse coach</div><div id="recup-ai" style="font-size:0.84rem;line-height:1.5;color:var(--text,#e8e9ea)"></div></div>'+
+      '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    var ov=document.getElementById('recup-overlay');
+    document.getElementById('recup-close').addEventListener('click', function(){ ov.remove(); });
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    var ranges=document.getElementById('recup-ranges');
+    if (ranges) ranges.addEventListener('click', function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      RANGE = parseInt(b.getAttribute('data-range'),10)||30;
+      ranges.querySelectorAll('button').forEach(function(x){ var on=(x===b); x.style.background=on?'var(--accent,#a3e635)':'transparent'; x.style.color=on?'#0f0f10':'var(--muted,#5e6068)'; });
+      renderTrends();
+    });
+    RANGE = 30;
+    renderTrends();
+    aiSynth(arr);
+  };
 })();
 </script>
 </body>
