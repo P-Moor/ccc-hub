@@ -9032,6 +9032,36 @@ if (document.readyState === 'loading') {
     }).catch(function(){ el.innerHTML=''; });
   }
 
+  function mergeServerHistory(done){
+    var url=localStorage.getItem('garmin_url'), tok=localStorage.getItem('garmin_token');
+    if(!url||!tok){ if(done) done(); return; }
+    fetch(url.replace(/\/+$/,'')+'/api/metrics-history',{headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){
+        var srv=(j&&j.history)||[];
+        if(srv.length){
+          var byDate={};
+          loadHist().forEach(function(x){ if(x&&x.date) byDate[x.date]=x; });   // local prioritaire (aujourd'hui)
+          srv.forEach(function(x){ if(x&&x.date && !byDate[x.date]) byDate[x.date]=x; });
+          var merged=Object.keys(byDate).map(function(k){return byDate[k];}).sort(function(a,b){return a.date<b.date?-1:1;});
+          if(merged.length>400) merged=merged.slice(merged.length-400);
+          try{ localStorage.setItem('ccc_recup_hist', JSON.stringify(merged)); }catch(e){}
+        }
+      })
+      .catch(function(){})
+      .then(function(){ if(done) done(); });
+  }
+
+  function runBackfill(btn){
+    var url=localStorage.getItem('garmin_url'), tok=localStorage.getItem('garmin_token');
+    if(!url||!tok){ return; }
+    btn.disabled=true; btn.textContent='Chargement lancé…';
+    fetch(url.replace(/\/+$/,'')+'/api/backfill?days=60',{method:'POST',headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(){ btn.textContent='⏳ En cours — rouvre la vue dans ~5 min'; })
+      .catch(function(){ btn.disabled=false; btn.textContent='Échec — réessaie'; });
+  }
+
   window.openRecupDetail = function(data){
     data = data || window.__garminData || {};
     try { window.__recordRecup(data); } catch(e){}
@@ -9062,6 +9092,7 @@ if (document.readyState === 'loading') {
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem"><div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);text-transform:uppercase;letter-spacing:0.05em">Tendances</div>'+
           '<div id="recup-ranges" style="display:flex;gap:0.3rem">'+rangesHtml+'</div></div>'+
         '<div id="recup-trends"></div>'+
+        '<button id="recup-backfill" style="width:100%;margin-top:0.4rem;padding:0.55rem;background:transparent;border:1px solid var(--accent,#a3e635);color:var(--accent,#a3e635);border-radius:8px;font-family:DM Mono,monospace;font-size:0.62rem;cursor:pointer">⤵ Charger l\'historique Garmin (remplir les courbes)</button>'+
         '<div style="margin-top:1rem;padding:0.8rem;background:var(--bg,#0f0f10);border-radius:8px"><div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);text-transform:uppercase;margin-bottom:0.3rem">Synthèse coach</div><div id="recup-ai" style="font-size:0.84rem;line-height:1.5;color:var(--text,#e8e9ea)"></div></div>'+
       '</div></div>';
     document.body.insertAdjacentHTML('beforeend', html);
@@ -9077,7 +9108,10 @@ if (document.readyState === 'loading') {
     });
     RANGE = 30;
     renderTrends();
-    aiSynth(arr);
+    var bf=document.getElementById('recup-backfill');
+    if (bf) bf.addEventListener('click', function(){ runBackfill(bf); });
+    aiSynth(loadHist());
+    mergeServerHistory(function(){ renderTrends(); aiSynth(loadHist()); });
   };
 })();
 </script>
