@@ -573,6 +573,11 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .sync-dot.stale { background: var(--orange); }
 .sync-dot.off { background: var(--red); }
 
+/* Bouton refresh Garmin : seule la flèche tourne, couleur = état (orange sync / vert ok / rouge erreur) */
+#btn-garmin-refresh { transition: color .2s ease; }
+#btn-garmin-refresh.syncing svg { animation: spin 0.8s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
 .forme-cfg-btn {
   background: var(--surface2); border: 1px solid var(--border2);
   color: var(--muted); padding: 4px 10px; border-radius: 6px;
@@ -4024,11 +4029,6 @@ if (document.readyState === 'loading') {
       return;
     }
     
-    var refreshBtn = document.getElementById('btn-garmin-refresh');
-    if (refreshBtn && forceRefresh) {
-      refreshBtn.style.animation = 'spin 0.8s linear infinite';
-    }
-    
     setStatus('syncing', forceRefresh ? 'rafraîchissement…' : 'synchronisation…');
     
     try {
@@ -4045,8 +4045,6 @@ if (document.readyState === 'loading') {
     } catch (err) {
       setStatus('error', 'erreur de sync');
       console.error('Garmin fetch error:', err);
-    } finally {
-      if (refreshBtn) refreshBtn.style.animation = '';
     }
   }
   
@@ -4062,8 +4060,15 @@ if (document.readyState === 'loading') {
     }
     if (txt) txt.textContent = text;
     if (badge) badge.style.display = (state === 'connected') ? 'none' : '';
-    // Le bouton refresh n'apparaît que si on est connecté ou en sync
-    if (refreshBtn) refreshBtn.style.display = (state === 'connected' || state === 'syncing') ? '' : 'none';
+    // Bouton refresh : visible si connecté / en sync / erreur ; flèche colorée selon l'état, et seule la flèche tourne pendant la sync
+    if (refreshBtn) {
+      refreshBtn.style.display = (state === 'connected' || state === 'syncing' || state === 'error') ? '' : 'none';
+      refreshBtn.style.color = state === 'connected' ? 'var(--green, #5ec27a)' :
+                               state === 'error'     ? 'var(--red, #ef4444)' :
+                               state === 'syncing'   ? 'var(--orange, #e8a020)' : '';
+      if (state === 'syncing') refreshBtn.classList.add('syncing');
+      else refreshBtn.classList.remove('syncing');
+    }
   }
   
   function renderEmpty() {
