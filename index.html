@@ -123,7 +123,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 /* Week overview */
 .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:1.2rem}
-.ws-day{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .12s}
+.ws-day{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .12s}
 .ws-day:hover{border-color:var(--border2)}
 .ws-day.today{border-color:var(--accent);background:var(--accent-dim)}
 .ws-day.done{opacity:0.45}
@@ -131,7 +131,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .ws-day.today .ws-dname{color:var(--accent)}
 .ws-check{width:14px;height:14px;border:1px solid var(--border2);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .12s}
 .ws-day.done .ws-check{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.ws-sess{font-size:0.62rem;color:var(--muted);text-align:center;line-height:1.3;padding:0 2px}
+.ws-sess{font-size:0.62rem;color:var(--muted);text-align:center;line-height:1.3;padding:0 2px;width:100%;overflow-wrap:anywhere;word-break:break-word}
 .ws-day.today .ws-sess{color:var(--text)}
 
 /* Bloc repliable « Plus de détails » (3e couche) */
@@ -157,6 +157,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .m1{background:var(--blue-bg)} .m2{background:var(--green-bg)} .m3{background:var(--orange-bg)} .tap{background:var(--surface2)} .ccc-seg{background:var(--red-bg);border-color:var(--red)}
 .pseg-l{font-family:'Syne',sans-serif;font-weight:700;font-size:0.74rem}
 .pseg-s{font-size:0.62rem;margin-top:3px;opacity:.7}
+.back-link{display:inline-flex;align-items:center;gap:0.35rem;background:var(--surface2,#1c1d21);border:1px solid var(--border,#242528);color:var(--text,#e8e9ea);font-family:'DM Mono',monospace;font-size:0.74rem;cursor:pointer;padding:0.6rem 1rem;border-radius:10px;margin-bottom:0.9rem;min-height:44px;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.back-link:active{background:var(--surface3,#202126);transform:scale(0.97)}
 .m1 .pseg-l{color:var(--blue)} .m2 .pseg-l{color:var(--green)} .m3 .pseg-l{color:var(--orange)} .tap .pseg-l{color:var(--muted)} .ccc-seg .pseg-l{color:var(--red)}
 
 .vol-row{display:flex;flex-direction:column;margin-bottom:6px}
@@ -1369,7 +1371,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 <!-- JOURNAL (historique consultable) -->
 <div class="panel" id="panel-journal"><div class="inner">
-  <button data-tab="settings" style="background:none;border:none;color:var(--muted,#5e6068);font-family:DM Mono,monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+  <button data-tab="settings" class="back-link">← Paramètres</button>
   <div class="ptitle">Journal <span class="ptitle-sub">historique · repas &amp; hydratation</span></div>
   <div id="journal-cal"></div>
   <div id="journal-day"></div>
@@ -1389,7 +1391,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     </div>
   </div>
   <div class="settings-sub" id="set-profil" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Profil</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="display:flex;align-items:center;gap:0.9rem;margin-bottom:0.9rem">
         <div id="prof-avatar" style="width:76px;height:76px;border-radius:50%;flex-shrink:0;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--accent,#a3e635);background-position:center;background-size:cover">?</div>
@@ -1423,7 +1425,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5">Enregistré automatiquement · sauvegardé sur le serveur. Poids, âge, taille et sexe alimentent le calcul des besoins (BMR).</div></div>
   </div>
   <div class="settings-sub" id="set-modes" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Modes</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="margin-bottom:1rem">
         <label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Sport</label>
@@ -1448,28 +1450,28 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       </div></div>
   </div>
   <div class="settings-sub" id="set-affichage" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Affichage</div>
     <div id="aff-style" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Style (palette + typo)</label><div style="display:flex;flex-direction:column;gap:0.45rem"><div data-style-id="ccc" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.5rem 0.6rem;border:1px solid var(--border,#242528);border-radius:10px"><span style="display:flex;gap:3px"><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#0f0f10;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#16171a;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#a3e635;border:1px solid rgba(128,128,128,.35)"></i></span><span style="flex:1;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem">CCC · Lime</span><span class="style-check" style="color:var(--accent);opacity:0;font-weight:700">✓</span></div><div data-style-id="magma" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.5rem 0.6rem;border:1px solid var(--border,#242528);border-radius:10px"><span style="display:flex;gap:3px"><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#15110e;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#1f1813;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#ff6a3d;border:1px solid rgba(128,128,128,.35)"></i></span><span style="flex:1;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem">Magma</span><span class="style-check" style="color:var(--accent);opacity:0;font-weight:700">✓</span></div><div data-style-id="glacier" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.5rem 0.6rem;border:1px solid var(--border,#242528);border-radius:10px"><span style="display:flex;gap:3px"><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#0c1016;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#141b24;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#36e0cf;border:1px solid rgba(128,128,128,.35)"></i></span><span style="flex:1;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem">Glacier</span><span class="style-check" style="color:var(--accent);opacity:0;font-weight:700">✓</span></div><div data-style-id="carnet" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.5rem 0.6rem;border:1px solid var(--border,#242528);border-radius:10px"><span style="display:flex;gap:3px"><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#f3efe6;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#fbf9f3;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#b8432c;border:1px solid rgba(128,128,128,.35)"></i></span><span style="flex:1;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem">Carnet (clair)</span><span class="style-check" style="color:var(--accent);opacity:0;font-weight:700">✓</span></div><div data-style-id="nocturne" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.5rem 0.6rem;border:1px solid var(--border,#242528);border-radius:10px"><span style="display:flex;gap:3px"><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#100d18;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#181425;border:1px solid rgba(128,128,128,.35)"></i><i style="width:13px;height:13px;border-radius:50%;display:inline-block;background:#9b6bff;border:1px solid rgba(128,128,128,.35)"></i></span><span style="flex:1;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem">Nocturne</span><span class="style-check" style="color:var(--accent);opacity:0;font-weight:700">✓</span></div></div><div style="font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.5rem">Change toute l’identité (couleurs + polices). Tu peux ensuite affiner l’accent ci-dessous.</div></div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Thème</label><div id="aff-theme" style="display:flex;gap:0.4rem;margin-bottom:1.1rem"><span class="aff-chip" data-theme-set="dark" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Sombre</span><span class="aff-chip" data-theme-set="light" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Clair</span><span class="aff-chip" data-theme-set="system" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Système</span></div><label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Couleur d'accent</label><div id="aff-accent" style="display:flex;flex-wrap:wrap;gap:0.55rem;margin-bottom:1.1rem"><span class="aff-swatch" data-accent="#a3e635" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#a3e635"></span><span class="aff-swatch" data-accent="#36e0cf" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#36e0cf"></span><span class="aff-swatch" data-accent="#60a5fa" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#60a5fa"></span><span class="aff-swatch" data-accent="#a78bfa" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#a78bfa"></span><span class="aff-swatch" data-accent="#fb7185" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#fb7185"></span><span class="aff-swatch" data-accent="#f59e0b" style="width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;background:#f59e0b"></span></div><label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Taille du texte</label><div id="aff-textsize" style="display:flex;gap:0.4rem"><span class="aff-chip" data-textsize="15" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Petit</span><span class="aff-chip" data-textsize="16" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Normal</span><span class="aff-chip" data-textsize="17.5" style="cursor:pointer;font-family:'DM Mono',monospace;font-size:0.66rem;padding:0.4rem 0.8rem;border-radius:14px;border:1px solid var(--border,#242528);background:var(--bg,#0f0f10);color:var(--muted,#5e6068)">Grand</span></div><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.5rem">Si la mise en page bouge trop, reviens sur « Normal ».</div></div><div id="aff-logo-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.6rem"><label style="display:block;font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Logo / icône de raccourci</label><div id="aff-logo" style="display:flex;flex-wrap:wrap;gap:0.6rem"><div data-logo-id="classique" style="cursor:pointer;padding:4px;border:2px solid transparent;border-radius:11px"><img data-logo-img="classique" width="44" height="44" style="display:block;border-radius:9px"></div><div data-logo-id="sommet" style="cursor:pointer;padding:4px;border:2px solid transparent;border-radius:11px"><img data-logo-img="sommet" width="44" height="44" style="display:block;border-radius:9px"></div><div data-logo-id="trace" style="cursor:pointer;padding:4px;border:2px solid transparent;border-radius:11px"><img data-logo-img="trace" width="44" height="44" style="display:block;border-radius:9px"></div><div data-logo-id="anneau" style="cursor:pointer;padding:4px;border:2px solid transparent;border-radius:11px"><img data-logo-img="anneau" width="44" height="44" style="display:block;border-radius:9px"></div></div><div style="font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.5rem">Icône de l’onglet et des nouveaux raccourcis. On étoffera. Sur iPhone, un raccourci déjà posé ne change qu’en le réinstallant.</div></div>
   </div>
   <div class="settings-sub" id="set-connexion" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Connexion</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5">Bientôt — URL backend + token Garmin, état de synchro, resync.</div></div>
   </div>
   <div class="settings-sub" id="set-donnees" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Données & sauvegarde</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5">Bientôt — sauvegarde serveur, sauvegarde manuelle, export, restauration.</div></div>
   </div>
   <div class="settings-sub" id="set-historique" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Historique</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><button data-tab="journal" style="width:100%;padding:0.7rem;background:var(--accent,#a3e635);color:#0f0f10;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">📒 Journal des repas →</button><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.55rem">Journal des entraînements — bientôt.</div></div>
   </div>
   <div class="settings-sub" id="set-apropos" style="display:none">
-    <button data-setting-back type="button" style="background:none;border:none;color:var(--muted,#5e6068);font-family:'DM Mono',monospace;font-size:0.66rem;cursor:pointer;padding:0;margin-bottom:0.5rem">← Paramètres</button>
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">À propos</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5">CCC 2026 Hub · ta prépa, en un seul endroit.</div></div>
   </div>
@@ -2993,7 +2995,8 @@ function renderToday() {
         var key = WI + '-' + i;
         var isDone = !!done2[key];
         var isToday = (i === DI);
-        var sShort = d.s.length > 22 ? d.s.substring(0,22) + '…' : d.s;
+        var sText = (d.s || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        var sShort = sText.length > 22 ? sText.substring(0,22) + '…' : sText;
         html += '<div class="ws-day' + (isToday?' today':'') + (isDone?' done':'') + '" data-done="' + key + '">' +
           '<div class="ws-dname">' + DAYFR[i] + '</div>' +
           '<div class="ws-check">' + (isDone?'<svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5ec27a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="4,10 8,14 16,5"/></svg>':'') + '</div>' +
@@ -5502,6 +5505,25 @@ if (document.readyState === 'loading') {
     try { localStorage.setItem('ccc_foods_custom', JSON.stringify(arr)); } catch(e){}
     try { if (window.CCCSync) CCCSync.pushState('foods_custom', arr); } catch(e){}
   }
+  function removeCustomFoodByCode(code) {
+    var arr = getCustomFoods().filter(function(x){ return x.code !== code; });
+    try { localStorage.setItem('ccc_foods_custom', JSON.stringify(arr)); } catch(e){}
+    try { if (window.CCCSync) CCCSync.pushState('foods_custom', arr); } catch(e){}
+  }
+  function nhToast(msg) {
+    try {
+      var t = document.getElementById('ccc-toast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'ccc-toast';
+        t.style.cssText = 'position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);z-index:10050;background:var(--surface2,#1c1d21);color:var(--text,#e8e9ea);border:1px solid var(--border2,#2e2f33);border-radius:9px;padding:0.55rem 0.9rem;font-family:DM Mono,monospace;font-size:0.66rem;box-shadow:0 6px 20px rgba(0,0,0,0.4);opacity:0;transition:opacity .25s ease;pointer-events:none;max-width:80%;text-align:center';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      requestAnimationFrame(function(){ t.style.opacity = '1'; });
+      clearTimeout(t.__h);
+      t.__h = setTimeout(function(){ t.style.opacity = '0'; }, 1600);
+    } catch(e){}
+  }
   function getFoods() {
     // Base par défaut + aliments custom (créés par l'utilisateur, flag custom:true)
     return FOODS_DEFAULT.concat(getCustomFoods());
@@ -5971,7 +5993,7 @@ if (document.readyState === 'loading') {
             '<div style="font-family:DM Mono,monospace;font-size:0.64rem;color:var(--text,#e8e9ea);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.n + '</div>' +
             '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted,#5e6068)">' + f.kcal + 'k · G' + f.g + ' P' + f.p + ' L' + f.l + ' /100g</div>' +
           '</div>' +
-          '<span class="nh-off-fav" data-off="' + i + '" style="cursor:pointer;font-size:0.85rem;flex-shrink:0" title="Garder en favori">' + (fav?'⭐':'☆') + '</span>' +
+          '<span class="nh-off-fav" data-off="' + i + '" style="cursor:pointer;flex-shrink:0;font-family:DM Mono,monospace;font-size:0.54rem;padding:0.28rem 0.5rem;border-radius:6px;border:1px solid ' + (fav?'var(--green,#22c55e)':'var(--accent,#a3e635)') + ';color:' + (fav?'var(--green,#22c55e)':'var(--accent,#a3e635)') + ';white-space:nowrap" title="' + (fav?'Retirer de ta base':'Ajouter à ta base') + '">' + (fav?'✓ base':'＋ base') + '</span>' +
         '</div>';
       });
       h += '</div>';
@@ -6139,9 +6161,14 @@ if (document.readyState === 'loading') {
   function favOffFood(idx){
     var f = offResults[idx];
     if (!f) return;
-    if (offIsFav(f.code)) return;
-    // On enregistre une copie « propre » dans les favoris (aliments custom)
-    saveCustomFood({ cat:'Open Food Facts', n:f.n, u:f.u, g:f.g, p:f.p, l:f.l, kcal:f.kcal, code:f.code });
+    if (offIsFav(f.code)) {
+      removeCustomFoodByCode(f.code);
+      nhToast('Retiré de ta base');
+    } else {
+      // On enregistre une copie « propre » dans ta base (aliments custom)
+      saveCustomFood({ cat:'Open Food Facts', n:f.n, u:f.u, g:f.g, p:f.p, l:f.l, kcal:f.kcal, code:f.code });
+      nhToast('✓ Ajouté à ta base');
+    }
     render();
   }
 
@@ -7848,7 +7875,7 @@ if (document.readyState === 'loading') {
     }
     if (!locEmpty && localTs && newer(localTs, srvTs)) { pushState(key, loc); return false; }
     if (!locEmpty && !localTs) { pushState(key, loc); return false; }
-    try { localStorage.setItem(stateLsKey(key), JSON.stringify(srv.value)); } catch(e){}
+    try { var _sv = srv.value; localStorage.setItem(stateLsKey(key), (typeof _sv === 'string') ? _sv : JSON.stringify(_sv)); } catch(e){}
     setMeta('state:' + key, srvTs);
     return true;
   }
@@ -7924,6 +7951,7 @@ if (document.readyState === 'loading') {
       running = false;
     }
     if (changed){
+      try { if (window.__applyAll) window.__applyAll(); } catch(e){}
       try { if (window.__renderNutrition) window.__renderNutrition(); } catch(e){}
       try { if (window.__renderGauges) window.__renderGauges(); } catch(e){}
       try { if (window.__renderWeight) window.__renderWeight(); } catch(e){}
@@ -9881,6 +9909,8 @@ if (document.readyState === 'loading') {
   }
   function setTheme(t){ try{ localStorage.setItem('ccc_theme',t); }catch(e){} try{ if(window.CCCSync&&CCCSync.pushState) CCCSync.pushState('theme',t); }catch(e){} applyAll(); }
   window.__applyAll=applyAll; window.__setTheme=setTheme;
+  // r\u00e9parer d'anciennes valeurs sur-encod\u00e9es (JSON-quot\u00e9es) par la synchro
+  try { ['ccc_theme','ccc_style','ccc_accent','ccc_logo','ccc_textsize','ccc_sport_mode','ccc_nutri_objective'].forEach(function(k){ var v=localStorage.getItem(k); if(v && v.length>1 && v.charAt(0)==='"' && v.charAt(v.length-1)==='"'){ try{ localStorage.setItem(k, JSON.parse(v)); }catch(e){} } }); } catch(e){}
   // suivre le thème système
   try{ var mq=window.matchMedia('(prefers-color-scheme: dark)'); var onCh=function(){ if(getTheme()==='system') applyAll(); }; if(mq.addEventListener) mq.addEventListener('change',onCh); else if(mq.addListener) mq.addListener(onCh); }catch(e){}
   // bouton sidebar : re-appliquer le style après le toggle natif
