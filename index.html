@@ -4314,13 +4314,13 @@ if (document.readyState === 'loading') {
     // ── Activité du jour (pas / calories actives / intensité) — depuis data.daily ──
     if (daily.steps != null) {
       var distExtra = (daily.distance_m != null) ? (daily.distance_m / 1000).toFixed(1) + ' km' : null;
-      html += metric(ic('foot',13), 'Pas', Number(daily.steps).toLocaleString('fr-FR'), '', distExtra, null, null);
+      html += metric(ic('foot',13), 'Pas', Number(daily.steps).toLocaleString('fr-FR'), '', distExtra, null, 'steps');
     }
-    if (daily.active_kcal != null) html += metric(ic('fire',13), 'Cal. actives', daily.active_kcal, 'kcal', null, null, null);
+    if (daily.active_kcal != null) html += metric(ic('fire',13), 'Cal. actives', daily.active_kcal, 'kcal', null, null, 'active_kcal');
     if (daily.intensity_min_moderate != null || daily.intensity_min_vigorous != null) {
       var imin = (daily.intensity_min_moderate || 0) + (daily.intensity_min_vigorous || 0);
       var floorsExtra = (daily.floors_up != null) ? daily.floors_up + ' étages' : null;
-      html += metric(ic('bolt',13), 'Intensité', imin, 'min', floorsExtra, null, null);
+      html += metric(ic('bolt',13), 'Intensité', imin, 'min', floorsExtra, null, 'intensity');
     }
     html += '</div>';
     
@@ -4343,6 +4343,7 @@ if (document.readyState === 'loading') {
     
     var bb = data.body_battery || {}, hrv = data.hrv || {}, sleep = data.sleep || {};
     var stress = data.stress || {}, read = data.readiness || {}, tl = data.training_load || {}, vo2 = data.vo2max || {};
+    var daily = data.daily || {};
     
     // Définition de chaque métrique : titre, valeur, unité, explication, interprétation
     var M = {};
@@ -4441,6 +4442,43 @@ if (document.readyState === 'loading') {
         vo2.running>=54?'' + ic("statusGood",13,"#5ec27a") + ' Excellent niveau (supérieur pour ton âge). Belle base aérobie pour l\'ultra.':
         vo2.running>=48?'' + ic("statusGood",13,"#5ec27a") + ' Bon niveau d\'endurance.':
         '' + ic("statusWarn",13,"#e8a020") + ' Marge de progression — le volume en Z2 et le travail de seuil le feront monter.'
+    };
+    
+    // ── Activité du jour : Pas ──
+    var stepsV = daily.steps;
+    M.steps = {
+      emoji:'👣', title:'Pas du jour', value:(stepsV!=null?Number(stepsV).toLocaleString('fr-FR'):'–'), unit:'',
+      sub:(daily.distance_m!=null?(daily.distance_m/1000).toFixed(1)+' km':'') + (daily.steps_goal!=null?' · objectif '+Number(daily.steps_goal).toLocaleString('fr-FR'):''),
+      what:'Total des pas sur la journée, marche libre comprise (hors séances loggées). Pour un ultra-traileur qui marche ses montées, le temps debout et la marche sont une charge bien réelle.',
+      interp: stepsV==null?'Donnée indisponible.':
+        stepsV>=20000?'' + ic("statusWarn",13,"#e8a020") + ' Grosse journée sur les pieds — vrai volume Z1. Ça compte dans ta charge ET ta dépense, même sans séance loggée. Si c\'était un jour de repos, garde-le en tête pour la récup et l\'alimentation.':
+        stepsV>=10000?'' + ic("statusGood",13,"#5ec27a") + ' Bonne activité de fond sur la journée, en plus de tes séances. Du volume facile qui entretient l\'aérobie.':
+        '' + ic("statusGood",13,"#5ec27a") + ' Journée plutôt calme côté pas — cohérent avec un jour de repos ou de taper.'
+    };
+    
+    // ── Activité du jour : Calories actives ──
+    var akV = daily.active_kcal;
+    M.active_kcal = {
+      emoji:'🔥', title:'Calories actives', value:(akV!=null?akV:'–'), unit:'kcal',
+      sub:(daily.total_kcal!=null?'Total '+daily.total_kcal+' kcal':'') + (daily.bmr_kcal!=null?' · métabo base '+daily.bmr_kcal:''),
+      what:'Énergie dépensée par l\'activité, au-delà du métabolisme de base (marche comprise). C\'est la part à recharger pour soutenir l\'entraînement sans creuser de déficit involontaire.',
+      interp: akV==null?'Donnée indisponible.':
+        akV>=800?'' + ic("statusWarn",13,"#e8a020") + ' Grosse dépense active aujourd\'hui. Pense à recharger en conséquence, surtout en semaine de charge, pour ne pas accumuler un déficit involontaire.':
+        akV>=400?'' + ic("statusGood",13,"#5ec27a") + ' Dépense active modérée, à intégrer dans ton budget du jour.':
+        '' + ic("statusGood",13,"#5ec27a") + ' Faible dépense active — cohérent avec un jour de repos.'
+    };
+    
+    // ── Activité du jour : Minutes d'intensité ──
+    var imMod = daily.intensity_min_moderate, imVig = daily.intensity_min_vigorous;
+    var imTot = (imMod!=null||imVig!=null) ? (imMod||0)+(imVig||0) : null;
+    M.intensity = {
+      emoji:'⚡', title:'Minutes d\'intensité', value:(imTot!=null?imTot:'–'), unit:'min',
+      sub:'Modérée '+(imMod||0)+' · Vigoureuse '+(imVig||0) + (daily.intensity_min_goal!=null?' · objectif '+daily.intensity_min_goal:''),
+      what:'Minutes passées à intensité modérée ou vigoureuse (Garmin), séances et marche rapide comprises. Reflète l\'effort cardio cumulé de la journée.',
+      interp: imTot==null?'Donnée indisponible.':
+        (daily.intensity_min_goal!=null && imTot>=daily.intensity_min_goal)?'' + ic("statusGood",13,"#5ec27a") + ' Objectif d\'intensité atteint — bon stimulus cardio sur la journée.':
+        imTot>=30?'' + ic("statusGood",13,"#5ec27a") + ' Bel effort cardio cumulé aujourd\'hui.':
+        '' + ic("statusGood",13,"#5ec27a") + ' Peu d\'intensité — normal un jour calme, de récup ou de taper.'
     };
     
     var m = M[mkey];
