@@ -4244,6 +4244,7 @@ if (document.readyState === 'loading') {
     var read     = data.readiness || {};
     var tl       = data.training_load || {};
     var vo2      = data.vo2max || {};
+    var daily    = data.daily || {};
     
     function metric(emoji, label, value, unit, extra, color, mkey) {
       var v = (value === null || value === undefined || value === '') ? '–' : value;
@@ -4310,6 +4311,17 @@ if (document.readyState === 'loading') {
     if (stress.avg != null) html += metric(ic('stress',13), 'Stress', stress.avg, '/100', stress.max != null ? 'max ' + stress.max : null, null, 'stress');
     if (tl.tsb != null) html += metric(ic('chart',13), 'TSB', Math.round(tl.tsb), '', tl.status || null, null, 'tsb');
     if (vo2.running != null) html += metric(ic('lung',13), 'VO2max', vo2.running.toFixed(1), '', 'running', null, 'vo2max');
+    // ── Activité du jour (pas / calories actives / intensité) — depuis data.daily ──
+    if (daily.steps != null) {
+      var distExtra = (daily.distance_m != null) ? (daily.distance_m / 1000).toFixed(1) + ' km' : null;
+      html += metric(ic('foot',13), 'Pas', Number(daily.steps).toLocaleString('fr-FR'), '', distExtra, null, null);
+    }
+    if (daily.active_kcal != null) html += metric(ic('fire',13), 'Cal. actives', daily.active_kcal, 'kcal', null, null, null);
+    if (daily.intensity_min_moderate != null || daily.intensity_min_vigorous != null) {
+      var imin = (daily.intensity_min_moderate || 0) + (daily.intensity_min_vigorous || 0);
+      var floorsExtra = (daily.floors_up != null) ? daily.floors_up + ' étages' : null;
+      html += metric(ic('bolt',13), 'Intensité', imin, 'min', floorsExtra, null, null);
+    }
     html += '</div>';
     
     container.innerHTML = leadHtml + html;
