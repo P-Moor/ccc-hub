@@ -1103,6 +1103,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <button class="sn" id="sn-nutrition"  data-tab="nutrition"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2 C7 2 5 5 5 9 C5 11.2 6.8 13 9 13 L9 18"/><path d="M11 2 L11 7 L13 7 L13 2"/><path d="M11 7 C11 9.2 12.8 11 15 11 L15 18"/><line x1="11" y1="11" x2="13" y2="11"/></svg></span><span class="sn-lbl">Nutrition</span></button>
     <button class="sn" id="sn-renfo"      data-tab="renfo"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="4" y2="10"/><rect x="4" y="7" width="2" height="6" rx="1"/><line x1="6" y1="10" x2="14" y2="10"/><rect x="14" y="7" width="2" height="6" rx="1"/><line x1="16" y1="10" x2="19" y2="10"/><rect x="3" y="8.5" width="1" height="3" rx="0.5"/><rect x="16" y="8.5" width="1" height="3" rx="0.5"/></svg></span><span class="sn-lbl">Renfo</span></button>
     <button class="sn" id="sn-coach"      data-tab="coach"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/><circle cx="7" cy="8.5" r="0.8" fill="currentColor"/><circle cx="10" cy="8.5" r="0.8" fill="currentColor"/><circle cx="13" cy="8.5" r="0.8" fill="currentColor"/></svg></span><span class="sn-lbl">Coach</span></button>
+    <button class="sn" id="sn-simu"       data-tab="simu"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="17" x2="18" y2="17"/><rect x="3" y="11" width="2.5" height="6"/><rect x="7" y="7" width="2.5" height="10"/><rect x="11" y="4" width="2.5" height="13"/><rect x="15" y="9" width="2.5" height="8"/></svg></span><span class="sn-lbl">Simu</span></button>
+    <button class="sn" id="sn-strava"     data-tab="strava"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,15 5,15 7.5,6 11,17 13,11 15,11"/><polyline points="15,11 16,8 18.5,8"/></svg></span><span class="sn-lbl">Strava</span></button>
     <button class="sn" id="sn-settings"   data-tab="settings"><span class="sn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="sn-lbl">Paramètres</span></button>
   </nav>
   <div class="sb-foot">
@@ -1477,7 +1479,534 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
   </div>
 </div></div>
 
+<!-- SIMULATEUR MONTE-CARLO -->
+<div class="panel" id="panel-simu"><div class="inner">
+  <div class="ptitle">Simulateur</div>
+  <p style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted,#5e6068);line-height:1.5;margin:0 0 0.9rem">101 km · 6050 m D+ · Courmayeur → Champex → Chamonix · 28/08/2026. Prédiction P10/P50/P90 calibrée sur tes courses. Le déterministe décide, tu ajustes.</p>
+
+  <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+    <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">1 · Calibration (tes courses)</div>
+    <div style="overflow-x:auto"><table id="simu-raceTable" style="width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.56rem">
+      <thead><tr style="color:var(--muted,#5e6068);text-transform:uppercase;font-size:0.5rem;letter-spacing:0.04em"><th style="text-align:left;padding:0.3rem 0.3rem;border-bottom:1px solid var(--border,#242528)">Course</th><th style="text-align:right;padding:0.3rem 0.3rem;border-bottom:1px solid var(--border,#242528)">Dist</th><th style="text-align:right;padding:0.3rem 0.3rem;border-bottom:1px solid var(--border,#242528)">D+</th><th style="text-align:right;padding:0.3rem 0.3rem;border-bottom:1px solid var(--border,#242528)">Temps</th><th style="text-align:right;padding:0.3rem 0.3rem;border-bottom:1px solid var(--border,#242528)">✓</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p id="simu-calibOut" style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--muted,#5e6068);line-height:1.5;margin:0.5rem 0 0"></p>
+  </div>
+
+  <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+    <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">2 · Paramètres du modèle</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Coût vertical <b style="color:var(--text,#e8e8e8)"><span id="simu-vertL"></span> min/100 m</b></label><input type="range" id="simu-pVert" min="2" max="10" step="0.1" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Fatigue ultra <b style="color:var(--text,#e8e8e8)"><span id="simu-fatL"></span></b></label><input type="range" id="simu-pFat" min="0" max="0.6" step="0.01" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Pénalité nuit <b style="color:var(--text,#e8e8e8)"><span id="simu-nightL"></span> min</b></label><input type="range" id="simu-pNight" min="0" max="90" step="5" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+      </div>
+      <div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Risque brûlures plantaires <b style="color:var(--text,#e8e8e8)"><span id="simu-footL"></span>%</b></label><input type="range" id="simu-pFoot" min="0" max="100" step="5" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Risque défaillance nutrition <b style="color:var(--text,#e8e8e8)"><span id="simu-bonkL"></span>%</b></label><input type="range" id="simu-pBonk" min="0" max="100" step="5" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+        <div style="margin:0.5rem 0"><label style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Incertitude allure (±) <b style="color:var(--text,#e8e8e8)"><span id="simu-cvL"></span>%</b></label><input type="range" id="simu-pCv" min="3" max="20" step="1" style="width:100%;accent-color:var(--accent,#a3e635)"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-top:0.6rem">
+      <button id="simu-run" style="background:var(--accent,#a3e635);color:#0f0f10;border:none;border-radius:8px;padding:0.6rem 1rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer">▶ Lancer 10 000 simulations</button>
+      <button id="simu-reset" style="background:transparent;color:var(--accent,#a3e635);border:1px solid var(--accent,#a3e635);border-radius:8px;padding:0.6rem 1rem;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">Réinitialiser</button>
+      <span id="simu-seedInfo" style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted,#5e6068)"></span>
+    </div>
+  </div>
+
+  <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+    <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">3 · Distribution du temps d'arrivée</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem">
+      <div style="background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">P10 · rapide</div><div id="simu-rP10" style="font-family:'DM Mono',monospace;font-weight:500;font-size:1.4rem;margin-top:0.2rem;color:#5ec27a">–</div></div>
+      <div style="background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">P50 · médian</div><div id="simu-rP50" style="font-family:'DM Mono',monospace;font-weight:500;font-size:1.4rem;margin-top:0.2rem;color:#a3e635">–</div></div>
+      <div style="background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">P90 · prudent</div><div id="simu-rP90" style="font-family:'DM Mono',monospace;font-weight:500;font-size:1.4rem;margin-top:0.2rem;color:#e8a020">–</div></div>
+    </div>
+    <canvas id="simu-hist" width="720" height="200" style="width:100%;height:200px;display:block;margin-top:0.6rem;background:var(--surface2,#0f0f10);border-radius:8px"></canvas>
+    <p id="simu-paceOut" style="font-family:'DM Mono',monospace;font-size:0.54rem;color:var(--muted,#5e6068);line-height:1.5;margin:0.5rem 0 0"></p>
+  </div>
+
+  <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem">
+    <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">4 · Lecture coach</div>
+    <div id="simu-verdict" style="border-left:3px solid var(--accent,#a3e635);padding:0.5rem 0.8rem;background:var(--surface2,#0f0f10);border-radius:0 6px 6px 0;font-family:'DM Mono',monospace;font-size:0.6rem;line-height:1.55">Lance une simulation pour obtenir la lecture.</div>
+    <p style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted,#5e6068);line-height:1.5;margin:0.5rem 0 0">Objectif visé : <b style="color:var(--text,#e8e8e8)">18-21h</b>. Cut-off CCC ≈ 26h30. Avec peu de courses l'intervalle est large — il se resserre à chaque course encodée.</p>
+  </div>
+</div></div>
+
+<!-- STRAVA -->
+<div class="panel" id="panel-strava"><div class="inner">
+  <div class="ptitle">Strava</div>
+  <div id="strava-nocfg" style="display:none;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:1rem;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted,#5e6068);line-height:1.6">
+    Backend non configuré. Va dans <b data-tab="settings" style="color:var(--accent,#a3e635);cursor:pointer">⚙ Paramètres → Garmin</b> pour saisir l'URL et le token — le même backend alimente Strava.
+  </div>
+  <div id="strava-status" style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem">
+    <span id="strava-dot" style="width:8px;height:8px;border-radius:50%;background:#5e6068;display:inline-block"></span>
+    <span id="strava-statustxt">Chargement…</span>
+    <button id="strava-refresh" style="margin-left:auto;background:transparent;border:1px solid var(--border2,#242528);color:var(--muted,#5e6068);border-radius:6px;padding:0.3rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer">↻ Resync</button>
+  </div>
+  <div id="strava-body" style="display:none">
+    <div id="strava-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:0.5rem;margin-bottom:1rem"></div>
+    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">Forme (TSB)</div>
+      <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#ef4444,#f59e0b,#34d399,#a3e635,#60a5fa);position:relative;margin:0.5rem 0 0.3rem"><div id="strava-tsbmark" style="position:absolute;top:-4px;width:2px;height:14px;background:#fff"></div></div>
+      <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted,#5e6068)"><span>surmenage</span><span>optimal</span><span>frais</span></div>
+      <div id="strava-tsbtext" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.6rem"></div>
+    </div>
+    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">Charge d'entraînement — 60 jours</div>
+      <canvas id="strava-chart" width="900" height="240" style="width:100%;height:auto;display:block"></canvas>
+      <div style="display:flex;flex-wrap:wrap;gap:0.7rem;font-family:'DM Mono',monospace;font-size:0.5rem;margin-top:0.4rem"><span style="color:#a3e635">━ CTL</span><span style="color:#f59e0b">━ ATL</span><span style="color:#60a5fa">━ TSB</span><span style="color:#555">▮ charge/j</span></div>
+    </div>
+    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem;margin-bottom:1rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">Usure chaussures</div>
+      <div id="strava-shoes"></div>
+    </div>
+    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.9rem 1rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">Activités récentes</div>
+      <div style="overflow-x:auto"><table id="strava-acts" style="width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.58rem"></table></div>
+    </div>
+  </div>
+</div></div>
+
 </main>
+<script>
+/* ════════════════════════════════════════════════════════════
+   ONGLET SIMULATEUR — Monte-Carlo temps d'arrivée CCC.
+   Régression 2 params sur les courses + 10 000 tirages seedés.
+   Init paresseux à la 1re ouverture de l'onglet.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var started = false;
+  var $ = function(id){ return document.getElementById(id); };
+
+  var RACES = [
+    {name:'EcoTrail Paris 80K', dist:82,   dplus:1373, hm:'9:52', use:true},
+    {name:'Wildstrubel 50',     dist:54.2, dplus:3101, hm:'8:20', use:true},
+    {name:'Ninglinspo 35K',     dist:35.5, dplus:2711, hm:'',     use:false}
+  ];
+  var CCC = {dist:101, dplus:6050};
+  var TARGET = {lo:18*60, hi:21*60};
+  var DEFAULTS = {vert:5.0, fat:0.29, night:35, foot:60, bonk:25, cv:10};
+  var P = Object.assign({}, DEFAULTS);
+
+  function hmToMin(s){ if(!s) return null; var m=String(s).split(':'); if(m.length<2) return null;
+    var h=parseInt(m[0],10), mm=parseInt(m[1],10); if(isNaN(h)||isNaN(mm)) return null; return h*60+mm; }
+  function minToHM(v){ v=Math.round(v); var h=Math.floor(v/60), m=v%60; return h+'h'+(m<10?'0':'')+m; }
+
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+    var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  var rnd = mulberry32(20260828);
+  function gauss(mu,sd){ var u=1-rnd(), v=rnd(); return mu+sd*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+  function calibrate(){
+    var pts=[];
+    RACES.forEach(function(r){ var t=hmToMin(r.hm); if(r.use && t){ pts.push({x1:r.dist, x2:r.dplus/100, y:t}); }});
+    if(pts.length<2){ return {pf:6.4, vc:P.vert, n:pts.length, note:'Moins de 2 courses avec temps — valeurs par défaut.'}; }
+    var s11=0,s12=0,s22=0,s1y=0,s2y=0;
+    pts.forEach(function(p){ s11+=p.x1*p.x1; s12+=p.x1*p.x2; s22+=p.x2*p.x2; s1y+=p.x1*p.y; s2y+=p.x2*p.y; });
+    var det=s11*s22-s12*s12;
+    if(Math.abs(det)<1e-9){ return {pf:6.4, vc:P.vert, n:pts.length, note:'Courses colinéaires — fit instable.'}; }
+    var pf=(s1y*s22-s2y*s12)/det;
+    var vc=(s11*s2y-s12*s1y)/det;
+    var longest=0; pts.forEach(function(p){ var e=p.x1+p.x2; if(e>longest) longest=e; });
+    return {pf:pf, vc:vc, n:pts.length, longest:longest,
+      note:pts.length+' courses · allure plat '+pf.toFixed(2)+' min/km · coût vertical '+vc.toFixed(2)+' min/100 m'};
+  }
+
+  function simulate(cal){
+    var effCCC = CCC.dist + CCC.dplus/100;
+    var pf = gauss(cal.pf, cal.pf*P.cv/100);
+    var vc = gauss(P.vert, P.vert*P.cv/100);
+    var base = CCC.dist*pf + (CCC.dplus/100)*vc;
+    var ratio = cal.longest ? (effCCC/cal.longest) : 1.4;
+    var fatMult = 1 + P.fat*Math.max(0, ratio-1);
+    fatMult = gauss(fatMult, 0.04);
+    var t = base*fatMult;
+    t += Math.max(0, gauss(P.night, P.night*0.35));
+    if(rnd()*100 < P.foot) t += 15+rnd()*30;
+    if(rnd()*100 < P.bonk) t += 20+rnd()*40;
+    return t;
+  }
+
+  function percentile(sorted,q){ var i=(sorted.length-1)*q, lo=Math.floor(i), hi=Math.ceil(i);
+    if(lo===hi) return sorted[lo]; return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo); }
+
+  // Prédiction headless (sans DOM) pour le hero Command Center. Seed fixe, restaure le rnd.
+  function computePrediction(){
+    var cal=calibrate();
+    var save=rnd; rnd=mulberry32(20260828);
+    var N=10000, out=new Array(N);
+    for(var i=0;i<N;i++) out[i]=simulate(cal);
+    rnd=save;
+    out.sort(function(a,b){return a-b;});
+    return {p10:percentile(out,0.10), p50:percentile(out,0.50), p90:percentile(out,0.90)};
+  }
+
+  function run(){
+    var cal=calibrate();
+    $('simu-calibOut').innerHTML = cal.note;
+    rnd = mulberry32(20260828);
+    var N=10000, out=new Array(N);
+    for(var i=0;i<N;i++) out[i]=simulate(cal);
+    out.sort(function(a,b){return a-b;});
+    var p10=percentile(out,0.10), p50=percentile(out,0.50), p90=percentile(out,0.90);
+    $('simu-rP10').textContent=minToHM(p10);
+    $('simu-rP50').textContent=minToHM(p50);
+    $('simu-rP90').textContent=minToHM(p90);
+    var pace=(p50/CCC.dist);
+    $('simu-paceOut').innerHTML=
+      'Allure moyenne P50 : <b style="color:var(--text,#e8e8e8)">'+Math.floor(pace)+':'+(Math.round((pace%1)*60)<10?'0':'')+Math.round((pace%1)*60)+' min/km</b>'+
+      ' (effort) · Vitesse ≈ <b style="color:var(--text,#e8e8e8)">'+(CCC.dist/(p50/60)).toFixed(2)+' km/h</b>.';
+    drawHist(out,p10,p50,p90);
+    verdict(p50,p90);
+    window.cccPrediction={p10:p10,p50:p50,p90:p90};
+    if(typeof window.__heroRefresh==='function'){ try{ window.__heroRefresh(); }catch(e){} }
+    $('simu-seedInfo').textContent='seed fixe · reproductible';
+  }
+
+  function verdict(p50,p90){
+    var el=$('simu-verdict'); var h='';
+    var pillOk='<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.5rem;font-weight:700;background:rgba(94,194,122,.15);color:#5ec27a">';
+    var pillWarn='<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.5rem;font-weight:700;background:rgba(232,160,32,.15);color:#e8a020">';
+    if(p50<=TARGET.hi && p50>=TARGET.lo){
+      h+=pillOk+'DANS LA CIBLE</span> P50 = <b>'+minToHM(p50)+'</b>, cohérent avec ton objectif 18-21h. ';
+    } else if(p50<TARGET.lo){
+      h+=pillOk+'AU-DESSUS DE LA CIBLE</span> Le modèle te voit à <b>'+minToHM(p50)+'</b>, plus rapide que ta fourchette. Prudence : peu de données, ne survends pas. ';
+    } else {
+      h+=pillWarn+'AU-DELÀ DE LA CIBLE</span> P50 = <b>'+minToHM(p50)+'</b>, au-dessus de 21h. La marge se gagne sur le D+ (renfo excentrique) et la gestion nuit/nutrition. ';
+    }
+    h+='9 fois sur 10 tu passes la ligne avant <b>'+minToHM(p90)+'</b> — large marge sur le cut-off (26h30). '+
+       'Encode plus de longues sorties D+ pour resserrer l\'intervalle.';
+    el.innerHTML=h;
+  }
+
+  function drawHist(data,p10,p50,p90){
+    var c=$('simu-hist'), ctx=c.getContext('2d');
+    var W=c.width, H=c.height; ctx.clearRect(0,0,W,H);
+    var min=data[0], max=data[data.length-1], bins=48, step=(max-min)/bins;
+    var counts=new Array(bins).fill(0);
+    data.forEach(function(v){ var b=Math.min(bins-1,Math.floor((v-min)/step)); counts[b]++; });
+    var mx=Math.max.apply(null,counts);
+    var pad=24;
+    for(var i=0;i<bins;i++){
+      var x=pad+(W-2*pad)*i/bins, w=(W-2*pad)/bins-1, hh=(H-pad)*(counts[i]/mx);
+      var center=min+(i+0.5)*step;
+      ctx.fillStyle = center<=p10?'#5ec27a' : center<=p90?'#a3e635' : '#e8a020';
+      ctx.globalAlpha=0.85; ctx.fillRect(x,H-pad-hh,w,hh);
+    }
+    ctx.globalAlpha=1;
+    [{v:p10,c:'#5ec27a'},{v:p50,c:'#ffffff'},{v:p90,c:'#e8a020'}].forEach(function(m){
+      var x=pad+(W-2*pad)*(m.v-min)/(max-min);
+      ctx.strokeStyle=m.c; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,6); ctx.lineTo(x,H-pad); ctx.stroke();
+      ctx.fillStyle=m.c; ctx.font='11px monospace'; ctx.fillText(minToHM(m.v),x-16,H-8);
+    });
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  function buildTable(){
+    var tb=document.querySelector('#simu-raceTable tbody'); tb.innerHTML='';
+    var inStyle='background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e8e8);border-radius:4px;padding:0.25rem 0.35rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;text-align:right';
+    RACES.forEach(function(r,idx){
+      var tr=document.createElement('tr');
+      tr.innerHTML =
+        '<td style="padding:0.3rem 0.3rem;border-bottom:1px solid var(--surface2,#1a1a1a)"><input type="text" data-i="'+idx+'" data-k="name" value="'+esc(r.name)+'" style="'+inStyle+';text-align:left;width:100%"></td>'+
+        '<td style="padding:0.3rem 0.3rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right"><input type="number" data-i="'+idx+'" data-k="dist" value="'+r.dist+'" step="0.1" style="'+inStyle+';width:52px"></td>'+
+        '<td style="padding:0.3rem 0.3rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right"><input type="number" data-i="'+idx+'" data-k="dplus" value="'+r.dplus+'" style="'+inStyle+';width:58px"></td>'+
+        '<td style="padding:0.3rem 0.3rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right"><input type="text" data-i="'+idx+'" data-k="hm" value="'+esc(r.hm)+'" placeholder="h:mm" style="'+inStyle+';width:48px"></td>'+
+        '<td style="padding:0.3rem 0.3rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right"><input type="checkbox" data-i="'+idx+'" data-k="use" '+(r.use?'checked':'')+' style="accent-color:var(--accent,#a3e635)"></td>';
+      tb.appendChild(tr);
+    });
+    tb.addEventListener('change', function(e){
+      var t=e.target, i=+t.getAttribute('data-i'), k=t.getAttribute('data-k'); if(k==null) return;
+      if(k==='use') RACES[i].use=t.checked;
+      else if(k==='dist'||k==='dplus') RACES[i][k]=parseFloat(t.value)||0;
+      else RACES[i][k]=t.value;
+      $('simu-calibOut').innerHTML=calibrate().note;
+    });
+  }
+
+  function bindSlider(id,labId,key,fmt){
+    var el=$(id), lab=$(labId);
+    function upd(){ P[key]=parseFloat(el.value); if(lab) lab.textContent=fmt?fmt(P[key]):P[key]; }
+    el.addEventListener('input',upd); return upd;
+  }
+  function syncSliders(){
+    $('simu-pVert').value=P.vert; $('simu-pFat').value=P.fat; $('simu-pNight').value=P.night;
+    $('simu-pFoot').value=P.foot; $('simu-pBonk').value=P.bonk; $('simu-pCv').value=P.cv;
+    $('simu-vertL').textContent=P.vert.toFixed(1); $('simu-fatL').textContent=P.fat.toFixed(2);
+    $('simu-nightL').textContent=P.night; $('simu-footL').textContent=P.foot;
+    $('simu-bonkL').textContent=P.bonk; $('simu-cvL').textContent=P.cv;
+  }
+
+  window.__simuInit = function(){
+    if(started) return; started=true;
+    buildTable();
+    bindSlider('simu-pVert','simu-vertL','vert',function(v){return v.toFixed(1);});
+    bindSlider('simu-pFat','simu-fatL','fat',function(v){return v.toFixed(2);});
+    bindSlider('simu-pNight','simu-nightL','night');
+    bindSlider('simu-pFoot','simu-footL','foot');
+    bindSlider('simu-pBonk','simu-bonkL','bonk');
+    bindSlider('simu-pCv','simu-cvL','cv');
+    syncSliders();
+    $('simu-calibOut').innerHTML=calibrate().note;
+    $('simu-run').addEventListener('click',run);
+    $('simu-reset').addEventListener('click',function(){ P=Object.assign({},DEFAULTS); syncSliders(); run(); });
+    run();
+  };
+
+  try { window.cccPrediction = computePrediction(); } catch(e){}
+  window.cccSim = {calibrate:calibrate, simulate:simulate, run:run, RACES:RACES, CCC:CCC};
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   ONGLET STRAVA — CTL/ATL/TSB, ACWR, usure chaussures.
+   Données live via /api/strava (backend Railway), token réutilisé
+   depuis garmin_url + garmin_token. Lecture seule.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var loaded = false, loading = false;
+
+  function cfg(){
+    return {
+      url: (localStorage.getItem('garmin_url') || '').replace(/\/+$/, ''),
+      token: localStorage.getItem('garmin_token') || ''
+    };
+  }
+  function setStatus(color, txt){
+    var d = $('strava-dot'), t = $('strava-statustxt');
+    if (d) d.style.background = color;
+    if (t) t.textContent = txt;
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fmtDur(min){ min = Math.round(min||0); var h = Math.floor(min/60), m = min%60; return h>0 ? h+'h'+(m<10?'0':'')+m : m+'min'; }
+  function sportTag(type){
+    var t = (type||'').toLowerCase();
+    if (t.indexOf('run')>=0 || t.indexOf('trail')>=0 || t.indexOf('hike')>=0 || t.indexOf('walk')>=0) return {c:'#a3e635', l:'Run'};
+    if (t.indexOf('ride')>=0 || t.indexOf('bike')>=0 || t.indexOf('cycl')>=0) return {c:'#60a5fa', l:'Vélo'};
+    return {c:'#f59e0b', l:type||'—'};
+  }
+
+  // Charge par activité : suffer_score Strava, sinon estimé (FC + D+).
+  function activityLoad(a){
+    if (a.suffer_score != null && a.suffer_score > 0) return a.suffer_score;
+    var min = a.moving_min || a.elapsed_min || 0, hr = a.avg_hr || 0, base;
+    if (hr > 0) { var inten = Math.max(0.4, Math.min(1.4, hr/155)); base = min*inten*0.9; }
+    else base = min*0.55;
+    base += (a.elev_gain_m||0)/100*4;
+    return Math.round(base);
+  }
+  function ewma(series, tc){
+    var k = 2/(tc+1), out = [], prev = 0;
+    for (var i=0;i<series.length;i++){ prev = series[i]*k + prev*(1-k); out.push(prev); }
+    return out;
+  }
+  function buildDaily(acts){
+    if (!acts.length) return {days:[], loads:[]};
+    var byDate = {}, minD = null;
+    for (var i=0;i<acts.length;i++){ var a = acts[i], d = a.date; if (!d) continue; byDate[d] = (byDate[d]||0) + activityLoad(a); if (!minD || d < minD) minD = d; }
+    var start = new Date(minD+'T00:00:00'), today = new Date(); today.setHours(0,0,0,0);
+    var days = [], loads = [];
+    for (var t = new Date(start); t <= today; t.setDate(t.getDate()+1)){ var key = t.toISOString().slice(0,10); days.push(key); loads.push(byDate[key]||0); }
+    return {days:days, loads:loads};
+  }
+  function avgLast(arr, d){ if (!arr.length) return 0; var s=0,c=0; for (var i=Math.max(0,arr.length-d);i<arr.length;i++){ s+=arr[i]; c++; } return c?s/c:0; }
+
+  function kpi(lab, val, sub, color){
+    return '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem 0.7rem">'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">'+lab+'</div>'+
+      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:1.5rem;line-height:1;margin:0.3rem 0 0.15rem;color:'+color+'">'+val+'</div>'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068)">'+sub+'</div></div>';
+  }
+
+  function render(cache){
+    var acts = (cache.activities||[]).slice();
+    acts.sort(function(a,b){ return (b.start_local||b.date||'').localeCompare(a.start_local||a.date||''); });
+    var asc = acts.slice().reverse();
+    var daily = buildDaily(asc);
+    var ctl = ewma(daily.loads, 42), atl = ewma(daily.loads, 7);
+    var tsb = ctl.map(function(c,i){ return c - atl[i]; });
+    var n = daily.loads.length;
+    var curCTL = n?ctl[n-1]:0, curATL = n?atl[n-1]:0, curTSB = n?tsb[n-1]:0;
+    var acute = avgLast(daily.loads,7), chronic = avgLast(daily.loads,28);
+    var acwr = chronic>0 ? acute/chronic : 0;
+    var wk = 0; for (var i=Math.max(0,daily.loads.length-7);i<daily.loads.length;i++) wk += daily.loads[i];
+
+    var acwrCol = acwr>1.5?'#ef4444':acwr>1.3?'#f59e0b':acwr<0.8?'#60a5fa':'#a3e635';
+    var acwrNote = acwr>1.5?'risque ↑↑':acwr>1.3?'attention':acwr<0.8?'sous-charge':'zone sûre';
+    var tsbCol = curTSB<-25?'#ef4444':curTSB<-10?'#f59e0b':curTSB>20?'#60a5fa':'#a3e635';
+    $('strava-kpis').innerHTML = [
+      kpi('CTL', Math.round(curCTL), 'forme fond', '#a3e635'),
+      kpi('ATL', Math.round(curATL), 'fatigue 7j', '#f59e0b'),
+      kpi('TSB', (curTSB>0?'+':'')+Math.round(curTSB), 'fraîcheur', tsbCol),
+      kpi('ACWR', acwr.toFixed(2), acwrNote, acwrCol),
+      kpi('Charge 7j', Math.round(wk), acts.length+' séances', 'var(--text,#e8e8e8)')
+    ].join('');
+
+    var pct = Math.max(0, Math.min(100, (curTSB+40)/80*100));
+    $('strava-tsbmark').style.left = pct+'%';
+    var tt;
+    if (curTSB<-25) tt = 'Dans le dur (surmenage). OK en bloc de charge, à éviter avant une échéance.';
+    else if (curTSB<-10) tt = 'Charge productive : tu construis. Zone d\'entraînement normale.';
+    else if (curTSB<=5) tt = 'Équilibre charge/récup — bon compromis progression / fraîcheur.';
+    else if (curTSB<=20) tt = 'Frais : idéal en fin d\'affûtage, quelques jours avant une course.';
+    else tt = 'Très frais / désentraînement possible si prolongé. Relance le volume.';
+    $('strava-tsbtext').textContent = tt;
+
+    drawChart(daily, ctl, atl, tsb);
+    renderShoes(cache.gear && cache.gear.shoes ? cache.gear.shoes : []);
+    renderActs(acts.slice(0,25));
+
+    window.cccForm = {ctl:curCTL, atl:curATL, tsb:curTSB, acwr:acwr, lastSync:cache.last_sync||null};
+    if (typeof window.__heroRefresh === 'function'){ try { window.__heroRefresh(); } catch(e){} }
+    $('strava-body').style.display = 'block';
+    var maj = cache.last_sync ? cache.last_sync.replace('T',' ').replace('Z',' UTC') : '?';
+    setStatus('#a3e635', acts.length+' activités · maj '+maj);
+  }
+
+  function renderShoes(shoes){
+    var el = $('strava-shoes');
+    if (!shoes.length){ el.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">Aucune chaussure liée dans Strava.</div>'; return; }
+    shoes = shoes.slice().sort(function(a,b){ return (b.distance_km||0)-(a.distance_km||0); });
+    var LIMIT = 700;
+    el.innerHTML = shoes.map(function(s){
+      var km = Math.round(s.distance_km||0), p = Math.min(100, km/LIMIT*100);
+      var col = p>90?'#ef4444':p>70?'#f59e0b':'#a3e635';
+      var lab = s.name + (s.retired?' (retirée)':'') + (s.primary?' ★':'');
+      return '<div style="margin-bottom:0.6rem"><div style="display:flex;justify-content:space-between;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.25rem"><span>'+esc(lab)+'</span><span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' / ~'+LIMIT+' km</span></div>'+
+        '<div style="height:7px;border-radius:4px;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);overflow:hidden"><div style="height:100%;width:'+p+'%;background:'+col+'"></div></div></div>';
+    }).join('') + '<div style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.3rem">Seuil indicatif ~700 km. Au-delà : amorti/drop dégradés → surveiller douleurs.</div>';
+  }
+
+  function renderActs(acts){
+    var el = $('strava-acts');
+    if (!acts.length){ el.innerHTML = '<tr><td style="color:var(--muted,#5e6068);padding:0.4rem">Aucune activité.</td></tr>'; return; }
+    var head = '<tr style="color:var(--muted,#5e6068);text-transform:uppercase;font-size:0.5rem;letter-spacing:0.04em"><th style="text-align:left;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">Date</th><th style="text-align:left;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">Séance</th><th style="text-align:right;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">Km</th><th style="text-align:right;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">D+</th><th style="text-align:right;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">Temps</th><th style="text-align:right;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">FC</th><th style="text-align:right;padding:0.3rem 0.4rem;border-bottom:1px solid var(--border,#242528)">Charge</th></tr>';
+    var rows = acts.map(function(a){
+      var tg = sportTag(a.type), load = activityLoad(a);
+      var est = (a.suffer_score==null||a.suffer_score<=0)?' *':'';
+      return '<tr><td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);white-space:nowrap">'+(a.date||'—')+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a)"><span style="color:'+tg.c+'">●</span> '+esc(a.name||'—')+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right;white-space:nowrap">'+(a.distance_km?a.distance_km.toFixed(1):'—')+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right;white-space:nowrap">'+(a.elev_gain_m?Math.round(a.elev_gain_m)+'m':'—')+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right;white-space:nowrap">'+fmtDur(a.moving_min)+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right;white-space:nowrap">'+(a.avg_hr?Math.round(a.avg_hr):'—')+'</td>'+
+        '<td style="padding:0.35rem 0.4rem;border-bottom:1px solid var(--surface2,#1a1a1a);text-align:right;white-space:nowrap">'+load+est+'</td></tr>';
+    }).join('');
+    el.innerHTML = head + rows;
+  }
+
+  function drawChart(daily, ctl, atl, tsb){
+    var cv = $('strava-chart'); if (!cv) return; var ctx = cv.getContext('2d');
+    var W = cv.width, H = cv.height, padL = 30, padR = 30, padB = 20, padT = 10;
+    ctx.clearRect(0,0,W,H);
+    var n = daily.loads.length;
+    if (n < 2){ ctx.fillStyle = '#5e6068'; ctx.font = "12px 'DM Mono'"; ctx.fillText('Pas assez de données.', padL, H/2); return; }
+    var pW = W-padL-padR, pH = H-padT-padB;
+    var maxLoad = Math.max.apply(null, daily.loads.concat(ctl, atl, [10]));
+    var minT = Math.min.apply(null, tsb.concat([0])), maxT = Math.max.apply(null, tsb.concat([0]));
+    var tR = Math.max(maxT-minT, 10);
+    var x = function(i){ return padL + (i/(n-1))*pW; };
+    var yL = function(v){ return padT + pH - (v/maxLoad)*pH; };
+    var yT = function(v){ return padT + pH - ((v-minT)/tR)*pH; };
+    ctx.strokeStyle = '#242528'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, padT+pH); ctx.lineTo(W-padR, padT+pH); ctx.stroke();
+    ctx.fillStyle = '#333'; var bw = Math.max(1, pW/n-1);
+    for (var i=0;i<n;i++){ if (daily.loads[i]<=0) continue; var bh = (daily.loads[i]/maxLoad)*pH; ctx.fillRect(x(i)-bw/2, padT+pH-bh, bw, bh); }
+    ctx.strokeStyle = '#3a3a3a'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(padL, yT(0)); ctx.lineTo(W-padR, yT(0)); ctx.stroke(); ctx.setLineDash([]);
+    function line(arr, yfn, col, w){ ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); for (var i=0;i<arr.length;i++){ var px = x(i), py = yfn(arr[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py); } ctx.stroke(); }
+    line(tsb, yT, '#60a5fa', 1.5); line(atl, yL, '#f59e0b', 2); line(ctl, yL, '#a3e635', 2.5);
+    ctx.fillStyle = '#5e6068'; ctx.font = "10px 'DM Mono'"; ctx.textAlign = 'center';
+    [0, Math.floor(n/2), n-1].forEach(function(i){ ctx.fillText(daily.days[i].slice(5), x(i), H-5); });
+    ctx.textAlign = 'left';
+  }
+
+  window.__stravaLoad = function(force){
+    var c = cfg();
+    if (!c.url || !c.token){ $('strava-nocfg').style.display = 'block'; $('strava-body').style.display = 'none'; setStatus('#5e6068', 'Backend non configuré.'); return; }
+    $('strava-nocfg').style.display = 'none';
+    if (loaded && !force) return;
+    if (loading) return;
+    loading = true;
+    setStatus('#f59e0b', force ? 'Resync Strava…' : 'Chargement…');
+    var ep = c.url + '/api/strava' + (force ? '?refresh=1' : '');
+    fetch(ep, { headers: { 'Authorization': 'Bearer ' + c.token } })
+      .then(function(r){
+        if (r.status === 401 || r.status === 403) throw new Error('Token refusé ('+r.status+').');
+        if (r.status === 404) throw new Error('Route /api/strava absente (backend à jour ?).');
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        return r.json();
+      })
+      .then(function(data){
+        var cache = data.strava_cache || data.cache || data;
+        if (!cache || !cache.activities) throw new Error('Réponse vide. Lance un resync.');
+        render(cache); loaded = true;
+      })
+      .catch(function(e){ setStatus('#ef4444', e.message || String(e)); })
+      .finally(function(){ loading = false; });
+  };
+
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document.body){ if (t.id === 'strava-refresh'){ window.__stravaLoad(true); return; } t = t.parentNode; }
+  });
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   COMMAND CENTER — hero consolidé en tête d'"Aujourd'hui".
+   Compte à rebours CCC + Forme (TSB, Strava) + Prédiction (P50, Simu).
+   Lit window.cccForm / window.cccPrediction ; rafraîchi via
+   window.__heroRefresh() appelé par les modules Strava/Simu.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  var CCC_DATE = new Date('2026-08-28T09:00:00');
+  function minToHM(v){ v=Math.round(v); var h=Math.floor(v/60), m=v%60; return h+'h'+(m<10?'0':'')+m; }
+  function daysToCCC(){ return Math.max(0, Math.ceil((CCC_DATE - new Date())/86400000)); }
+
+  function tile(dataTab, lab, val, sub, color){
+    var head = dataTab ? '<div data-tab="'+dataTab+'" style="cursor:pointer;' : '<div style="';
+    return head+'background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.7rem 0.6rem;text-align:center">'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:0.48rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">'+lab+'</div>'+
+      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:1.55rem;line-height:1.05;margin:0.25rem 0 0.1rem;color:'+color+'">'+val+'</div>'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:0.48rem;color:var(--muted,#5e6068)">'+sub+'</div></div>';
+  }
+
+  function render(){
+    var el = document.getElementById('today-hero-block'); if(!el) return;
+    var d = daysToCCC();
+    var f = window.cccForm, p = window.cccPrediction;
+    var formVal='—', formSub='connecte Strava', formCol='var(--muted,#5e6068)';
+    if(f){
+      var t=Math.round(f.tsb);
+      formVal=(t>0?'+':'')+t;
+      formCol = t<-25?'#ef4444' : t<-10?'#f59e0b' : t>20?'#60a5fa' : '#a3e635';
+      formSub = t<-25?'surmenage' : t<-10?'charge' : t>20?'frais' : 'optimal';
+    }
+    var predVal='—', predSub='P50 · ouvre Simu';
+    if(p){ predVal=minToHM(p.p50); predSub='P50 · médian'; }
+    el.innerHTML =
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem">'+
+        tile(null, 'Échéance CCC', 'J-'+d, '28 août 2026', 'var(--accent,#a3e635)')+
+        tile('strava', 'Forme (TSB)', formVal, formSub, formCol)+
+        tile('simu', 'Prédiction', predVal, predSub, 'var(--text,#e8e8e8)')+
+      '</div>';
+  }
+  window.__heroRefresh = render;
+
+  function boot(){
+    render();
+    try{
+      if(!window.cccForm && localStorage.getItem('garmin_url') && localStorage.getItem('garmin_token') && typeof window.__stravaLoad==='function'){
+        window.__stravaLoad(false);
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    BIBLIOTHÈQUE D'ICÔNES SVG MONOCHROMES (trait fin, currentColor)
@@ -1701,6 +2230,9 @@ function switchTab(name) {
   var n = document.getElementById('sn-' + name);
   if (p) p.classList.add('active');
   if (n) n.classList.add('active');
+  if (name === 'strava' && typeof window.__stravaLoad === 'function') { try { window.__stravaLoad(false); } catch(e){} }
+  if (name === 'simu' && typeof window.__simuInit === 'function') { try { window.__simuInit(); } catch(e){} }
+  if (name === 'today' && typeof window.__heroRefresh === 'function') { try { window.__heroRefresh(); } catch(e){} }
 }
 
 // U2 — DISCUTER : ouvre le Coach pré-chargé avec une question (cohérente, car le coach lit le même verdict).
