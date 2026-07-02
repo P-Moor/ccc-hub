@@ -17,7 +17,7 @@
 
 :root {
   --bg:#0f0f10; --surface:#16171a; --surface2:#1c1d21; --surface3:#202126;
-  --border:#242528; --border2:#2e2f33; --text:#e8e9ea; --muted:#5e6068;
+  --border:#242528; --border2:#2e2f33; --text:#e8e9ea; --muted:#868992;
   --blue:#5ba3e8; --blue-bg:#0d2035;
   --green:#5ec27a; --green-bg:#0d2010;
   --orange:#e8a020; --orange-bg:#2a1a00;
@@ -61,6 +61,15 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 .sn:hover{background:var(--surface2);color:var(--text)}
 .sn.active{background:var(--accent-dim);color:var(--accent)}
 .sn.active .sn-ico svg{stroke:var(--accent)}
+.sn-plusbtn{display:none}
+.plus-list{display:flex;flex-direction:column;gap:0.55rem}
+.plus-row{display:flex;align-items:center;gap:0.85rem;width:100%;min-height:56px;padding:0.7rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;color:var(--text);transition:background .12s}
+.plus-row:hover,.plus-row:active{background:var(--surface2)}
+.plus-ico{flex-shrink:0;display:flex;color:var(--accent)}
+.plus-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.plus-t{font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;color:var(--text)}
+.plus-s{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)}
+.plus-arr{flex-shrink:0;font-size:1.3rem;color:var(--muted);line-height:1}
 .sn-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .sn-ico svg{width:18px;height:18px;stroke:currentColor}
 .sn-lbl{font-size:0.73rem;font-family:'Space Grotesk',sans-serif;font-weight:400}
@@ -404,13 +413,16 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     font-size: 0.5rem;
   }
   .sn-lbl {
-    display: block !important; font-size: 0.5rem !important;
+    display: block !important; font-size: 0.62rem !important;
     white-space: nowrap; letter-spacing: 0;
   }
   .sn-ico { width: 22px !important; height: 22px !important; }
   .sn-ico svg { width: 22px !important; height: 22px !important; }
   .sn.active { background: transparent !important; }
   .sn.active .sn-lbl { color: var(--accent); }
+  /* Bottom-bar mobile : 5 primaires + Plus. Les secondaires passent dans l'onglet Plus. */
+  .sn-more { display: none !important; }
+  .sn-plusbtn { display: flex !important; }
 
   /* Le contenu principal n'a plus de marge gauche, mais une marge basse pour la barre */
   .main { margin-left: 0 !important; padding-bottom: 70px; }
@@ -1081,6 +1093,159 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 @keyframes adFade{from{opacity:0}to{opacity:1}}
 
 </style>
+<style id="ccc-ds-v2">
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+/* ══════════════════════════════════════════════════════════════
+   CCC · TOPO/FINCASH — Design System v3 (couche de surcharge)
+   Noir pur, lime vif dosé, halos, carrés arrondis, Satoshi.
+   Touche trail : courbes de niveau + accents cartographiques.
+   Mode clair préservé.
+   ══════════════════════════════════════════════════════════════ */
+
+/* — Palette (dark uniquement ; light intouché) — */
+html:not([data-theme="light"]){
+  --bg:#0a0a0a;
+  --surface:#101010;
+  --surface2:#161616;
+  --surface3:#1e1e1f;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --text:#f5f5f5;
+  --muted:#9a9a9d;
+  --accent:#c5f24e;
+  --accent-2:#b4e830;
+  --accent-ink:#141f04;
+  --accent-dim:rgba(197,242,78,0.10);
+  --accent-mid:rgba(197,242,78,0.30);
+  --accent-glow:rgba(197,242,78,0.45);
+  --radius:20px;
+  --glow:0 0 22px rgba(197,242,78,0.45);
+  --shadow:0 10px 30px -20px rgba(0,0,0,0.85);
+  --shadow-lg:0 26px 60px -28px rgba(0,0,0,0.92);
+}
+
+/* — Police globale : Satoshi — */
+html:not([data-theme="light"]) body,
+html:not([data-theme="light"]) button,
+html:not([data-theme="light"]) input,
+html:not([data-theme="light"]) select,
+html:not([data-theme="light"]) textarea{
+  font-family:'Satoshi','Space Grotesk',-apple-system,sans-serif !important;
+  letter-spacing:-0.015em;
+}
+
+/* — Atmosphère : noir pur + courbes de niveau (carto) — */
+body{ background:var(--bg) !important; background-attachment:fixed; }
+main.main{ position:relative; }
+main.main::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.6;
+  background:
+    repeating-radial-gradient(circle at 88% 3%, transparent 0 40px, rgba(197,242,78,0.035) 40px 41px, transparent 41px 82px),
+    repeating-radial-gradient(circle at 5% 96%, transparent 0 48px, rgba(255,255,255,0.022) 48px 49px, transparent 49px 98px);
+}
+.panel > .inner{ position:relative; z-index:1; }
+.lc-time,.sbw-val,.cc-m__val,.th-num,.th-title{ font-variant-numeric:tabular-nums; }
+
+/* — Titre de page : Satoshi gras + tick lime lumineux — */
+.ptitle{ font-family:'Satoshi',sans-serif !important; font-weight:700; font-size:1.6rem; letter-spacing:-0.025em; padding-bottom:0.9rem; margin-bottom:1.4rem; }
+.sb-brand-name,.plus-t,.th-title{ font-family:'Satoshi',sans-serif !important; font-weight:700; letter-spacing:-0.02em; }
+.ptitle::before{
+  content:""; align-self:center; width:3px; height:1.05em; border-radius:2px; flex:0 0 auto;
+  background:var(--accent); box-shadow:var(--glow);
+}
+.sec{ display:flex; align-items:center; gap:0.6rem; }
+.sec::before{ content:""; flex:0 0 auto; width:14px; height:1px; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); }
+
+/* — Sidebar (desktop) — */
+.sidebar{ background:linear-gradient(180deg, var(--surface), var(--bg)); border-right:1px solid var(--border) !important; }
+.sn.active{ color:var(--accent) !important; }
+.sn.active::after{ content:""; position:absolute; left:0; top:20%; bottom:20%; width:2px; border-radius:0 2px 2px 0; background:var(--accent); box-shadow:var(--glow); }
+.sn.active .sn-ico svg{ filter:drop-shadow(0 0 6px var(--accent-glow)); }
+
+/* — Cartes : panneaux arrondis fincash — */
+.today-hero,.card,.forme-block,.gauges-card,#garmin-activities-card,#garmin-gauges-card,#nutri-hydra-card,.jd-card,.plus-row{
+  border-radius:var(--radius) !important;
+  box-shadow:var(--shadow);
+  background:var(--surface) !important;
+  border:1px solid var(--border) !important;
+}
+.card{ transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.card:hover{ transform:translateY(-2px); border-color:var(--border2); box-shadow:var(--shadow-lg); }
+.more-block>summary{ border-radius:12px; padding-left:0.4rem; }
+.more-block>summary:hover{ background:var(--surface2); }
+
+/* — COMMAND CENTER : compte-à-rebours fincash + touche olive/carto — */
+.cc-hero{
+  position:relative; margin-bottom:1.4rem; padding:1.35rem 1.35rem 1.25rem;
+  border:1px solid var(--accent-2); border-radius:var(--radius); overflow:hidden;
+  background:
+    repeating-radial-gradient(circle at 50% 128%, transparent 0 26px, rgba(197,242,78,0.07) 26px 27px, transparent 27px 54px),
+    radial-gradient(130% 130% at 82% -12%, rgba(120,150,40,0.42), transparent 55%),
+    linear-gradient(180deg, #141a0b, var(--surface));
+  box-shadow:var(--shadow-lg);
+}
+.cc-hero__head{ display:flex; align-items:baseline; justify-content:space-between; gap:0.6rem; margin-bottom:0.4rem; }
+.cc-hero__kicker{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); white-space:nowrap; }
+.cc-hero__route{ font-family:'Satoshi',sans-serif; font-size:0.62rem; color:var(--muted); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.cc-hero__big{ display:flex; align-items:flex-end; gap:1rem; padding:0.2rem 0 0.9rem; border-bottom:1px solid var(--border); margin-bottom:0.9rem; }
+.cc-hero__day{ display:flex; align-items:baseline; line-height:0.78; }
+.cc-hero__j{ font-family:'Satoshi',sans-serif; font-weight:500; font-size:1.9rem; color:var(--muted); margin-right:0.15rem; }
+.cc-hero__num{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:5rem; line-height:0.76; letter-spacing:-0.045em; color:var(--text); font-variant-numeric:tabular-nums; }
+.cc-hero__date{ display:flex; flex-direction:column; gap:0.2rem; padding-bottom:0.45rem; }
+.cc-hero__d1{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:1rem; color:var(--accent); }
+.cc-hero__d2{ font-family:'Satoshi',sans-serif; font-size:0.62rem; color:var(--muted); }
+.cc-metrics{ display:grid; grid-template-columns:1fr 1fr; gap:0.55rem; }
+.cc-m{
+  -webkit-appearance:none; appearance:none; cursor:pointer; color:var(--text); text-align:left;
+  display:grid; grid-template-columns:1fr auto; grid-template-areas:"lab go" "val go" "sub go";
+  align-items:center; column-gap:0.4rem;
+  padding:0.75rem 0.85rem; border:1px solid var(--border); border-radius:15px;
+  background:rgba(0,0,0,0.3); transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.cc-m:hover{ transform:translateY(-2px); border-color:var(--accent-mid); box-shadow:0 12px 30px -20px var(--accent-glow); }
+.cc-m:active{ transform:translateY(0); }
+.cc-m__lab{ grid-area:lab; font-family:'Satoshi',sans-serif; font-weight:500; font-size:0.6rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
+.cc-m__val{ grid-area:val; font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.7rem; line-height:1.05; letter-spacing:-0.03em; margin-top:0.15rem; }
+.cc-m__sub{ grid-area:sub; font-family:'Satoshi',sans-serif; font-size:0.6rem; color:var(--muted); }
+.cc-m__go{ grid-area:go; font-size:1rem; color:var(--muted); opacity:0.5; transition:transform .16s, color .16s, opacity .16s; }
+.cc-m:hover .cc-m__go{ transform:translateX(3px); color:var(--accent); opacity:1; }
+
+/* — Boutons & réglages — */
+.forme-cfg-btn{ border-radius:999px; transition:all .15s ease; }
+.forme-cfg-btn:hover{ box-shadow:0 0 0 1px var(--accent-mid); }
+
+/* — Sliders — */
+input[type=range]{ -webkit-appearance:none; appearance:none; height:4px; border-radius:3px; background:var(--surface3); }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--accent); border:none; box-shadow:var(--glow); cursor:pointer; }
+input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:var(--accent); border:none; box-shadow:var(--glow); cursor:pointer; }
+input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent-mid) !important; box-shadow:0 0 0 3px var(--accent-dim); }
+
+/* — Menu Plus : badges lime lumineux — */
+.plus-row:hover,.plus-row:active{ border-color:var(--accent-mid) !important; transform:translateY(-1px); }
+.plus-ico{ width:42px; height:42px; border-radius:13px; align-items:center; justify-content:center; background:var(--accent); box-shadow:var(--glow); }
+.plus-ico svg{ stroke:var(--accent-ink) !important; }
+
+/* — Bottom-bar mobile : barre flottante arrondie, item actif = pilule lime — */
+@media (max-width:768px){
+  .sidebar{
+    left:10px !important; right:10px !important; width:auto !important;
+    bottom:calc(8px + env(safe-area-inset-bottom,0)) !important;
+    border-radius:26px !important; border:1px solid var(--border2) !important;
+    background:rgba(16,16,16,0.85) !important;
+    -webkit-backdrop-filter:saturate(160%) blur(20px); backdrop-filter:saturate(160%) blur(20px);
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.95);
+    padding:6px !important;
+  }
+  .sn{ border-radius:999px !important; }
+  .sn.active{ background:var(--accent) !important; color:var(--accent-ink) !important; box-shadow:var(--glow) !important; }
+  .sn.active::after{ display:none; }
+  .sn.active .sn-ico svg{ filter:none; stroke:var(--accent-ink) !important; }
+  .sn.active .sn-lbl{ color:var(--accent-ink) !important; }
+  .cc-hero__num{ font-size:4.4rem; }
+  .cc-m__val{ font-size:1.5rem; }
+  .ptitle{ font-size:1.35rem !important; }
+}
+</style>
 </head>
 <body>
 <!-- SIDEBAR -->
@@ -1101,11 +1266,12 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     <button class="sn active" id="sn-today"     data-tab="today"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="3.5"/><line x1="10" y1="1" x2="10" y2="5.5"/><line x1="10" y1="14.5" x2="10" y2="19"/><line x1="1" y1="10" x2="5.5" y2="10"/><line x1="14.5" y1="10" x2="19" y2="10"/></svg></span><span class="sn-lbl">Aujourd'hui</span><span class="sn-bdg" id="bdg-today"></span></button>
     <button class="sn" id="sn-plan"       data-tab="plan"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,17 7,7 11,11 15,5 19,17"/><line x1="1" y1="17" x2="19" y2="17"/></svg></span><span class="sn-lbl">Plan</span><span class="sn-bdg" id="bdg-plan"></span></button>
     <button class="sn" id="sn-nutrition"  data-tab="nutrition"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2 C7 2 5 5 5 9 C5 11.2 6.8 13 9 13 L9 18"/><path d="M11 2 L11 7 L13 7 L13 2"/><path d="M11 7 C11 9.2 12.8 11 15 11 L15 18"/><line x1="11" y1="11" x2="13" y2="11"/></svg></span><span class="sn-lbl">Nutrition</span></button>
-    <button class="sn" id="sn-renfo"      data-tab="renfo"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="4" y2="10"/><rect x="4" y="7" width="2" height="6" rx="1"/><line x1="6" y1="10" x2="14" y2="10"/><rect x="14" y="7" width="2" height="6" rx="1"/><line x1="16" y1="10" x2="19" y2="10"/><rect x="3" y="8.5" width="1" height="3" rx="0.5"/><rect x="16" y="8.5" width="1" height="3" rx="0.5"/></svg></span><span class="sn-lbl">Renfo</span></button>
+    <button class="sn sn-more" id="sn-renfo"      data-tab="renfo"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="4" y2="10"/><rect x="4" y="7" width="2" height="6" rx="1"/><line x1="6" y1="10" x2="14" y2="10"/><rect x="14" y="7" width="2" height="6" rx="1"/><line x1="16" y1="10" x2="19" y2="10"/><rect x="3" y="8.5" width="1" height="3" rx="0.5"/><rect x="16" y="8.5" width="1" height="3" rx="0.5"/></svg></span><span class="sn-lbl">Renfo</span></button>
     <button class="sn" id="sn-coach"      data-tab="coach"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/><circle cx="7" cy="8.5" r="0.8" fill="currentColor"/><circle cx="10" cy="8.5" r="0.8" fill="currentColor"/><circle cx="13" cy="8.5" r="0.8" fill="currentColor"/></svg></span><span class="sn-lbl">Coach</span></button>
-    <button class="sn" id="sn-simu"       data-tab="simu"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="17" x2="18" y2="17"/><rect x="3" y="11" width="2.5" height="6"/><rect x="7" y="7" width="2.5" height="10"/><rect x="11" y="4" width="2.5" height="13"/><rect x="15" y="9" width="2.5" height="8"/></svg></span><span class="sn-lbl">Simu</span></button>
+    <button class="sn sn-more" id="sn-simu"       data-tab="simu"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="17" x2="18" y2="17"/><rect x="3" y="11" width="2.5" height="6"/><rect x="7" y="7" width="2.5" height="10"/><rect x="11" y="4" width="2.5" height="13"/><rect x="15" y="9" width="2.5" height="8"/></svg></span><span class="sn-lbl">Simu</span></button>
     <button class="sn" id="sn-strava"     data-tab="strava"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,15 5,15 7.5,6 11,17 13,11 15,11"/><polyline points="15,11 16,8 18.5,8"/></svg></span><span class="sn-lbl">Strava</span></button>
-    <button class="sn" id="sn-settings"   data-tab="settings"><span class="sn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="sn-lbl">Paramètres</span></button>
+    <button class="sn sn-more" id="sn-settings"   data-tab="settings"><span class="sn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="sn-lbl">Paramètres</span></button>
+    <button class="sn sn-plusbtn" id="sn-plus" data-tab="plus"><span class="sn-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="4" r="1.4"/><circle cx="10" cy="4" r="1.4"/><circle cx="16" cy="4" r="1.4"/><circle cx="4" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="16" cy="10" r="1.4"/><circle cx="4" cy="16" r="1.4"/><circle cx="10" cy="16" r="1.4"/><circle cx="16" cy="16" r="1.4"/></svg></span><span class="sn-lbl">Plus</span></button>
   </nav>
   <div class="sb-foot">
     <button id="theme-toggle" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:0.5rem;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;margin-bottom:0.6rem;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:all .15s">
@@ -1122,8 +1288,11 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 <div class="panel active" id="panel-today"><div class="inner">
   <div class="ptitle">Aujourd'hui</div>
   <div id="fil-du-jour"></div>
-  <div id="feel-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1rem">
-    <div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem">Ressenti du jour</div>
+  <div id="today-hero-block"></div>
+  <div id="week-synth"></div>
+  <details class="more-block"><summary><span class="more-chevron"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="5,8 10,13 15,8"/></svg></span><span>Ressenti du jour</span><span class="more-line"></span></summary>
+  <div class="more-inner">
+  <div id="feel-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.8rem 1rem;margin-bottom:0">
     <div style="margin-bottom:0.6rem">
       <div style="display:flex;justify-content:space-between;font-size:0.74rem;color:var(--text,#e8e9ea);margin-bottom:0.15rem"><span>Effort perçu (RPE)</span><span id="feel-rpe-val" style="font-family:DM Mono,monospace;color:var(--accent,#a3e635)">0/10</span></div>
       <input id="feel-rpe" type="range" min="0" max="10" step="1" value="0" style="width:100%;accent-color:var(--accent,#a3e635)">
@@ -1139,8 +1308,8 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       </select>
     </div>
   </div>
-  <div id="week-synth"></div>
-  <div id="today-hero-block"></div>
+  </div>
+  </details>
 
   <div class="forme-block" id="forme-block">
     <div class="forme-head">
@@ -1188,6 +1357,17 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
       <div id="mini-cal-block"></div>
     </div>
   </details>
+</div></div>
+
+<!-- PLUS (menu secondaire mobile) -->
+<div class="panel" id="panel-plus"><div class="inner">
+  <div class="ptitle">Plus</div>
+  <div class="plus-list">
+    <button class="plus-row" data-tab="simu"><span class="plus-ico"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="17" x2="18" y2="17"/><rect x="3" y="11" width="2.5" height="6"/><rect x="7" y="7" width="2.5" height="10"/><rect x="11" y="4" width="2.5" height="13"/><rect x="15" y="9" width="2.5" height="8"/></svg></span><span class="plus-txt"><span class="plus-t">Simu</span><span class="plus-s">Prédiction Monte-Carlo</span></span><span class="plus-arr">›</span></button>
+    <button class="plus-row" data-tab="renfo"><span class="plus-ico"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="4" y2="10"/><rect x="4" y="7" width="2" height="6" rx="1"/><line x1="6" y1="10" x2="14" y2="10"/><rect x="14" y="7" width="2" height="6" rx="1"/><line x1="16" y1="10" x2="19" y2="10"/></svg></span><span class="plus-txt"><span class="plus-t">Renfo</span><span class="plus-s">Renforcement musculaire</span></span><span class="plus-arr">›</span></button>
+    <button class="plus-row" data-tab="journal"><span class="plus-ico"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="12" height="16" rx="1.5"/><line x1="7" y1="6" x2="13" y2="6"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="14" x2="11" y2="14"/></svg></span><span class="plus-txt"><span class="plus-t">Journal</span><span class="plus-s">Historique repas & ressenti</span></span><span class="plus-arr">›</span></button>
+    <button class="plus-row" data-tab="settings"><span class="plus-ico"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M10 1.5 V4 M10 16 V18.5 M1.5 10 H4 M16 10 H18.5 M3.8 3.8 L5.6 5.6 M14.4 14.4 L16.2 16.2 M16.2 3.8 L14.4 5.6 M5.6 14.4 L3.8 16.2"/></svg></span><span class="plus-txt"><span class="plus-t">Paramètres</span><span class="plus-s">Garmin, données, thème</span></span><span class="plus-arr">›</span></button>
+  </div>
 </div></div>
 
 <!-- PLAN -->
@@ -1966,12 +2146,12 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
   function minToHM(v){ v=Math.round(v); var h=Math.floor(v/60), m=v%60; return h+'h'+(m<10?'0':'')+m; }
   function daysToCCC(){ return Math.max(0, Math.ceil((CCC_DATE - new Date())/86400000)); }
 
-  function tile(dataTab, lab, val, sub, color){
-    var head = dataTab ? '<div data-tab="'+dataTab+'" style="cursor:pointer;' : '<div style="';
-    return head+'background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:10px;padding:0.7rem 0.6rem;text-align:center">'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:0.48rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">'+lab+'</div>'+
-      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:1.55rem;line-height:1.05;margin:0.25rem 0 0.1rem;color:'+color+'">'+val+'</div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:0.48rem;color:var(--muted,#5e6068)">'+sub+'</div></div>';
+  function metric(dataTab, lab, val, sub, color){
+    return '<button class="cc-m" data-tab="'+dataTab+'">'+
+      '<span class="cc-m__lab">'+lab+'</span>'+
+      '<span class="cc-m__val" style="color:'+color+'">'+val+'</span>'+
+      '<span class="cc-m__sub">'+sub+'</span>'+
+      '<span class="cc-m__go">→</span></button>';
   }
 
   function render(){
@@ -1988,10 +2168,19 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
     var predVal='—', predSub='P50 · ouvre Simu';
     if(p){ predVal=minToHM(p.p50); predSub='P50 · médian'; }
     el.innerHTML =
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem">'+
-        tile(null, 'Échéance CCC', 'J-'+d, '28 août 2026', 'var(--accent,#a3e635)')+
-        tile('strava', 'Forme (TSB)', formVal, formSub, formCol)+
-        tile('simu', 'Prédiction', predVal, predSub, 'var(--text,#e8e8e8)')+
+      '<div class="cc-hero">'+
+        '<div class="cc-hero__head">'+
+          '<span class="cc-hero__kicker">Cockpit — CCC by UTMB</span>'+
+          '<span class="cc-hero__route">Courmayeur → Champex → Chamonix</span>'+
+        '</div>'+
+        '<div class="cc-hero__big">'+
+          '<div class="cc-hero__day"><span class="cc-hero__j">J</span><span class="cc-hero__num">−'+d+'</span></div>'+
+          '<div class="cc-hero__date"><span class="cc-hero__d1">28 août 2026</span><span class="cc-hero__d2">101 km · 6050 m D+</span></div>'+
+        '</div>'+
+        '<div class="cc-metrics">'+
+          metric('strava', 'Forme · TSB', formVal, formSub, formCol)+
+          metric('simu', 'Prédiction · P50', predVal, predSub, 'var(--text,#e8e8e8)')+
+        '</div>'+
       '</div>';
   }
   window.__heroRefresh = render;
