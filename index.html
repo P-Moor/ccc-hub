@@ -1094,7 +1094,7 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 </style>
 <style id="ccc-ds-v2">
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700,900&display=swap');
 /* ══════════════════════════════════════════════════════════════
    CCC · TOPO/FINCASH — Design System v3 (couche de surcharge)
    Noir pur, lime vif dosé, halos, carrés arrondis, Satoshi.
@@ -1104,45 +1104,71 @@ body{font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:400;backgr
 
 /* — Palette (dark uniquement ; light intouché) — */
 html:not([data-theme="light"]){
-  --bg:#0a0a0a;
-  --surface:#101010;
-  --surface2:#161616;
-  --surface3:#1e1e1f;
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.13);
-  --text:#f5f5f5;
-  --muted:#9a9a9d;
+  --bg:#06070a;
+  --surface:#0f1216;
+  --surface2:#161a20;
+  --surface3:#1e232b;
+  --glass:rgba(255,255,255,0.045);
+  --glass2:rgba(255,255,255,0.075);
+  --border:rgba(255,255,255,0.09);
+  --border2:rgba(255,255,255,0.16);
+  --edge-hi:rgba(255,255,255,0.28);
+  --text:#f3f5f8;
+  --muted:#8b93a4;
+  --dim:#5b6273;
   --accent:#c5f24e;
   --accent-2:#b4e830;
-  --accent-ink:#141f04;
+  --accent-ink:#131c05;
+  --cyan:#5eead4;
+  --violet:#a78bfa;
   --accent-dim:rgba(197,242,78,0.10);
   --accent-mid:rgba(197,242,78,0.30);
   --accent-glow:rgba(197,242,78,0.45);
-  --radius:20px;
-  --glow:0 0 22px rgba(197,242,78,0.45);
-  --shadow:0 10px 30px -20px rgba(0,0,0,0.85);
-  --shadow-lg:0 26px 60px -28px rgba(0,0,0,0.92);
+  --radius:22px;
+  --glow:0 0 26px rgba(197,242,78,0.38);
+  --shadow:0 20px 50px -30px rgba(0,0,0,0.9);
+  --shadow-lg:0 30px 70px -30px rgba(0,0,0,0.92);
 }
 
-/* — Police globale : Satoshi — */
+/* — Police corps : Satoshi ; interlettrage aéré — */
 html:not([data-theme="light"]) body,
 html:not([data-theme="light"]) button,
 html:not([data-theme="light"]) input,
 html:not([data-theme="light"]) select,
 html:not([data-theme="light"]) textarea{
   font-family:'Satoshi','Space Grotesk',-apple-system,sans-serif !important;
-  letter-spacing:-0.015em;
+  letter-spacing:0.005em;
+}
+/* — Titres & gros chiffres : Clash Display — */
+html:not([data-theme="light"]) .ptitle,
+html:not([data-theme="light"]) .sb-brand-name,
+html:not([data-theme="light"]) .plus-t,
+html:not([data-theme="light"]) .th-title,
+html:not([data-theme="light"]) .cc-num,
+html:not([data-theme="light"]) .cc-m__val{
+  font-family:'Clash Display','Satoshi',sans-serif !important; letter-spacing:-0.01em;
 }
 
-/* — Atmosphère : noir pur + courbes de niveau (carto) — */
-body{ background:var(--bg) !important; background-attachment:fixed; }
-main.main{ position:relative; }
-main.main::before{
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.6;
-  background:
-    repeating-radial-gradient(circle at 88% 3%, transparent 0 40px, rgba(197,242,78,0.035) 40px 41px, transparent 41px 82px),
-    repeating-radial-gradient(circle at 5% 96%, transparent 0 48px, rgba(255,255,255,0.022) 48px 49px, transparent 49px 98px);
-}
+/* — Fond génératif : verre liquide sur topographie vivante — */
+html:not([data-theme="light"]) body{ background:var(--bg) !important; }
+html:not([data-theme="light"]) main.main{ background:transparent !important; }
+main.main::before{ content:none !important; }   /* neutralise l'ancien contour */
+#ccfield{ position:fixed; inset:0; z-index:0; width:100%; height:100%; display:block; pointer-events:none; }
+.cc-aurora{ position:fixed; inset:-25% -12%; z-index:0; pointer-events:none; filter:blur(70px); opacity:0.5; }
+.cc-aurora b{ position:absolute; display:block; border-radius:50%; mix-blend-mode:screen; animation:ccdrift 26s ease-in-out infinite alternate; }
+.cc-aurora .a1{ width:60vw; height:60vw; left:-8vw; top:-14vh; background:radial-gradient(circle,rgba(94,234,212,0.5),transparent 65%); }
+.cc-aurora .a2{ width:55vw; height:55vw; right:-12vw; top:6vh; background:radial-gradient(circle,rgba(197,242,78,0.4),transparent 62%); animation-delay:-8s; }
+.cc-aurora .a3{ width:70vw; height:70vw; left:10vw; bottom:-28vh; background:radial-gradient(circle,rgba(167,139,250,0.34),transparent 65%); animation-delay:-15s; }
+@keyframes ccdrift{ 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(4vw,3vh) scale(1.12)} 100%{transform:translate(-3vw,-2vh) scale(0.96)} }
+.cc-grain{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.cc-vignette{ position:fixed; inset:0; z-index:0; pointer-events:none; background:radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(0,0,0,0.55)); }
+html[data-theme="light"] #ccfield,
+html[data-theme="light"] .cc-aurora,
+html[data-theme="light"] .cc-grain,
+html[data-theme="light"] .cc-vignette{ display:none !important; }
+/* contenu au-dessus du fond */
+.sidebar, main.main{ position:relative; z-index:2; }
 .panel > .inner{ position:relative; z-index:1; }
 .lc-time,.sbw-val,.cc-m__val,.th-num,.th-title{ font-variant-numeric:tabular-nums; }
 
@@ -1162,51 +1188,70 @@ main.main::before{
 .sn.active::after{ content:""; position:absolute; left:0; top:20%; bottom:20%; width:2px; border-radius:0 2px 2px 0; background:var(--accent); box-shadow:var(--glow); }
 .sn.active .sn-ico svg{ filter:drop-shadow(0 0 6px var(--accent-glow)); }
 
-/* — Cartes : panneaux arrondis fincash — */
-.today-hero,.card,.forme-block,.gauges-card,#garmin-activities-card,#garmin-gauges-card,#nutri-hydra-card,.jd-card,.plus-row{
+/* — Cartes : verre liquide (dark) — */
+html:not([data-theme="light"]) .today-hero,
+html:not([data-theme="light"]) .card,
+html:not([data-theme="light"]) .forme-block,
+html:not([data-theme="light"]) .gauges-card,
+html:not([data-theme="light"]) #garmin-activities-card,
+html:not([data-theme="light"]) #garmin-gauges-card,
+html:not([data-theme="light"]) #nutri-hydra-card,
+html:not([data-theme="light"]) .jd-card,
+html:not([data-theme="light"]) .plus-row{
   border-radius:var(--radius) !important;
-  box-shadow:var(--shadow);
-  background:var(--surface) !important;
+  background:linear-gradient(180deg, var(--glass2), var(--glass)) !important;
   border:1px solid var(--border) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5); backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:var(--shadow), inset 0 1px 0 var(--edge-hi);
 }
-.card{ transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
-.card:hover{ transform:translateY(-2px); border-color:var(--border2); box-shadow:var(--shadow-lg); }
+.card{ transition:transform .18s cubic-bezier(.2,.8,.2,1), border-color .18s ease, box-shadow .18s ease; }
+html:not([data-theme="light"]) .card:hover{ transform:translateY(-3px); border-color:var(--border2); box-shadow:var(--shadow-lg), inset 0 1px 0 var(--edge-hi); }
 .more-block>summary{ border-radius:12px; padding-left:0.4rem; }
-.more-block>summary:hover{ background:var(--surface2); }
+html:not([data-theme="light"]) .more-block>summary:hover{ background:var(--glass); }
 
-/* — COMMAND CENTER : compte-à-rebours fincash + touche olive/carto — */
+/* — COMMAND CENTER : hero verre + filet lime + profil d'altitude — */
 .cc-hero{
-  position:relative; margin-bottom:1.4rem; padding:1.35rem 1.35rem 1.25rem;
-  border:1px solid var(--accent-2); border-radius:var(--radius); overflow:hidden;
+  position:relative; margin-bottom:1.4rem; padding:1.4rem 1.35rem 1.3rem;
+  border:1px solid var(--border2); border-radius:var(--radius); overflow:hidden;
   background:
-    repeating-radial-gradient(circle at 50% 128%, transparent 0 26px, rgba(197,242,78,0.07) 26px 27px, transparent 27px 54px),
-    radial-gradient(130% 130% at 82% -12%, rgba(120,150,40,0.42), transparent 55%),
-    linear-gradient(180deg, #141a0b, var(--surface));
-  box-shadow:var(--shadow-lg);
+    repeating-radial-gradient(circle at 50% 132%, transparent 0 30px, rgba(197,242,78,0.05) 30px 31px, transparent 31px 62px),
+    radial-gradient(130% 120% at 84% -14%, rgba(120,150,40,0.34), transparent 58%),
+    linear-gradient(180deg, rgba(20,26,11,0.7), var(--glass));
+  -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
+  box-shadow:var(--shadow-lg), inset 0 1px 0 var(--edge-hi);
 }
-.cc-hero__head{ display:flex; align-items:baseline; justify-content:space-between; gap:0.6rem; margin-bottom:0.4rem; }
-.cc-hero__kicker{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); white-space:nowrap; }
-.cc-hero__route{ font-family:'Satoshi',sans-serif; font-size:0.62rem; color:var(--muted); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
-.cc-hero__big{ display:flex; align-items:flex-end; gap:1rem; padding:0.2rem 0 0.9rem; border-bottom:1px solid var(--border); margin-bottom:0.9rem; }
-.cc-hero__day{ display:flex; align-items:baseline; line-height:0.78; }
-.cc-hero__j{ font-family:'Satoshi',sans-serif; font-weight:500; font-size:1.9rem; color:var(--muted); margin-right:0.15rem; }
-.cc-hero__num{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:5rem; line-height:0.76; letter-spacing:-0.045em; color:var(--text); font-variant-numeric:tabular-nums; }
-.cc-hero__date{ display:flex; flex-direction:column; gap:0.2rem; padding-bottom:0.45rem; }
-.cc-hero__d1{ font-family:'Satoshi',sans-serif; font-weight:700; font-size:1rem; color:var(--accent); }
-.cc-hero__d2{ font-family:'Satoshi',sans-serif; font-size:0.62rem; color:var(--muted); }
-.cc-metrics{ display:grid; grid-template-columns:1fr 1fr; gap:0.55rem; }
+.cc-route{ display:flex; align-items:center; gap:0.5rem; font-family:'JetBrains Mono',monospace; font-size:0.62rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--cyan); }
+.cc-route .cc-route__sep{ flex:1; height:1px; background:linear-gradient(90deg,var(--cyan),transparent); }
+.cc-count{ display:flex; align-items:flex-end; margin:0.7rem 0 0.15rem; }
+.cc-jlab{ display:inline-flex; flex-direction:column; align-items:stretch; gap:9px; margin-right:14px; transform:translateY(-4px); }
+.cc-jlab .cc-jl{ font-family:'Clash Display',sans-serif; font-weight:700; font-size:4.4rem; line-height:0.78; text-align:center; color:transparent; -webkit-text-stroke:1.7px var(--accent); text-stroke:1.7px var(--accent); filter:drop-shadow(0 0 12px rgba(197,242,78,0.45)); }
+.cc-jlab .cc-jd{ height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 16px rgba(197,242,78,0.5); }
+.cc-num{ font-weight:700; font-size:6.6rem; line-height:0.8; letter-spacing:-0.02em; background:linear-gradient(180deg,#fff,#c9d0dc); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.cc-unit{ font-family:'Clash Display',sans-serif; font-weight:600; font-size:1.5rem; color:var(--muted); align-self:flex-end; transform:translateY(-14px); margin-left:8px; }
+.cc-sub{ display:flex; justify-content:space-between; align-items:baseline; gap:0.6rem; margin-top:0.5rem; }
+.cc-date{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--muted); }
+.cc-goal{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--accent); white-space:nowrap; }
+.cc-profile{ position:relative; height:108px; margin-top:1rem; }
+.cc-profile svg{ width:100%; height:100%; display:block; overflow:visible; }
+.cc-pin{ position:absolute; transform:translate(-50%,-100%); font-family:'JetBrains Mono',monospace; font-size:0.52rem; color:var(--muted); white-space:nowrap; text-align:center; line-height:1.25; pointer-events:none; }
+.cc-pin i{ display:block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin:0 auto 4px; box-shadow:0 0 8px var(--accent); }
+.cc-pin b{ color:var(--text); font-weight:500; }
+.cc-metrics{ display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-top:1.1rem; }
 .cc-m{
   -webkit-appearance:none; appearance:none; cursor:pointer; color:var(--text); text-align:left;
   display:grid; grid-template-columns:1fr auto; grid-template-areas:"lab go" "val go" "sub go";
   align-items:center; column-gap:0.4rem;
-  padding:0.75rem 0.85rem; border:1px solid var(--border); border-radius:15px;
-  background:rgba(0,0,0,0.3); transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+  padding:0.85rem 0.95rem; border:1px solid var(--border); border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  box-shadow:inset 0 1px 0 var(--edge-hi);
+  transition:transform .18s cubic-bezier(.2,.8,.2,1), border-color .18s ease, box-shadow .18s ease;
 }
-.cc-m:hover{ transform:translateY(-2px); border-color:var(--accent-mid); box-shadow:0 12px 30px -20px var(--accent-glow); }
-.cc-m:active{ transform:translateY(0); }
-.cc-m__lab{ grid-area:lab; font-family:'Satoshi',sans-serif; font-weight:500; font-size:0.6rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
-.cc-m__val{ grid-area:val; font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.7rem; line-height:1.05; letter-spacing:-0.03em; margin-top:0.15rem; }
-.cc-m__sub{ grid-area:sub; font-family:'Satoshi',sans-serif; font-size:0.6rem; color:var(--muted); }
+.cc-m:hover{ transform:translateY(-2px); border-color:var(--accent-mid); box-shadow:0 12px 30px -20px var(--accent-glow), inset 0 1px 0 var(--edge-hi); }
+.cc-m:active{ transform:scale(0.98); }
+.cc-m__lab{ grid-area:lab; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:0.56rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+.cc-m__val{ grid-area:val; font-weight:700; font-size:1.9rem; line-height:1.05; letter-spacing:-0.01em; margin-top:0.2rem; }
+.cc-m__sub{ grid-area:sub; font-family:'JetBrains Mono',monospace; font-size:0.56rem; color:var(--dim); margin-top:0.15rem; }
 .cc-m__go{ grid-area:go; font-size:1rem; color:var(--muted); opacity:0.5; transition:transform .16s, color .16s, opacity .16s; }
 .cc-m:hover .cc-m__go{ transform:translateX(3px); color:var(--accent); opacity:1; }
 
@@ -1227,27 +1272,60 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
 
 /* — Bottom-bar mobile : barre flottante arrondie, item actif = pilule lime — */
 @media (max-width:768px){
-  .sidebar{
-    left:10px !important; right:10px !important; width:auto !important;
-    bottom:calc(8px + env(safe-area-inset-bottom,0)) !important;
-    border-radius:26px !important; border:1px solid var(--border2) !important;
-    background:rgba(16,16,16,0.85) !important;
-    -webkit-backdrop-filter:saturate(160%) blur(20px); backdrop-filter:saturate(160%) blur(20px);
-    box-shadow:0 20px 50px -20px rgba(0,0,0,0.95);
-    padding:6px !important;
+  html:not([data-theme="light"]) .sidebar{
+    left:12px !important; right:12px !important; width:auto !important;
+    bottom:calc(10px + env(safe-area-inset-bottom,0)) !important;
+    border-radius:26px !important; border:1px solid var(--border2) !important; border-right:1px solid var(--border2) !important;
+    background:rgba(12,14,18,0.6) !important;
+    -webkit-backdrop-filter:saturate(180%) blur(30px); backdrop-filter:saturate(180%) blur(30px);
+    box-shadow:0 22px 55px -20px rgba(0,0,0,0.95), inset 0 1px 0 var(--edge-hi);
+    padding:8px !important;
   }
-  .sn{ border-radius:999px !important; }
-  .sn.active{ background:var(--accent) !important; color:var(--accent-ink) !important; box-shadow:var(--glow) !important; }
+  .sn{ border-radius:18px !important; }
+  html:not([data-theme="light"]) .sn.active{ background:var(--accent) !important; color:var(--accent-ink) !important; box-shadow:var(--glow) !important; }
   .sn.active::after{ display:none; }
-  .sn.active .sn-ico svg{ filter:none; stroke:var(--accent-ink) !important; }
-  .sn.active .sn-lbl{ color:var(--accent-ink) !important; }
-  .cc-hero__num{ font-size:4.4rem; }
-  .cc-m__val{ font-size:1.5rem; }
+  html:not([data-theme="light"]) .sn.active .sn-ico svg{ filter:none; stroke:var(--accent-ink) !important; }
+  html:not([data-theme="light"]) .sn.active .sn-lbl{ color:var(--accent-ink) !important; }
+  .cc-num{ font-size:5.4rem; }
+  .cc-jlab .cc-jl{ font-size:3.6rem; }
+  .cc-m__val{ font-size:1.7rem; }
   .ptitle{ font-size:1.35rem !important; }
 }
 </style>
 </head>
 <body>
+<!-- FOND GÉNÉRATIF (verre liquide + topographie vivante) -->
+<canvas id="ccfield"></canvas>
+<div class="cc-aurora"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
+<div class="cc-grain"></div>
+<div class="cc-vignette"></div>
+<script>
+(function(){
+  if(document.documentElement.getAttribute('data-theme')==='light') return;
+  var c=document.getElementById('ccfield'); if(!c) return;
+  var x=c.getContext('2d'), w,h,dpr,t=0, raf;
+  function size(){dpr=Math.min(window.devicePixelRatio||1,2);w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';}
+  size(); addEventListener('resize',size);
+  var N=26;
+  function draw(){
+    x.clearRect(0,0,w,h);
+    for(var i=0;i<N;i++){
+      var off=i/N, amp=(24+i*3)*dpr, base=h*off;
+      x.beginPath();
+      for(var px=0;px<=w;px+=14*dpr){
+        var yy=base+Math.sin(px*0.0016+t*0.6+i*0.5)*amp+Math.sin(px*0.0007-t*0.35+i*0.9)*amp*0.6;
+        px===0?x.moveTo(px,yy):x.lineTo(px,yy);
+      }
+      var a=0.05+0.05*Math.sin(t*0.4+i);
+      x.strokeStyle=(i%4===0)?'rgba(94,234,212,'+Math.max(0.03,a*0.6).toFixed(3)+')':'rgba(197,242,78,'+Math.max(0.02,a*0.5).toFixed(3)+')';
+      x.lineWidth=1*dpr; x.stroke();
+    }
+    t+=0.008; raf=requestAnimationFrame(draw);
+  }
+  draw();
+  document.addEventListener('visibilitychange',function(){ if(document.hidden){cancelAnimationFrame(raf);} else {draw();} });
+})();
+</script>
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-brand">
@@ -2154,6 +2232,30 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
       '<span class="cc-m__go">→</span></button>';
   }
 
+  // Profil d'altitude CCC (silhouette + pins sommets) — calculé une fois
+  var PROFILE_HTML = (function(){
+    var pts=[[0,1550],[8,1690],[14,2000],[21,2537],[30,1650],[38,1993],[55,1470],[64,2049],[82,1450],[90,1830],[101,1035]];
+    var W=400,H=108,maxA=2537,minA=1035,top=46,bot=102;
+    function X(km){return km/101*W;}
+    function Y(a){return bot-((a-minA)/(maxA-minA))*(bot-top);}
+    var d='M '+X(pts[0][0]).toFixed(1)+' '+Y(pts[0][1]).toFixed(1);
+    for(var i=1;i<pts.length;i++){
+      var px=X(pts[i-1][0]),py=Y(pts[i-1][1]),cx=X(pts[i][0]),cy=Y(pts[i][1]),mx=(px+cx)/2;
+      d+=' C '+mx.toFixed(1)+' '+py.toFixed(1)+' '+mx.toFixed(1)+' '+cy.toFixed(1)+' '+cx.toFixed(1)+' '+cy.toFixed(1);
+    }
+    var svg='<svg viewBox="0 0 400 108" preserveAspectRatio="none">'+
+      '<defs><linearGradient id="ccpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(197,242,78,0.28)"/><stop offset="1" stop-color="rgba(197,242,78,0)"/></linearGradient></defs>'+
+      '<path d="'+d+' L 400 108 L 0 108 Z" fill="url(#ccpg)"></path>'+
+      '<path d="'+d+'" fill="none" stroke="#c5f24e" stroke-width="1.8" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(197,242,78,0.7))"></path></svg>';
+    var key=[[21,'Grand Col Ferret','2537'],[64,'Bertone','2049'],[90,'Flégère','1830']];
+    var pins='';
+    key.forEach(function(k){
+      var alt=pts.filter(function(p){return p[0]===k[0];})[0][1];
+      pins+='<div class="cc-pin" style="left:'+(k[0]/101*100).toFixed(1)+'%;top:'+((Y(alt)/108)*100).toFixed(1)+'%"><i></i>'+k[1]+'<br><b>'+k[2]+' m</b></div>';
+    });
+    return svg+pins;
+  })();
+
   function render(){
     var el = document.getElementById('today-hero-block'); if(!el) return;
     var d = daysToCCC();
@@ -2169,14 +2271,14 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     if(p){ predVal=minToHM(p.p50); predSub='P50 · médian'; }
     el.innerHTML =
       '<div class="cc-hero">'+
-        '<div class="cc-hero__head">'+
-          '<span class="cc-hero__kicker">Cockpit — CCC by UTMB</span>'+
-          '<span class="cc-hero__route">Courmayeur → Champex → Chamonix</span>'+
+        '<div class="cc-route"><span>Courmayeur</span><span class="cc-route__sep"></span><span>Chamonix</span></div>'+
+        '<div class="cc-count">'+
+          '<span class="cc-jlab"><span class="cc-jl">J</span><span class="cc-jd"></span></span>'+
+          '<span class="cc-num">'+d+'</span>'+
+          '<span class="cc-unit">jours</span>'+
         '</div>'+
-        '<div class="cc-hero__big">'+
-          '<div class="cc-hero__day"><span class="cc-hero__j">J</span><span class="cc-hero__num">−'+d+'</span></div>'+
-          '<div class="cc-hero__date"><span class="cc-hero__d1">28 août 2026</span><span class="cc-hero__d2">101 km · 6050 m D+</span></div>'+
-        '</div>'+
+        '<div class="cc-sub"><span class="cc-date">VEN 28 AOÛT · 09:00</span><span class="cc-goal">101 KM · 6050 M D+</span></div>'+
+        '<div class="cc-profile">'+PROFILE_HTML+'</div>'+
         '<div class="cc-metrics">'+
           metric('strava', 'Forme · TSB', formVal, formSub, formCol)+
           metric('simu', 'Prédiction · P50', predVal, predSub, 'var(--text,#e8e8e8)')+
