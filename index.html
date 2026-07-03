@@ -1168,7 +1168,7 @@ html[data-theme="light"] .cc-aurora,
 html[data-theme="light"] .cc-grain,
 html[data-theme="light"] .cc-vignette{ display:none !important; }
 /* contenu au-dessus du fond */
-.sidebar, main.main{ position:relative; z-index:2; }
+main.main{ position:relative; z-index:2; }
 .panel > .inner{ position:relative; z-index:1; }
 .lc-time,.sbw-val,.cc-m__val,.th-num,.th-title{ font-variant-numeric:tabular-nums; }
 
@@ -1184,9 +1184,23 @@ html[data-theme="light"] .cc-vignette{ display:none !important; }
 
 /* — Sidebar (desktop) — */
 .sidebar{ background:linear-gradient(180deg, var(--surface), var(--bg)); border-right:1px solid var(--border) !important; }
-.sn.active{ color:var(--accent) !important; }
-.sn.active::after{ content:""; position:absolute; left:0; top:20%; bottom:20%; width:2px; border-radius:0 2px 2px 0; background:var(--accent); box-shadow:var(--glow); }
-.sn.active .sn-ico svg{ filter:drop-shadow(0 0 6px var(--accent-glow)); }
+/* — LIQUID GLASS : indicateur unique qui glisse/morphe entre onglets — */
+.sb-nav{ position:relative; }
+.sn{ z-index:1; }
+.sn.active::after{ display:none !important; }
+html:not([data-theme="light"]) .sn.active{ background:transparent !important; color:var(--accent) !important; }
+html:not([data-theme="light"]) .sn.active .sn-ico svg{ stroke:var(--accent) !important; filter:drop-shadow(0 0 6px var(--accent-glow)); }
+html:not([data-theme="light"]) .sn.active .sn-lbl{ color:var(--accent) !important; }
+.sn-glass{
+  position:absolute; top:0; left:0; z-index:0; border-radius:16px; opacity:0;
+  background:linear-gradient(180deg, rgba(197,242,78,0.20), rgba(197,242,78,0.05));
+  border:1px solid var(--accent-mid);
+  -webkit-backdrop-filter:blur(10px) saturate(1.8); backdrop-filter:blur(10px) saturate(1.8);
+  box-shadow:0 0 24px rgba(197,242,78,0.30), inset 0 1px 0 var(--edge-hi);
+  pointer-events:none; will-change:transform,width,height;
+  transition:transform .55s cubic-bezier(.34,1.5,.5,1), width .55s cubic-bezier(.34,1.5,.5,1), height .55s cubic-bezier(.34,1.5,.5,1), opacity .3s ease;
+}
+html[data-theme="light"] .sn-glass{ display:none !important; }
 
 /* — Cartes : verre liquide (dark) — */
 html:not([data-theme="light"]) .today-hero,
@@ -1282,10 +1296,11 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     padding:8px !important;
   }
   .sn{ border-radius:18px !important; }
-  html:not([data-theme="light"]) .sn.active{ background:var(--accent) !important; color:var(--accent-ink) !important; box-shadow:var(--glow) !important; }
-  .sn.active::after{ display:none; }
-  html:not([data-theme="light"]) .sn.active .sn-ico svg{ filter:none; stroke:var(--accent-ink) !important; }
-  html:not([data-theme="light"]) .sn.active .sn-lbl{ color:var(--accent-ink) !important; }
+  html:not([data-theme="light"]) .sn.active{ background:transparent !important; color:var(--accent) !important; box-shadow:none !important; }
+  .sn.active::after{ display:none !important; }
+  html:not([data-theme="light"]) .sn.active .sn-ico svg{ stroke:var(--accent) !important; filter:drop-shadow(0 0 6px var(--accent-glow)); }
+  html:not([data-theme="light"]) .sn.active .sn-lbl{ color:var(--accent) !important; }
+  .sn-glass{ border-radius:16px !important; }
   .cc-num{ font-size:5.4rem; }
   .cc-jlab .cc-jl{ font-size:3.6rem; }
   .cc-m__val{ font-size:1.7rem; }
@@ -1358,6 +1373,40 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     <div class="sb-ccc"><strong id="sb-days">—</strong>jours avant CCC<br><span id="sb-date" style="font-size:0.52rem">Ven 28 août 2026</span></div>
   </div>
 </aside>
+
+<script>
+/* — LIQUID GLASS NAV : un seul indicateur qui glisse/morphe entre onglets (Apple-style) — */
+(function(){
+  function init(){
+    if(document.documentElement.getAttribute('data-theme')==='light') return;
+    var nav=document.querySelector('.sb-nav'); if(!nav) return;
+    var glass=nav.querySelector('.sn-glass');
+    if(!glass){ glass=document.createElement('div'); glass.className='sn-glass'; nav.insertBefore(glass,nav.firstChild); }
+    var first=true;
+    function move(){
+      var a=nav.querySelector('.sn.active');
+      if(!a || a.offsetParent===null){ glass.style.opacity='0'; return; }
+      var w=a.offsetWidth, h=a.offsetHeight;
+      var H=Math.min(h,60);                 // borne : jamais de colonne pleine hauteur
+      var yoff=a.offsetTop+(h-H)/2;         // centré verticalement sur le bouton
+      var inset=Math.min(6, w*0.08);        // léger retrait latéral → pastille
+      if(first){ glass.style.transition='none'; }
+      glass.style.transform='translate('+(a.offsetLeft+inset)+'px,'+yoff+'px)';
+      glass.style.width=(w-inset*2)+'px';
+      glass.style.height=H+'px';
+      glass.style.opacity='1';
+      if(first){ glass.offsetWidth; glass.style.transition=''; first=false; }
+    }
+    window.__navGlassMove=move;
+    move();
+    addEventListener('resize',move);
+    addEventListener('orientationchange',function(){ setTimeout(move,60); });
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ setTimeout(move,20); }); }
+    setTimeout(move,120);
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',init); } else { init(); }
+})();
+</script>
 
 <!-- MAIN -->
 <main class="main">
@@ -2524,6 +2573,7 @@ function switchTab(name) {
   if (name === 'strava' && typeof window.__stravaLoad === 'function') { try { window.__stravaLoad(false); } catch(e){} }
   if (name === 'simu' && typeof window.__simuInit === 'function') { try { window.__simuInit(); } catch(e){} }
   if (name === 'today' && typeof window.__heroRefresh === 'function') { try { window.__heroRefresh(); } catch(e){} }
+  if (typeof window.__navGlassMove === 'function') { try { window.__navGlassMove(); } catch(e){} }
 }
 
 // U2 — DISCUTER : ouvre le Coach pré-chargé avec une question (cohérente, car le coach lit le même verdict).
