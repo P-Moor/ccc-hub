@@ -1269,6 +1269,28 @@ html:not([data-theme="light"]) .more-block>summary:hover{ background:var(--glass
 .cc-m__go{ grid-area:go; font-size:1rem; color:var(--muted); opacity:0.5; transition:transform .16s, color .16s, opacity .16s; }
 .cc-m:hover .cc-m__go{ transform:translateX(3px); color:var(--accent); opacity:1; }
 
+/* — Verdict du jour (bandeau IA) — */
+.cc-verdict{ position:relative; margin:1.1rem 0 0; padding:0.85rem 1rem 0.9rem 1.1rem; border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:14px; background:rgba(197,242,78,0.045); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+.cc-verdict__txt{ font-family:'Satoshi','DM Mono',sans-serif; font-size:0.86rem; line-height:1.5; color:var(--text); }
+.cc-verdict__txt b{ color:var(--accent); font-weight:700; }
+.cc-verdict__chips{ display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.6rem; }
+.cc-chip{ font-family:'JetBrains Mono',monospace; font-size:0.58rem; letter-spacing:0.02em; color:var(--muted); background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:999px; padding:0.24rem 0.55rem; }
+/* — 3 scores maîtres — */
+.cc-scores{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:0.6rem; }
+.cc-score{ position:relative; -webkit-appearance:none; appearance:none; cursor:pointer; text-align:left; color:var(--text);
+  display:flex; flex-direction:column; gap:0.15rem; padding:0.8rem 0.7rem 0.75rem; border:1px solid var(--border); border-radius:16px;
+  background:rgba(255,255,255,0.03); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); box-shadow:inset 0 1px 0 var(--edge-hi);
+  transition:transform .18s cubic-bezier(.2,.8,.2,1), border-color .18s ease, box-shadow .18s ease; }
+.cc-score:hover{ transform:translateY(-2px); border-color:var(--accent-mid); box-shadow:0 12px 30px -20px var(--accent-glow), inset 0 1px 0 var(--edge-hi); }
+.cc-score:active{ transform:scale(0.98); }
+.cc-score__lab{ font-family:'JetBrains Mono',monospace; font-size:0.54rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+.cc-score__val{ font-weight:700; font-size:1.5rem; line-height:1.05; letter-spacing:-0.01em; margin-top:0.1rem; white-space:nowrap; color:var(--sc,var(--text)); }
+.cc-score__state{ display:flex; align-items:center; gap:5px; font-family:'JetBrains Mono',monospace; font-size:0.53rem; color:var(--muted); margin-top:0.15rem; line-height:1.3; white-space:nowrap; }
+.cc-score__state i{ flex:0 0 6px; width:6px; height:6px; border-radius:50%; background:var(--sc,var(--muted)); box-shadow:0 0 6px var(--sc,transparent); }
+.cc-score__go{ position:absolute; top:0.6rem; right:0.65rem; font-size:0.9rem; color:var(--muted); opacity:0.45; transition:transform .16s, color .16s, opacity .16s; }
+.cc-score:hover .cc-score__go{ transform:translateX(2px); color:var(--accent); opacity:1; }
+.sc-good{ --sc:var(--accent); } .sc-ok{ --sc:var(--cyan); } .sc-warn{ --sc:#f59e0b; } .sc-alert{ --sc:#ef4444; }
+
 /* — Boutons & réglages — */
 .forme-cfg-btn{ border-radius:999px; transition:all .15s ease; }
 .forme-cfg-btn:hover{ box-shadow:0 0 0 1px var(--accent-mid); }
@@ -2225,12 +2247,58 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   function minToHM(v){ v=Math.round(v); var h=Math.floor(v/60), m=v%60; return h+'h'+(m<10?'0':'')+m; }
   function daysToCCC(){ return Math.max(0, Math.ceil((CCC_DATE - new Date())/86400000)); }
 
-  function metric(dataTab, lab, val, sub, color){
-    return '<button class="cc-m" data-tab="'+dataTab+'">'+
-      '<span class="cc-m__lab">'+lab+'</span>'+
-      '<span class="cc-m__val" style="color:'+color+'">'+val+'</span>'+
-      '<span class="cc-m__sub">'+sub+'</span>'+
-      '<span class="cc-m__go">→</span></button>';
+  function scoreCard(dataTab, lab, val, cls, state){
+    return '<button class="cc-score '+cls+'" data-tab="'+dataTab+'">'+
+      '<span class="cc-score__go">&rsaquo;</span>'+
+      '<span class="cc-score__lab">'+lab+'</span>'+
+      '<span class="cc-score__val">'+val+'</span>'+
+      '<span class="cc-score__state"><i></i>'+state+'</span></button>';
+  }
+  // Forme (fraîcheur / TSB) → carte cliquable vers Strava
+  function scoreForme(f){
+    if(!f || f.tsb==null) return { val:'—', cls:'', state:'Strava ?' };
+    var t=Math.round(f.tsb);
+    var cls = t<=-20?'sc-alert' : t<-10?'sc-warn' : t>20?'sc-ok' : 'sc-good';
+    var state = t<=-20?'Fatigué' : t<-10?'Chargé' : t>20?'Frais +' : 'Frais';
+    return { val:(t>0?'+':'')+t, raw:t, cls:cls, state:state };
+  }
+  // Effort du jour (ce que la séance prévue va coûter) → vers Plan
+  function scoreEffort(){
+    var E=null; try{ E=(typeof window.CCC_ETAT==='function')?window.CCC_ETAT():null; }catch(e){}
+    if(!E || !E.seance){ return { val:'—', cls:'', state:'Plan ?' }; }
+    var s=E.seance, ch=s.charge||0, type=(s.jour_type||'repos');
+    if(type==='repos' || (!s.prevue && ch===0)) return { val:'Repos', cls:'sc-ok', state:'Jour off' };
+    var lv=E.leviers||{};
+    var cls, val, state;
+    if(ch>=28 || s.gros_jour){ val='Élevé'; cls='sc-warn'; state='Gros jour'; }
+    else if(ch>=14){ val='Bon'; cls='sc-good'; state='Qualité'; }
+    else { val='Léger'; cls='sc-ok'; state='Footing'; }
+    if(lv.decharge){ val='Léger'; cls='sc-ok'; state='Décharge'; }
+    if(lv.affutage){ val='Léger'; cls='sc-ok'; state='Affûtage'; }
+    if(lv.fatigue){ cls='sc-warn'; state='On allège'; }
+    return { val:val, cls:cls, state:state };
+  }
+  // Cap CCC (temps d'arrivée estimé) → vers Simu
+  function scoreCap(p){
+    if(!p || p.p50==null) return { val:'—', cls:'', state:'Simu ?' };
+    var h=p.p50/60;
+    var cls = h<=19?'sc-good' : h<=21?'sc-ok' : 'sc-warn';
+    var state = h<=19?'Au top' : h<=21?'Objectif' : 'Trop long';
+    return { val:minToHM(p.p50), cls:cls, state:state };
+  }
+  // Verdict du jour : une phrase qui suit les mêmes leviers que tout le reste
+  function buildVerdict(){
+    var E=null; try{ E=(typeof window.CCC_ETAT==='function')?window.CCC_ETAT():null; }catch(e){}
+    if(!E) return { txt:'Connecte Strava et Garmin pour voir ton état du jour.', chips:[] };
+    var lv=E.leviers||{}, chips=[], txt;
+    if(lv.fatigue && lv.chaleur){ txt='Ta récup est <b>basse</b> et il fait <b>chaud</b>. On allège la séance, on remange à hauteur normale et on monte l\'eau.'; chips=['séance allégée','+eau et sels','on remange normal']; }
+    else if(lv.fatigue){ txt='Ta récup est <b>basse</b>. Priorité au <b>repos</b> aujourd\'hui : séance courte, bon sommeil, pas de forçage.'; chips=['séance allégée','récup','sommeil']; }
+    else if(lv.affutage){ txt='Semaine d\'<b>affûtage</b>. On réduit le volume et on garde un peu d\'intensité pour rester vif. Pas de surplus à table.'; chips=['volume réduit','rappel intensité','glucides maintenus']; }
+    else if(lv.decharge){ txt='Semaine de <b>décharge</b>. On lève le pied pour absorber la charge. On recharge, pas de déficit.'; chips=['volume réduit','on recharge']; }
+    else if(lv.chaleur){ txt='Il fait <b>chaud</b> aujourd\'hui. La séance passe, mais hydrate avant d\'avoir soif et ajoute des sels.'; chips=['+eau et sels','tôt le matin']; }
+    else if(lv.gros_jour){ txt='Tu es <b>frais</b> et c\'est un <b>gros jour</b>. Attaque la séance, mange à ta faim, recharge en glucides.'; chips=['gros jour','glucides pleins']; }
+    else { txt='Tu es <b>frais</b>, conditions normales. Bonne journée pour dérouler ta séance comme prévu.'; chips=['séance normale','glucides normaux']; }
+    return { txt:txt, chips:chips };
   }
 
   // Profil d'altitude CCC (silhouette + pins sommets) — calculé une fois
@@ -2261,15 +2329,8 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     var el = document.getElementById('today-hero-block'); if(!el) return;
     var d = daysToCCC();
     var f = window.cccForm, p = window.cccPrediction;
-    var formVal='—', formSub='connecte Strava', formCol='var(--muted,#5e6068)';
-    if(f){
-      var t=Math.round(f.tsb);
-      formVal=(t>0?'+':'')+t;
-      formCol = t<-25?'#ef4444' : t<-10?'#f59e0b' : t>20?'#60a5fa' : '#a3e635';
-      formSub = t<-25?'surmenage' : t<-10?'charge' : t>20?'frais' : 'optimal';
-    }
-    var predVal='—', predSub='P50 · ouvre Simu';
-    if(p){ predVal=minToHM(p.p50); predSub='P50 · médian'; }
+    var forme=scoreForme(f), effort=scoreEffort(), cap=scoreCap(p), verdict=buildVerdict();
+    var chips = verdict.chips.map(function(c){ return '<span class="cc-chip">'+c+'</span>'; }).join('');
     el.innerHTML =
       '<div class="cc-hero">'+
         '<div class="cc-route"><span>Courmayeur</span><span class="cc-route__sep"></span><span>Chamonix</span></div>'+
@@ -2280,9 +2341,12 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
         '</div>'+
         '<div class="cc-sub"><span class="cc-date">VEN 28 AOÛT · 09:00</span><span class="cc-goal">101 KM · 6050 M D+</span></div>'+
         '<div class="cc-profile">'+PROFILE_HTML+'</div>'+
-        '<div class="cc-metrics">'+
-          metric('strava', 'Forme · TSB', formVal, formSub, formCol)+
-          metric('simu', 'Prédiction · P50', predVal, predSub, 'var(--text,#e8e8e8)')+
+        '<div class="cc-verdict"><div class="cc-verdict__txt">'+verdict.txt+'</div>'+
+          (chips?'<div class="cc-verdict__chips">'+chips+'</div>':'')+'</div>'+
+        '<div class="cc-scores">'+
+          scoreCard('strava', 'Forme', forme.val, forme.cls, forme.state)+
+          scoreCard('plan', 'Effort', effort.val, effort.cls, effort.state)+
+          scoreCard('simu', 'Cap CCC', cap.val, cap.cls, cap.state)+
         '</div>'+
       '</div>';
   }
