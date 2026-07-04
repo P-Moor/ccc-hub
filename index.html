@@ -1544,7 +1544,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
 
 <!-- NUTRITION -->
 <div class="panel" id="panel-nutrition"><div class="inner">
-  <div class="ptitle">Nutrition <span class="ptitle-sub">plan · recettes · référence</span></div>
+  <div class="ptitle">Nutrition <span class="ptitle-sub">plan · recettes · assiette du jour</span></div>
 
   <div class="sec sec-first">Plan de la semaine</div>
   <div class="ag-nav" id="ag-nav"></div>
@@ -1553,67 +1553,6 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   <div class="wkc-mod" id="weekplan-module"></div>
   <div class="rec-mod" id="recipes-module"></div>
 
-  <div class="ptitle" id="matrices-toggle" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem">Référence nutritionnelle <span class="ptitle-sub">matrices · banque · algorithme</span> <span id="matrices-chev" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">▸ déplier</span></div>
-  <div id="matrices-body" style="display:none">
-  <div class="sec sec-first">Matrices carb cycling</div>
-  <div class="cleg">
-    <span class="cleg-lbl">Lien plan →</span>
-    <span class="badge lc">LC</span><span style="font-size:0.63rem;color:var(--muted)">Low Carb</span>
-    <span style="color:var(--border2);margin:0 .15rem">·</span>
-    <span class="badge mc">MC</span><span style="font-size:0.63rem;color:var(--muted)">Medium Carb</span>
-    <span style="color:var(--border2);margin:0 .15rem">·</span>
-    <span class="badge hc">HC</span><span style="font-size:0.63rem;color:var(--muted)">High Carb</span>
-  </div>
-  <div class="gabarits">
-    <div class="gabarit low">
-      <div class="gabarit-header"><div class="ndot"></div><div class="gname">LOW CARB</div><div class="gtrig">Repos · EF</div></div>
-      <div class="gbody">
-        <div class="ggoal">Oxydation lipidique — repos digestif.</div>
-        <div class="meal"><div class="mtime">Matin</div><div class="mcont">Skyr<span class="mqty">200g</span> + Whey<span class="mqty">30g</span> + Oléagineux<span class="mqty">20g</span></div></div>
-        <div class="meal"><div class="mtime">Midi</div><div class="mcont">Protéines<span class="mqty">160-200g</span> + Légumes<span class="mqty">libre</span> + Huile olive<span class="mqty">1cs</span> — zéro féculent</div></div>
-        <div class="meal"><div class="mtime">Soir</div><div class="mcont">Protéines maigres<span class="mqty">160g</span> + Légumes verts<span class="mqty">libre</span> — zéro féculent</div></div>
-        <div class="ghack">⚡ Hack famille : même plat — laisser féculents dans la casserole.</div>
-      </div>
-    </div>
-    <div class="gabarit med">
-      <div class="gabarit-header"><div class="ndot"></div><div class="gname">MEDIUM CARB</div><div class="gtrig">Z2 ≤1h15</div></div>
-      <div class="gbody">
-        <div class="ggoal">Maintenir réservoir sans stocker.</div>
-        <div class="meal"><div class="mtime">Matin</div><div class="mcont">Flocons<span class="mqty">70g</span> + Skyr<span class="mqty">150g</span> + Whey<span class="mqty">20g</span> + Fruit</div></div>
-        <div class="meal"><div class="mtime">Midi</div><div class="mcont">Protéines<span class="mqty">150g</span> + Féculents<span class="mqty">150g cuits</span> + Légumes</div></div>
-        <div class="meal"><div class="mtime">16h</div><div class="mcont">Skyr<span class="mqty">150g</span> ou Oléagineux<span class="mqty">25g</span></div></div>
-        <div class="meal"><div class="mtime">Soir</div><div class="mcont">Protéines<span class="mqty">150g</span> + Féculents<span class="mqty">150g cuits</span> + Légumes</div></div>
-      </div>
-    </div>
-    <div class="gabarit high">
-      <div class="gabarit-header"><div class="ndot"></div><div class="gname">HIGH CARB</div><div class="gtrig">Veille longue</div></div>
-      <div class="gbody">
-        <div class="ggoal">Remplir cuves glycogène au max.</div>
-        <div class="meal"><div class="mtime">Matin</div><div class="mcont">Porridge<span class="mqty">100g sec</span> + Miel<span class="mqty">20g</span> + Banane + Whey<span class="mqty">30g</span></div></div>
-        <div class="meal"><div class="mtime">Midi</div><div class="mcont">Protéines<span class="mqty">150g</span> + Féculents blancs<span class="mqty">250g cuits</span> + peu fibres</div></div>
-        <div class="meal"><div class="mtime">Soir</div><div class="mcont">Protéines<span class="mqty">150g</span> + Féculents<span class="mqty">300g+ cuits</span> + plaisir contrôlé</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="sec">Banque alimentaire</div>
-  <div class="banque">
-    <div class="bc"><div class="bc-title">🍗 Protéines — Le Ciment</div><div class="bc-note">Chaque repas, quel que soit le mode.</div><div class="tags"><span class="tag">Skyr 200g ★</span><span class="tag">Œufs ×3</span><span class="tag">Thon 130g</span><span class="tag">Whey 30g</span><span class="tag sub">Poulet/Dinde 160g</span><span class="tag sub">Veau haché 5% 160g</span><span class="tag sub">Bœuf haché 5% 160g</span><span class="tag sub">Saumon 150g</span><span class="tag sub">Cabillaud 180g</span></div></div>
-    <div class="bc"><div class="bc-title">🍚 Glucides — Le Carburant</div><div class="bc-note">MC: 150g cuits · HC: 250-400g cuits</div><div class="tags"><span class="tag">Flocons 70g</span><span class="tag">Pain complet 2t.</span><span class="tag">Banane ×1</span><span class="tag sub">Riz blanc/basmati</span><span class="tag sub">Quinoa</span><span class="tag sub">Pâtes blanches</span><span class="tag sub">Patate douce ★</span><span class="tag sub">PDT vapeur</span><span class="tag sub">Miel 20g (HC)</span></div></div>
-    <div class="bc"><div class="bc-title">🥑 Lipides — L'Huile Moteur</div><div class="bc-note">Essentiels en LC. Stabilisent SN.</div><div class="tags"><span class="tag">Amandes 20g</span><span class="tag">Noix 20g</span><span class="tag">BPC pur 20g</span><span class="tag sub">Avocat 1/2</span><span class="tag sub">Huile olive 1cs</span><span class="tag sub">Huile noix</span><span class="tag sub">Chia 15g</span></div></div>
-    <div class="bc"><div class="bc-title">🥦 Légumes & Micro — Le Châssis</div><div class="bc-note">À volonté en LC pour le volume.</div><div class="tags"><span class="tag">Brocolis ∞</span><span class="tag">Épinards ∞</span><span class="tag">Courgettes ∞</span><span class="tag">Haricots verts ∞</span><span class="tag sub">Tomates</span><span class="tag sub">Carottes crues</span><span class="tag sub">Poivrons</span><span class="tag sub">Fruits rouges 80g</span></div></div>
-  </div>
-  <div class="sec">Algorithme repas</div>
-  <div class="algo">
-    <div class="atitle">⚙️ Assemblage en 4 minutes</div>
-    <div class="ascen">Jeudi soir, run 45min + renfo → Medium Carb.</div>
-    <div class="asteps">
-      <div class="astep"><div class="asnum">1</div><div class="aslbl">Ciment</div><div class="ascont">Protéine → Œufs ×3 (omelette)</div></div>
-      <div class="astep"><div class="asnum">2</div><div class="aslbl">Carburant</div><div class="ascont">Glucide 150g cuit → Reste riz de la veille</div></div>
-      <div class="astep"><div class="asnum">3</div><div class="aslbl">Châssis</div><div class="ascont">Légume libre → Pousses d'épinards</div></div>
-    </div>
-    <div class="ares"><svg class="ic" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5ec27a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="4,10 8,14 16,5"/></svg> Repas récup parfait — 4 minutes, zéro décision.</div>
-  </div>
-  </div>
 </div></div>
 
 <!-- Agenda fusionné dans Nutrition (section « Plan de la semaine ») -->
@@ -9654,25 +9593,6 @@ if (document.readyState === 'loading') {
   window.__sedSetWeek=function(idx){ if(typeof idx==='number' && idx>=0){ cWI=idx; pick=null; render(); } };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', render);
   else render();
-})();
-
-
-/* ════════════════════════════════════════════════════════════
-   ACCORDÉON — Matrices Nutritionnelles (replié par défaut, état persistant)
-════════════════════════════════════════════════════════════ */
-(function(){
-  'use strict';
-  var KEY='ccc_matrices_open';
-  function init(){
-    var t=document.getElementById('matrices-toggle'), b=document.getElementById('matrices-body'), c=document.getElementById('matrices-chev');
-    if(!t||!b) return;
-    var open=false; try{ open=localStorage.getItem(KEY)==='1'; }catch(e){}
-    function apply(){ b.style.display=open?'block':'none'; if(c) c.textContent=open?'▾ replier':'▸ déplier'; }
-    apply();
-    t.addEventListener('click', function(){ open=!open; try{ localStorage.setItem(KEY, open?'1':'0'); }catch(e){} apply(); });
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
 })();
 </script>
 <script>
