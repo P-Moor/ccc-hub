@@ -6729,7 +6729,19 @@ if (document.readyState === 'loading') {
       if (typeof WI !== 'undefined' && typeof DI !== 'undefined') sessionDone = !!done[WI + '-' + DI];
     } catch(e){}
     if (sessionDone) bonus = 1;
-    return {base:base, bonus:bonus, total:base+bonus, sessionDone:sessionDone};
+    // ── ALIGNEMENT « une seule voix » : la chaleur (État du jour) monte le besoin + électrolytes ──
+    var heat = 0, heatNote = null, elec = false;
+    try {
+      var E = (typeof window.CCC_ETAT === 'function') ? window.CCC_ETAT() : null;
+      if (E && E.meteo && E.meteo.dispo) {
+        var tmax = (E.meteo.ressenti_max != null) ? E.meteo.ressenti_max : E.meteo.temp_max;
+        if (tmax != null) {
+          if (tmax >= 32)      { heat = 1.0; elec = true; heatNote = 'Chaleur forte ' + Math.round(tmax) + '°C — +1 L et électrolytes indispensables.'; }
+          else if (tmax >= 28) { heat = 0.5; elec = true; heatNote = 'Chaleur ' + Math.round(tmax) + '°C — +0,5 L, pense aux électrolytes.'; }
+        }
+      }
+    } catch(e){}
+    return {base:base, bonus:bonus, heat:heat, elec:elec, heatNote:heatNote, total:base+bonus+heat, sessionDone:sessionDone};
   }
 
   // État UI : quel repas est en cours d'ajout (pour afficher le sélecteur)
@@ -6967,7 +6979,10 @@ if (document.readyState === 'loading') {
       '<span style="color:' + waterCol + '">' + waterPct + '%</span></div>';
     html += '<div style="height:10px;border-radius:5px;background:var(--border,#242528);overflow:hidden;margin-bottom:0.6rem">' +
       '<div style="width:' + waterPct + '%;height:100%;background:' + waterCol + ';transition:width 0.4s ease"></div></div>';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);margin-bottom:0.6rem">Base ' + wt.base + 'L' + (wt.bonus>0 ? ' + ' + wt.bonus + 'L (séance faite)' : ' · valide ta séance pour +1L') + '</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);margin-bottom:' + (wt.heatNote ? '0.4rem' : '0.6rem') + '">Base ' + wt.base + 'L' + (wt.bonus>0 ? ' + ' + wt.bonus + 'L (séance faite)' : ' · valide ta séance pour +1L') + (wt.heat>0 ? ' + ' + wt.heat + 'L (chaleur)' : '') + '</div>';
+    if (wt.heatNote) {
+      html += '<div style="display:flex;align-items:center;gap:0.4rem;font-family:DM Mono,monospace;font-size:0.58rem;color:#e8a020;background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.25);border-radius:7px;padding:0.4rem 0.6rem;margin-bottom:0.6rem"><span style="flex-shrink:0">☀</span><span>' + wt.heatNote + '</span></div>';
+    }
     html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap">' +
       '<button class="nh-water" data-add="0.25" style="flex:1;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e9ea);padding:0.45rem;border-radius:6px;font-family:DM Mono,monospace;font-size:0.66rem;cursor:pointer">+25cl</button>' +
       '<button class="nh-water" data-add="0.5" style="flex:1;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e9ea);padding:0.45rem;border-radius:6px;font-family:DM Mono,monospace;font-size:0.66rem;cursor:pointer">+50cl</button>' +
