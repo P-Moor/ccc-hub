@@ -2926,6 +2926,96 @@ function volEq(v) {
 }
 
 
+// ════════════════════════════════════════════════════════════════════════
+// ÉTAT DU JOUR — SOURCE UNIQUE lue par nutrition, hydratation et coach.
+// Agrège séance + phase + récup + météo pour que tous parlent d'une voix.
+// Étape 1 : socle. Les modules le brancheront aux étapes suivantes.
+// ════════════════════════════════════════════════════════════════════════
+function _etatDk(d){ d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+
+function _etatPhase(w){
+  if(!w) return { code:'base', nom:'Base', num:null, decharge:false, affutage:false, course:false };
+  var role = (w.role||'').toLowerCase(), ph = (w.phase||'').toString().toUpperCase();
+  var decharge = role==='decharge' || ph.indexOf('DÉCHARGE')>=0 || ph.indexOf('DECHARGE')>=0;
+  var affutage = role==='affutage' || role==='taper' || ph==='TAPER' || ph==='TAP';
+  var course   = role==='course' || ph==='COURSE' || ph==='RACE';
+  var code = course ? 'course' : affutage ? 'affutage' : decharge ? 'decharge' : 'charge';
+  var noms = { course:'Course', affutage:'Affûtage', decharge:'Décharge', charge:'Charge' };
+  return { code:code, nom:noms[code], num:w.num, decharge:decharge, affutage:affutage, course:course };
+}
+
+function etatDuJour(){
+  var now = new Date(), hour = now.getHours();
+  var st = {
+    ts: now.toISOString(),
+    heure: hour,
+    moment: hour<11?'matin':hour<14?'midi':hour<18?'apres-midi':'soir',
+    date: _etatDk(now)
+  };
+  // ── Séance : prévue (plan) + faite (Garmin) + charge estimée ──
+  var seance = { prevue:null, faite:null, charge:0, gros_jour:false, jour_type:'repos' };
+  var pd = null;
+  try {
+    if (typeof PLAN_DATA!=='undefined' && typeof WI!=='undefined' && typeof DI!=='undefined' && PLAN_DATA[WI] && PLAN_DATA[WI].days[DI]) {
+      pd = PLAN_DATA[WI].days[DI];
+      seance.prevue = { titre:pd.title, run:pd.run||0, velo:pd.velo||0, dplus:pd.dplus||0, type:pd.type, muscu:!!pd.muscu };
+      seance.jour_type = pd.type || 'repos';
+      seance.charge = Math.round((pd.run||0) + (pd.velo||0)/3 + (pd.dplus||0)/100);
+      seance.gros_jour = (pd.type==='long' || pd.type==='course' || pd.type==='gravel' || seance.charge>=28);
+    }
+  } catch(e){}
+  try {
+    var gd = window.__garminData;
+    if (gd && gd.activities) {
+      var done = gd.activities.filter(function(a){ return (a.date||'').slice(0,10)===st.date; });
+      if (done.length){ var a=done[0]; seance.faite = { nom:a.name, km:a.distance_km, dplus:a.elevation_gain, min:a.duration_min, hr:a.avg_hr, te:a.te_aerobic }; }
+    }
+  } catch(e){}
+  st.seance = seance;
+  // ── Phase du plan (charge / décharge / affûtage / course) ──
+  try { st.phase = _etatPhase((typeof PLAN_DATA!=='undefined' && typeof WI!=='undefined') ? PLAN_DATA[WI] : null); } catch(e){ st.phase = _etatPhase(null); }
+  // ── Récupération : readiness + body battery (Garmin) + CTL/ATL/TSB/ACWR (Strava) ──
+  var recup = { readiness:null, body_battery:null, tsb:null, ctl:null, atl:null, acwr:null, fatigue:false, frais:false };
+  try { var g=window.__garminData; if(g){ recup.readiness = g.readiness && g.readiness.score; recup.body_battery = g.body_battery && g.body_battery.current; } } catch(e){}
+  try { var f=window.cccForm; if(f){ recup.tsb=f.tsb; recup.ctl=f.ctl; recup.atl=f.atl; recup.acwr=f.acwr; } } catch(e){}
+  var lowSignals = 0;
+  if (recup.readiness!=null && recup.readiness<40) lowSignals++;
+  if (recup.body_battery!=null && recup.body_battery<30) lowSignals++;
+  if (recup.tsb!=null && recup.tsb<=-20) lowSignals++;
+  if (recup.acwr!=null && recup.acwr>1.5) lowSignals++;
+  recup.fatigue = lowSignals>=2;
+  recup.frais = (recup.tsb!=null && recup.tsb>=5) || (recup.readiness!=null && recup.readiness>=75);
+  st.recup = recup;
+  // ── Météo (window.__weather) : la chaleur pilote l'hydratation ──
+  var meteo = { dispo:false, chaleur:false };
+  try {
+    if (window.__weather && window.__weather.now){
+      var w = window.__weather;
+      meteo = { dispo:true, temp:w.now.temp, ressenti:w.now.feels, humidite:w.now.humidity, vent_kmh:w.now.wind_kmh,
+                temp_max:(w.today&&w.today.temp_max), ressenti_max:(w.today&&w.today.feels_max),
+                pluie_proba:(w.today&&w.today.precip_proba), uv_max:(w.today&&w.today.uv_max), chaleur:!!w.hot, lieu:w.label||'' };
+    }
+  } catch(e){}
+  st.meteo = meteo;
+  // ── Mode carb du jour (source unique, pilotée par la séance) ──
+  try { st.mode_carb = (pd && typeof dayCarbMode==='function') ? dayCarbMode(pd) : 'MC'; } catch(e){ st.mode_carb='MC'; }
+  // ── Ressenti + intention déclarés par Pierre ──
+  try { var fl=window.__getFeel && window.__getFeel(); if(fl && (fl.rpe||fl.pain||fl.zone)) st.ressenti = { rpe:fl.rpe, douleur:fl.pain, zone:fl.zone }; } catch(e){}
+  try { var it=(localStorage.getItem('ccc_intention')||'').trim(); if(it) st.intention=it; } catch(e){}
+  // ── Leviers de synthèse : ce que TOUS les modules doivent suivre d'une seule voix ──
+  st.leviers = {
+    chaleur: !!meteo.chaleur,
+    decharge: !!st.phase.decharge,
+    affutage: !!st.phase.affutage,
+    fatigue: !!recup.fatigue,
+    gros_jour: !!seance.gros_jour,
+    mode_carb: st.mode_carb
+  };
+  return st;
+}
+window.CCC_ETAT = etatDuJour;
+
+
 function getMonthWeek(weekIndex) {
   let flat = [];
   [1,2,3,4].forEach(function(m) { months[m].forEach(function(w) { flat.push(w); }); });
@@ -6608,6 +6698,17 @@ if (document.readyState === 'loading') {
       kcal = maintenance - deficit; pPerKg = 2.0;
       if (kcal < floor) { kcal = floor; deficit = maintenance - floor; }
     }
+    // ── ALIGNEMENT « une seule voix » : la récup et la phase priment sur le déficit ──
+    // Si l'État du jour signale fatigue ou décharge, on annule tout déficit (la récup passe avant).
+    var etatNote = null, etatFlags = null;
+    try {
+      var E = (typeof window.CCC_ETAT === 'function') ? window.CCC_ETAT() : null;
+      if (E && E.leviers) {
+        etatFlags = E.leviers;
+        if (deficit > 0 && E.leviers.fatigue) { kcal = maintenance; deficit = 0; etatNote = 'Déficit annulé — fatigue détectée, la récup passe avant.'; }
+        else if (deficit > 0 && E.leviers.decharge) { kcal = maintenance; deficit = 0; etatNote = 'Déficit annulé — semaine de décharge, on recharge.'; }
+      }
+    } catch(e){}
     // 'maintien' & 'prepa' = maintenance (prepa conserve la périodisation glucides via le mode)
     // Périodisation glucides : HC → plus de glucides (lipides bas), LC → moins (lipides hauts)
     var fatPct = (objective === 'quotidien') ? 0.30 : (mode === 'HC' ? 0.22 : mode === 'LC' ? 0.33 : 0.27);
@@ -6615,7 +6716,7 @@ if (document.readyState === 'loading') {
     var lTarget = Math.round(kcal * fatPct / 9);
     var gTarget = Math.round((kcal - pTarget*4 - lTarget*9) / 4);
     if (gTarget < 0) gTarget = 0;
-    return {bmr:Math.round(bmr), actKcal:actUsed, estimated:estimated, mode:mode, kcal:kcal, g:gTarget, p:pTarget, l:lTarget, weight:weight, objective:objective, maintenance:maintenance, deficit:deficit};
+    return {bmr:Math.round(bmr), actKcal:actUsed, estimated:estimated, mode:mode, kcal:kcal, g:gTarget, p:pTarget, l:lTarget, weight:weight, objective:objective, maintenance:maintenance, deficit:deficit, etatNote:etatNote, etatFlags:etatFlags};
   }
 
   // ── Hydratation ──
@@ -6769,7 +6870,10 @@ if (document.readyState === 'loading') {
     });
     html += '</div>';
     var defTxt = (t.deficit>0) ? ' · déficit léger −' + t.deficit + ' kcal' : '';
-    html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:1rem">BMR Mifflin ' + t.bmr + ' kcal' + (t.actKcal>0 ? ' + ' + t.actKcal + ' kcal effort' + (t.estimated ? ' (estimé plan)' : ' (réel Garmin)') : ' · repos') + ' → cible ' + t.kcal + ' kcal · mode carb ' + t.mode + defTxt + '</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);margin-bottom:' + (t.etatNote ? '0.5rem' : '1rem') + '">BMR Mifflin ' + t.bmr + ' kcal' + (t.actKcal>0 ? ' + ' + t.actKcal + ' kcal effort' + (t.estimated ? ' (estimé plan)' : ' (réel Garmin)') : ' · repos') + ' → cible ' + t.kcal + ' kcal · mode carb ' + t.mode + defTxt + '</div>';
+    if (t.etatNote) {
+      html += '<div style="display:flex;align-items:center;gap:0.4rem;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);background:rgba(163,230,53,0.08);border:1px solid rgba(163,230,53,0.25);border-radius:7px;padding:0.45rem 0.6rem;margin-bottom:1rem"><span style="flex-shrink:0">↔</span><span>' + t.etatNote + '</span></div>';
+    }
 
     // Barres d'apport global
     function macroBar(label, val, goal, unit, color) {
