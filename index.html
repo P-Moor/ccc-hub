@@ -1768,7 +1768,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   <div class="settings-sub" id="set-connexion" style="display:none">
     <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Connexion</div>
-    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5">Bientôt — URL backend + token Garmin, état de synchro, resync.</div></div>
+    <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:0.15rem">📍 Lieu d'entraînement <span style="font-weight:400;color:var(--muted,#5e6068);font-size:0.62rem">— météo du coach</span></div><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5;margin-bottom:0.7rem">Sert la météo (température, chaleur, pluie, UV) que le coach IA prend en compte. Coordonnées jamais mises dans une URL.</div><label style="display:block;font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Nom du lieu</label><input type="text" id="geo-label" placeholder="Genève, chalet…" style="width:100%;box-sizing:border-box;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e8e8);border-radius:8px;padding:0.5rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.7rem;margin-bottom:0.6rem"><div style="display:flex;gap:0.5rem;margin-bottom:0.6rem"><div style="flex:1"><label style="display:block;font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Latitude</label><input type="number" step="0.0001" id="geo-lat" placeholder="46.20" style="width:100%;box-sizing:border-box;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e8e8);border-radius:8px;padding:0.5rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.7rem"></div><div style="flex:1"><label style="display:block;font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Longitude</label><input type="number" step="0.0001" id="geo-lon" placeholder="6.14" style="width:100%;box-sizing:border-box;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e8e8);border-radius:8px;padding:0.5rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.7rem"></div></div><div style="display:flex;gap:0.5rem"><button type="button" id="geo-locate" style="flex:1;background:var(--surface2,#0f0f10);border:1px solid var(--accent,#a3e635);color:var(--accent,#a3e635);border-radius:8px;padding:0.55rem;font-family:'DM Mono',monospace;font-size:0.64rem;cursor:pointer">📍 Ma position</button><button type="button" id="geo-save" style="flex:1;background:var(--accent,#a3e635);border:none;color:#141f04;border-radius:8px;padding:0.55rem;font-family:'DM Mono',monospace;font-weight:700;font-size:0.64rem;cursor:pointer">Enregistrer</button></div><div id="geo-status" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.7rem"></div></div>
   </div>
   <div class="settings-sub" id="set-donnees" style="display:none">
     <button data-setting-back type="button" class="back-link">← Paramètres</button>
@@ -10900,6 +10900,105 @@ if (document.readyState === 'loading') {
   }
   if(document.readyState!=='loading') wire(); else document.addEventListener('DOMContentLoaded',wire);
   document.addEventListener('click',function(e){ var t=e.target; while(t&&t!==document.body){ if(t.getAttribute&&t.getAttribute('data-tab')==='settings'){ setTimeout(wire,60); return; } t=t.parentNode; } });
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   MÉTÉO — lieu d'entraînement (fixe + géoloc navigateur).
+   Coords POSTées au backend /api/weather (jamais en URL). Expose
+   window.__weather + window.__loadWeather(force) pour le coach IA.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  function cfg(){ return { url:(localStorage.getItem('garmin_url')||'').replace(/\/+$/,''), token:localStorage.getItem('garmin_token')||'' }; }
+  function getGeo(){ try{ return JSON.parse(localStorage.getItem('ccc_geo')||'null'); }catch(e){ return null; } }
+  function setGeo(g){ localStorage.setItem('ccc_geo', JSON.stringify(g)); }
+  window.__weather = window.__weather || null;
+  var lastFetch = 0, TTL = 20*60*1000;
+
+  function fmtWeather(w){
+    if(!w || !w.now) return '';
+    var n=w.now, t=w.today||{};
+    var s = Math.round(n.temp)+'°C';
+    if(n.feels!=null && Math.abs(n.feels-n.temp)>=2) s += ' (ressenti '+Math.round(n.feels)+'°)';
+    if(n.desc) s += ' · '+n.desc;
+    var extra=[];
+    if(t.temp_max!=null) extra.push('max '+Math.round(t.temp_max)+'°');
+    if(w.hot) extra.push('⚠️ chaleur');
+    if(t.precip_proba!=null && t.precip_proba>=30) extra.push('pluie '+t.precip_proba+'%');
+    if(t.uv_max!=null && t.uv_max>=6) extra.push('UV '+Math.round(t.uv_max));
+    return s + (extra.length? ' — '+extra.join(' · ') : '');
+  }
+
+  window.__loadWeather = function(force){
+    var c = cfg(), g = getGeo();
+    if(!c.url || !c.token || !g || g.lat==null || g.lon==null){ window.__weather=null; return Promise.resolve(null); }
+    var now = Date.now();
+    if(!force && window.__weather && (now-lastFetch)<TTL) return Promise.resolve(window.__weather);
+    return fetch(c.url+'/api/weather', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.token},
+      body: JSON.stringify({lat:g.lat, lon:g.lon, label:g.label||''})
+    }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(w){
+        window.__weather = w; lastFetch = Date.now();
+        try{ document.dispatchEvent(new CustomEvent('ccc-weather',{detail:w})); }catch(e){}
+        var st=$('geo-status'); if(st){ st.style.color='var(--muted,#5e6068)'; st.textContent='🌤️ '+ (g.label?g.label+' — ':'') + fmtWeather(w); }
+        return w;
+      })
+      .catch(function(e){
+        var st=$('geo-status'); if(st){ st.style.color='var(--danger,#f26d5e)'; st.textContent='Météo indisponible ('+e.message+') — vérifie le backend dans ⚙.'; }
+        return null;
+      });
+  };
+
+  function prefill(){
+    var g=getGeo(); if(!g) return;
+    if($('geo-label')) $('geo-label').value = g.label||'';
+    if($('geo-lat'))   $('geo-lat').value   = (g.lat!=null? g.lat : '');
+    if($('geo-lon'))   $('geo-lon').value   = (g.lon!=null? g.lon : '');
+    var st=$('geo-status');
+    if(st && window.__weather){ st.textContent='🌤️ '+(g.label?g.label+' — ':'')+fmtWeather(window.__weather); }
+  }
+
+  function saveFromInputs(){
+    var lat=parseFloat($('geo-lat')&&$('geo-lat').value), lon=parseFloat($('geo-lon')&&$('geo-lon').value);
+    var label=($('geo-label')&&$('geo-label').value||'').trim();
+    var st=$('geo-status');
+    if(isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180){ if(st){st.style.color='var(--danger,#f26d5e)';st.textContent='Coordonnées invalides.';} return; }
+    setGeo({label:label, lat:lat, lon:lon});
+    if(st){ st.style.color='var(--muted,#5e6068)'; st.textContent='Lieu enregistré — chargement météo…'; }
+    window.__loadWeather(true);
+  }
+
+  function locate(){
+    var st=$('geo-status');
+    if(!navigator.geolocation){ if(st){st.style.color='var(--danger,#f26d5e)';st.textContent='Géoloc non supportée par ce navigateur.';} return; }
+    if(st){ st.style.color='var(--muted,#5e6068)'; st.textContent='📍 Localisation en cours…'; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat=Math.round(pos.coords.latitude*1e4)/1e4, lon=Math.round(pos.coords.longitude*1e4)/1e4;
+      if($('geo-lat')) $('geo-lat').value=lat;
+      if($('geo-lon')) $('geo-lon').value=lon;
+      if($('geo-label') && !$('geo-label').value) $('geo-label').value='Ma position';
+      setGeo({label:($('geo-label')&&$('geo-label').value||'Ma position'), lat:lat, lon:lon});
+      window.__loadWeather(true);
+    }, function(err){
+      if(st){ st.style.color='var(--danger,#f26d5e)'; st.textContent='Position refusée/indisponible ('+err.message+').'; }
+    }, {enableHighAccuracy:false, timeout:10000, maximumAge:600000});
+  }
+
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    while(t && t!==document.body){
+      if(t.id==='geo-save'){ saveFromInputs(); return; }
+      if(t.id==='geo-locate'){ locate(); return; }
+      if(t.getAttribute && t.getAttribute('data-setting')==='connexion'){ setTimeout(prefill,60); }
+      t=t.parentNode;
+    }
+  });
+
+  function boot(){ prefill(); window.__loadWeather(false); }
+  if(document.readyState!=='loading') setTimeout(boot,400); else document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot,400); });
 })();
 </script>
 </body>
