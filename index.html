@@ -1701,6 +1701,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
       <div class="set-row" data-setting="connexion" style="display:flex;align-items:center;justify-content:space-between;gap:0.6rem;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;cursor:pointer"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">🔌 Connexion</span><span style="color:var(--muted,#5e6068);font-size:1.1rem;line-height:1">›</span></div>
       <div class="set-row" data-setting="donnees" style="display:flex;align-items:center;justify-content:space-between;gap:0.6rem;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;cursor:pointer"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">💾 Données & sauvegarde</span><span style="color:var(--muted,#5e6068);font-size:1.1rem;line-height:1">›</span></div>
       <div class="set-row" data-setting="historique" style="display:flex;align-items:center;justify-content:space-between;gap:0.6rem;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;cursor:pointer"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">📓 Historique</span><span style="color:var(--muted,#5e6068);font-size:1.1rem;line-height:1">›</span></div>
+      <div class="set-row" data-setting="lexique" style="display:flex;align-items:center;justify-content:space-between;gap:0.6rem;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;cursor:pointer"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">📖 Lexique du coureur</span><span style="color:var(--muted,#5e6068);font-size:1.1rem;line-height:1">›</span></div>
       <div class="set-row" data-setting="apropos" style="display:flex;align-items:center;justify-content:space-between;gap:0.6rem;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;cursor:pointer"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">ℹ️ À propos</span><span style="color:var(--muted,#5e6068);font-size:1.1rem;line-height:1">›</span></div>
     </div>
   </div>
@@ -1783,6 +1784,15 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     <button data-setting-back type="button" class="back-link">← Paramètres</button>
     <div class="ptitle">Historique</div>
     <div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:0.9rem 1rem;margin-top:0.5rem"><button data-tab="journal" style="width:100%;padding:0.7rem;background:var(--accent,#a3e635);color:#0f0f10;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">📒 Journal des repas →</button><div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.55rem">Journal des entraînements — bientôt.</div></div>
+  </div>
+  <div class="settings-sub" id="set-lexique" style="display:none">
+    <button data-setting-back type="button" class="back-link">← Paramètres</button>
+    <div class="ptitle">Lexique du coureur</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--muted,#5e6068);line-height:1.5;margin:0.3rem 0 0.6rem">Tous les termes utilisés dans l'app et en prépa trail, par thème. Cherche un sigle (EF, VMA, TSB, readiness…).</div>
+    <input type="search" id="lexique-search" placeholder="🔎 Chercher un terme…" style="width:100%;box-sizing:border-box;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);color:var(--text,#e8e8e8);border-radius:10px;padding:0.6rem 0.8rem;font-family:'DM Mono',monospace;font-size:0.72rem;margin-bottom:0.4rem">
+    <div id="lexique-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.7rem"></div>
+    <div id="lexique-list"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.8rem">Repères indicatifs. Les seuils marqués « toi » sont tes propres valeurs.</div>
   </div>
   <div class="settings-sub" id="set-apropos" style="display:none">
     <button data-setting-back type="button" class="back-link">← Paramètres</button>
@@ -11023,6 +11033,110 @@ if (document.readyState === 'loading') {
 
   function boot(){ prefill(); window.__loadWeather(false); }
   if(document.readyState!=='loading') setTimeout(boot,400); else document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot,400); });
+})();
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   LEXIQUE DU COUREUR — Réglages ▸ Lexique
+   Glossaire par thème + recherche + filtres. Module isolé, non destructif.
+   ═══════════════════════════════════════════════════════════ */
+(function(){
+  var LEX = [
+    { c:"🫀 Physiologie & seuils", t:[
+      ["EF — Endurance Fondamentale","Allure facile, conversationnelle (zone 2). La brique de base du volume : développe le moteur aérobie sans creuser la fatigue."],
+      ["VMA — Vitesse Maximale Aérobie","Allure à laquelle tu atteins ta VO2max. Référence des séances de fractionné court (ex. 30/30)."],
+      ["VO2max","Consommation maximale d'oxygène (ml/kg/min) : ton plafond aérobie. Toi ≈ 54."],
+      ["Seuil lactique (SL / LT)","Allure ou FC où le lactate s'accumule plus vite qu'il n'est éliminé. Au-delà, tu ne tiens plus longtemps. Toi : 169 bpm · 4:19/km · 392 W."],
+      ["Seuil anaérobie / FTP","Intensité tenable ~1 h. Sur vélo = FTP (Functional Threshold Power), en watts."],
+      ["PMA","Puissance Maximale Aérobie (vélo) : l'équivalent en watts de la VMA."],
+      ["FC max","Fréquence cardiaque maximale atteignable."],
+      ["FC repos (FCR)","FC au réveil, allongé. Basse et stable = bon signe de forme et de récupération."],
+      ["Zones FC (Z1–Z5)","Découpage de l'intensité : Z1–2 facile (endurance), Z3 tempo, Z4 seuil, Z5 VO2max."],
+      ["Réserve cardiaque","Écart FCmax − FCrepos ; base du calcul des zones (méthode Karvonen)."]
+    ]},
+    { c:"📊 Charge & récupération", t:[
+      ["Readiness","Score de « prêt à performer » (0–100) calculé par l'app à partir de HRV, sommeil, Body Battery, FC repos et stress. C'est le verdict du jour : y aller ou lever le pied."],
+      ["TSB — Forme","Training Stress Balance = CTL − ATL = ta fraîcheur. Positif = frais/affûté ; très négatif = fatigué. C'est la tuile « Forme » du cockpit."],
+      ["CTL — Fitness","Charge d'entraînement moyenne sur ~42 j : ta forme de fond, ce que tu as construit."],
+      ["ATL — Fatigue","Charge moyenne sur ~7 j : ta fatigue récente."],
+      ["ACWR","Ratio charge aiguë ÷ chronique (7 j / 28 j). Zone sûre ≈ 0.8–1.3 ; au-delà de 1.5 = risque de blessure."],
+      ["TSS","Training Stress Score : quantifie la charge d'une séance (durée × intensité)."],
+      ["HRV / VFC","Variabilité de la fréquence cardiaque (écart entre battements). Haute = système nerveux récupéré ; une chute signale fatigue, stress ou maladie."],
+      ["Body Battery","Jauge Garmin d'énergie (0–100) : se recharge au repos/sommeil, se vide à l'effort et au stress."],
+      ["RPE","Effort perçu sur une échelle 0–10. Ton ressenti subjectif, qui complète les données objectives."],
+      ["TE — Training Effect","Impact d'une séance mesuré par Garmin : aérobie (1–5) et anaérobie."],
+      ["Deload / décharge","Semaine allégée volontairement pour assimiler la charge. Un volume plus bas y est voulu, pas un manque."],
+      ["Affûtage / tapering","Baisse du volume avant la course pour arriver frais (TSB positif)."],
+      ["Surcompensation","Le gain de forme qui suit la récupération après une surcharge bien dosée."]
+    ]},
+    { c:"⛰️ Trail & course", t:[
+      ["D+ / D−","Dénivelé positif (montée cumulée) / négatif (descente). CCC = 101 km · 6050 m D+."],
+      ["Barrière horaire / cut-off","Heure limite à un point de passage. La dépasser = hors course."],
+      ["GAP","Grade Adjusted Pace : allure ajustée à la pente, pour comparer plat et montée."],
+      ["Ravito","Ravitaillement : point de course avec eau et nourriture."],
+      ["Drop","Différence de hauteur talon–orteil d'une chaussure (mm). Bas = pied plus proche du sol."],
+      ["Cadence","Nombre de pas par minute (spm). Souvent visé ~170–180."],
+      ["Allure / pace","Temps par kilomètre (min/km)."],
+      ["ITRA","Indice de performance trail (International Trail Running Association)."],
+      ["UTMB Index","Score de niveau par distance sur le circuit UTMB."],
+      ["Dénivelé technique","Terrain accidenté qui coûte plus cher que le D+ brut (ex. Ninglinspo)."]
+    ]},
+    { c:"🍚 Nutrition & filières", t:[
+      ["Glucides / carbs","Carburant principal de l'effort intense. En course, viser 60–90 g/h."],
+      ["Glycogène","Réserve de glucides (muscle + foie). Réserves vides = le « mur » / bonk."],
+      ["Carb cycling","Alterner jours high-carb (séances dures/longues) et low-carb (repos/easy). Ton protocole."],
+      ["Bonk / mur","Panne d'énergie brutale quand le glycogène est épuisé."],
+      ["Électrolytes","Sels perdus dans la sueur (sodium, potassium, magnésium) à compenser, surtout par forte chaleur."],
+      ["Sodium","Principal électrolyte de la sueur : clé par chaleur pour éviter crampes et hyponatrémie."],
+      ["Hydratation","Apport en eau, à moduler selon la chaleur et l'apport en sodium."],
+      ["Jeûne","1 jour/semaine sur un jour de repos, dans ton approche carb cycling."],
+      ["Whey / isolat","Protéine de lactosérum ; l'isolat est plus pur et pauvre en lactose (toi : Nutripure Isolat Native)."]
+    ]},
+    { c:"🧠 Spécifique à l'app", t:[
+      ["Fil du jour / Coach du jour","Synthèse IA en tête d'« Aujourd'hui » : forme + séance + nutrition + le nudge du moment."],
+      ["Cerveau unique","Une seule logique IA (persona partagée) nourrie de toutes tes données ; les écrans n'en sont que des angles."],
+      ["Verdict déterministe","Le score readiness calculé par règles = source de vérité. L'IA l'habille mais ne le contredit jamais."],
+      ["Prédiction P10 / P50 / P90","Simulateur Monte-Carlo : temps CCC estimé. P50 = médian, P10 = scénario rapide, P90 = lent."],
+      ["Monte-Carlo","10 000 tirages simulés, calibrés sur tes 3 courses de référence, pour estimer ton temps CCC."],
+      ["Intention / « Pourquoi »","Le contexte que tu écris quand tu t'écartes du plan ; le coach en tient compte au lieu de juger à l'aveugle."],
+      ["Météo du coach","Température, chaleur, pluie, UV de ton lieu, intégrées au raisonnement de l'IA."]
+    ]}
+  ];
+  var listEl, searchEl, chipsEl, active='';
+  function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function render(){
+    if(!listEl) return;
+    var q=norm(searchEl.value); listEl.innerHTML='';
+    chipsEl.querySelectorAll('[data-cat]').forEach(function(s){ var on=s.getAttribute('data-cat')===active; s.style.background=on?'var(--accent,#a3e635)':'transparent'; s.style.color=on?'#141f04':'var(--muted,#5e6068)'; s.style.borderColor=on?'var(--accent,#a3e635)':'var(--border,#242528)'; });
+    var any=false;
+    LEX.forEach(function(cat){
+      if(active && cat.c!==active) return;
+      var hits=cat.t.filter(function(p){ return !q || norm(p[0]).indexOf(q)>=0 || norm(p[1]).indexOf(q)>=0; });
+      if(!hits.length) return; any=true;
+      var h=document.createElement('div'); h.textContent=cat.c; h.style.cssText='font-family:Syne,sans-serif;font-weight:700;font-size:0.8rem;color:var(--accent,#a3e635);margin:0.9rem 0 0.4rem'; listEl.appendChild(h);
+      var card=document.createElement('div'); card.style.cssText='background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;overflow:hidden';
+      hits.forEach(function(p,i){
+        var row=document.createElement('div'); row.style.cssText='padding:0.7rem 0.9rem'+(i?';border-top:1px solid var(--border,#242528)':'');
+        var tt=document.createElement('div'); tt.textContent=p[0]; tt.style.cssText='font-family:DM Mono,monospace;font-weight:700;font-size:0.74rem;color:var(--text,#e8e8e8);margin-bottom:0.15rem';
+        var dd=document.createElement('div'); dd.textContent=p[1]; dd.style.cssText='font-size:0.72rem;color:var(--muted,#5e6068);line-height:1.5';
+        row.appendChild(tt); row.appendChild(dd); card.appendChild(row);
+      });
+      listEl.appendChild(card);
+    });
+    if(!any){ var e=document.createElement('div'); e.textContent='Aucun terme trouvé.'; e.style.cssText='font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);padding:0.6rem 0'; listEl.appendChild(e); }
+  }
+  function build(){
+    listEl=document.getElementById('lexique-list'); searchEl=document.getElementById('lexique-search'); chipsEl=document.getElementById('lexique-chips');
+    if(!listEl||!searchEl||!chipsEl||listEl.getAttribute('data-built')) return; listEl.setAttribute('data-built','1');
+    function chip(label,val){ var s=document.createElement('span'); s.textContent=label; s.setAttribute('data-cat',val); s.style.cssText='cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.32rem 0.66rem;border-radius:14px;border:1px solid var(--border,#242528);color:var(--muted,#5e6068)'; chipsEl.appendChild(s); }
+    chip('Tout','');
+    LEX.forEach(function(cat){ chip(cat.c.replace(/^\S+\s/,''), cat.c); });
+    chipsEl.addEventListener('click', function(e){ var s=e.target; while(s&&s!==chipsEl){ if(s.getAttribute&&s.getAttribute('data-cat')!=null){ active=s.getAttribute('data-cat'); render(); return; } s=s.parentNode; } });
+    searchEl.addEventListener('input', render);
+    render();
+  }
+  document.addEventListener('click', function(e){ var t=e.target; while(t&&t!==document){ if(t.getAttribute&&t.getAttribute('data-setting')==='lexique'){ setTimeout(build,30); return; } t=t.parentNode; } });
+  if(document.readyState!=='loading') build(); else document.addEventListener('DOMContentLoaded', build);
 })();
 </script>
 </body>
