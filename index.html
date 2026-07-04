@@ -6663,6 +6663,9 @@ if (document.readyState === 'loading') {
   var activeSlot = null;
   var searchTerm = '';
   var selectedCat = 'all';
+  // Saisie libre / dictée → analyse IA (4d)
+  var aiBusy = false;
+  var aiError = '';
   // Recherche Open Food Facts (en ligne, toutes marques)
   var offResults = [];
   var offLoading = false;
@@ -6919,6 +6922,19 @@ if (document.readyState === 'loading') {
     foods.forEach(function(f){ if (cats.indexOf(f.cat)<0) cats.push(f.cat); });
 
     var h = '<div style="padding:0.6rem;background:var(--bg,#0f0f10);border-top:1px solid var(--border,#242528)">';
+    // ── Saisie libre / dictée → analyse IA (4d) : voie rapide ──
+    h += '<div style="border:1px solid rgba(163,230,53,0.3);border-radius:8px;padding:0.5rem;margin-bottom:0.6rem;background:rgba(163,230,53,0.04)">';
+    h += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--accent,#a3e635);margin-bottom:0.35rem">✨ Décris ou dicte ce repas <span style="color:var(--muted,#5e6068)">— l\'IA estime les macros</span></div>';
+    h += '<textarea id="nh-ai-text" rows="2" placeholder="ex : omelette 3 œufs, 150 g de riz, une salade + huile d\'olive"' + (aiBusy?' disabled':'') + ' style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.66rem;resize:vertical;margin-bottom:0.4rem"></textarea>';
+    if (aiBusy) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--muted,#5e6068);text-align:center;padding:0.35rem">⏳ Analyse en cours…</div>';
+    } else {
+      h += '<div class="nh-ai-go" data-slot="' + slotId + '" style="text-align:center;cursor:pointer;font-family:DM Mono,monospace;font-size:0.64rem;font-weight:600;color:#0f0f10;background:var(--accent,#a3e635);border-radius:6px;padding:0.45rem">Analyser & ajouter</div>';
+    }
+    if (aiError) h += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--orange,#e8a020);text-align:center;padding:0.35rem 0 0">' + aiError + '</div>';
+    h += '<div style="font-family:DM Mono,monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-align:center;margin-top:0.3rem">🎤 Pour dicter : appuie sur le micro de ton clavier.</div>';
+    h += '</div>';
+    h += '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem">Ou choisis précisément</div>';
     // Recherche
     h += '<input id="nh-search" type="text" placeholder="🔍 Rechercher...' + (isDrinkSlot?' une boisson':' un aliment') + '" value="' + searchTerm + '" style="width:100%;box-sizing:border-box;background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:6px;padding:0.45rem;color:var(--text,#e8e9ea);font-family:DM Mono,monospace;font-size:0.68rem;margin-bottom:0.5rem">';
     // Catégories (chips) — masquées pour le créneau Boissons (une seule catégorie)
@@ -7169,6 +7185,43 @@ if (document.readyState === 'loading') {
     render();
   }
 
+  // ── Analyse IA d'un repas décrit en texte libre (ou dicté) → items macro ──
+  function slotLabelOf(slotId){ for (var i=0;i<MEAL_SLOTS.length;i++){ if (MEAL_SLOTS[i].id===slotId) return MEAL_SLOTS[i].label; } return slotId; }
+  function aiParseMeal(slotId, text) {
+    text = (text||'').trim();
+    if (!text) { aiError = 'Écris ou dicte d\'abord ce que tu as mangé.'; render(); return; }
+    if (typeof window.askClaudeJSON !== 'function' || !localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) {
+      aiError = 'Backend IA non configuré (⚙ Garmin).'; render(); return;
+    }
+    aiBusy = true; aiError = ''; render();
+    var sys = "Tu es un assistant nutrition. On te donne la description libre d'un repas en français (parfois dictée, donc imparfaite). " +
+      "Découpe-le en aliments distincts avec des quantités réalistes et estime les macros par aliment. " +
+      "Si une quantité n'est pas précisée, suppose une portion standard. Les calories doivent être cohérentes avec 4 kcal/g de glucides et protéines, 9 kcal/g de lipides. " +
+      "Réponds UNIQUEMENT en JSON strict, sans texte autour : " +
+      '{"items":[{"food":"nom court","qty":"quantité ex 150g ou ×3","g":<glucides g>,"p":<protéines g>,"l":<lipides g>,"kcal":<kcal>}]}';
+    window.askClaudeJSON('Repas (' + slotLabelOf(slotId) + ') : ' + text, { system: sys, max_tokens: 800 })
+      .then(function(res){
+        var items = (res && res.items) || (Array.isArray(res) ? res : null);
+        if (!items || !items.length) { aiBusy=false; aiError='Rien reconnu — reformule (ex : « 2 œufs, 150 g riz »).'; render(); return; }
+        var dk = todayKey();
+        var day = getDayMeals(dk);
+        if (!day[slotId]) day[slotId] = [];
+        items.forEach(function(it){
+          var g=Math.max(0,Math.round(+it.g||0)), p=Math.max(0,Math.round(+it.p||0)), l=Math.max(0,Math.round(+it.l||0));
+          var kcal=Math.round(+it.kcal|| (g*4+p*4+l*9));
+          day[slotId].push({ food:String(it.food||'aliment').slice(0,60), qty:String(it.qty||'').slice(0,20), g:g, p:p, l:l, kcal:kcal, _ai:true });
+        });
+        saveDayMeals(dk, day);
+        aiBusy=false; aiError=''; activeSlot=null; searchTerm=''; selectedCat='all';
+        render();
+      })
+      .catch(function(e){
+        aiBusy=false;
+        aiError = 'Analyse impossible' + (e && e.message ? ' (' + e.message + ')' : '') + '. Réessaie ou utilise la recherche.';
+        render();
+      });
+  }
+
   // ════════════════════════════════════════
   // HANDLERS
   // ════════════════════════════════════════
@@ -7187,11 +7240,18 @@ if (document.readyState === 'loading') {
         activeSlot = el.getAttribute('data-slot');
         searchTerm=''; selectedCat='all';
         offResults=[]; offError=''; offQueryDone=''; offLoading=false;
+        aiBusy=false; aiError='';
         render();
       });
     });
     var cancel = document.querySelector('.nh-cancel');
-    if (cancel) cancel.addEventListener('click', function(){ activeSlot=null; offResults=[]; offError=''; offQueryDone=''; render(); });
+    if (cancel) cancel.addEventListener('click', function(){ activeSlot=null; offResults=[]; offError=''; offQueryDone=''; aiBusy=false; aiError=''; render(); });
+
+    var aiGo = document.querySelector('.nh-ai-go');
+    if (aiGo) aiGo.addEventListener('click', function(){
+      var ta = document.getElementById('nh-ai-text');
+      aiParseMeal(aiGo.getAttribute('data-slot'), ta ? ta.value : '');
+    });
 
     var search = document.getElementById('nh-search');
     if (search) {
