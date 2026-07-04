@@ -5145,6 +5145,7 @@ if (document.readyState === 'loading') {
     "MATÉRIEL : rotation Adizero Boston 13 / Trabuco Max 3 / Salomon S/Lab Ultra 2 / Brooks Cascadia. NE JAMAIS recommander Hoka. " +
     "STYLE : ferme mais bienveillant ; tu le challenges et restes franc même si c'est inconfortable ; tu contres la culpabilité d'entraînement par les DONNÉES objectives (HRV, Body Battery, readiness, TSB), jamais par des généralités rassurantes ; tu valides seulement quand c'est mérité. " +
     "INTELLIGENCE D'ADAPTATION : tu raisonnes toujours en CONTEXTE avant de juger. Un volume ou une intensité plus bas n'est PAS un manque en soi : croise-le avec la météo (chaleur/canicule, pluie, vent — fournie dans les données), la fatigue objective (HRV, Body Battery, readiness, TSB), la phase du plan (deload voulu, affûtage), les contraintes santé (goutte, hallux, brûlures plantaires) et l'intention déclarée par Pierre. S'il a adapté intelligemment (ex : lever le pied par 35-38 °C, écourter sous la pluie battante, décharger en fatigue), tu le RECONNAIS comme une bonne décision — tu ne dis JAMAIS 'sous le volume' de façon mécanique. Tu ne signales un vrai déficit que s'il est RÉPÉTÉ ET sans raison contextuelle. Face à un doute, tu poses la question plutôt que d'asséner un verdict rigide. " +
+    "UNE SEULE VOIX : l'app pilote déjà nutrition et hydratation depuis les MÊMES signaux que toi (champ 'etat' = leviers chaleur/décharge/affûtage/fatigue/gros_jour/mode_carb ; champs 'decision_*' = ce que l'app a déjà décidé, ex 'déficit annulé car fatigue', 'hydratation +1 L chaleur'). Quand une décision t'est fournie, tu la CONFIRMES et l'EXPLIQUES — tu ne la contredis JAMAIS. Tes conseils entraînement, nutrition et hydratation doivent toujours pointer dans la même direction que ces leviers (si gros jour + chaleur : recharge glucides ET hydrate ; si décharge/fatigue : allège et laisse récupérer). " +
     "Tu réponds en français, concis et actionnable, tu tutoies Pierre. JAMAIS de conseil médical alarmant.";
 
   async function loadGarmin(forceRefresh) {
@@ -7634,7 +7635,10 @@ if (document.readyState === 'loading') {
       if (t) {
         ctx.nutrition_cible = { kcal:t.kcal, glucides:t.g, proteines:t.p, lipides:t.l, mode_carb:t.mode, objectif:t.objective, deficit_kcal:t.deficit||0 };
         ctx.nutrition_restant = { kcal:Math.max(0,t.kcal-conso.kcal), glucides:Math.max(0,t.g-conso.glucides), proteines:Math.max(0,t.p-conso.proteines), lipides:Math.max(0,t.l-conso.lipides) };
+        if (t.etatNote) ctx.decision_nutrition = t.etatNote;
       }
+      // ── SOURCE UNIQUE : mêmes leviers que nutrition + hydratation ──
+      try { var _E = (typeof window.CCC_ETAT==='function') ? window.CCC_ETAT() : null; if (_E) { ctx.etat = _E.leviers; ctx.phase_plan = _E.phase && _E.phase.nom; } } catch(e){}
     } catch(e){}
     try { ctx.nutrition_objectif = localStorage.getItem('ccc_nutri_objective') || 'prepa'; } catch(e){}
 
@@ -8413,6 +8417,16 @@ if (document.readyState === 'loading') {
     try { if (window.__weather && window.__weather.now){ var _w=window.__weather; st.meteo = { temp:_w.now.temp, ressenti:_w.now.feels, humidite:_w.now.humidity, vent_kmh:_w.now.wind_kmh, description:_w.now.desc, temp_max_jour:(_w.today&&_w.today.temp_max), ressenti_max_jour:(_w.today&&_w.today.feels_max), pluie_proba:(_w.today&&_w.today.precip_proba), uv_max:(_w.today&&_w.today.uv_max), chaleur:!!_w.hot, lieu:_w.label||'' }; } } catch(e){}
     // Intention / raison déclarée par Pierre quand il s'écarte du plan
     try { var _int=(localStorage.getItem('ccc_intention')||'').trim(); if(_int) st.intention=_int; } catch(e){}
+    // ── SOURCE UNIQUE : les mêmes leviers qui pilotent nutrition + hydratation ──
+    try {
+      var _E = (typeof window.CCC_ETAT === 'function') ? window.CCC_ETAT() : null;
+      if (_E) { st.etat = _E.leviers; st.phase_plan = _E.phase && _E.phase.nom; }
+    } catch(e){}
+    // ── Décisions déjà prises par l'app (à confirmer/expliquer, jamais contredire) ──
+    try {
+      var _tg = (window.__nutriTargets && window.__nutriTargets()) || null;
+      if (_tg) { st.nutrition_cible = { kcal:_tg.kcal, glucides:_tg.g, proteines:_tg.p, lipides:_tg.l, mode:_tg.mode }; if (_tg.etatNote) st.decision_nutrition = _tg.etatNote; }
+    } catch(e){}
     return st;
   }
 
