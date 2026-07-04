@@ -1546,6 +1546,8 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
 <div class="panel" id="panel-nutrition"><div class="inner">
   <div class="ptitle">Nutrition <span class="ptitle-sub">plan · recettes · assiette du jour</span></div>
 
+  <div id="assiette-jour"></div>
+
   <div class="sec sec-first">Plan de la semaine</div>
   <div class="ag-nav" id="ag-nav"></div>
   <div id="ag-display"></div>
@@ -2523,6 +2525,7 @@ function switchTab(name) {
   if (name === 'strava' && typeof window.__stravaLoad === 'function') { try { window.__stravaLoad(false); } catch(e){} }
   if (name === 'simu' && typeof window.__simuInit === 'function') { try { window.__simuInit(); } catch(e){} }
   if (name === 'today' && typeof window.__heroRefresh === 'function') { try { window.__heroRefresh(); } catch(e){} }
+  if (name === 'nutrition' && typeof window.__assietteRender === 'function') { try { window.__assietteRender(); } catch(e){} }
   if (typeof window.__navGlassMove === 'function') { try { window.__navGlassMove(); } catch(e){} }
 }
 
@@ -11160,6 +11163,76 @@ if (document.readyState === 'loading') {
   }
   document.addEventListener('click', function(e){ var t=e.target; while(t&&t!==document){ if(t.getAttribute&&t.getAttribute('data-setting')==='lexique'){ setTimeout(build,30); return; } t=t.parentNode; } });
   if(document.readyState!=='loading') build(); else document.addEventListener('DOMContentLoaded', build);
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   ASSIETTE DU JOUR — reco nutrition dynamique (une seule voix)
+   Lit window.__nutriTargets() (kcal/macros/mode carb) + window.CCC_ETAT()
+   (leviers chaleur/fatigue/décharge). S'affiche en tête de l'onglet
+   Nutrition. Ne remplace pas le plan 8 sem. : elle le complète. Non destructif.
+════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var MODES = {
+    HC: { nom:'High Carb', tag:'plein carburant', col:'#a3e635',
+          intro:"Grosse journée ou veille de bloc — on remplit les réserves de glycogène.",
+          fecule:'riz, pâtes, patate douce, semoule',
+          exemple:'Riz 200 g cuit + poulet 150 g + légumes + compote ou banane en dessert.' },
+    MC: { nom:'Medium Carb', tag:'carburant modéré', col:'#5eead4',
+          intro:"Séance modérée — glucides suffisants autour de l'effort, sans excès.",
+          fecule:'patate douce, riz, quinoa, pain complet',
+          exemple:'Patate douce + œufs ×3 + grosse portion de légumes + un fruit.' },
+    LC: { nom:'Low Carb', tag:'axé protéines & lipides', col:'#a78bfa',
+          intro:"Repos ou footing léger — on baisse les féculents, priorité protéines et bons lipides.",
+          fecule:'légumineuses en petite quantité, légumes racines',
+          exemple:'Saumon ou œufs + avocat + grande assiette de légumes verts, peu de féculents.' }
+  };
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function dateLabel(){ try { return new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}); } catch(e){ return ''; } }
+  function stat(v,u,lbl){
+    return '<div style="flex:1;min-width:58px;text-align:center;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.5rem 0.3rem">'+
+      '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem">'+v+'<span style="font-size:0.58rem;color:var(--muted,#5e6068)">'+u+'</span></div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.04em;margin-top:0.15rem">'+lbl+'</div></div>';
+  }
+  function blk(ico,titre,val,detail){
+    return '<div style="display:flex;gap:0.6rem;align-items:flex-start;padding:0.5rem 0;border-top:1px solid var(--border,#242528)">'+
+      '<span style="font-size:1rem;flex-shrink:0">'+ico+'</span><div style="flex:1">'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.66rem;color:var(--text,#e8e8e8)"><b>'+titre+'</b> · '+val+'</div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068);margin-top:0.1rem;line-height:1.4">'+detail+'</div></div></div>';
+  }
+  function render(){
+    var el = document.getElementById('assiette-jour');
+    if (!el) return;
+    var t = null; try { t = (window.__nutriTargets && window.__nutriTargets()) || null; } catch(e){}
+    if (!t) { el.innerHTML=''; return; }
+    var E = null; try { E = (typeof window.CCC_ETAT==='function') ? window.CCC_ETAT() : null; } catch(e){}
+    var mode = t.mode || 'MC';
+    var M = MODES[mode] || MODES.MC;
+    var portF = Math.max(1, Math.round((t.g||0)/45));
+
+    var html = '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.2rem;margin:0.2rem 0 0.4rem">';
+    html += '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem">'+
+      '<span style="font-family:Syne,sans-serif;font-weight:700;font-size:1.02rem">🍽️ Assiette du jour</span>'+
+      '<span style="font-family:DM Mono,monospace;font-size:0.6rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:10px;background:'+M.col+';color:#0f0f10">'+mode+'</span>'+
+      '<span style="margin-left:auto;font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+esc(dateLabel())+'</span></div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.64rem;color:var(--muted,#5e6068);line-height:1.5;margin-bottom:0.7rem"><b style="color:var(--text,#e8e8e8)">'+esc(M.nom)+'</b> · '+esc(M.tag)+' — '+esc(M.intro)+'</div>';
+    html += '<div style="display:flex;gap:0.4rem;margin-bottom:0.5rem">'+stat(t.kcal,'','kcal')+stat(t.g,'g','Gluc.')+stat(t.p,'g','Prot.')+stat(t.l,'g','Lip.')+'</div>';
+    if (t.estimated) html += '<div style="font-family:DM Mono,monospace;font-size:0.54rem;color:var(--muted,#5e6068);margin-bottom:0.5rem">Estimé depuis la séance prévue (pas encore de séance Garmin aujourd\'hui).</div>';
+    if (t.etatNote) html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:#a3e635;background:rgba(163,230,53,0.08);border:1px solid rgba(163,230,53,0.25);border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.5rem;line-height:1.45">↔ '+esc(t.etatNote)+'</div>';
+    if (E && E.leviers && E.leviers.chaleur) html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:#f59e0b;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.5rem;line-height:1.45">☀ Chaleur — sale un peu plus, fruits + électrolytes, hydrate avant d\'avoir soif.</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin:0.5rem 0 0">Répartition</div>';
+    html += blk('🥩','Protéine', (t.p||0)+' g/j', 'Œufs, poulet, poisson, skyr, tofu — vise ~'+Math.round((t.p||0)/3)+' g par repas.');
+    html += blk('🍚','Glucides', (t.g||0)+' g/j · ≈'+portF+' portion'+(portF>1?'s':''), M.fecule+'. '+(mode==='HC'?'Autour ET à distance de la séance.':mode==='LC'?'Le peu de féculents concentré autour de la séance.':'Priorité avant/après l\'effort.'));
+    html += blk('🥦','Légumes', 'à volonté', 'Couleur, fibres, micronutriments — la moitié de l\'assiette.');
+    html += blk('🫒','Lipides', (t.l||0)+' g/j', 'Huile d\'olive, avocat, oléagineux, poissons gras.');
+    html += '<div style="margin-top:0.6rem;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem 0.7rem"><div style="font-family:DM Mono,monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Exemple repas principal</div><div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--text,#e8e8e8);line-height:1.45">'+esc(M.exemple)+'</div></div>';
+    html += '</div>';
+    el.innerHTML = html;
+  }
+  window.__assietteRender = render;
+  document.addEventListener('ccc-weather', function(){ try{ render(); }catch(e){} });
+  if (document.readyState!=='loading') render(); else document.addEventListener('DOMContentLoaded', render);
 })();
 </script>
 </body>
