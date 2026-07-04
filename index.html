@@ -1434,6 +1434,10 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
         <option value="">Aucune</option><option>Hallux</option><option>Dos</option><option>Genou</option><option>Mollet</option><option>Tendon d'Achille</option><option>Autre</option>
       </select>
     </div>
+    <div style="margin-top:0.6rem">
+      <div style="font-size:0.72rem;color:var(--muted,#5e6068);margin-bottom:0.25rem">Pourquoi (contexte du jour) — le coach en tient compte</div>
+      <textarea id="feel-why" rows="2" placeholder="Ex : 38 °C toute la semaine, j'ai levé le pied. / Décharge voulue. / Réveil crevé." style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem;font-size:0.76rem;font-family:inherit;resize:vertical"></textarea>
+    </div>
   </div>
   </div>
   </details>
@@ -5033,6 +5037,7 @@ if (document.readyState === 'loading') {
     "Whey par défaut = Nutripure Isolat Native. Nutrition de course : Näak (partenaire CCC), Maurten, SIS, Overstim's, Aptonia. " +
     "MATÉRIEL : rotation Adizero Boston 13 / Trabuco Max 3 / Salomon S/Lab Ultra 2 / Brooks Cascadia. NE JAMAIS recommander Hoka. " +
     "STYLE : ferme mais bienveillant ; tu le challenges et restes franc même si c'est inconfortable ; tu contres la culpabilité d'entraînement par les DONNÉES objectives (HRV, Body Battery, readiness, TSB), jamais par des généralités rassurantes ; tu valides seulement quand c'est mérité. " +
+    "INTELLIGENCE D'ADAPTATION : tu raisonnes toujours en CONTEXTE avant de juger. Un volume ou une intensité plus bas n'est PAS un manque en soi : croise-le avec la météo (chaleur/canicule, pluie, vent — fournie dans les données), la fatigue objective (HRV, Body Battery, readiness, TSB), la phase du plan (deload voulu, affûtage), les contraintes santé (goutte, hallux, brûlures plantaires) et l'intention déclarée par Pierre. S'il a adapté intelligemment (ex : lever le pied par 35-38 °C, écourter sous la pluie battante, décharger en fatigue), tu le RECONNAIS comme une bonne décision — tu ne dis JAMAIS 'sous le volume' de façon mécanique. Tu ne signales un vrai déficit que s'il est RÉPÉTÉ ET sans raison contextuelle. Face à un doute, tu poses la question plutôt que d'asséner un verdict rigide. " +
     "Tu réponds en français, concis et actionnable, tu tutoies Pierre. JAMAIS de conseil médical alarmant.";
 
   async function loadGarmin(forceRefresh) {
@@ -7527,6 +7532,11 @@ if (document.readyState === 'loading') {
     // U4.1 — mémoire longitudinale : tendances / régressions sur plusieurs jours
     try { var tr = window.__computeTrends && window.__computeTrends(); if (tr) ctx.tendances = tr; } catch(e){}
 
+    // météo du lieu (fournie par window.__weather) — le coach en tient compte
+    try { if (window.__weather && window.__weather.now){ var _w=window.__weather; ctx.meteo = { temp:_w.now.temp, ressenti:_w.now.feels, humidite:_w.now.humidity, vent_kmh:_w.now.wind_kmh, description:_w.now.desc, temp_max_jour:(_w.today&&_w.today.temp_max), ressenti_max_jour:(_w.today&&_w.today.feels_max), pluie_proba:(_w.today&&_w.today.precip_proba), uv_max:(_w.today&&_w.today.uv_max), chaleur:!!_w.hot, lieu:_w.label||'' }; } } catch(e){}
+    // intention/raison déclarée par Pierre quand il s'écarte du plan
+    try { var _int=(localStorage.getItem('ccc_intention')||'').trim(); if(_int) ctx.intention=_int; } catch(e){}
+
     return ctx;
   }
 
@@ -7534,7 +7544,8 @@ if (document.readyState === 'loading') {
     " CONTEXTE D'USAGE : tu réponds dans le chat de suivi. Tiens compte de la conversation récente fournie (continuité, ne repars pas de zéro). " +
     "Tu disposes du contexte réel (séance du jour et de demain, semaine jour par jour prévu/réalisé, forme Garmin, cibles et restant nutrition) : APPUIE-TOI dessus concrètement. " +
     "Tu disposes aussi de TENDANCES (mémoire longitudinale : évolution sur plusieurs jours de HRV, FC repos, sommeil, Body Battery, stress, poids, douleur/RPE, et volume course prévu/réalisé sur plusieurs semaines) : SIGNALE spontanément les tendances et régressions notables quand c'est pertinent (ex. « ton HRV baisse depuis ~10j », « douleur hallux récurrente sur 14j », « poids qui stagne », « 3e semaine consécutive de dépassement du volume prévu ») sans alarmer inutilement, et relie-les à des actions concrètes. " +
-    "Quand Pierre demande une modification (repas, hydratation, volume), tu la PROPOSES via le champ action : tu n'écris jamais 'c'est fait', c'est l'app qui applique APRÈS validation de Pierre.";
+    "Quand Pierre demande une modification (repas, hydratation, volume), tu la PROPOSES via le champ action : tu n'écris jamais 'c'est fait', c'est l'app qui applique APRÈS validation de Pierre. " +
+    "INTELLIGENCE D'ADAPTATION : le contexte peut inclure la MÉTÉO du lieu (température, ressenti, chaleur, pluie, UV) et parfois une INTENTION de Pierre (pourquoi il s'écarte du plan). Ne juge JAMAIS un écart au volume ou à l'intensité sans regarder ces facteurs. Par forte chaleur (ressenti ≥ 28°C), en altitude, sous la pluie, ou en cas de fatigue / contrainte de vie / maladie / deload volontaire déclarés, un volume réduit ou une séance écourtée est une ADAPTATION INTELLIGENTE, pas un manque : valide le choix d'avoir adapté plutôt que de dire « sous le volume ». Ne parle de retard ou de déficit que si l'écart est RÉPÉTÉ ET sans raison contextuelle. Intègre concrètement la météo dans tes conseils (hydratation, électrolytes, heure de sortie, exposition UV, couverture pluie).";
 
   function addMsg(role, text, isLoading) {
     var div = document.createElement('div');
@@ -8262,6 +8273,10 @@ if (document.readyState === 'loading') {
     } catch(e){}
     // U4.3 — ressenti du jour (RPE / douleur / zone)
     try { var fl = window.__getFeel && window.__getFeel(); if (fl && (fl.rpe || fl.pain || fl.zone)) st.ressenti = { rpe: fl.rpe, douleur: fl.pain, zone: fl.zone }; } catch(e){}
+    // Météo du lieu (window.__weather) — le coach en tient compte pour juger le volume
+    try { if (window.__weather && window.__weather.now){ var _w=window.__weather; st.meteo = { temp:_w.now.temp, ressenti:_w.now.feels, humidite:_w.now.humidity, vent_kmh:_w.now.wind_kmh, description:_w.now.desc, temp_max_jour:(_w.today&&_w.today.temp_max), ressenti_max_jour:(_w.today&&_w.today.feels_max), pluie_proba:(_w.today&&_w.today.precip_proba), uv_max:(_w.today&&_w.today.uv_max), chaleur:!!_w.hot, lieu:_w.label||'' }; } } catch(e){}
+    // Intention / raison déclarée par Pierre quand il s'écarte du plan
+    try { var _int=(localStorage.getItem('ccc_intention')||'').trim(); if(_int) st.intention=_int; } catch(e){}
     return st;
   }
 
@@ -10506,9 +10521,18 @@ if (document.readyState === 'loading') {
     migrateLegacy();
     var rpe=document.getElementById('feel-rpe'), pain=document.getElementById('feel-pain'), zone=document.getElementById('feel-zone');
     var rpeV=document.getElementById('feel-rpe-val'), painV=document.getElementById('feel-pain-val');
+    var why=document.getElementById('feel-why');
     if(!rpe||!pain||!zone||!rpeV||!painV) return;
     var s=getFeel(dk());
     if(s){ if(s.rpe!=null) rpe.value=s.rpe; if(s.pain!=null) pain.value=s.pain; if(s.zone) zone.value=s.zone; }
+    if(why){ try{ why.value=(s&&s.why)||localStorage.getItem('ccc_intention')||''; }catch(e){}
+      var whyT=null;
+      why.addEventListener('input', function(){
+        try{ localStorage.setItem('ccc_intention', why.value.trim()); }catch(e){}
+        if(whyT) clearTimeout(whyT);
+        whyT=setTimeout(function(){ saveFeel({ rpe:parseInt(rpe.value,10)||0, pain:parseInt(pain.value,10)||0, zone:zone.value||'', why:why.value.trim(), ts:Date.now() }); scheduleHubRefresh(); }, 1200);
+      });
+    }
     function paint(){
       rpeV.textContent = rpe.value+'/10';
       painV.textContent = pain.value+'/10';
@@ -10516,7 +10540,7 @@ if (document.readyState === 'loading') {
     }
     paint();
     function commit(){
-      saveFeel({ rpe:parseInt(rpe.value,10)||0, pain:parseInt(pain.value,10)||0, zone:zone.value||'', ts:Date.now() });
+      saveFeel({ rpe:parseInt(rpe.value,10)||0, pain:parseInt(pain.value,10)||0, zone:zone.value||'', why:(why?why.value.trim():''), ts:Date.now() });
       paint();
       scheduleHubRefresh();
     }
