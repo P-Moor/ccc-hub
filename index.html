@@ -1562,6 +1562,514 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   </div>
   </div>
   </details>
+
+  <div class="sec">Plan de course</div>
+  <style id="raceplan-css">
+  #raceplan,#profdetail{
+    --bg:#06070a;--surface:#101216;--surface2:#171a1f;--border:#23262d;
+    --text:#eceef1;--muted:#8b909b;--accent:#c5f24e;--cyan:#5eead4;--violet:#a78bfa;
+    --green:#5ec27a;--amber:#f59e0b;--red:#ef4444;--radius:18px;
+  }
+  #raceplan{font-family:'Satoshi',system-ui,sans-serif;letter-spacing:.005em}
+  #raceplan h1,#raceplan h2,#raceplan h3{font-family:'Clash Display',sans-serif;font-weight:700;line-height:1.05}
+  #raceplan .mono{font-family:'JetBrains Mono',monospace}
+  #raceplan .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));
+    border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:.9rem;backdrop-filter:blur(20px)}
+  #raceplan .kick{font-family:'JetBrains Mono';font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #raceplan .hero{background:radial-gradient(120% 140% at 0% 0%,rgba(197,242,78,.10),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.006));
+    border:1px solid var(--border);border-radius:22px;padding:1.2rem;margin-bottom:.9rem;position:relative;overflow:hidden}
+  #raceplan .hero::before{content:'';position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7}
+  #raceplan .route{display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono';font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  #raceplan .route .line{flex:1;height:1px;background:linear-gradient(90deg,var(--accent),var(--cyan))}
+  #raceplan .hero h1{font-size:2.4rem;margin:.5rem 0 .2rem}
+  #raceplan .hero .specs{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+  #raceplan .chip{font-family:'JetBrains Mono';font-size:.6rem;padding:.28rem .55rem;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+  #raceplan .chip b{color:var(--accent);font-weight:700}
+  #raceplan .warn{display:flex;gap:.5rem;align-items:flex-start;font-family:'JetBrains Mono';font-size:.6rem;line-height:1.5;color:var(--amber);
+    background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:.55rem .7rem;margin-bottom:.9rem}
+  #raceplan .tgt{display:flex;align-items:center;gap:.8rem;margin-top:.7rem}
+  #raceplan .tgt input{flex:1;accent-color:var(--accent)}
+  #raceplan .tgt .val{font-family:'Clash Display';font-weight:700;font-size:1.3rem;color:var(--accent);min-width:96px;text-align:right}
+  #raceplan input[type=range]{-webkit-appearance:none;height:4px;border-radius:2px;background:var(--surface2);outline:none}
+  #raceplan input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);cursor:pointer}
+  #raceplan .assist-card{background:radial-gradient(140% 120% at 100% 0%,rgba(197,242,78,.10),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));border-color:rgba(197,242,78,.28)}
+  #raceplan .assist-head{display:flex;align-items:center;gap:.5rem;font-family:'Satoshi';font-weight:700;font-size:.95rem}
+  #raceplan .assist-head .ico{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#141f04;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+  #raceplan .astrip{display:flex;gap:.5rem;margin-top:.7rem}
+  #raceplan .atile{flex:1;min-width:0;background:rgba(197,242,78,.06);border:1px solid rgba(197,242,78,.25);border-radius:12px;padding:.55rem .4rem;text-align:center}
+  #raceplan .atile .an{font-family:'Satoshi';font-weight:700;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #raceplan .atile .ak{font-family:'JetBrains Mono';font-size:.5rem;color:var(--muted);margin-top:.1rem}
+  #raceplan .atile .ae{font-family:'Clash Display';font-weight:700;font-size:1.15rem;color:var(--accent);margin-top:.25rem}
+  #raceplan .atile .ad{font-family:'JetBrains Mono';font-size:.5rem;color:var(--muted);margin-top:.28rem;line-height:1.4}
+  #raceplan .atile .ad b{color:var(--text);font-weight:700}
+  #raceplan .profwrap{position:relative;margin:.2rem 0 .3rem}
+  #raceplan .profwrap svg{width:100%;height:150px;display:block;overflow:visible}
+  #raceplan .leg{display:flex;gap:1rem;flex-wrap:wrap;font-family:'JetBrains Mono';font-size:.54rem;color:var(--muted);margin-top:.3rem}
+  #raceplan .leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:.3rem;vertical-align:-1px}
+  #raceplan .profcard{cursor:pointer;transition:border-color .18s}
+  #raceplan .profcard:active{border-color:rgba(197,242,78,.4)}
+  #raceplan .prof-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+  #raceplan .prof-open{font-family:'JetBrains Mono';font-size:.6rem;color:var(--accent);background:rgba(197,242,78,.1);border:1px solid rgba(197,242,78,.28);padding:.18rem .5rem;border-radius:999px;white-space:nowrap}
+  #profdetail{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;flex-direction:column;font-family:'Satoshi',system-ui,sans-serif}
+  #profdetail.open{display:flex}
+  #profdetail .pd-top{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem .6rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+  #profdetail .pd-t1{font-family:'Clash Display';font-weight:600;font-size:1.15rem}
+  #profdetail .pd-t2{font-family:'JetBrains Mono';font-size:.58rem;color:var(--muted);margin-top:.1rem}
+  #profdetail .pd-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  #profdetail .pd-filters{display:flex;gap:.4rem;flex-wrap:wrap;padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+  #profdetail .pdf{font-family:'JetBrains Mono';font-size:.6rem;padding:.28rem .6rem;border-radius:999px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:.32rem;user-select:none}
+  #profdetail .pdf .sw{width:9px;height:9px;border-radius:2px;background:currentColor;opacity:.35}
+  #profdetail .pdf.on{color:#141f04;background:var(--accent);border-color:var(--accent);font-weight:700}
+  #profdetail .pdf.on .sw{opacity:1;background:#141f04}
+  #profdetail .pd-body{position:relative;flex:1;min-height:0;display:flex}
+  #profdetail .pd-yaxis{position:absolute;left:0;top:0;bottom:0;width:42px;z-index:2;pointer-events:none}
+  #profdetail .pd-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  #profdetail .pd-scroll svg{height:100%;display:block}
+  #profdetail .pd-hint{text-align:center;font-family:'JetBrains Mono';font-size:.55rem;color:var(--muted);padding:.5rem;border-top:1px solid var(--border)}
+  #raceplan .tl{position:relative;margin-top:.4rem}
+  #raceplan .cp{position:relative;display:flex;gap:.75rem;padding:.55rem 0;cursor:pointer;align-items:flex-start}
+  #raceplan .cp .node{position:relative;flex-shrink:0;width:34px;display:flex;justify-content:center}
+  #raceplan .cp .node::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:var(--border);z-index:0}
+  #raceplan .cp:first-child .node::before{top:26px}
+  #raceplan .cp:last-child .node::before{bottom:auto;height:26px}
+  #raceplan .cp .dot{position:relative;z-index:1;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:var(--surface2);border:1px solid var(--border)}
+  #raceplan .cp.base .dot{background:rgba(94,234,212,.14);border-color:var(--cyan)}
+  #raceplan .cp.finish .dot{background:rgba(197,242,78,.16);border-color:var(--accent)}
+  #raceplan .cp.assist .dot{background:rgba(197,242,78,.16);border-color:var(--accent);box-shadow:0 0 10px rgba(197,242,78,.35)}
+  #raceplan .cp .body{flex:1;min-width:0}
+  #raceplan .cp-top{display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start}
+  #raceplan .cp .nm{font-family:'Satoshi';font-weight:700;font-size:.86rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+  #raceplan .cp .sub{font-family:'JetBrains Mono';font-size:.56rem;color:var(--muted);margin-top:.15rem}
+  #raceplan .cp .times{flex-shrink:0;text-align:right}
+  #raceplan .cp .eta{font-family:'Clash Display';font-weight:700;font-size:1.05rem}
+  #raceplan .cp .co{font-family:'JetBrains Mono';font-size:.54rem;color:var(--muted);margin-top:.1rem}
+  #raceplan .pill{font-family:'JetBrains Mono';font-size:.5rem;padding:.12rem .4rem;border-radius:6px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  #raceplan .pill-assist{background:var(--accent);color:#141f04;font-weight:700}
+  #raceplan .pill-base{background:rgba(94,234,212,.16);color:var(--cyan)}
+  #raceplan .pill-fin{background:rgba(197,242,78,.16);color:var(--accent)}
+  #raceplan .pill-rav{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  #raceplan .gauge{margin-top:.45rem}
+  #raceplan .gbar{position:relative;height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
+  #raceplan .gprog{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.07)}
+  #raceplan .gmarg{position:absolute;top:0;bottom:0;right:0}
+  #raceplan .gmarg.m-ok{background:linear-gradient(90deg,var(--green),var(--accent))}
+  #raceplan .gmarg.m-warn{background:var(--amber)}
+  #raceplan .gmarg.m-bad{background:var(--red)}
+  #raceplan .gdoor{position:absolute;top:-2px;bottom:-2px;right:0;width:2px;background:var(--text);opacity:.5}
+  #raceplan .glab{display:flex;justify-content:space-between;gap:.4rem;font-family:'JetBrains Mono';font-size:.52rem;color:var(--muted);margin-top:.26rem}
+  #raceplan .glab .mid{font-weight:700}
+  #raceplan .m-ok{color:var(--green)} #raceplan .m-warn{color:var(--amber)} #raceplan .m-bad{color:var(--red)}
+  #raceplan .cp-detail{display:none;padding:.1rem 0 .5rem 3.4rem;font-family:'JetBrains Mono';font-size:.6rem;color:var(--muted);line-height:1.6}
+  #raceplan .cp-detail.open{display:block}
+  #raceplan .cp-detail b{color:var(--text)}
+  #raceplan .secrow{padding:.5rem 0;border-top:1px solid var(--border)}
+  #raceplan .secrow:first-child{border-top:none}
+  #raceplan .secr-top{display:flex;justify-content:space-between;gap:.6rem;font-family:'JetBrains Mono';font-size:.64rem}
+  #raceplan .secr-top .k{color:var(--text);font-weight:500} #raceplan .secr-top .v{color:var(--muted);text-align:right;white-space:nowrap}
+  #raceplan .sbar{height:6px;border-radius:4px;background:var(--surface2);overflow:hidden;margin:.3rem 0}
+  #raceplan .sfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--accent) 45%,var(--amber) 78%,var(--red));border-radius:4px}
+  #raceplan .secr-sub{font-family:'JetBrains Mono';font-size:.52rem;color:var(--muted)}
+  #raceplan .fuel-sum{display:flex;gap:.5rem;margin:.6rem 0 .3rem}
+  #raceplan .fuel-sum .ft{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:.55rem .3rem;text-align:center}
+  #raceplan .ft .fv{font-family:'Clash Display';font-weight:700;font-size:1.15rem;color:var(--accent)}
+  #raceplan .ft .fl{font-family:'JetBrains Mono';font-size:.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+  #raceplan .fleg{border:1px solid var(--border);border-radius:14px;padding:.7rem .8rem;margin-bottom:.5rem;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
+  #raceplan .fleg.restock-assist{border-color:rgba(197,242,78,.3);background:rgba(197,242,78,.05)}
+  #raceplan .leg-top{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+  #raceplan .leg-nm{font-family:'Satoshi';font-weight:700;font-size:.82rem}
+  #raceplan .leg-dur{font-family:'Clash Display';font-weight:700;font-size:1.05rem;color:var(--text);flex-shrink:0}
+  #raceplan .leg-sub{font-family:'JetBrains Mono';font-size:.54rem;color:var(--muted);margin-top:.1rem}
+  #raceplan .leg-need{font-family:'JetBrains Mono';font-size:.6rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+  #raceplan .leg-need b{color:var(--text);font-weight:700}
+  #raceplan .pips{display:flex;gap:3px;margin-top:.45rem;flex-wrap:wrap;align-items:center}
+  #raceplan .pip{width:17px;height:10px;border-radius:3px;background:linear-gradient(180deg,var(--accent),#9bd12e);box-shadow:0 0 5px rgba(197,242,78,.25)}
+  #raceplan .pipmore{font-family:'JetBrains Mono';font-size:.54rem;color:var(--muted)}
+  #raceplan .restock{display:flex;align-items:center;gap:.4rem;margin-top:.55rem;font-family:'JetBrains Mono';font-size:.54rem;color:var(--muted);border-top:1px dashed var(--border);padding-top:.5rem}
+  #raceplan .rc{padding:.12rem .42rem;border-radius:6px;font-size:.5rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  #raceplan .rc-assist{background:var(--accent);color:#141f04;font-weight:700}
+  #raceplan .rc-full{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  #raceplan .rc-base{background:rgba(94,234,212,.16);color:var(--cyan)}
+  #raceplan .row{display:flex;justify-content:space-between;gap:.6rem;font-family:'JetBrains Mono';font-size:.64rem;padding:.4rem 0;border-top:1px solid var(--border)}
+  #raceplan .row:first-child{border-top:none}
+  #raceplan .row .k{color:var(--muted)} #raceplan .row .v{color:var(--text);font-weight:500;text-align:right}
+  #raceplan details{border-top:1px solid var(--border)}
+  #raceplan details:first-of-type{border-top:none}
+  #raceplan summary{list-style:none;cursor:pointer;padding:.7rem 0;font-family:'Satoshi';font-weight:700;font-size:.82rem;display:flex;justify-content:space-between;align-items:center}
+  #raceplan summary::-webkit-details-marker{display:none}
+  #raceplan summary::after{content:'+';font-family:'JetBrains Mono';color:var(--muted);font-size:1rem}
+  #raceplan details[open] summary::after{content:'-'}
+  #raceplan .check{display:flex;gap:.6rem;align-items:flex-start;font-family:'JetBrains Mono';font-size:.64rem;padding:.35rem 0;line-height:1.4}
+  #raceplan .check .bx{flex-shrink:0;width:15px;height:15px;border:1.5px solid var(--muted);border-radius:4px;margin-top:.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--bg)}
+  #raceplan .check .bx.on{background:var(--accent);border-color:var(--accent)}
+  #raceplan .sub-h{font-family:'JetBrains Mono';font-size:.54rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:.7rem 0 .3rem}
+  #raceplan .note{font-family:'JetBrains Mono';font-size:.58rem;color:var(--muted);line-height:1.5;margin-top:.4rem}
+  </style>
+  <div id="raceplan">
+  <div class="hero">
+    <div class="route"><span>Courmayeur</span><span class="line"></span><span>Chamonix</span></div>
+    <h1>CCC by UTMB</h1>
+    <div class="specs">
+      <span class="chip"><b>101.9</b> km</span>
+      <span class="chip"><b>6050</b> m D+</span>
+      <span class="chip">Depart <b>28 aout 09:00</b></span>
+      <span class="chip">Limite <b>26h30</b></span>
+    </div>
+    <div class="tgt">
+      <span class="kick">Objectif d'arrivee</span>
+      <input id="tgt" type="range" min="1080" max="1590" step="5" value="1199">
+      <span class="val" id="tgtval">19h59</span>
+    </div>
+    <div class="note" id="tgtnote"></div>
+  </div>
+
+  <div class="card assist-card">
+    <div class="assist-head"><span class="ico">&#128101;</span> Ou ton equipe t'attend</div>
+    <div class="note" style="margin-top:.4rem">Assistance perso autorisee <b style="color:var(--text)">uniquement</b> sur ces points (regle UTMB, a confirmer avec le road-book 2026). Prevois-y rechange, ravito perso et un boost de moral.</div>
+    <div id="assiststrip" class="astrip"></div>
+  </div>
+
+  <div class="warn">
+    <span>&#9888;</span>
+    <span>Distances, altitudes et barrieres <b>calees sur le profil officiel UTMB</b>. Le road-book definitif CCC 2026 sortira quelques mois avant la course : on ajustera si les horaires bougent.</span>
+  </div>
+
+  <div class="card profcard" id="profcard">
+    <div class="prof-head"><span class="kick">Profil altitude</span><span class="prof-open">Ouvrir en detail &#8594;</span></div>
+    <div class="profwrap"><svg id="prof" viewBox="0 0 1000 150" preserveAspectRatio="none"></svg></div>
+    <div class="leg"><span><i style="background:var(--accent)"></i>Assistance equipe</span><span><i style="background:var(--cyan)"></i>Base vie</span><span><i style="background:var(--muted)"></i>Ravitaillement</span></div>
+  </div>
+
+  <div class="card">
+    <div class="kick" style="margin-bottom:.3rem">Points de passage &amp; barrieres</div>
+    <div class="note" style="margin:0 0 .3rem">La barre coloree = <b style="color:var(--text)">ta marge d'avance</b> sur la barriere (la porte = trait blanc a droite). <b style="color:var(--text)">Pleine = 3h d'avance ou plus</b> (large) ; elle se vide quand tu passes juste (orange puis rouge). Tape une ligne pour le detail.</div>
+    <div id="cplist" class="tl"></div>
+  </div>
+
+  <div class="card">
+    <details open><summary>Strategie allure &amp; sections</summary>
+      <div class="note">La barre = <b style="color:var(--text)">difficulte de la section</b> (denivele par km). Courte et bleue = ca roule (plat, descente), longue et rouge = grosse montee, sois patient. A droite : ton temps et ton allure estimes a ton objectif.</div>
+      <div id="seclist" style="margin-top:.5rem"></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <details><summary>Plan ravitaillement &amp; nutrition</summary>
+      <div class="note">Cible course : <b style="color:var(--text)">70 g de glucides / heure</b> (gels, barres, boisson), <b style="color:var(--text)">~0,5 L d'eau / h</b> (plus par chaleur), sodium 400 a 700 mg / h.</div>
+      <div id="fuelsum" class="fuel-sum"></div>
+      <div class="sub-h">Ce que tu portes entre chaque ravito</div>
+      <div id="fuellist"></div>
+      <div class="note">1 prise = 1 gel ou 1 barre (~30 g de glucides), chaque carre lime = une prise. Chaque carte = un troncon entre deux points ou tu peux refaire le plein. Champex (base vie) = ton equipe + vraie nourriture.</div>
+      <div class="sub-h">Reglages perso</div>
+      <div class="row"><span class="k">Sac a boire</span><span class="v">Flasks 2 x 500 ml + poche 1 L</span></div>
+      <div class="row"><span class="k">Glucides total</span><span class="v" id="carbtot">calcul...</span></div>
+      <div class="row"><span class="k">Sels / electrolytes</span><span class="v">1 pastille / 500 ml quand il fait chaud</span></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <details><summary>Materiel obligatoire &amp; drop bags</summary>
+      <div class="sub-h">Sac obligatoire UTMB (porte tout du depart a l'arrivee)</div>
+      <div id="matlist"></div>
+      <div class="sub-h">Sac base vie Champex (km 55)</div>
+      <div id="droplist"></div>
+      <div class="note">La liste officielle exacte est publiee dans le reglement CCC. Verifie le controle materiel avant le depart.</div>
+    </details>
+  </div>
+  </div>
+
+  <div id="profdetail">
+    <div class="pd-top">
+      <div>
+        <div class="pd-t1">Profil detaille CCC</div>
+        <div class="pd-t2">Courmayeur &#8594; Chamonix &#183; 101.9 km &#183; 6050 m D+</div>
+      </div>
+      <button class="pd-close" id="pdclose" aria-label="Fermer">&#10005;</button>
+    </div>
+    <div class="pd-filters" id="pdfilters"></div>
+    <div class="pd-body">
+      <div class="pd-yaxis"><svg id="pdaxis" preserveAspectRatio="none"></svg></div>
+      <div class="pd-scroll" id="pdscroll"><svg id="pddetail" preserveAspectRatio="none"></svg></div>
+    </div>
+    <div class="pd-hint">Glisse horizontalement pour parcourir la course &#8594;</div>
+  </div>
+
+  <script>
+  (function(){
+  'use strict';
+  var START = 9*60;
+  var CP = [
+    {n:'Courmayeur',        km:0,     alt:1191, dp:0,    type:'start',  co:null,      assist:false, rav:'start', r:'Depart 09:00'},
+    {n:'Refuge Bertone',    km:13.7,  alt:1989, dp:1450, type:'ravito', co:4*60+45,   assist:false, rav:'full',  r:'C1 - Ravito, apres la grosse montee a la Tete de la Tronche (2584 m)'},
+    {n:'Refuge Bonatti',    km:19.2,  alt:2025, dp:1650, type:'point',  co:null,      assist:false, rav:'water', r:'Refuge, sentier balcon en surplomb du val Ferret'},
+    {n:'Arnouvaz',          km:26.5,  alt:1769, dp:1950, type:'ravito', co:7*60+30,   assist:false, rav:'full',  r:'C2 - Ravito complet, juste avant le Grand Col Ferret'},
+    {n:'Grand Col Ferret',  km:30.5,  alt:2537, dp:2720, type:'point',  co:null,      assist:false, rav:'none',  r:'Point haut 2537 m, frontiere Italie / Suisse'},
+    {n:'La Fouly',          km:40.9,  alt:1600, dp:2770, type:'ravito', co:11*60+15,  assist:false, rav:'full',  r:'C3 - Ravito complet'},
+    {n:'Champex-Lac',       km:54.8,  alt:1477, dp:3200, type:'base',   co:14*60+15,  assist:true,  rav:'base',  r:'C4 - BASE VIE : sac perso + assistance equipe autorisee'},
+    {n:"Plan de l'Au",      km:60.0,  alt:1340, dp:3280, type:'point',  co:null,      assist:false, rav:'water', r:'Avant la montee de Bovine'},
+    {n:'Trient',            km:71.4,  alt:1300, dp:4200, type:'ravito', co:19*60+0,   assist:false, rav:'full',  r:'C5 - Ravito complet (pas d assistance perso ici)'},
+    {n:'Vallorcine',        km:83.3,  alt:1264, dp:5030, type:'ravito', co:22*60+15,  assist:true,  rav:'full',  r:'C6 - Dernier ravito complet + assistance equipe autorisee'},
+    {n:'La Flegere',        km:94.7,  alt:1877, dp:6000, type:'ravito', co:25*60+45,  assist:false, rav:'water', r:'Ravito leger avant la descente finale sur Chamonix'},
+    {n:'Chamonix',          km:101.9, alt:1035, dp:6050, type:'finish', co:26*60+30,  assist:false, rav:'finish',r:'C7 - ARRIVEE'}
+  ];
+  var PROFILE = [
+    [0,1191],[4,1900],[7.7,2584],[10,2100],[13.7,1989],[16,1840],[19.2,2025],[22.5,1900],
+    [26.5,1769],[28.5,2062],[30.5,2537],[33,2071],[37,1720],[40.9,1600],[45,1280],[48,1151],
+    [51,1300],[54.8,1477],[60,1340],[63,1700],[65.5,1970],[68,1620],[71.4,1300],[74.5,1932],
+    [78,1480],[83.3,1264],[86,1461],[90,1720],[94.7,1877],[98,1560],[101.9,1035]
+  ];
+  function hhmm(min){
+    var t = (START + min) % (24*60);
+    var h = Math.floor(t/60), m = Math.round(t%60);
+    var day = (START+min) >= 24*60 ? ' <span style="color:var(--muted)">(sam)</span>' : '';
+    return ('0'+h).slice(-2)+'h'+('0'+m).slice(-2)+day;
+  }
+  function clock(min){ return hhmm(min).replace(/ .*/,''); }
+  function dur(min){ var h=Math.floor(min/60), m=Math.round(min%60); return h+'h'+('0'+m).slice(-2); }
+  function dNeg(i){ return CP[i].dp - (CP[i].alt - CP[0].alt); }
+  function computeETAs(targetMin){
+    var segs=[], totalEffort=0;
+    for(var i=1;i<CP.length;i++){
+      var dist=CP[i].km-CP[i-1].km;
+      var dplus=Math.max(0,CP[i].dp-CP[i-1].dp);
+      var effort=dist + dplus/100;
+      var frac=(CP[i].km+CP[i-1].km)/2/CP[CP.length-1].km;
+      var fatigue=1+0.18*frac;
+      var w=effort*fatigue;
+      segs.push({dist:dist,dplus:dplus,w:w});
+      totalEffort+=w;
+    }
+    var etas=[0], acc=0;
+    for(var j=0;j<segs.length;j++){ acc += targetMin*segs[j].w/totalEffort; etas.push(acc); segs[j].min=targetMin*segs[j].w/totalEffort; }
+    return {etas:etas, segs:segs};
+  }
+  function marginClass(m){ if(m<0||m<20) return 'm-bad'; if(m<90) return 'm-warn'; return 'm-ok'; }
+  function icoFor(c){
+    if(c.assist) return '&#128101;';
+    if(c.type==='start') return '&#128640;';
+    if(c.type==='finish') return '&#127937;';
+    if(c.type==='base') return '&#127968;';
+    if(c.type==='point') return '&#9968;';
+    if(c.rav==='full') return '&#127869;';
+    return '&#128167;';
+  }
+  function render(){
+    var target=+document.getElementById('tgt').value;
+    document.getElementById('tgtval').textContent=dur(target);
+    var R=computeETAs(target), etas=R.etas, segs=R.segs;
+    var slack=1590-target;
+    document.getElementById('tgtnote').innerHTML='Arrivee estimee <b style="color:var(--accent)">'+hhmm(target)+'</b> &#183; marge totale sur la barriere finale <b style="color:var(--accent)">'+dur(slack)+'</b>.';
+    var ah='';
+    for(var a=0;a<CP.length;a++){ if(CP[a].assist){
+      ah+='<div class="atile"><div class="an">'+CP[a].n+'</div><div class="ak">km '+CP[a].km.toFixed(0)+'</div><div class="ae">'+clock(etas[a])+'</div><div class="ad">D+ <b>'+CP[a].dp+' m</b> &#183; D- <b>'+dNeg(a)+' m</b></div></div>';
+    }}
+    document.getElementById('assiststrip').innerHTML=ah;
+    var h='';
+    for(var i=0;i<CP.length;i++){
+      var c=CP[i], eta=etas[i];
+      var cls=' '+c.type + (c.assist?' assist':'');
+      var pills='';
+      if(c.assist) pills+='<span class="pill pill-assist">&#128101; Assistance</span>';
+      if(c.type==='base') pills+='<span class="pill pill-base">Base vie</span>';
+      else if(c.type==='finish') pills+='<span class="pill pill-fin">Arrivee</span>';
+      else if(!c.assist && c.rav==='full') pills+='<span class="pill pill-rav">Ravito complet</span>';
+      else if(!c.assist && c.rav==='water') pills+='<span class="pill pill-rav">Eau</span>';
+      var etaTxt, coTxt='', gauge='';
+      if(c.type==='start'){ etaTxt='09h00'; coTxt='Depart'; }
+      else {
+        etaTxt=hhmm(eta);
+        if(c.co!=null){
+          var m=c.co-eta, mc=marginClass(m);
+          var pct=m<0?100:Math.min(100, m/180*100);
+          var bar;
+          if(m<0){ bar='<div class="gbar"><div class="gmarg m-bad" style="width:100%"></div><div class="gdoor"></div></div>'; }
+          else { bar='<div class="gbar"><div class="gprog" style="width:'+(100-pct).toFixed(1)+'%"></div><div class="gmarg '+mc+'" style="width:'+pct.toFixed(1)+'%"></div><div class="gdoor"></div></div>'; }
+          gauge='<div class="gauge">'+bar+
+            '<div class="glab"><span class="mid '+mc+'">'+(m<0?'RETARD '+dur(-m):'marge +'+dur(m))+' d\'avance</span><span>porte a '+clock(c.co)+'</span></div></div>';
+        } else { coTxt='pas de barriere'; }
+      }
+      var segTxt = i>0 ? ('Section '+(CP[i-1].km).toFixed(1)+' &#8594; '+c.km.toFixed(1)+' km &#183; +'+Math.max(0,c.dp-CP[i-1].dp)+' m D+ &#183; '+dur(segs[i-1].min)+' estime') : '';
+      h+='<div class="cp'+cls+'" data-i="'+i+'">'+
+          '<div class="node"><div class="dot">'+icoFor(c)+'</div></div>'+
+          '<div class="body">'+
+            '<div class="cp-top">'+
+              '<div style="min-width:0"><div class="nm">'+c.n+' '+pills+'</div>'+
+              '<div class="sub">km '+c.km.toFixed(1)+' &#183; '+c.alt+' m &#183; +'+c.dp+' m D+</div></div>'+
+              '<div class="times"><div class="eta">'+etaTxt+'</div>'+(coTxt?'<div class="co">'+coTxt+'</div>':'')+'</div>'+
+            '</div>'+ gauge +
+          '</div></div>'+
+        '<div class="cp-detail" data-d="'+i+'"><b>'+c.r+'</b>'+(segTxt?'<br>'+segTxt:'')+'</div>';
+    }
+    document.getElementById('cplist').innerHTML=h;
+    var maxDpk=0; for(var x=0;x<segs.length;x++){ var dk=segs[x].dist>0?segs[x].dplus/segs[x].dist:0; if(dk>maxDpk) maxDpk=dk; }
+    function terr(dk){ if(dk<25) return {w:'Ca roule',c:'var(--cyan)'}; if(dk<60) return {w:'Vallonne',c:'var(--accent)'}; if(dk<110) return {w:'Montee',c:'var(--amber)'}; return {w:'Grosse montee',c:'var(--red)'}; }
+    var sh='';
+    for(var s=0;s<segs.length;s++){
+      var av=CP[s], bv=CP[s+1], dist=bv.km-av.km;
+      var spd = dist>0 ? (segs[s].min/dist) : 0;
+      var dpk = dist>0 ? segs[s].dplus/dist : 0;
+      var t=terr(dpk);
+      sh+='<div class="secrow">'+
+        '<div class="secr-top"><span class="k">'+av.n+' &#8594; '+bv.n+'</span><span class="v">'+dur(segs[s].min)+' &#183; '+spd.toFixed(1)+' min/km</span></div>'+
+        '<div class="sbar"><div class="sfill" style="width:'+(maxDpk?dpk/maxDpk*100:0).toFixed(1)+'%"></div></div>'+
+        '<div class="secr-sub"><b style="color:'+t.c+'">'+t.w+'</b> &#183; '+dist.toFixed(1)+' km &#183; +'+segs[s].dplus+' m ('+Math.round(dpk)+' m/km)</div></div>';
+    }
+    document.getElementById('seclist').innerHTML=sh;
+    var lh='', totG=0, totW=0, sIdx=0;
+    for(var bi=1;bi<CP.length;bi++){
+      var nd=CP[bi];
+      var isRestock = nd.rav==='full'||nd.rav==='base'||nd.type==='finish';
+      if(!isRestock) continue;
+      var na=CP[sIdx];
+      var mins=etas[bi]-etas[sIdx], hrs=mins/60;
+      var g=Math.round(hrs*70), prises=Math.max(1,Math.round(g/30)), water=hrs*0.5;
+      var dist2=nd.km-na.km, dplus2=nd.dp-na.dp;
+      totG+=g; totW+=water;
+      var pips='', pc=Math.min(prises,14), pp;
+      for(pp=0;pp<pc;pp++) pips+='<span class="pip"></span>';
+      if(prises>14) pips+='<span class="pipmore">+'+(prises-14)+'</span>';
+      var rc;
+      if(nd.type==='finish') rc='<span class="rc rc-full">Arrivee</span>';
+      else if(nd.assist) rc='<span class="rc rc-assist">&#128101; Assistance equipe</span>';
+      else if(nd.rav==='base') rc='<span class="rc rc-base">Base vie</span>';
+      else rc='<span class="rc rc-full">Ravito complet</span>';
+      lh+='<div class="fleg'+(nd.assist?' restock-assist':'')+'">'+
+        '<div class="leg-top"><span class="leg-nm">'+na.n+' &#8594; '+nd.n+'</span><span class="leg-dur">'+dur(mins)+'</span></div>'+
+        '<div class="leg-sub">'+dist2.toFixed(1)+' km &#183; +'+dplus2+' m D+</div>'+
+        '<div class="leg-need">A emporter : <b>'+prises+' prises</b> &#183; '+g+' g glucides &#183; &#128167; ~'+water.toFixed(1).replace('.0','')+' L</div>'+
+        '<div class="pips">'+pips+'</div>'+
+        '<div class="restock">'+rc+' <span>'+(nd.type==='finish'?'Arrivee, c\'est plie':'refais le plein ici')+'</span></div>'+
+        '</div>';
+      sIdx=bi;
+    }
+    document.getElementById('fuellist').innerHTML=lh;
+    var gEq=Math.round(totG/30);
+    document.getElementById('fuelsum').innerHTML=
+      '<div class="ft"><div class="fv">~'+totG+' g</div><div class="fl">Glucides total</div></div>'+
+      '<div class="ft"><div class="fv">~'+gEq+'</div><div class="fl">Prises gels/barres</div></div>'+
+      '<div class="ft"><div class="fv">~'+totW.toFixed(1)+' L</div><div class="fl">Eau bue</div></div>';
+    document.getElementById('carbtot').textContent='~'+totG+' g ('+gEq+' gels/barres eq.)';
+  }
+  function drawProfile(){
+    var svg=document.getElementById('prof');
+    var maxKm=CP[CP.length-1].km, minA=1000, maxA=2650;
+    var W=1000,H=150, pad=6;
+    function x(km){ return km/maxKm*W; }
+    function y(alt){ return H-pad-(alt-minA)/(maxA-minA)*(H-2*pad); }
+    var d='M '+x(PROFILE[0][0]).toFixed(1)+' '+y(PROFILE[0][1]).toFixed(1);
+    for(var i=0;i<PROFILE.length-1;i++){
+      var p0=PROFILE[i>0?i-1:0], p1=PROFILE[i], p2=PROFILE[i+1], p3=PROFILE[i+2<PROFILE.length?i+2:i+1];
+      var c1x=x(p1[0])+(x(p2[0])-x(p0[0]))/6, c1y=y(p1[1])+(y(p2[1])-y(p0[1]))/6;
+      var c2x=x(p2[0])-(x(p3[0])-x(p1[0]))/6, c2y=y(p2[1])-(y(p3[1])-y(p1[1]))/6;
+      d+=' C '+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+x(p2[0]).toFixed(1)+' '+y(p2[1]).toFixed(1);
+    }
+    var area=d+' L '+x(maxKm).toFixed(1)+' '+H+' L 0 '+H+' Z';
+    var s='<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>';
+    s+='<path d="'+area+'" fill="url(#ga)"/>';
+    s+='<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2.5" style="filter:drop-shadow(0 0 5px var(--accent))"/>';
+    var peaks=[[7.7,2584],[30.5,2537]];
+    for(var pk=0;pk<peaks.length;pk++){
+      var kx=x(peaks[pk][0]), ky=y(peaks[pk][1]);
+      s+='<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4" fill="none" stroke="var(--text)" stroke-width="1.5"/>';
+      s+='<text x="'+kx.toFixed(1)+'" y="'+(ky-9).toFixed(1)+'" fill="var(--text)" font-size="15" font-family="JetBrains Mono" font-weight="600" text-anchor="middle">'+peaks[pk][1]+'</text>';
+    }
+    for(var j=0;j<CP.length;j++){
+      if(CP[j].type==='point') continue;
+      var cx=x(CP[j].km), cy=y(CP[j].alt);
+      if(CP[j].assist){ s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" fill="var(--accent)" style="filter:drop-shadow(0 0 4px var(--accent))"/>'; s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="8.5" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".5"/>'; continue; }
+      var col=CP[j].type==='base'?'var(--cyan)':CP[j].type==='finish'?'var(--accent)':CP[j].type==='start'?'var(--text)':'var(--muted)';
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="3.5" fill="'+col+'"/>';
+    }
+    svg.innerHTML=s;
+  }
+  var PDF={ravitos:true,assist:true,sommets:true,pente:true,barrieres:false,alt:true};
+  var PDFILT=[{k:'ravitos',lab:'Ravitos'},{k:'assist',lab:'Assistance'},{k:'sommets',lab:'Sommets'},{k:'pente',lab:'Pente %'},{k:'barrieres',lab:'Barrieres'},{k:'alt',lab:'Altitude'}];
+  function slopeCol(sl){ if(sl>=15) return '#ef4444'; if(sl>=8) return '#f59e0b'; if(sl>=0) return '#c5f24e'; if(sl>=-8) return '#5ec27a'; return '#5eead4'; }
+  function buildPdFilters(){
+    var h='';
+    for(var i=0;i<PDFILT.length;i++){ var f=PDFILT[i]; h+='<button class="pdf'+(PDF[f.k]?' on':'')+'" data-f="'+f.k+'"><span class="sw"></span>'+f.lab+'</button>'; }
+    document.getElementById('pdfilters').innerHTML=h;
+  }
+  var PDL=48;
+  function drawPdAxis(minA,maxA,H,plotTop,plotBot){
+    var a='', W=42;
+    a+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--bg)"/>';
+    if(PDF.alt){ for(var alt=1200; alt<=2600; alt+=200){ var yy=plotBot-(alt-minA)/(maxA-minA)*(plotBot-plotTop); a+='<text x="'+(W-6)+'" y="'+(yy+4).toFixed(1)+'" fill="var(--muted)" font-size="11" font-family="JetBrains Mono" text-anchor="end">'+alt+'</text>'; } }
+    a+='<line x1="'+W+'" y1="0" x2="'+W+'" y2="'+H+'" stroke="var(--border)" stroke-width="1"/>';
+    var ax=document.getElementById('pdaxis'); ax.setAttribute('viewBox','0 0 '+W+' '+H); ax.setAttribute('width',W); ax.setAttribute('height',H); ax.style.width=W+'px'; ax.innerHTML=a;
+  }
+  function drawProfDetail(){
+    var minA=1000, maxA=2650;
+    var pxPerKm=32, maxKm=CP[CP.length-1].km;
+    var H=document.getElementById('pdscroll').clientHeight||420;
+    var W=Math.round(PDL+maxKm*pxPerKm), plotTop=56, plotBot=H-140;
+    function x(km){ return PDL+km*pxPerKm; }
+    function y(alt){ return plotBot-(alt-minA)/(maxA-minA)*(plotBot-plotTop); }
+    var s='<defs><linearGradient id="gad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".26"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>';
+    if(PDF.alt){ for(var alt=1200; alt<=2600; alt+=200){ var yy=y(alt); s+='<line x1="0" y1="'+yy.toFixed(1)+'" x2="'+W+'" y2="'+yy.toFixed(1)+'" stroke="var(--border)" stroke-width="1" opacity=".5"/>'; } }
+    var d='M '+x(PROFILE[0][0]).toFixed(1)+' '+y(PROFILE[0][1]).toFixed(1);
+    for(var i=0;i<PROFILE.length-1;i++){
+      var p0=PROFILE[i>0?i-1:0], p1=PROFILE[i], p2=PROFILE[i+1], p3=PROFILE[i+2<PROFILE.length?i+2:i+1];
+      var c1x=x(p1[0])+(x(p2[0])-x(p0[0]))/6, c1y=y(p1[1])+(y(p2[1])-y(p0[1]))/6;
+      var c2x=x(p2[0])-(x(p3[0])-x(p1[0]))/6, c2y=y(p2[1])-(y(p3[1])-y(p1[1]))/6;
+      d+=' C '+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+x(p2[0]).toFixed(1)+' '+y(p2[1]).toFixed(1);
+    }
+    s+='<path d="'+d+' L '+x(maxKm).toFixed(1)+' '+plotBot+' L '+PDL+' '+plotBot+' Z" fill="url(#gad)"/>';
+    if(PDF.pente){
+      for(var g=0; g<PROFILE.length-1; g++){
+        var a1=PROFILE[g], a2=PROFILE[g+1];
+        var dm=(a2[0]-a1[0])*1000, sl=dm>0?(a2[1]-a1[1])/dm*100:0;
+        s+='<line x1="'+x(a1[0]).toFixed(1)+'" y1="'+y(a1[1]).toFixed(1)+'" x2="'+x(a2[0]).toFixed(1)+'" y2="'+y(a2[1]).toFixed(1)+'" stroke="'+slopeCol(sl)+'" stroke-width="4" stroke-linecap="round"/>';
+        if(Math.abs(sl)>=9){ var mx=(x(a1[0])+x(a2[0]))/2, my=(y(a1[1])+y(a2[1]))/2; s+='<text x="'+mx.toFixed(1)+'" y="'+(my+(sl>0?-8:16)).toFixed(1)+'" fill="'+slopeCol(sl)+'" font-size="11" font-family="JetBrains Mono" text-anchor="middle">'+(sl>0?'+':'')+Math.round(sl)+'%</text>'; }
+      }
+    } else { s+='<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2.5" style="filter:drop-shadow(0 0 5px var(--accent))"/>'; }
+    for(var km=0; km<=Math.floor(maxKm); km+=5){ var xx=x(km); s+='<line x1="'+xx.toFixed(1)+'" y1="'+plotBot+'" x2="'+xx.toFixed(1)+'" y2="'+(plotBot+6)+'" stroke="var(--muted)" stroke-width="1"/><text x="'+xx.toFixed(1)+'" y="'+(plotBot+20)+'" fill="var(--muted)" font-size="11" font-family="JetBrains Mono" text-anchor="middle">'+km+'</text>'; }
+    if(PDF.sommets){
+      var peaks=[[7.7,2584,'Tete de la Tronche'],[30.5,2537,'Grand Col Ferret'],[65.5,1970,'Bovine'],[74.5,1932,'Les Tseppes'],[94.7,1877,'La Flegere']];
+      for(var pk=0;pk<peaks.length;pk++){ var kx=x(peaks[pk][0]), ky=y(peaks[pk][1]); s+='<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4" fill="none" stroke="var(--text)" stroke-width="1.5"/><text x="'+kx.toFixed(1)+'" y="'+(ky-22).toFixed(1)+'" fill="var(--text)" font-size="12" font-family="JetBrains Mono" font-weight="600" text-anchor="middle">'+peaks[pk][2]+'</text><text x="'+kx.toFixed(1)+'" y="'+(ky-9).toFixed(1)+'" fill="var(--muted)" font-size="11" font-family="JetBrains Mono" text-anchor="middle">'+peaks[pk][1]+' m</text>'; }
+    }
+    if(PDF.ravitos){
+      for(var j=0;j<CP.length;j++){
+        var c=CP[j]; if(c.type==='point') continue;
+        var cx=x(c.km), cy=y(c.alt), isA=PDF.assist&&c.assist;
+        var col=isA?'var(--accent)':c.type==='base'?'var(--cyan)':c.type==='finish'?'var(--accent)':c.type==='start'?'var(--text)':'var(--muted)';
+        s+='<line x1="'+cx.toFixed(1)+'" y1="'+cy.toFixed(1)+'" x2="'+cx.toFixed(1)+'" y2="'+plotBot+'" stroke="'+col+'" stroke-width="1" stroke-dasharray="2 3" opacity=".55"/>';
+        s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+(isA?5:3.5)+'" fill="'+col+'"/>';
+        if(isA) s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="9" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".6"/>';
+        var ly=plotBot+40+(j%2)*40;
+        var anch='middle', tx=cx; if(c.km<3){ anch='start'; tx=cx-3; } else if(c.km>maxKm-4){ anch='end'; tx=cx+3; }
+        s+='<text x="'+tx.toFixed(1)+'" y="'+ly+'" fill="var(--text)" font-size="12" font-family="Satoshi,sans-serif" font-weight="600" text-anchor="'+anch+'">'+c.n+'</text>';
+        s+='<text x="'+tx.toFixed(1)+'" y="'+(ly+13)+'" fill="var(--muted)" font-size="11" font-family="JetBrains Mono" text-anchor="'+anch+'">km '+c.km+' &#183; '+c.alt+'m</text>';
+        s+='<text x="'+tx.toFixed(1)+'" y="'+(ly+26)+'" fill="var(--muted)" font-size="11" font-family="JetBrains Mono" text-anchor="'+anch+'">D+ '+c.dp+' &#183; D- '+dNeg(j)+'</text>';
+        if(PDF.barrieres&&c.co!=null) s+='<text x="'+tx.toFixed(1)+'" y="'+(ly+39)+'" fill="var(--amber)" font-size="11" font-family="JetBrains Mono" text-anchor="'+anch+'">barr '+clock(c.co)+'</text>';
+      }
+    }
+    var svg=document.getElementById('pddetail'); svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('width',W); svg.setAttribute('height',H); svg.style.width=W+'px'; svg.innerHTML=s;
+    drawPdAxis(minA,maxA,H,plotTop,plotBot);
+  }
+  function openProfDetail(){ document.getElementById('profdetail').classList.add('open'); document.body.style.overflow='hidden'; buildPdFilters(); requestAnimationFrame(drawProfDetail); }
+  function closeProfDetail(){ document.getElementById('profdetail').classList.remove('open'); document.body.style.overflow=''; }
+  var MAT=['Veste impermeable a capuche, coutures etanchees','Pantalon ou collant long (jambes couvertes)','Reserve d\'eau 1 L minimum','Gobelet personnel (pas de gobelet aux ravitos)','Couverture de survie 1,4 x 2 m','Sifflet','Bande adhesive elastique (bandage)','Reserve alimentaire de secours','Frontale + piles de rechange','Telephone portable charge','Bonnet','Gants chauds impermeables','Veste chaude 2e couche (selon meteo montagne)','2 bouteilles / flasks + poche','Carte d\'identite / passeport'];
+  var DROP=['Rechange haut + chaussettes seches','Vraie nourriture (riz, soupe salee, ce que tu digeres)','Piles / batterie frontale de rechange','Ravitaillement solide pour la 2e moitie','Baume anti-frottements','Veste plus chaude si nuit fraiche','Charge rapide telephone'];
+  function drawChecklists(){
+    function box(arr){ return arr.map(function(t){ return '<div class="check"><span class="bx" data-c="1"></span><span>'+t+'</span></div>'; }).join(''); }
+    document.getElementById('matlist').innerHTML=box(MAT);
+    document.getElementById('droplist').innerHTML=box(DROP);
+  }
+  document.addEventListener('click',function(e){
+    var inRP=e.target.closest('#raceplan'), inPD=e.target.closest('#profdetail');
+    if(!inRP&&!inPD) return;
+    var bx=e.target.closest('.bx'); if(bx){ bx.classList.toggle('on'); bx.innerHTML=bx.classList.contains('on')?'&#10003;':''; return; }
+    var pf=e.target.closest('.pdf'); if(pf){ var k=pf.getAttribute('data-f'); PDF[k]=!PDF[k]; pf.classList.toggle('on'); drawProfDetail(); return; }
+    if(e.target.closest('#pdclose')){ closeProfDetail(); return; }
+    if(e.target.closest('#profcard')){ openProfDetail(); return; }
+    var cp=e.target.closest('.cp'); if(cp){ var i=cp.getAttribute('data-i'); var dd=document.querySelector('#raceplan .cp-detail[data-d="'+i+'"]'); if(dd) dd.classList.toggle('open'); return; }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.getElementById('profdetail'); if(o&&o.classList.contains('open')) closeProfDetail(); } });
+  window.addEventListener('resize',function(){ var o=document.getElementById('profdetail'); if(o&&o.classList.contains('open')) drawProfDetail(); });
+  document.getElementById('tgt').addEventListener('input',render);
+  drawProfile(); drawChecklists(); render();
+  })();
+  </script>
 </div></div>
 
 <!-- NUTRITION -->
