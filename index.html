@@ -1618,7 +1618,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   #raceplan .prof-open{font-family:'JetBrains Mono';font-size:.6rem;color:var(--accent);background:rgba(197,242,78,.1);border:1px solid rgba(197,242,78,.28);padding:.18rem .5rem;border-radius:999px;white-space:nowrap}
   #profdetail{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;flex-direction:column;font-family:'Satoshi',system-ui,sans-serif}
   #profdetail.open{display:flex}
-  #profdetail .pd-top{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem .6rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+  #profdetail .pd-top{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + .9rem) 1rem .6rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
   #profdetail .pd-t1{font-family:'Clash Display';font-weight:600;font-size:1.15rem}
   #profdetail .pd-t2{font-family:'JetBrains Mono';font-size:.58rem;color:var(--muted);margin-top:.1rem}
   #profdetail .pd-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -1631,7 +1631,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   #profdetail .pd-yaxis{position:absolute;left:0;top:0;bottom:0;width:42px;z-index:2;pointer-events:none}
   #profdetail .pd-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #profdetail .pd-scroll svg{height:100%;display:block}
-  #profdetail .pd-hint{text-align:center;font-family:'JetBrains Mono';font-size:.55rem;color:var(--muted);padding:.5rem;border-top:1px solid var(--border)}
+  #profdetail .pd-hint{text-align:center;font-family:'JetBrains Mono';font-size:.55rem;color:var(--muted);padding:.5rem .5rem calc(env(safe-area-inset-bottom,0px) + .5rem);border-top:1px solid var(--border)}
   #raceplan .tl{position:relative;margin-top:.4rem}
   #raceplan .cp{position:relative;display:flex;gap:.75rem;padding:.55rem 0;cursor:pointer;align-items:flex-start}
   #raceplan .cp .node{position:relative;flex-shrink:0;width:34px;display:flex;justify-content:center}
