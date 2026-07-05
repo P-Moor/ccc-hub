@@ -2052,7 +2052,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     var svg=document.getElementById('pddetail'); svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('width',W); svg.setAttribute('height',H); svg.style.width=W+'px'; svg.innerHTML=s;
     drawPdAxis(minA,maxA,H,plotTop,plotBot);
   }
-  function openProfDetail(){ document.getElementById('profdetail').classList.add('open'); document.body.style.overflow='hidden'; buildPdFilters(); requestAnimationFrame(drawProfDetail); }
+  function openProfDetail(){ var pd=document.getElementById('profdetail'); if(pd.parentElement!==document.body) document.body.appendChild(pd); /* sort du stacking context de main (nav flottante z300) */ pd.classList.add('open'); document.body.style.overflow='hidden'; buildPdFilters(); requestAnimationFrame(drawProfDetail); }
   function closeProfDetail(){ document.getElementById('profdetail').classList.remove('open'); document.body.style.overflow=''; }
   var MAT=['Veste impermeable a capuche, coutures etanchees','Pantalon ou collant long (jambes couvertes)','Reserve d\'eau 1 L minimum','Gobelet personnel (pas de gobelet aux ravitos)','Couverture de survie 1,4 x 2 m','Sifflet','Bande adhesive elastique (bandage)','Reserve alimentaire de secours','Frontale + piles de rechange','Telephone portable charge','Bonnet','Gants chauds impermeables','Veste chaude 2e couche (selon meteo montagne)','2 bouteilles / flasks + poche','Carte d\'identite / passeport'];
   var DROP=['Rechange haut + chaussettes seches','Vraie nourriture (riz, soupe salee, ce que tu digeres)','Piles / batterie frontale de rechange','Ravitaillement solide pour la 2e moitie','Baume anti-frottements','Veste plus chaude si nuit fraiche','Charge rapide telephone'];
