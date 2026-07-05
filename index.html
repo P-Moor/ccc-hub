@@ -6854,8 +6854,10 @@ if (document.readyState === 'loading') {
     var water = getWater(dk);
 
     var html = '<div id="nutri-hydra-card" style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-radius:12px;padding:1.2rem;margin-top:1rem">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;gap:0.5rem">' +
+    html += '<div style="display:flex;align-items:center;margin-bottom:0.5rem">' +
       '<span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:700"><svg class="ic" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="3.5"/></svg> Nutrition du jour</span>' +
+      '</div>';
+    html += '<div style="display:flex;justify-content:flex-end;margin-bottom:0.7rem">' +
       '<span id="nh-newfood" style="cursor:pointer;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);border:1px solid var(--accent,#a3e635);border-radius:6px;padding:0.3rem 0.6rem;white-space:nowrap;flex-shrink:0">+ Aliment</span>' +
       '</div>';
     // ── Objectif unique « Prépa CCC » (piloté par le plan + la récup, aucun réglage manuel) ──
