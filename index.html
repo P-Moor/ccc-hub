@@ -4530,16 +4530,8 @@ function renderToday() {
       var mc4 = agDay.m === 'LC' ? 'lc' : agDay.m === 'HC' ? 'hc' : 'mc';
       mealEl.innerHTML = '<div class="today-meal">' +
         '<span class="badge ' + mc4 + '" style="margin-bottom:5px;align-self:flex-start">' + agDay.m + '</span>' +
-        '<div class="tm-row"><div class="tm-label">' + ic('sunrise',12) + ' Matin</div><div class="tm-val">' + agDay.matin + '</div></div>' +
-        '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">' + ic('sun',12) + ' Midi</div><div class="tm-val">' + agDay.midi + '</div></div>' +
-        '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">' + ic('apple',12) + ' Collation</div><div class="tm-val">' + agDay.colla + '</div></div>' +
-        '<div class="tm-sep"></div>' +
-        '<div class="tm-row"><div class="tm-label">' + ic('moon',12) + ' Soir</div><div class="tm-val">' + agDay.soir + '</div></div>' +
-        '<div class="tm-sep"></div>' +
-        '<div style="font-size:0.62rem;color:var(--muted);line-height:1.4;margin-top:2px">💡 Suggestion du plan — tu composes tes vrais repas dans l\'onglet Nutrition.</div>' +
-        '<button id="tm-copy-plan" style="margin-top:7px;align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.42rem 0.85rem;font-size:0.72rem;cursor:pointer;font-family:DM Mono,monospace">📋 Copier vers le jour</button>' +
+        '<div style="font-size:0.68rem;color:var(--text);line-height:1.45">Trame ' + agDay.m + ' du plan &#183; le d&#233;tail des repas et ta saisie r&#233;elle sont dans l\'onglet Nutrition.</div>' +
+        '<button id="tm-copy-plan" style="margin-top:8px;align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.42rem 0.85rem;font-size:0.72rem;cursor:pointer;font-family:DM Mono,monospace">📋 Copier vers le jour</button>' +
         '</div>';
       var cpb = document.getElementById('tm-copy-plan');
       if (cpb) cpb.addEventListener('click', function(){
@@ -9011,19 +9003,22 @@ if (document.readyState === 'loading') {
             st.seance_faite?st.seance_faite.km:0, st.body_battery||0].join('|');
   }
 
-  function verdictColor(score){
-    if (score==null) return 'var(--blue,#5ba3e8)';
-    if (score>=70) return 'var(--accent,#a3e635)';
-    if (score>=50) return 'var(--orange,#e8a020)';
-    return 'var(--red,#e5484d)';
+  function verdictColor(v){
+    // Le feu suit le NIVEAU (verdict), pas le score brut : évite l'incohérence
+    // "score 0 rouge + niveau vert" quand les données Garmin manquent.
+    var n = v && v.niveau;
+    if (n==='pic' || n==='vert') return 'var(--accent,#a3e635)';
+    if (n==='orange') return 'var(--orange,#e8a020)';
+    if (n==='rouge') return 'var(--red,#e5484d)';
+    return 'var(--blue,#5ba3e8)';
   }
   function render(data){
     var slot = document.getElementById('fil-du-jour');
     if (!slot) return;
     data = data || {};
     var v = data.v || null, hub = data.hub || null;
-    var col = verdictColor(v ? v.score : null);
-    if (hub && hub.tone === 'warn' && (!v || v.score == null)) col = 'var(--orange,#e8a020)';
+    var col = verdictColor(v);
+    if (hub && hub.tone === 'warn' && (!v || v.niveau == null)) col = 'var(--orange,#e8a020)';
     var h = '<div style="background:var(--surface,#16171a);border:1px solid var(--border,#242528);border-left:3px solid '+col+';border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem">';
     h += '<div style="display:flex;align-items:center;gap:6px;font-family:DM Mono,monospace;font-size:0.58rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">' +
       '<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4 H17 V13 H10 L6 16.5 V13 H3 Z"/></svg>' +
@@ -9051,7 +9046,7 @@ if (document.readyState === 'loading') {
     if (rf) rf.addEventListener('click', function(){ updateFil(true); });
     var dc = document.getElementById('fdj-discuss');
     if (dc) dc.addEventListener('click', function(){
-      if (window.__askCoach) window.__askCoach("À propos de mon coach du jour" + (v ? " (verdict " + v.niveau + " " + v.score + "/100)" : "") + " : explique-moi et conseille-moi pour le reste de la journée — forme, séance, nutrition.");
+      if (window.__askCoach) window.__askCoach("À propos de mon coach du jour" + (v ? " (verdict " + v.niveau + (v.score!=null?" "+v.score+"/100":"") + ")" : "") + " : explique-moi et conseille-moi pour le reste de la journée — forme, séance, nutrition.");
     });
   }
 
@@ -10819,6 +10814,7 @@ if (document.readyState === 'loading') {
     if(i.score_sommeil!=null) parts.push(['s',clamp01(i.score_sommeil/100)*100,C.w.sommeil]);
     if(i.body_battery!=null) parts.push(['bb',clamp01(i.body_battery/100)*100,C.w.bb]);
     if(i.fc_repos!=null) parts.push(['rhr',clamp01((C.rhr.mauvais-i.fc_repos)/(C.rhr.mauvais-C.rhr.bon))*100,C.w.rhr]);
+    if(!parts.length) return null;
     var totW=parts.reduce(function(a,p){return a+p[2];},0)||1;
     return Math.round(parts.reduce(function(a,p){return a+p[1]*p[2];},0)/totW);
   }
