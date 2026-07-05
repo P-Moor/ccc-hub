@@ -7387,6 +7387,45 @@ if (document.readyState === 'loading') {
   window.__nutriGetFoods = getFoods;
   window.__nutriTargets = computeTargets;
   window.__nutriAddFood = saveCustomFood;
+  // ── Pont tap-to-log : ajout direct au journal du jour + créneau intelligent + undo ──
+  window.__nutriSmartSlot = function(){
+    var h = new Date().getHours();
+    if (h < 10) return 'petitdej';
+    if (h < 12) return 'preseance';
+    if (h < 15) return 'dej';
+    if (h < 18) return 'encas';
+    if (h < 22) return 'diner';
+    return 'encas';
+  };
+  window.__nutriQuickAdd = function(item){
+    if (!item) return null;
+    var dk = todayKey();
+    var day = getDayMeals(dk);
+    var slot = (item.slot && MEAL_SLOTS.some(function(s){return s.id===item.slot;})) ? item.slot : window.__nutriSmartSlot();
+    if (!day[slot]) day[slot] = [];
+    var g=Math.max(0,Math.round(+item.g||0)), p=Math.max(0,Math.round(+item.p||0)), l=Math.max(0,Math.round(+item.l||0));
+    var kcal=Math.round(+item.kcal || (g*4+p*4+l*9));
+    var sid = 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    day[slot].push({ food:String(item.food||'aliment').slice(0,60), qty:String(item.qty||'').slice(0,20), g:g, p:p, l:l, kcal:kcal, _ai:true, _sid:sid });
+    saveDayMeals(dk, day);
+    render();
+    if (window.__updateFilDuJour) { try { window.__updateFilDuJour(false); } catch(e){} }
+    return { slot:slot, sid:sid, label:slotLabelOf(slot) };
+  };
+  window.__nutriQuickRemove = function(ref){
+    if (!ref || !ref.sid) return;
+    var dk = todayKey();
+    var day = getDayMeals(dk); var arr = day[ref.slot]; if (!arr) return;
+    for (var i=0;i<arr.length;i++){ if (arr[i] && arr[i]._sid===ref.sid){ arr.splice(i,1); break; } }
+    saveDayMeals(dk, day);
+    render();
+    if (window.__updateFilDuJour) { try { window.__updateFilDuJour(false); } catch(e){} }
+  };
+  window.__nutriTodayEaten = function(){
+    var day = getDayMeals(todayKey()); var out = [];
+    Object.keys(day).forEach(function(sl){ (day[sl]||[]).forEach(function(it){ if(it && it.food) out.push(it.food); }); });
+    return out;
+  };
   window.__renderNutrition = function(){
     render();
     // Le fil du jour réagit aux changements de repas/hydratation
@@ -11355,9 +11394,105 @@ if (document.readyState === 'loading') {
     html += blk('🥦','Légumes', 'à volonté', 'Couleur, fibres, micronutriments — la moitié de l\'assiette.');
     html += blk('🫒','Lipides', (t.l||0)+' g/j', 'Huile d\'olive, avocat, oléagineux, poissons gras.');
     html += '<div style="margin-top:0.6rem;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.6rem 0.7rem"><div style="font-family:DM Mono,monospace;font-size:0.5rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Exemple repas principal</div><div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--text,#e8e8e8);line-height:1.45">'+esc(M.exemple)+'</div></div>';
+    html += sugHTML();
     html += '</div>';
     el.innerHTML = html;
   }
+
+  // ── Suggestions repas générées par l'IA, ajoutables au journal en un tap ──
+  var sug = { list:null, busy:false, err:'', added:{} };
+  function sugHTML(){
+    var h = '<div style="margin-top:0.8rem;border-top:1px solid var(--border,#242528);padding-top:0.7rem">';
+    h += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">'+
+      '<span style="font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted,#5e6068);text-transform:uppercase;letter-spacing:0.05em">💡 Suggestions du coach</span>';
+    if (sug.list && sug.list.length && !sug.busy) h += '<button data-sug-refresh style="margin-left:auto;cursor:pointer;background:transparent;border:1px solid var(--border,#242528);color:var(--muted,#5e6068);border-radius:6px;font-family:DM Mono,monospace;font-size:0.55rem;padding:0.2rem 0.5rem">↻ Autres</button>';
+    h += '</div>';
+    if (sug.busy) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--accent,#a3e635);padding:0.3rem 0">Le coach compose des idées…</div>';
+    } else if (sug.err) {
+      h += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:#f59e0b;padding:0.3rem 0;line-height:1.4">'+esc(sug.err)+'</div>'+
+        '<button data-sug-refresh style="cursor:pointer;background:transparent;border:1px solid var(--border,#242528);color:var(--muted,#5e6068);border-radius:8px;font-family:DM Mono,monospace;font-size:0.6rem;padding:0.4rem 0.7rem;margin-top:0.3rem">Réessayer</button>';
+    } else if (sug.list && sug.list.length) {
+      sug.list.forEach(function(it, i){
+        if (sug.added[i]) {
+          h += '<div style="display:flex;align-items:center;gap:0.5rem;background:rgba(163,230,53,0.08);border:1px solid rgba(163,230,53,0.25);border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.4rem">'+
+            '<span style="color:#a3e635;flex-shrink:0">✓</span>'+
+            '<span style="flex:1;min-width:0;font-family:DM Mono,monospace;font-size:0.6rem;color:var(--text,#e8e8e8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.food)+' <span style="color:var(--muted,#5e6068)">→ '+esc(sug.added[i].label||'')+'</span></span>'+
+            '<button data-sug-undo="'+i+'" style="flex-shrink:0;cursor:pointer;background:transparent;border:none;color:#f59e0b;font-family:DM Mono,monospace;font-size:0.58rem;padding:0.1rem 0.3rem;text-decoration:underline">Annuler</button></div>';
+        } else {
+          h += '<button data-sug-add="'+i+'" style="display:flex;width:100%;text-align:left;align-items:center;gap:0.55rem;cursor:pointer;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;padding:0.5rem 0.6rem;margin-bottom:0.4rem">'+
+            '<span style="flex-shrink:0;font-family:Syne,sans-serif;font-weight:700;font-size:1rem;color:var(--accent,#a3e635);line-height:1">+</span>'+
+            '<span style="flex:1;min-width:0">'+
+              '<span style="display:block;font-family:DM Mono,monospace;font-size:0.64rem;color:var(--text,#e8e8e8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.food)+(it.qty?' <span style="color:var(--muted,#5e6068)">'+esc(it.qty)+'</span>':'')+'</span>'+
+              (it.why? '<span style="display:block;font-family:DM Mono,monospace;font-size:0.52rem;color:var(--muted,#5e6068);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:0.05rem">'+esc(it.why)+'</span>':'')+
+            '</span>'+
+            '<span style="flex-shrink:0;font-family:DM Mono,monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+(Math.round(+it.kcal||0))+' kcal</span></button>';
+        }
+      });
+    } else {
+      h += '<button data-sug-refresh style="display:flex;width:100%;justify-content:center;align-items:center;gap:0.4rem;cursor:pointer;background:transparent;border:1px dashed var(--accent,#a3e635);color:var(--accent,#a3e635);border-radius:8px;font-family:DM Mono,monospace;font-size:0.62rem;padding:0.55rem 0.7rem">💡 Proposer des idées repas</button>';
+    }
+    h += '</div>';
+    return h;
+  }
+  function fetchSug(){
+    if (sug.busy) return;
+    var t=null; try{ t=(window.__nutriTargets&&window.__nutriTargets())||null; }catch(e){}
+    if(!t){ sug.err='Cibles nutrition indisponibles.'; render(); return; }
+    if (typeof window.askClaudeJSON!=='function' || !localStorage.getItem('garmin_url') || !localStorage.getItem('garmin_token')) {
+      sug.err='Backend IA non configuré (⚙ Réglages › Connexion).'; render(); return;
+    }
+    var E=null; try{ E=(typeof window.CCC_ETAT==='function')?window.CCC_ETAT():null; }catch(e){}
+    var eaten=[]; try{ eaten=(window.__nutriTodayEaten&&window.__nutriTodayEaten())||[]; }catch(e){}
+    var mode=t.mode||'MC';
+    var chaleur = !!(E&&E.leviers&&E.leviers.chaleur);
+    var meteo=''; try{ if(window.__weather&&window.__weather.today){ var tp=Math.round(window.__weather.today.feels_max||window.__weather.today.temp_max||0); if(tp) meteo=' Température ressentie max ~'+tp+'°C.'; } }catch(e){}
+    sug.busy=true; sug.err=''; sug.list=null; sug.added={}; render();
+    var sys = "Tu es le coach nutrition de Pierre, ultra-traileur en prépa CCC (UTMB). "+
+      "Propose 5 aliments ou mini-plats CONCRETS et simples à ajouter à sa journée pour l'aider à atteindre ses cibles, en cohérence avec son mode glucidique du jour. "+
+      "Mode "+mode+" ("+(mode==='HC'?'high carb, remplir le glycogène':mode==='LC'?'low carb, priorité protéines et lipides, peu de féculents':'medium carb, glucides modérés')+"). "+
+      "Varie les catégories (protéine, glucide/féculent, légume ou fruit, lipide, collation). Quantités réalistes. "+
+      "Calories cohérentes : 4 kcal/g pour glucides et protéines, 9 kcal/g pour lipides. "+
+      "Choisis le créneau le plus logique parmi exactement : petitdej, preseance, dej, postseance, encas, diner. "+
+      "Réponds UNIQUEMENT en JSON strict, sans texte autour : "+
+      '{"suggestions":[{"food":"nom court","qty":"ex 150 g ou x2","slot":"dej","g":<glucides g>,"p":<proteines g>,"l":<lipides g>,"kcal":<kcal>,"why":"raison courte moins de 40 caracteres"}]}';
+    var prompt = 'Cibles du jour : '+t.kcal+' kcal, glucides '+(t.g||0)+' g, protéines '+(t.p||0)+' g, lipides '+(t.l||0)+' g. Mode '+mode+'.'+
+      (chaleur?(' Il fait chaud aujourd\'hui.'+meteo+' Privilégie hydratation, fruits, sodium.'):meteo)+
+      (eaten.length? (' Déjà mangé aujourd\'hui : '+eaten.slice(0,15).join(', ')+'. Évite de reproposer la même chose.') : ' Rien mangé encore aujourd\'hui.')+
+      ' Donne 5 idées adaptées.';
+    window.askClaudeJSON(prompt, { system: sys, max_tokens: 700 }).then(function(res){
+      var arr = (res&&res.suggestions) || (Array.isArray(res)?res:null);
+      if(!arr||!arr.length){ sug.busy=false; sug.err='Aucune idée générée — réessaie.'; render(); return; }
+      sug.list = arr.slice(0,6).map(function(it){
+        var g=Math.max(0,Math.round(+it.g||0)),p=Math.max(0,Math.round(+it.p||0)),l=Math.max(0,Math.round(+it.l||0));
+        return { food:String(it.food||'aliment').slice(0,50), qty:String(it.qty||'').slice(0,20), slot:String(it.slot||'').slice(0,12), g:g,p:p,l:l, kcal:Math.round(+it.kcal||(g*4+p*4+l*9)), why:String(it.why||'').slice(0,50) };
+      });
+      sug.busy=false; sug.err=''; sug.added={}; render();
+    }).catch(function(e){
+      sug.busy=false; sug.err='Impossible de générer'+(e&&e.message?' ('+e.message+')':'')+' — réessaie.'; render();
+    });
+  }
+  document.addEventListener('click', function(e){
+    var tgt = e.target; if(!tgt||!tgt.closest) return;
+    var el = tgt.closest('[data-sug-add],[data-sug-refresh],[data-sug-undo]');
+    if(!el) return;
+    if(el.hasAttribute('data-sug-refresh')){ e.preventDefault(); fetchSug(); return; }
+    if(el.hasAttribute('data-sug-add')){
+      e.preventDefault();
+      var i=parseInt(el.getAttribute('data-sug-add'),10);
+      if(sug.list && sug.list[i] && !sug.added[i]){
+        var ref=null; try{ ref=window.__nutriQuickAdd && window.__nutriQuickAdd(sug.list[i]); }catch(err){}
+        if(ref){ sug.added[i]=ref; render(); }
+      }
+      return;
+    }
+    if(el.hasAttribute('data-sug-undo')){
+      e.preventDefault();
+      var j=parseInt(el.getAttribute('data-sug-undo'),10);
+      if(sug.added[j]){ try{ window.__nutriQuickRemove && window.__nutriQuickRemove(sug.added[j]); }catch(err){} delete sug.added[j]; render(); }
+      return;
+    }
+  });
   window.__assietteRender = render;
   document.addEventListener('ccc-weather', function(){ try{ render(); }catch(e){} });
   if (document.readyState!=='loading') render(); else document.addEventListener('DOMContentLoaded', render);
