@@ -1526,7 +1526,12 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
 
 <!-- PLAN -->
 <div class="panel" id="panel-plan"><div class="inner">
-  <div class="ptitle">Plan d'entraînement <span class="ptitle-sub">16 semaines · CCC 28 août 2026</span></div>
+  <div class="ptitle">Plan <span class="ptitle-sub">entraînement · course</span></div>
+  <div class="p-tabs" id="plan-subnav" style="margin:0.2rem 0 1rem">
+    <button class="p-tab active" data-plansub="train">Entraînement</button>
+    <button class="p-tab" data-plansub="race">Course</button>
+  </div>
+  <div id="plan-train">
   <div class="sec sec-first">Vue d'ensemble</div>
   <div class="phase-bar">
     <div class="phase-seg m1"><div class="pseg-l">Mois 1</div><div class="pseg-s">Socle · S1-S4</div></div>
@@ -1562,8 +1567,9 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   </div>
   </div>
   </details>
+  </div><!-- /plan-train -->
 
-  <div class="sec">Plan de course</div>
+  <div id="plan-race" style="display:none">
   <style id="raceplan-css">
   #raceplan,#profdetail{
     --bg:#06070a;--surface:#101216;--surface2:#171a1f;--border:#23262d;
@@ -2068,6 +2074,23 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   window.addEventListener('resize',function(){ var o=document.getElementById('profdetail'); if(o&&o.classList.contains('open')) drawProfDetail(); });
   document.getElementById('tgt').addEventListener('input',render);
   drawProfile(); drawChecklists(); render();
+  })();
+  </script>
+  </div><!-- /plan-race -->
+  <script>
+  (function(){
+    function sw(v){
+      var tr=document.getElementById('plan-train'), rc=document.getElementById('plan-race');
+      if(!tr||!rc) return;
+      tr.style.display = (v==='race')?'none':'';
+      rc.style.display = (v==='race')?'':'none';
+      var b=document.querySelectorAll('#plan-subnav .p-tab');
+      for(var i=0;i<b.length;i++) b[i].classList.toggle('active', b[i].getAttribute('data-plansub')===v);
+    }
+    document.addEventListener('click',function(e){
+      var t=e.target.closest('#plan-subnav .p-tab'); if(!t) return;
+      sw(t.getAttribute('data-plansub'));
+    });
   })();
   </script>
 </div></div>
