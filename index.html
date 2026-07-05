@@ -10877,6 +10877,13 @@ if (document.readyState === 'loading') {
     var dominant=ordre.map(function(c){return flags.filter(function(f){return f.code===c;})[0];}).filter(Boolean)[0];
     var consigne=dominant?dominant.action:'Tout est au vert — deroule ta seance prevue.';
     if(carb_switch) consigne+=' \u00B7 Bascule Low Carb.';
+    // Etape 4 une seule voix : la seance/consigne suivent aussi meteo + phase (via CCC_ETAT)
+    if(i.chaleur){
+      add('chaleur','\u2600\uFE0F','Chaleur','info','Meteo','Chaud'+(i.temp_ressenti_max!=null?' ressenti '+Math.round(i.temp_ressenti_max)+'\u00B0':''),'Cale la seance tot ou tard, Z2, sel + eau avant d\u2019avoir soif');
+      consigne+=' \u00B7 Chaleur : cale tot/tard, hydrate + sels.';
+    }
+    if(i.decharge && niveau!=='rouge'){ seance+=' (decharge : reste facile)'; }
+    else if(i.affutage && niveau!=='rouge'){ seance+=' (affutage : volume reduit, garde un peu de vivacite)'; }
     return { date:i.date||null, niveau:niveau, score:compositeScore(i,C), consigne:consigne, seance_recommandee:seance, flags:flags, carb_switch:carb_switch, no_run:noRun };
   }
 
@@ -10884,6 +10891,7 @@ if (document.readyState === 'loading') {
   function gatherReadinessInputs(garmin){
     var g = garmin || window.__garminData || {};
     var subj={}; try{ subj=JSON.parse(localStorage.getItem('ccc_subjectif_'+rkDay())||'{}'); }catch(e){}
+    var E=null; try{ E=(typeof window.CCC_ETAT==='function')?window.CCC_ETAT():null; }catch(e){}
     var seance='',carb='';
     try{
       if(typeof PLAN_DATA!=='undefined' && typeof WI!=='undefined' && typeof DI!=='undefined' && PLAN_DATA[WI] && PLAN_DATA[WI].days && PLAN_DATA[WI].days[DI]){
@@ -10899,7 +10907,11 @@ if (document.readyState === 'loading') {
       score_sommeil: g.sleep&&g.sleep.score, heures_sommeil: g.sleep&&g.sleep.duration_hours,
       fc_repos: g.rhr,
       douleur: (subj.douleur!=null?subj.douleur:null), zone_douleur: subj.zone||null, rpe:(subj.rpe!=null?subj.rpe:null),
-      type_seance: seance, nutrition_prevue: carb
+      type_seance: seance, nutrition_prevue: carb,
+      chaleur: !!(E&&E.leviers&&E.leviers.chaleur),
+      temp_ressenti_max: (E&&E.meteo&&(E.meteo.ressenti_max!=null?E.meteo.ressenti_max:E.meteo.temp_max))||null,
+      decharge: !!(E&&E.leviers&&E.leviers.decharge),
+      affutage: !!(E&&E.leviers&&E.leviers.affutage)
     };
   }
 
