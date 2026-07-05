@@ -5751,6 +5751,7 @@ if (document.readyState === 'loading') {
     var read     = data.readiness || {};
     var tl       = data.training_load || {};
     var vo2      = data.vo2max || {};
+    var endur    = data.endurance || {};
     var daily    = data.daily || {};
     
     function metric(emoji, label, value, unit, extra, color, mkey) {
@@ -5818,6 +5819,7 @@ if (document.readyState === 'loading') {
     if (stress.avg != null) html += metric(ic('stress',13), 'Stress', stress.avg, '/100', stress.max != null ? 'max ' + stress.max : null, null, 'stress');
     if (tl.tsb != null) html += metric(ic('chart',13), 'TSB', Math.round(tl.tsb), '', tl.status || null, null, 'tsb');
     if (vo2.running != null) html += metric(ic('lung',13), 'VO2max', vo2.running.toFixed(1), '', 'running', null, 'vo2max');
+    if (endur.score != null) html += metric(ic('lung',13), 'Endurance', endur.score, '', endur.classification || null, null, 'endurance');
     // ── Activité du jour (pas / calories actives / intensité) — depuis data.daily ──
     if (daily.steps != null) {
       var distExtra = (daily.distance_m != null) ? (daily.distance_m / 1000).toFixed(1) + ' km' : null;
@@ -5950,7 +5952,18 @@ if (document.readyState === 'loading') {
         vo2.running>=48?'' + ic("statusGood",13,"#5ec27a") + ' Bon niveau d\'endurance.':
         '' + ic("statusWarn",13,"#e8a020") + ' Marge de progression — le volume en Z2 et le travail de seuil le feront monter.'
     };
-    
+
+    // Endurance Score (Garmin)
+    M.endurance = {
+      emoji:'🫁', title:'Endurance Score', value:(endur.score!=null?endur.score:'–'), unit:'',
+      sub:(endur.classification||''),
+      what:'Score Garmin d\'endurance : ta capacité à soutenir l\'effort dans la durée, construite par le volume aérobie accumulé (surtout les sorties longues et le Z2). Il monte lentement avec la régularité. C\'est le socle de l\'ultra.',
+      interp: endur.score==null?'Donnée indisponible.':
+        endur.score>=7000?'' + ic("statusGood",13,"#5ec27a") + ' Socle d\'endurance très solide, exactement ce que la CCC exige. Entretiens-le par le volume long.':
+        endur.score>=5000?'' + ic("statusGood",13,"#5ec27a") + ' Bonne endurance de fond. Les sorties longues et le Z2 continuent de la bâtir.':
+        '' + ic("statusWarn",13,"#e8a020") + ' Encore à construire. La régularité en Z2 et les sorties longues le feront monter progressivement.'
+    };
+
     // ── Activité du jour : Pas ──
     var stepsV = daily.steps;
     M.steps = {
