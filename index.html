@@ -1709,6 +1709,36 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   #raceplan .check .bx.on{background:var(--accent);border-color:var(--accent)}
   #raceplan .sub-h{font-family:'JetBrains Mono';font-size:.54rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:.7rem 0 .3rem}
   #raceplan .note{font-family:'JetBrains Mono';font-size:.58rem;color:var(--muted);line-height:1.5;margin-top:.4rem}
+  /* ── MODE COURSE : ecran jour J, texte geant, contraste max, zero animation ── */
+  #raceplan .rm-openbtn{display:block;width:100%;min-height:54px;margin-top:.8rem;background:var(--accent);border:0;border-radius:14px;color:#101400;font-weight:700;font-size:1.05rem;cursor:pointer;font-family:'Satoshi',system-ui,sans-serif}
+  #racemode{position:fixed;inset:0;z-index:1100;background:#000;display:none;flex-direction:column;font-family:'Satoshi',system-ui,sans-serif;color:#fff}
+  #racemode.open{display:flex}
+  #racemode .rm-top{display:flex;align-items:flex-start;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + .9rem) 1rem .6rem;border-bottom:1px solid #26272b}
+  #racemode .rm-kick{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#c5f24e}
+  #racemode .rm-clock{font-family:'Clash Display','Satoshi',sans-serif;font-weight:700;font-size:2rem;line-height:1.1}
+  #racemode .rm-close{min-width:48px;min-height:48px;background:#151619;border:1px solid #2a2b30;border-radius:12px;color:#fff;font-size:1.15rem;cursor:pointer}
+  #racemode .rm-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.1rem 1rem 1.2rem}
+  #racemode .rm-next-kick{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#9aa0ab;margin-bottom:.3rem}
+  #racemode .rm-name{font-family:'Clash Display','Satoshi',sans-serif;font-weight:700;font-size:2.3rem;line-height:1.05;margin-bottom:.7rem}
+  #racemode .rm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem}
+  #racemode .rm-cell{background:#101114;border:1px solid #26272b;border-radius:14px;padding:.7rem .8rem}
+  #racemode .rm-cell .l{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:#9aa0ab}
+  #racemode .rm-cell .v{font-family:'Clash Display','Satoshi',sans-serif;font-weight:700;font-size:1.7rem;margin-top:.15rem}
+  #racemode .rm-marge{background:#101114;border:1px solid #26272b;border-radius:16px;padding:.9rem;text-align:center;margin-bottom:.8rem}
+  #racemode .rm-marge .l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#9aa0ab}
+  #racemode .rm-marge .v{font-family:'Clash Display','Satoshi',sans-serif;font-weight:700;font-size:3.6rem;line-height:1.05}
+  #racemode .rm-marge .s{font-size:.95rem;color:#c9ccd4;margin-top:.15rem}
+  #racemode .ok{color:#c5f24e}
+  #racemode .warn{color:#f5a623}
+  #racemode .bad{color:#ff5a5a}
+  #racemode .rm-nut{background:#15170d;border:1px solid #3a4218;border-radius:14px;padding:.8rem .9rem;font-size:1.02rem;line-height:1.5;color:#e8ecdc;margin-bottom:.9rem}
+  #racemode .rm-nut b{color:#c5f24e}
+  #racemode .rm-btn{display:block;width:100%;min-height:64px;background:#c5f24e;border:0;border-radius:16px;color:#101400;font-family:'Satoshi',system-ui,sans-serif;font-weight:700;font-size:1.25rem;cursor:pointer;margin-bottom:.7rem}
+  #racemode .rm-sub{display:flex;justify-content:space-between;align-items:center;gap:.6rem;font-size:.85rem;color:#9aa0ab}
+  #racemode .rm-undo{background:transparent;border:1px solid #2a2b30;border-radius:10px;color:#9aa0ab;min-height:44px;padding:0 .8rem;cursor:pointer;font-size:.8rem}
+  #racemode .rm-rest{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#9aa0ab;margin:.2rem 0 .9rem}
+  #racemode .rm-foot{padding:.6rem 1rem calc(env(safe-area-inset-bottom,0px) + .6rem);border-top:1px solid #26272b;font-size:.72rem;line-height:1.45;color:#9aa0ab}
+  #racemode .rm-foot b{color:#fff}
   </style>
   <div id="raceplan">
   <div class="hero">
@@ -1726,17 +1756,18 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
       <span class="val" id="tgtval">19h59</span>
     </div>
     <div class="note" id="tgtnote"></div>
+    <button class="rm-openbtn" id="rm-openbtn">&#127937; MODE COURSE &#8594;</button>
   </div>
 
   <div class="card assist-card">
     <div class="assist-head"><span class="ico">&#128101;</span> Ou ton equipe t'attend</div>
-    <div class="note" style="margin-top:.4rem">Assistance perso autorisee <b style="color:var(--text)">uniquement</b> sur ces points (regle UTMB, a confirmer avec le road-book 2026). Prevois-y rechange, ravito perso et un boost de moral.</div>
+    <div class="note" style="margin-top:.4rem">Assistance perso autorisee <b style="color:var(--text)">uniquement</b> sur ces points (<b style="color:var(--text)">confirme 2026</b> : Champex-Lac et Vallorcine, PAS Trient). 1 seule personne, zone dediee, sac 30 L max. Prevois-y rechange, ravito perso et un boost de moral.</div>
     <div id="assiststrip" class="astrip"></div>
   </div>
 
   <div class="warn">
     <span>&#9888;</span>
-    <span>Distances, altitudes et barrieres <b>calees sur le profil officiel UTMB</b>. Le road-book definitif CCC 2026 sortira quelques mois avant la course : on ajustera si les horaires bougent.</span>
+    <span>Barrieres = <b>references officielles des editions recentes</b> (affichees par l'organisateur, verifiees le 27/07/2026), calculees sur la <b>derniere vague (09:30)</b>. Regle UTMB : il faut <b>QUITTER le poste avant l'heure barriere</b>. Guide Coureur 2026 attendu debut aout : on ajustera si ca bouge.</span>
   </div>
 
   <div class="card profcard" id="profcard">
@@ -1776,9 +1807,9 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     <details><summary>Materiel obligatoire &amp; drop bags</summary>
       <div class="sub-h">Sac obligatoire UTMB (porte tout du depart a l'arrivee)</div>
       <div id="matlist"></div>
-      <div class="sub-h">Sac base vie Champex (km 55)</div>
+      <div class="sub-h">Sac assistance Champex (remis par ton equipe, 30 L max)</div>
       <div id="droplist"></div>
-      <div class="note">La liste officielle exacte est publiee dans le reglement CCC. Verifie le controle materiel avant le depart.</div>
+      <div class="note">Liste officielle 2026 (document UTMB, verifie le 27/07/2026). Des kits chaleur/froid ADDITIONNELS peuvent etre actives selon la meteo annoncee : verifie l'email UTMB la veille. Controles possibles a tout moment.</div>
     </details>
   </div>
   </div>
@@ -1799,6 +1830,18 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     <div class="pd-hint">Glisse horizontalement pour parcourir la course &#8594;</div>
   </div>
 
+  <div id="racemode">
+    <div class="rm-top">
+      <div>
+        <div class="rm-kick">Mode course &#183; CCC 2026</div>
+        <div class="rm-clock" id="rmclock">--:--</div>
+      </div>
+      <button class="rm-close" id="rmclose" aria-label="Fermer">&#10005;</button>
+    </div>
+    <div class="rm-body" id="rmbody"></div>
+    <div class="rm-foot">Barrieres = references officielles recentes (derniere vague 09:30), a confirmer au Guide Coureur 2026. <b>Quitte chaque poste avant l'heure barriere.</b> Fonctionne 100 % hors-ligne.</div>
+  </div>
+
   <script>
   (function(){
   'use strict';
@@ -1811,11 +1854,11 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     {n:'Grand Col Ferret',  km:30.5,  alt:2537, dp:2720, type:'point',  co:null,      assist:false, rav:'none',  r:'Point haut 2537 m, frontiere Italie / Suisse'},
     {n:'La Fouly',          km:40.9,  alt:1600, dp:2770, type:'ravito', co:11*60+15,  assist:false, rav:'full',  r:'C3 - Ravito complet'},
     {n:'Champex-Lac',       km:54.8,  alt:1477, dp:3200, type:'base',   co:14*60+15,  assist:true,  rav:'base',  r:'C4 - BASE VIE : sac perso + assistance equipe autorisee'},
-    {n:"Plan de l'Au",      km:60.0,  alt:1340, dp:3280, type:'point',  co:null,      assist:false, rav:'water', r:'Avant la montee de Bovine'},
+    {n:"Plan de l'Au",      km:60.0,  alt:1340, dp:3280, type:'point',  co:15*60+15,  assist:false, rav:'water', r:'Avant la montee de Bovine'},
     {n:'Trient',            km:71.4,  alt:1300, dp:4200, type:'ravito', co:19*60+0,   assist:false, rav:'full',  r:'C5 - Ravito complet (pas d assistance perso ici)'},
     {n:'Vallorcine',        km:83.3,  alt:1264, dp:5030, type:'ravito', co:22*60+15,  assist:true,  rav:'full',  r:'C6 - Dernier ravito complet + assistance equipe autorisee'},
     {n:'La Flegere',        km:94.7,  alt:1877, dp:6000, type:'ravito', co:25*60+45,  assist:false, rav:'water', r:'Ravito leger avant la descente finale sur Chamonix'},
-    {n:'Chamonix',          km:101.9, alt:1035, dp:6050, type:'finish', co:26*60+30,  assist:false, rav:'finish',r:'C7 - ARRIVEE'}
+    {n:'Chamonix',          km:101.9, alt:1035, dp:6050, type:'finish', co:27*60,     assist:false, rav:'finish',r:'C7 - ARRIVEE (limite 12:00 : 26h30 comptees depuis la DERNIERE vague 09:30)'}
   ];
   var PROFILE = [
     [0,1191],[4,1900],[7.7,2584],[10,2100],[13.7,1989],[16,1840],[19.2,2025],[22.5,1900],
@@ -2054,7 +2097,99 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   }
   function openProfDetail(){ var pd=document.getElementById('profdetail'); if(pd.parentElement!==document.body) document.body.appendChild(pd); /* sort du stacking context de main (nav flottante z300) */ pd.classList.add('open'); document.body.style.overflow='hidden'; buildPdFilters(); requestAnimationFrame(drawProfDetail); }
   function closeProfDetail(){ document.getElementById('profdetail').classList.remove('open'); document.body.style.overflow=''; }
-  var MAT=['Veste impermeable a capuche, coutures etanchees','Pantalon ou collant long (jambes couvertes)','Reserve d\'eau 1 L minimum','Gobelet personnel (pas de gobelet aux ravitos)','Couverture de survie 1,4 x 2 m','Sifflet','Bande adhesive elastique (bandage)','Reserve alimentaire de secours','Frontale + piles de rechange','Telephone portable charge','Bonnet','Gants chauds impermeables','Veste chaude 2e couche (selon meteo montagne)','2 bouteilles / flasks + poche','Carte d\'identite / passeport'];
+
+  /* ── MODE COURSE : ecran jour J. Offline (heure systeme + donnees inline),
+     pointage manuel a chaque poste, marge barriere en direct. Zero animation. ── */
+  var RACE0 = new Date(2026, 7, 28, 9, 0, 0);   // depart vague 09:00, heure locale
+  var RM_KEY = 'ccc_race_state';
+  var SEGNUT = ['',
+    'Grosse montee vers la Tete de la Tronche (2584 m) : 2 prises par heure des le depart, bois regulierement, <b>pas d\'eau avant Bertone</b>.',
+    'Sentier balcon roulant : 2 prises par heure, finis une flasque. <b>Eau au refuge Bonatti</b>.',
+    'Descente douce vers le val Ferret : mange du <b>solide</b> tant que ca roule. <b>Ravito complet a Arnouvaz</b> : refais toutes les flasques avant le Ferret.',
+    'Montee du Grand Col Ferret (+770 m) : gels plutot que solide, petites gorgees frequentes, <b>sels si chaleur</b>. Rien au sommet.',
+    'Tres longue descente vers La Fouly : <b>le troncon ou l\'on oublie de manger</b>, 2 prises par heure quand meme. Ravito complet + Naak a La Fouly.',
+    'Vallee roulante puis bosse finale : digere du solide, vise <b>Champex = base vie</b> : vrai repas + ton equipe (sac 30 L).',
+    'Sortie de Champex a plat : 20 min pour digerer, flasques pleines avant <b>Bovine</b>.',
+    'Bovine, le mur de la nuit (+650 m raides) : 1 gel au pied, <b>cafeine ici si coup de mou</b>. Ravito complet a Trient.',
+    'Les Tseppes de nuit (+630 m) : sels + cafeine. <b>Vallorcine = dernier vrai ravito + ton equipe</b>.',
+    'Derniere grosse montee vers La Flegere (+610 m) : 1 gel au pied, 1 a mi-pente. <b>Dernier point d\'eau a La Flegere</b>.',
+    'Descente finale sur Chamonix : reste lucide, ne te blesse pas, bois ce qui reste. <b>Savoure</b>.'];
+  function rmState(){ try { var s = JSON.parse(localStorage.getItem(RM_KEY) || '{}'); if (!s.passed) s.passed = {}; return s; } catch(e){ return {passed:{}}; } }
+  function rmSave(s){ try { localStorage.setItem(RM_KEY, JSON.stringify(s)); } catch(e){} try { if (window.CCCSync) CCCSync.pushState('race_state', s); } catch(e){} }
+  function rmLast(s){ var m = -1; for (var k in s.passed) { var i = parseInt(k, 10); if (i > m) m = i; } return m; }
+  function rmFmtClock(d){ return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function rmFmtDur(min){ var neg = min < 0; min = Math.abs(Math.round(min)); var h = Math.floor(min / 60), m = min % 60; return (neg ? '-' : '+') + h + 'h' + ('0' + m).slice(-2); }
+  function rmBarrierDate(co){ return new Date(RACE0.getTime() + co * 60000); }
+  function rmRender(){
+    var body = document.getElementById('rmbody'); if (!body) return;
+    var clk = document.getElementById('rmclock'); if (clk) clk.textContent = rmFmtClock(new Date());
+    var s = rmState(), last = rmLast(s), now = Date.now(), N = CP.length, h = '';
+    if (last >= N - 1) {
+      var t0 = s.passed[0] || RACE0.getTime(), tf = s.passed[N - 1] || now;
+      h = '<div class="rm-next-kick">Arrivee</div><div class="rm-name">Chamonix &#127937;</div>'
+        + '<div class="rm-marge"><div class="l">Temps final</div><div class="v ok">' + rmFmtDur((tf - t0) / 60000).replace('+', '') + '</div><div class="s">BRAVO. 101,9 km &#183; 6050 m D+</div></div>'
+        + '<div class="rm-sub"><span>Pointages enregistres : ' + Object.keys(s.passed).length + '</span><button class="rm-undo" data-rmact="reset">Remise a zero</button></div>';
+      body.innerHTML = h; return;
+    }
+    var nextIdx = last + 1, next = CP[nextIdx];
+    var bIdx = null;
+    for (var i = nextIdx; i < N; i++) { if (CP[i].co != null) { bIdx = i; break; } }
+    var margin = null, bAt = null;
+    if (bIdx != null) { bAt = rmBarrierDate(CP[bIdx].co); margin = (bAt.getTime() - now) / 60000; }
+    var mCls = margin == null ? 'ok' : (margin >= 90 ? 'ok' : (margin >= 45 ? 'warn' : 'bad'));
+    if (last < 0) {
+      var toStart = (RACE0.getTime() - now) / 60000;
+      h = '<div class="rm-next-kick">Depart &#183; vendredi 28 aout &#183; vague 09:00</div><div class="rm-name">Courmayeur</div>'
+        + '<div class="rm-marge"><div class="l">' + (toStart >= 0 ? 'Depart dans' : 'Depart depuis') + '</div><div class="v ok">' + rmFmtDur(Math.abs(toStart)).replace('+', '') + '</div><div class="s">Barrieres calculees sur la derniere vague (09:30)</div></div>'
+        + '<div class="rm-nut"><b>Avant le depart :</b> petit-dej 3 h avant, 500 ml d\'eau, flasques pleines, 2 frontales verifiees, LiveTrail lance, roaming actif.</div>'
+        + '<button class="rm-btn" data-rmact="point">DEPART PRIS &#10003;</button>';
+      body.innerHTML = h; return;
+    }
+    var from = CP[last];
+    var dKm = (next.km - from.km), dDp = Math.max(0, next.dp - from.dp);
+    var restKm = (CP[N - 1].km - from.km), restDp = Math.max(0, CP[N - 1].dp - from.dp);
+    h = '<div class="rm-next-kick">Prochain point</div><div class="rm-name">' + next.n + '</div>'
+      + '<div class="rm-grid">'
+      + '<div class="rm-cell"><div class="l">Distance</div><div class="v">' + dKm.toFixed(1).replace('.', ',') + ' km</div></div>'
+      + '<div class="rm-cell"><div class="l">D+ du troncon</div><div class="v">+' + dDp + ' m</div></div>'
+      + '</div>';
+    if (bIdx != null) {
+      var bLabel = (bIdx === nextIdx ? 'Marge barriere ' + CP[bIdx].n : 'Prochaine barriere : ' + CP[bIdx].n);
+      var bDay = bAt.getDate() === 29 ? ' (sam)' : '';
+      h += '<div class="rm-marge"><div class="l">' + bLabel + ' &#183; ' + rmFmtClock(bAt) + bDay + '</div><div class="v ' + mCls + '">' + rmFmtDur(margin) + '</div><div class="s">Il faut QUITTER le poste avant l\'heure barriere</div></div>';
+    }
+    h += '<div class="rm-nut">' + (SEGNUT[nextIdx] || '') + '</div>'
+      + '<button class="rm-btn" data-rmact="point">' + next.n.toUpperCase() + ' ATTEINT &#10003;</button>'
+      + '<div class="rm-rest">Reste ' + restKm.toFixed(1).replace('.', ',') + ' km &#183; +' + restDp + ' m D+ depuis ' + from.n + '</div>'
+      + '<div class="rm-sub"><span>Dernier pointage : ' + from.n + (s.passed[last] ? ' ' + rmFmtClock(new Date(s.passed[last])) : '') + '</span><button class="rm-undo" data-rmact="undo">Annuler</button></div>';
+    body.innerHTML = h;
+  }
+  var rmTimer = null;
+  function openRaceMode(){
+    var rm = document.getElementById('racemode');
+    if (rm.parentElement !== document.body) document.body.appendChild(rm); /* sort du stacking context de main */
+    rm.classList.add('open'); document.body.style.overflow = 'hidden';
+    rmRender();
+    if (rmTimer) clearInterval(rmTimer);
+    rmTimer = setInterval(rmRender, 30000);
+  }
+  function closeRaceMode(){
+    document.getElementById('racemode').classList.remove('open');
+    document.body.style.overflow = '';
+    if (rmTimer) { clearInterval(rmTimer); rmTimer = null; }
+  }
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#rm-openbtn')) { openRaceMode(); return; }
+    if (!e.target.closest('#racemode')) return;
+    if (e.target.closest('#rmclose')) { closeRaceMode(); return; }
+    var act = e.target.closest('[data-rmact]'); if (!act) return;
+    var a = act.getAttribute('data-rmact'), s = rmState();
+    if (a === 'point') { s.passed[rmLast(s) + 1] = Date.now(); rmSave(s); rmRender(); }
+    else if (a === 'undo') { var l = rmLast(s); if (l >= 0 && confirm('Annuler le pointage de ' + CP[l].n + ' ?')) { delete s.passed[l]; rmSave(s); rmRender(); } }
+    else if (a === 'reset') { if (confirm('Remettre le mode course a zero ?')) { rmSave({passed: {}}); rmRender(); } }
+  });
+
+  var MAT=['Piece d\'identite originale avec photo','Smartphone charge, app LiveTrail installee, roaming actif (IT/CH/FR), jamais en mode avion','Reserve d\'eau 1 L minimum (1,5 L recommande CCC), recipients refermables','Couverture de survie 1,40 x 2 m minimum','Sifflet','Veste impermeable a capuche avec membrane (min recommande 20 000 Schmerber), coutures etanchees','DEUX lampes frontales en etat de marche, avec secours pour CHACUNE (200 lumens recommande)','Piles ou power bank de secours (5 000 mAh et plus tolere si une lampe reste utilisable)','Sac de course porte du depart a l\'arrivee','Bande elastique auto-adhesive 100 x 6 cm minimum','Casquette, bandana ou tour de cou (protection solaire)','Surpantalon impermeable','2e couche chaude manches longues 180 g et plus (ou sous-couche 110 g + coupe-vent DWR), coton exclu','Bonnet (ou 2e tour de cou multifonction)','Gants chauds et impermeables','Gobelet personnel 15 cl minimum (flasque a couvercle refusee)','Reserve alimentaire (~800 kcal : 2 gels + 2 barres)'];
   var DROP=['Rechange haut + chaussettes seches','Vraie nourriture (riz, soupe salee, ce que tu digeres)','Piles / batterie frontale de rechange','Ravitaillement solide pour la 2e moitie','Baume anti-frottements','Veste plus chaude si nuit fraiche','Charge rapide telephone'];
   function drawChecklists(){
     function box(arr){ return arr.map(function(t){ return '<div class="check"><span class="bx" data-c="1"></span><span>'+t+'</span></div>'; }).join(''); }
@@ -9803,7 +9938,7 @@ if (document.readyState === 'loading') {
     running = true;
     var changed = false;
     try {
-      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo', 'shoe_cats', 'recipes', 'weekplan', 'shopping_checked', 'intention', 'coach_thread'];
+      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo', 'shoe_cats', 'recipes', 'weekplan', 'shopping_checked', 'intention', 'coach_thread', 'race_state'];
       var res = await Promise.all(keys.map(function(k){ return reconcileState(k).catch(function(){ return false; }); }));
       if (res.some(Boolean)) changed = true;
 
