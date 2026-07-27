@@ -2682,11 +2682,16 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
      Une super-shoe carbone ne dure pas autant qu'un trainer route, et une
      trail s'use d'abord par les crampons. Catégorie persistée par paire. */
   var SHOE_CATS = [
-    { id:'route_daily',  label:'Route &#8211; quotidien',    limit:700 },
-    { id:'route_rapide', label:'Route &#8211; rapide',       limit:600 },
-    { id:'route_compet', label:'Route &#8211; compétition',  limit:300 },
-    { id:'trail',        label:'Trail &#8211; entraînement', limit:500 },
-    { id:'trail_compet', label:'Trail &#8211; compétition',  limit:400 }
+    { id:'route_daily',  fam:'route', qual:'Quotidien',    label:'Route &#183; quotidien',    limit:700 },
+    { id:'route_rapide', fam:'route', qual:'Rapide',       label:'Route &#183; rapide',       limit:600 },
+    { id:'route_compet', fam:'route', qual:'Compétition',  label:'Route &#183; compétition',  limit:300, compet:true },
+    { id:'trail',        fam:'trail', qual:'Entraînement', label:'Trail &#183; entraînement', limit:500 },
+    { id:'trail_compet', fam:'trail', qual:'Compétition',  label:'Trail &#183; compétition',  limit:400, compet:true }
+  ];
+  // Familles : identité couleur lisible au premier regard (route cyan / trail lime).
+  var SHOE_FAMS = [
+    { id:'route', name:'Route', color:'#5eead4', bg:'rgba(94,234,212,0.12)' },
+    { id:'trail', name:'Trail', color:'#a3e635', bg:'rgba(163,230,53,0.12)' }
   ];
   // Ordre volontaire : "Cascadia Elite" doit tomber en trail, pas en route_compet.
   var SHOE_KW = [
@@ -2765,12 +2770,12 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     var pct = shoePct(s, cat), bar = Math.min(100, pct);
     var col = pct>85 ? '#ef4444' : (pct>=60 ? '#f59e0b' : 'var(--accent,#a3e635)');
     var h = '<div style="margin-bottom:0.7rem">';
-    h += '<div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.25rem">'+
-         '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
+    h += '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.25rem">'+
+         '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
          '<span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' / '+cat.limit+' km <span style="color:'+col+'">'+pct+' %</span></span></div>';
     h += '<div style="height:7px;border-radius:4px;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);overflow:hidden"><div style="height:100%;width:'+bar+'%;background:'+col+'"></div></div>';
     if (shoeEdit[key]){
-      h += '<div style="display:flex;gap:0.4rem;margin-top:0.45rem;align-items:stretch">'+shoeSelect(key, cat.id)+shoeBtn('shoe-ok', key, 'Valider', 1)+shoeBtn('shoe-cancel', key, 'Annuler')+'</div>';
+      h += '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:0.4rem;margin-top:0.45rem;align-items:stretch">'+shoeSelect(key, cat.id)+shoeBtn('shoe-ok', key, 'Valider', 1)+shoeBtn('shoe-cancel', key, 'Annuler')+'</div>';
     } else {
       h += '<div style="display:flex;gap:0.4rem;margin-top:0.4rem;justify-content:flex-end">'+shoeBtn('shoe-edit', key, 'Catégorie')+shoeBtn('shoe-arch', key, 'Archiver')+'</div>';
     }
@@ -2794,20 +2799,35 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
       html += uncat.map(function(s){
         var key = shoeKey(s), km = Math.round(s.distance_km||0);
         return '<div style="margin-bottom:0.55rem">'+
-          '<div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.3rem">'+
-          '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
+          '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.3rem">'+
+          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
           '<span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' km</span></div>'+
-          '<div style="display:flex;gap:0.4rem;align-items:stretch">'+shoeSelect(key, shoeAutoCat(s.name))+shoeBtn('shoe-ok', key, 'Valider', 1)+'</div></div>';
+          '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0.4rem;align-items:stretch">'+shoeSelect(key, shoeAutoCat(s.name))+shoeBtn('shoe-ok', key, 'Valider', 1)+'</div></div>';
       }).join('');
       html += '</div>';
     }
 
-    SHOE_CATS.forEach(function(c){
-      var list = lastShoes.filter(function(s){ return shoeCatOf(s, m) === c.id; });
-      if (!list.length) return;
-      list.sort(function(a,b){ return shoePct(b,c) - shoePct(a,c); });
-      html += '<div style="'+hd+';color:var(--muted,#5e6068);margin:0 0 0.5rem">'+c.label+' &#183; seuil '+c.limit+' km</div>';
-      html += list.map(function(s){ return shoeRowHTML(s, c); }).join('');
+    SHOE_FAMS.forEach(function(f){
+      var cats = SHOE_CATS.filter(function(c){ return c.fam === f.id; });
+      var nFam = 0;
+      cats.forEach(function(c){ nFam += lastShoes.filter(function(s){ return shoeCatOf(s, m) === c.id; }).length; });
+      if (!nFam) return;
+      html += '<div style="border:1px solid var(--border,#242528);border-left:3px solid '+f.color+';border-radius:12px;padding:0.7rem 0.75rem 0.25rem;margin-bottom:0.8rem;background:rgba(255,255,255,0.015)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">'+
+        '<span style="font-family:\'DM Mono\',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:'+f.color+';background:'+f.bg+';padding:0.18rem 0.6rem;border-radius:6px">'+f.name+'</span>'+
+        '<span style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068)">'+nFam+' paire'+(nFam>1?'s':'')+'</span></div>';
+      var first = true;
+      cats.forEach(function(c){
+        var list = lastShoes.filter(function(s){ return shoeCatOf(s, m) === c.id; });
+        if (!list.length) return;
+        list.sort(function(a,b){ return shoePct(b,c) - shoePct(a,c); });
+        html += '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.5rem;margin:0.5rem 0 0.45rem'+(first?'':';padding-top:0.65rem;border-top:1px solid var(--border,#242528)')+'">'+
+          '<span style="font-family:\'DM Mono\',monospace;font-size:0.58rem;letter-spacing:0.04em;text-transform:uppercase;color:'+(c.compet?f.color:'var(--text,#e8e8e8)')+'">'+c.qual+'</span>'+
+          '<span style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068);white-space:nowrap">seuil '+c.limit+' km</span></div>';
+        html += list.map(function(s){ return shoeRowHTML(s, c); }).join('');
+        first = false;
+      });
+      html += '</div>';
     });
 
     var arch = lastShoes.filter(function(s){ return shoeCatOf(s, m) === 'retired'; });
@@ -2815,8 +2835,8 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
       html += '<details style="margin-top:0.4rem"><summary style="font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068);cursor:pointer;min-height:44px;display:flex;align-items:center">Archivées ('+arch.length+')</summary><div style="padding-top:0.4rem">';
       html += arch.map(function(s){
         var key = shoeKey(s), km = Math.round(s.distance_km||0);
-        return '<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.45rem">'+
-          '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+shoeName(s)+' <span style="opacity:0.7">'+km+' km</span></span>'+
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0.5rem;margin-bottom:0.45rem">'+
+          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+shoeName(s)+' <span style="opacity:0.7">'+km+' km</span></span>'+
           shoeBtn('shoe-unarch', key, 'Désarchiver')+'</div>';
       }).join('');
       html += '</div></details>';
