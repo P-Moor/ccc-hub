@@ -2678,18 +2678,187 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
     setStatus('#a3e635', acts.length+' activités · maj '+maj);
   }
 
+  /* ── USURE CHAUSSURES : seuils différenciés par catégorie ──────────
+     Une super-shoe carbone ne dure pas autant qu'un trainer route, et une
+     trail s'use d'abord par les crampons. Catégorie persistée par paire. */
+  var SHOE_CATS = [
+    { id:'route_daily',  label:'Route &#8211; quotidien',    limit:700 },
+    { id:'route_rapide', label:'Route &#8211; rapide',       limit:600 },
+    { id:'route_compet', label:'Route &#8211; compétition',  limit:300 },
+    { id:'trail',        label:'Trail &#8211; entraînement', limit:500 },
+    { id:'trail_compet', label:'Trail &#8211; compétition',  limit:400 }
+  ];
+  // Ordre volontaire : "Cascadia Elite" doit tomber en trail, pas en route_compet.
+  var SHOE_KW = [
+    { cat:'trail_compet', kw:['s-lab','s/lab','s|lab','slab'] },
+    { cat:'trail',        kw:['trabuco','cascadia','speedgoat','trail','grvl'] },
+    { cat:'route_compet', kw:['supercomp','vaporfly','adios pro','elite'] },
+    { cat:'route_rapide', kw:['superblast','boston','endorphin'] }
+  ];
+  var SHOE_SEED = [
+    ['ASICS MegaBlast','route_daily'], ['ASICS NovaBlast 5','route_daily'],
+    ['ASICS Nimbus 26 | Paris','route_daily'], ['Nike Air Zoom Vomero 16','route_daily'],
+    ['ASICS Superblast 2','route_rapide'], ['Adidas ADIZERO BOSTON 13','route_rapide'],
+    ['New Balance FuelCell SuperComp Elite v4','route_compet'],
+    ['ASICS Gel Trabuco 12 Dark Mint','trail'], ['ASICS Trabuco Max 3','trail'],
+    ['ASICS Trabuco Max 5','trail'], ['Brooks CASCADIA ELITE','trail'],
+    ['Salomon AERO GLIDE 3 GRVL','trail'],
+    ['Salomon S-LAB ULTRA V2','trail_compet'], ['Salomon Ultra Glide 4','trail_compet'],
+    ['Salomon S|LAB Ultra Glide','retired']
+  ];
+  var SHOE_SEED_MAP = {};
+  SHOE_SEED.forEach(function(p){ SHOE_SEED_MAP[shoeSeedKey(p[0])] = p[1]; });
+
+  var lastShoes = [], shoeEdit = {};
+
+  function shoeNormName(n){ return String(n==null?'':n).toLowerCase().replace(/\s+/g,' ').trim(); }
+  function shoeSeedKey(n){ return String(n==null?'':n).toLowerCase().replace(/[^a-z0-9]+/g,''); }
+  function shoeKey(s){ return (s && s.id) ? String(s.id) : shoeNormName(s && s.name); }
+  function shoeCatById(id){ for (var i=0;i<SHOE_CATS.length;i++){ if (SHOE_CATS[i].id===id) return SHOE_CATS[i]; } return null; }
+  function shoeAutoCat(name){
+    var n = String(name==null?'':name).toLowerCase();
+    for (var i=0;i<SHOE_KW.length;i++){
+      for (var j=0;j<SHOE_KW[i].kw.length;j++){ if (n.indexOf(SHOE_KW[i].kw[j])>=0) return SHOE_KW[i].cat; }
+    }
+    return 'route_daily';
+  }
+  function loadShoeCats(){
+    try { var r = JSON.parse(localStorage.getItem('ccc_shoe_cats')||'null'); return (r && typeof r==='object') ? r : null; } catch(e){ return null; }
+  }
+  function saveShoeCats(m){
+    try { localStorage.setItem('ccc_shoe_cats', JSON.stringify(m)); } catch(e){}
+    try { if (window.CCCSync) CCCSync.pushState('shoe_cats', m); } catch(e){}
+  }
+  // Seed au premier chargement seulement (clé absente), matching par nom normalisé.
+  function ensureShoeSeed(shoes){
+    var m = loadShoeCats();
+    if (m) return m;
+    m = {};
+    shoes.forEach(function(s){ var c = SHOE_SEED_MAP[shoeSeedKey(s.name)]; if (c) m[shoeKey(s)] = c; });
+    saveShoeCats(m);
+    return m;
+  }
+  // Choix local prioritaire ; sinon une paire retirée côté Strava part en archivée.
+  function shoeCatOf(s, m){
+    var v = m[shoeKey(s)];
+    if (v) return v;
+    if (s.retired) return 'retired';
+    return null;
+  }
+  function shoePct(s, cat){ return Math.round((s.distance_km||0) / cat.limit * 100); }
+
+  function shoeSelect(key, sel){
+    var o = SHOE_CATS.map(function(c){ return '<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+c.label+'</option>'; }).join('');
+    return '<select class="shoe-sel" data-k="'+esc(key)+'" style="flex:1;min-width:0;min-height:44px;background:var(--bg,#0f0f10);border:1px solid var(--border,#242528);border-radius:8px;color:var(--text,#e8e8e8);font-family:\'DM Mono\',monospace;font-size:0.68rem;padding:0.4rem 0.5rem;box-sizing:border-box">'+o+'</select>';
+  }
+  // Actions principales encadrées (Valider) ; secondaires discrètes, cible tactile 44px conservée.
+  function shoeBtn(cls, key, txt, accent){
+    var st = accent
+      ? 'border:1px solid var(--accent,#a3e635);border-radius:8px;color:var(--accent,#a3e635);padding:0.4rem 0.8rem'
+      : 'border:0;color:var(--muted,#5e6068);padding:0.4rem 0.5rem';
+    return '<button class="'+cls+'" data-k="'+esc(key)+'" style="min-height:44px;background:transparent;'+st+';font-family:\'DM Mono\',monospace;font-size:0.6rem;cursor:pointer;white-space:nowrap">'+txt+'</button>';
+  }
+  function shoeName(s){ return esc(s.name) + (s.primary?' ★':''); }
+
+  function shoeRowHTML(s, cat){
+    var key = shoeKey(s), km = Math.round(s.distance_km||0);
+    var pct = shoePct(s, cat), bar = Math.min(100, pct);
+    var col = pct>85 ? '#ef4444' : (pct>=60 ? '#f59e0b' : 'var(--accent,#a3e635)');
+    var h = '<div style="margin-bottom:0.7rem">';
+    h += '<div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.25rem">'+
+         '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
+         '<span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' / '+cat.limit+' km <span style="color:'+col+'">'+pct+' %</span></span></div>';
+    h += '<div style="height:7px;border-radius:4px;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);overflow:hidden"><div style="height:100%;width:'+bar+'%;background:'+col+'"></div></div>';
+    if (shoeEdit[key]){
+      h += '<div style="display:flex;gap:0.4rem;margin-top:0.45rem;align-items:stretch">'+shoeSelect(key, cat.id)+shoeBtn('shoe-ok', key, 'Valider', 1)+shoeBtn('shoe-cancel', key, 'Annuler')+'</div>';
+    } else {
+      h += '<div style="display:flex;gap:0.4rem;margin-top:0.4rem;justify-content:flex-end">'+shoeBtn('shoe-edit', key, 'Catégorie')+shoeBtn('shoe-arch', key, 'Archiver')+'</div>';
+    }
+    return h + '</div>';
+  }
+
   function renderShoes(shoes){
     var el = $('strava-shoes');
-    if (!shoes.length){ el.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">Aucune chaussure liée dans Strava.</div>'; return; }
-    shoes = shoes.slice().sort(function(a,b){ return (b.distance_km||0)-(a.distance_km||0); });
-    var LIMIT = 700;
-    el.innerHTML = shoes.map(function(s){
-      var km = Math.round(s.distance_km||0), p = Math.min(100, km/LIMIT*100);
-      var col = p>90?'#ef4444':p>70?'#f59e0b':'#a3e635';
-      var lab = s.name + (s.retired?' (retirée)':'') + (s.primary?' ★':'');
-      return '<div style="margin-bottom:0.6rem"><div style="display:flex;justify-content:space-between;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.25rem"><span>'+esc(lab)+'</span><span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' / ~'+LIMIT+' km</span></div>'+
-        '<div style="height:7px;border-radius:4px;background:var(--surface2,#0f0f10);border:1px solid var(--border,#242528);overflow:hidden"><div style="height:100%;width:'+p+'%;background:'+col+'"></div></div></div>';
-    }).join('') + '<div style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.3rem">Seuil indicatif ~700 km. Au-delà : amorti/drop dégradés → surveiller douleurs.</div>';
+    if (!el) return;
+    lastShoes = shoes || [];
+    if (!lastShoes.length){ el.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">Aucune chaussure liée dans Strava.</div>'; return; }
+    var m = ensureShoeSeed(lastShoes), html = '';
+    var hd = 'font-family:\'DM Mono\',monospace;font-size:0.56rem;text-transform:uppercase;letter-spacing:0.06em';
+
+    var uncat = lastShoes.filter(function(s){ return shoeCatOf(s, m) === null; });
+    if (uncat.length){
+      html += '<div style="border:1px solid var(--accent,#a3e635);border-radius:8px;padding:0.7rem;margin-bottom:0.9rem">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.6rem">'+
+        '<div style="'+hd+';color:var(--accent,#a3e635)">À catégoriser ('+uncat.length+')</div>'+
+        shoeBtn('shoe-allok', '*', 'Tout valider', 1)+'</div>';
+      html += uncat.map(function(s){
+        var key = shoeKey(s), km = Math.round(s.distance_km||0);
+        return '<div style="margin-bottom:0.55rem">'+
+          '<div style="display:flex;justify-content:space-between;gap:0.6rem;font-family:\'DM Mono\',monospace;font-size:0.56rem;margin-bottom:0.3rem">'+
+          '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+shoeName(s)+'</span>'+
+          '<span style="white-space:nowrap;color:var(--muted,#5e6068)">'+km+' km</span></div>'+
+          '<div style="display:flex;gap:0.4rem;align-items:stretch">'+shoeSelect(key, shoeAutoCat(s.name))+shoeBtn('shoe-ok', key, 'Valider', 1)+'</div></div>';
+      }).join('');
+      html += '</div>';
+    }
+
+    SHOE_CATS.forEach(function(c){
+      var list = lastShoes.filter(function(s){ return shoeCatOf(s, m) === c.id; });
+      if (!list.length) return;
+      list.sort(function(a,b){ return shoePct(b,c) - shoePct(a,c); });
+      html += '<div style="'+hd+';color:var(--muted,#5e6068);margin:0 0 0.5rem">'+c.label+' &#183; seuil '+c.limit+' km</div>';
+      html += list.map(function(s){ return shoeRowHTML(s, c); }).join('');
+    });
+
+    var arch = lastShoes.filter(function(s){ return shoeCatOf(s, m) === 'retired'; });
+    if (arch.length){
+      html += '<details style="margin-top:0.4rem"><summary style="font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068);cursor:pointer;min-height:44px;display:flex;align-items:center">Archivées ('+arch.length+')</summary><div style="padding-top:0.4rem">';
+      html += arch.map(function(s){
+        var key = shoeKey(s), km = Math.round(s.distance_km||0);
+        return '<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.45rem">'+
+          '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:\'DM Mono\',monospace;font-size:0.56rem;color:var(--muted,#5e6068)">'+shoeName(s)+' <span style="opacity:0.7">'+km+' km</span></span>'+
+          shoeBtn('shoe-unarch', key, 'Désarchiver')+'</div>';
+      }).join('');
+      html += '</div></details>';
+    }
+
+    html += '<div style="font-family:\'DM Mono\',monospace;font-size:0.5rem;color:var(--muted,#5e6068);line-height:1.5;margin-top:0.6rem">Seuils par catégorie. Trail : surveiller aussi l\'usure des crampons, souvent limitante avant la mousse.</div>';
+    el.innerHTML = html;
+  }
+
+  function shoeSelValue(key){
+    var els = document.querySelectorAll('#strava-shoes .shoe-sel');
+    for (var i=0;i<els.length;i++){ if (els[i].getAttribute('data-k')===key) return els[i].value; }
+    return null;
+  }
+  function shoeByKey(key){
+    for (var i=0;i<lastShoes.length;i++){ if (shoeKey(lastShoes[i])===key) return lastShoes[i]; }
+    return null;
+  }
+  function handleShoeClick(e){
+    var b = e.target.closest('button');
+    if (!b || !b.className || b.className.indexOf('shoe-')<0) return false;
+    var key = b.getAttribute('data-k'), m = loadShoeCats() || {}, i;
+    if (b.classList.contains('shoe-allok')){
+      var els = document.querySelectorAll('#strava-shoes .shoe-sel');
+      for (i=0;i<els.length;i++){ m[els[i].getAttribute('data-k')] = els[i].value; }
+      saveShoeCats(m); renderShoes(lastShoes); return true;
+    }
+    if (!key) return false;
+    if (b.classList.contains('shoe-ok')){
+      var v = shoeSelValue(key);
+      if (v){ m[key] = v; delete shoeEdit[key]; saveShoeCats(m); renderShoes(lastShoes); }
+      return true;
+    }
+    if (b.classList.contains('shoe-edit')){ shoeEdit[key] = 1; renderShoes(lastShoes); return true; }
+    if (b.classList.contains('shoe-cancel')){ delete shoeEdit[key]; renderShoes(lastShoes); return true; }
+    if (b.classList.contains('shoe-arch')){ m[key] = 'retired'; delete shoeEdit[key]; saveShoeCats(m); renderShoes(lastShoes); return true; }
+    if (b.classList.contains('shoe-unarch')){
+      var s = shoeByKey(key);
+      m[key] = shoeAutoCat(s ? s.name : '');
+      saveShoeCats(m); renderShoes(lastShoes); return true;
+    }
+    return false;
   }
 
   function renderActs(acts){
@@ -2761,6 +2930,7 @@ input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--accent
   };
 
   document.addEventListener('click', function(e){
+    if (e.target && e.target.closest && e.target.closest('#strava-shoes')){ if (handleShoeClick(e)) return; }
     var t = e.target;
     while (t && t !== document.body){ if (t.id === 'strava-refresh'){ window.__stravaLoad(true); return; } t = t.parentNode; }
   });
@@ -9605,7 +9775,7 @@ if (document.readyState === 'loading') {
     running = true;
     var changed = false;
     try {
-      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo'];
+      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo', 'shoe_cats'];
       var res = await Promise.all(keys.map(function(k){ return reconcileState(k).catch(function(){ return false; }); }));
       if (res.some(Boolean)) changed = true;
 
