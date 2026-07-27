@@ -5878,7 +5878,12 @@ if (document.readyState === 'loading') {
       var data = await r.json();
       renderData(data);
       var syncTime = data.last_sync ? new Date(data.last_sync).toLocaleString('fr-FR', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '';
-      setStatus('connected', 'connecté · ' + syncTime);
+      // Fraîcheur : des données servies mais périmées passaient pour « connecté »
+      // (source des fausses alertes « Garmin cassé »). On évalue l'âge réel.
+      var ageH = data.last_sync ? (Date.now() - new Date(data.last_sync).getTime()) / 3600000 : null;
+      if (ageH != null && ageH >= 48) setStatus('error', 'données d\'il y a ' + Math.round(ageH) + ' h · sync en panne ?');
+      else if (ageH != null && ageH >= 24) setStatus('stale', 'données d\'il y a ' + Math.round(ageH) + ' h');
+      else setStatus('connected', 'connecté · ' + syncTime);
     } catch (err) {
       setStatus('error', 'erreur de sync');
       console.error('Garmin fetch error:', err);
@@ -5893,15 +5898,18 @@ if (document.readyState === 'loading') {
     if (dot) {
       dot.style.background = state === 'connected' ? 'var(--green, #5ec27a)' :
                               state === 'error'     ? 'var(--red, #ef4444)' :
+                              state === 'stale'     ? 'var(--orange, #e8a020)' :
                               state === 'syncing'   ? 'var(--orange, #e8a020)' : 'var(--muted, #5e6068)';
     }
     if (txt) txt.textContent = text;
-    if (badge) badge.style.display = (state === 'connected') ? 'none' : '';
+    // stale = données présentes mais vieilles : on affiche quand même les métriques (pas le badge démo)
+    if (badge) badge.style.display = (state === 'connected' || state === 'stale') ? 'none' : '';
     // Bouton refresh : visible si connecté / en sync / erreur ; flèche colorée selon l'état, et seule la flèche tourne pendant la sync
     if (refreshBtn) {
-      refreshBtn.style.display = (state === 'connected' || state === 'syncing' || state === 'error') ? '' : 'none';
+      refreshBtn.style.display = (state === 'connected' || state === 'stale' || state === 'syncing' || state === 'error') ? '' : 'none';
       refreshBtn.style.color = state === 'connected' ? 'var(--green, #5ec27a)' :
                                state === 'error'     ? 'var(--red, #ef4444)' :
+                               state === 'stale'     ? 'var(--orange, #e8a020)' :
                                state === 'syncing'   ? 'var(--orange, #e8a020)' : '';
       if (state === 'syncing') refreshBtn.classList.add('syncing');
       else refreshBtn.classList.remove('syncing');
@@ -8356,7 +8364,7 @@ if (document.readyState === 'loading') {
   var pendingAction = null;  // action en attente de validation
 
   function loadThread(){ try { var a=JSON.parse(localStorage.getItem(THREAD_KEY)||'[]'); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
-  function saveThread(){ try { localStorage.setItem(THREAD_KEY, JSON.stringify(thread.slice(-60))); } catch(e){} }
+  function saveThread(){ try { localStorage.setItem(THREAD_KEY, JSON.stringify(thread.slice(-60))); } catch(e){} try { if (window.CCCSync) CCCSync.pushState('coach_thread', thread.slice(-60)); } catch(e){} }
   function pushThread(role, text){ thread.push({role:role, text:text}); saveThread(); }
 
   function todayKey() {
@@ -9795,7 +9803,7 @@ if (document.readyState === 'loading') {
     running = true;
     var changed = false;
     try {
-      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo', 'shoe_cats'];
+      var keys = ['plan_overrides', 'done', 'foods_custom', 'weight_log', 'day_overrides', 'recup_hist', 'feel_hist', 'profile', 'sport_mode', 'nutri_objective', 'accent', 'textsize', 'style', 'theme', 'logo', 'shoe_cats', 'recipes', 'weekplan', 'shopping_checked', 'intention', 'coach_thread'];
       var res = await Promise.all(keys.map(function(k){ return reconcileState(k).catch(function(){ return false; }); }));
       if (res.some(Boolean)) changed = true;
 
@@ -9868,7 +9876,7 @@ if (document.readyState === 'loading') {
   function foodsFn(){ try { return (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){ return []; } }
   function uid(){ return 'r' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function save(a){ try { localStorage.setItem(KEY, JSON.stringify(a)); } catch(e){} }
+  function save(a){ try { localStorage.setItem(KEY, JSON.stringify(a)); } catch(e){} try { if (window.CCCSync) CCCSync.pushState('recipes', a); } catch(e){} }
   function load(){
     var a = null;
     try { a = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ a = null; }
@@ -10194,7 +10202,7 @@ if (document.readyState === 'loading') {
   }
   function foods(){ try { return (window.__nutriGetFoods && window.__nutriGetFoods()) || []; } catch(e){ return []; } }
   function loadPlan(){ var o=null; try { o=JSON.parse(localStorage.getItem(WK_KEY)||'null'); } catch(e){} return (o&&typeof o==='object')?o:{}; }
-  function savePlan(o){ try { localStorage.setItem(WK_KEY, JSON.stringify(o)); } catch(e){} }
+  function savePlan(o){ try { localStorage.setItem(WK_KEY, JSON.stringify(o)); } catch(e){} try { if (window.CCCSync) CCCSync.pushState('weekplan', o); } catch(e){} }
   function assign(dateStr, slot, recipeId){ var o=loadPlan(); if(!o[dateStr]) o[dateStr]={}; if(recipeId) o[dateStr][slot]=recipeId; else delete o[dateStr][slot]; savePlan(o); }
   function tot(r){ var s=0; if(r)(r.items||[]).forEach(function(i){ s+=i.kcal||0; }); return Math.round(s); }
   function curWeekIdx(){
@@ -10303,7 +10311,7 @@ if (document.readyState === 'loading') {
     return parts.join(' + ')||'—';
   }
   function loadChecks(){ var o=null; try{ o=JSON.parse(localStorage.getItem(SHOP_KEY)||'null'); }catch(e){} return (o&&typeof o==='object')?o:{}; }
-  function saveChecks(o){ try{ localStorage.setItem(SHOP_KEY, JSON.stringify(o)); }catch(e){} }
+  function saveChecks(o){ try{ localStorage.setItem(SHOP_KEY, JSON.stringify(o)); }catch(e){} try{ if (window.CCCSync) CCCSync.pushState('shopping_checked', o); }catch(e){} }
   function openShop(){
     var items=buildShop(), groups={};
     items.forEach(function(it){ var c=catOf(it.food); if(!groups[c]) groups[c]=[]; groups[c].push(it); });
@@ -11469,6 +11477,7 @@ if (document.readyState === 'loading') {
       var whyT=null;
       why.addEventListener('input', function(){
         try{ localStorage.setItem('ccc_intention', why.value.trim()); }catch(e){}
+        try{ if (window.CCCSync) CCCSync.pushState('intention', why.value.trim()); }catch(e){}
         if(whyT) clearTimeout(whyT);
         whyT=setTimeout(function(){ saveFeel({ rpe:parseInt(rpe.value,10)||0, pain:parseInt(pain.value,10)||0, zone:zone.value||'', why:why.value.trim(), ts:Date.now() }); scheduleHubRefresh(); }, 1200);
       });
