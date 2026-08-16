@@ -91,7 +91,25 @@ export const NUTRITION = {
   portage: {
     depart: "7 gels + 3 barres + 2 ziplocks + 2 gels réserve",
     champex: "8 gels dont 5 caféinés + 2 barres + 2 ziplocks"
-  }
+  },
+
+  // Decoupage lisible des memes donnees, pour l'ecran : deux flasques, trois
+  // cafes situes sur le parcours, et ce qu'on porte a chaque depart.
+  flasques: [
+    { n:"1", quoi:"Näak Boost concombre", d:"60 g de glucides et 500 mg de sodium par 500 ml" },
+    { n:"2", quoi:"Eau", d:"Refroidissement, et pour faire passer les gels" }
+  ],
+  recharge: "Aux ravitos : Näak Ultra Energy, 55 g par 500 ml. Testée ✅",
+  cafes: [
+    { n:1, ou:"Départ de Champex", h:"~19:45", km:54.6 },
+    { n:2, ou:"Trient", h:"~23:00", km:71.2 },
+    { n:3, ou:"Vallorcine", h:"~01:45", km:83.2 }
+  ],
+  cafeRegle: "Jamais avant Champex. Deux gels caféinés en réserve.",
+  charge: [
+    { q:"Au départ", g:7, b:3, z:2, plus:"2 gels de réserve" },
+    { q:"À Champex", g:8, b:2, z:2, plus:"dont 5 caféinés" }
+  ]
 };
 
 // ============================ PREPA ============================

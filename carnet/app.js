@@ -986,19 +986,40 @@ function traceFeuilleCourse() {
 /* ============================ nutrition ============================ */
 
 function traceNutrition() {
-  return '<div class="nu-cible"><b>' + NUTRITION.cible + '</b><span>' + NUTRITION.regle + '</span></div>' +
-    '<div class="nu-bloc"><span>Boisson</span><p>' + NUTRITION.boisson + '</p></div>' +
-    '<div class="nu-bloc"><span>Caféine</span><ul class="nu-caf">' +
-      NUTRITION.cafeine.map(c =>
-        '<li><b>' + c.quoi + '</b><i>' + c.ou + '</i></li>').join('') +
-    '</ul></div>' +
-    '<div class="nu-bloc"><span>Portage</span><p><b>Au départ</b> ' + NUTRITION.portage.depart +
-      '<br><b>À Champex</b> ' + NUTRITION.portage.champex + '</p></div>' +
-    '<div class="nu-bloc"><span>Ce que vaut un Näak</span><table class="nu-tab">' +
-      '<tr><th></th><th>gluc</th><th>kcal</th></tr>' +
-      NAAK.map(p => '<tr><td><b>' + p.n + '</b><small>' + p.u + ' &#183; ' + p.note + '</small></td>' +
-        '<td>' + p.g + ' g</td><td>' + p.kcal + '</td></tr>').join('') +
-    '</table></div>';
+  // deux chiffres, une regle, puis des blocs qui se lisent d'un coup d'oeil
+  let h = '<div class="nu-gros">' +
+      '<div><b>70</b><i>g/h</i><span>la cadence</span></div>' +
+      '<div><b>1 400</b><i>g</i><span>sur la course</span></div>' +
+    '</div>' +
+    '<div class="nu-regle">Une prise = <b>manger ET boire</b>, ensemble.' +
+      '<span>⏰ Alarme Fenix toutes les 30 min</span></div>';
+
+  h += '<div class="nu-sec"><span>Les deux flasques</span>' +
+    NUTRITION.flasques.map(f => '<div class="nu-fl"><b>' + f.n + '</b>' +
+      '<div><b>' + f.quoi + '</b><small>' + f.d + '</small></div></div>').join('') +
+    '<p class="nu-rech">' + NUTRITION.recharge + '</p></div>';
+
+  h += '<div class="nu-sec"><span>Les trois cafés</span>' +
+    NUTRITION.cafes.map(c => '<div class="nu-cf"><b>' + c.n + '</b>' +
+      '<div class="nu-cf-c"><b>' + c.ou + '</b><small>km ' + kmFmt(c.km) + '</small></div>' +
+      '<i>' + c.h + '</i></div>').join('') +
+    '<p class="nu-rech alerte">' + NUTRITION.cafeRegle + '</p></div>';
+
+  h += '<div class="nu-sec"><span>Ce que je porte</span>' +
+    NUTRITION.charge.map(c => '<div class="nu-ch"><b>' + c.q + '</b>' +
+      '<div class="nu-ch-l">' +
+        '<span><b>' + c.g + '</b>gels</span>' +
+        '<span><b>' + c.b + '</b>barres</span>' +
+        '<span><b>' + c.z + '</b>ziplocks</span>' +
+      '</div><small>' + c.plus + '</small></div>').join('') + '</div>';
+
+  h += '<details class="nu-det"><summary>Ce que vaut chaque Näak</summary>' +
+    '<table class="nu-tab"><tr><th></th><th>gluc</th><th>kcal</th></tr>' +
+    NAAK.map(p => '<tr><td><b>' + p.n + '</b><small>' + p.u + ' &#183; ' + p.note + '</small></td>' +
+      '<td>' + p.g + ' g</td><td>' + p.kcal + '</td></tr>').join('') +
+    '</table></details>';
+
+  return h;
 }
 
 /* ============================ checklists ============================ */
@@ -1346,23 +1367,41 @@ function traceVerif() {
 
 /* ---- le contrat nutrition ---- */
 
+// Le contrat en deux colonnes plutot qu'en prose : ce qui entre, ce qui sort.
+const OUI = ['Riz', 'Pommes de terre', 'Pain gris', 'Poulet, dinde', 'Œufs', 'Skyr',
+             'Légumes', 'Fruits entiers'];
+const NON = ['Industriel', 'Glaces, biscuits', 'Sodas', 'Friture'];
+
 function traceContrat() {
   const c = AFFUTAGE.contratNutrition;
   const d1 = dateDe(c.du), d2 = dateDe(c.au), now = minuit(maintenant());
   const actif = now >= d1 && now <= d2;
+
   return document.getElementById('contratHote').innerHTML =
     '<div class="ct-etat ' + (actif ? 'on' : '') + '">' +
       (actif ? 'En vigueur' : (now < d1 ? 'À partir du ' + d1.getDate() + ' août' : 'Terminé, place à la recharge')) +
       ' &#183; ' + d1.getDate() + ' au ' + d2.getDate() + ' août</div>' +
-    '<div class="ct-p"><b>' + c.principe + '</b></div>' +
-    '<div class="nu-bloc"><span>La base</span><p>' + c.base + '</p></div>' +
-    '<div class="nu-bloc"><span>Zéro</span><p>' + c.zero + '</p></div>' +
-    '<div class="nu-bloc"><span>Quantité</span><p>' + c.quantite + '</p></div>' +
-    '<div class="nu-bloc"><span>Le verrou</span><p>' + c.verrou + '</p></div>' +
-    '<div class="nu-bloc"><span>Hydratation</span><p>' + c.hydratation + '</p></div>' +
-    '<div class="nu-bloc"><span>Exceptions</span>' + c.exceptions.map(e => '<p>&#183; ' + e + '</p>').join('') + '</div>' +
-    '<div class="ct-garde">' + c.gardeFou + '</div>' +
-    '<div class="nu-bloc"><span>Mesure</span><p>' + c.mesure + '</p></div>';
+    '<div class="ct-p">Maintenance propre, zéro excédent.<b>Pas de déficit.</b></div>' +
+
+    '<div class="ct-cols">' +
+      '<div class="oui"><span>Ça entre</span><ul>' + OUI.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' +
+      '<div class="non"><span>Ça n\'entre pas</span><ul>' + NON.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' +
+    '</div>' +
+
+    '<div class="ct-tuiles">' +
+      '<div><b>2 à 2,5 L</b><span>par jour, constant</span></div>' +
+      '<div><b>À ta faim</b><span>aux repas, sans compter</span></div>' +
+      '<div><b>Skyr le soir</b><span>le verrou anti-craquage</span></div>' +
+    '</div>' +
+
+    '<div class="ct-garde"><b>Si tu as faim entre les repas, tu manges.</b> ' +
+      'Sur une semaine d\'affûtage, la faim signale qu\'on est passé sous la maintenance. ' +
+      '« Propre » est l\'objectif, « moins » ne l\'est pas.</div>' +
+
+    '<details class="nu-det"><summary>Les trois exceptions et la pesée</summary>' +
+      c.exceptions.map(e => '<p class="ct-ex">' + e + '</p>').join('') +
+      '<p class="ct-ex"><b>Balance</b> ' + c.mesure + '</p>' +
+    '</details>';
 }
 
 /* ---- le sac, piece par piece ---- */
