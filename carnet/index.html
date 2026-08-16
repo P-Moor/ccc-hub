@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr" data-theme="jour">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E2430">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CCC 4330">
+<meta name="description" content="Carnet de course CCC by UTMB 2026 &#183; dossard 4330">
+<title>CCC 4330 &#183; carnet de course</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="dossard">
+    <div class="dossard-haut">
+      <div class="dossard-id"><span>CCC</span><i>&#183;</i><b>4330</b></div>
+      <div class="dossard-actions">
+        <button class="dossard-btn" id="btnRegles" aria-label="Les 5 règles">&#9873;</button>
+        <button class="dossard-btn" id="btnTheme" aria-label="Basculer jour ou nuit">&#9789;</button>
+      </div>
+    </div>
+    <div class="barre-jn" aria-hidden="true"><i class="j"></i><i class="n"></i></div>
+    <div class="dossard-faits">
+      <span><b>101,5</b> km</span>
+      <span><b>6 062</b> m D+</span>
+      <span>cible <b>20h15</b></span>
+      <span>ven <b>28/08</b></span>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="vue actif" id="v-accueil">
+      <div class="carte cd" id="cdCarte">
+        <div class="cd-oeil" id="cdOeil">Départ dans</div>
+        <div class="cd-grille" id="cdGrille"></div>
+        <div class="cd-sous" id="cdSous"></div>
+      </div>
+
+      <div class="gros">
+        <button data-va="deroule">Déroulé<span>9 ravitos, heure par heure</span></button>
+        <button data-va="listes">Checklists<span id="ckResume">&#8230;</span></button>
+        <button class="plein course" data-va="course">Mode course<span>pointage et marge en direct</span></button>
+      </div>
+
+      <div class="titre">Rappel</div>
+      <div class="carte" id="regleDuJour"></div>
+    </section>
+
+    <section class="vue" id="v-profil">
+      <div class="switch" data-role="scenario"></div>
+      <div class="titre">Le profil</div>
+      <div class="carte profil-carte">
+        <div id="profilHote"></div>
+        <div class="pf-lecture">
+          <div><span>km</span><b id="lecKm">0</b></div>
+          <div><span>altitude</span><b id="lecAlt">1221</b></div>
+          <div><span>section</span><b id="lecSec" style="font-size:15px">Bertone</b></div>
+          <div><span id="lecPlan">passage A</span><b id="lecH">09:15</b></div>
+        </div>
+        <div class="pf-aide">Glisse le doigt sur le profil</div>
+      </div>
+
+      <div class="titre">La marge sur les barrières</div>
+      <div class="carte">
+        <div id="margeHote" class="marge-barre"></div>
+        <div class="marge-legende" id="margeLegende"></div>
+      </div>
+    </section>
+
+    <section class="vue" id="v-deroule">
+      <div class="titre">Le scénario</div>
+      <div class="switch" data-role="scenario"></div>
+      <div class="carte scenar" id="scenarInfo"></div>
+      <div class="titre" id="titreDeroule">Le déroulé</div>
+      <div class="carte"><div class="tl" id="timeline"></div></div>
+
+      <div class="titre">Nutrition</div>
+      <div class="carte" id="nutriHote"></div>
+    </section>
+
+    <section class="vue" id="v-listes">
+      <div class="carte ck-tete">
+        <div class="ck-pct"><b id="ckPct">0</b><i>%</i><span>prêt</span></div>
+        <div class="ck-piste"><i id="ckJauge"></i></div>
+        <div class="ck-compte" id="ckCompte"></div>
+      </div>
+      <button class="ck-filtre" id="ckFiltre"><i></i>Ne montrer que ce qui reste</button>
+      <div id="ckGroupes"></div>
+      <div class="titre">En attente</div>
+      <div class="carte" id="ckAttente"></div>
+    </section>
+
+    <section class="vue" id="v-course">
+      <div class="vide">Mode course : phase 2.</div>
+    </section>
+
+  </main>
+
+  <div class="feuille-fond" id="feuilleFond"></div>
+  <aside class="feuille" id="feuille" role="dialog" aria-modal="true" aria-labelledby="feuilleTitre">
+    <div class="feuille-poignee"></div>
+    <button class="feuille-fermer" id="feuilleFermer" aria-label="Fermer">&#10005;</button>
+    <div class="feuille-titre" id="feuilleTitre">Les 5 règles</div>
+    <div id="feuilleCorps"></div>
+  </aside>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab actif" data-vue="accueil" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Accueil</button>
+    <button class="tab" data-vue="profil" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M2 18l6-9 4 5 3-4 7 8z"/></svg>Profil</button>
+    <button class="tab" data-vue="deroule" role="tab">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8"/><path d="M11 6h9"/><path d="M11 18h9"/></svg>Déroulé</button>
+    <button class="tab" data-vue="listes" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M4 7l2 2 4-4"/><path d="M4 17l2 2 4-4"/><path d="M13 8h7"/><path d="M13 18h7"/></svg>Listes</button>
+    <button class="tab" data-vue="course" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z"/></svg>Course</button>
+  </nav>
+
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
