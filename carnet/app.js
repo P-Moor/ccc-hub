@@ -1,7 +1,8 @@
 // CCC 4330 &#183; carnet de course v2
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
-import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION } from './data.js';
+import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
+         PANIC, ALERTES } from './data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -129,9 +130,12 @@ document.getElementById('btnTheme').addEventListener('click', () => {
 
 function montre(nom) {
   etat.vue = nom;
+  // pilote le mode 3h du matin : typo XXL et fond noir sur l'onglet course
+  document.documentElement.dataset.course = nom === 'course' ? '1' : '0';
   document.querySelectorAll('.vue').forEach(v => v.classList.toggle('actif', v.id === 'v-' + nom));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('actif', t.dataset.vue === nom));
   window.scrollTo(0, 0);
+  if (nom === 'course') majCourse(true);
 }
 
 document.querySelectorAll('.tab').forEach(t => {
@@ -529,6 +533,296 @@ function ouvreFiche(i) {
   ouvreFeuille(court(s.nom) + '  &#183;  km ' + kmFmt(s.cumKm), ficheRavito(i));
 }
 
+/* ============================ mode course ============================ */
+
+let course = store.get('course', null) || {};
+if (!Array.isArray(course.pointages)) course.pointages = [];
+if (!course.vues || typeof course.vues !== 'object') course.vues = {};
+if (typeof course.ralenti !== 'boolean') course.ralenti = false;
+
+const sauveCourse = () => store.set('course', course);
+
+// "1h08" a partir d'une duree en ms, signe compris
+function dureeTxt(ms) {
+  const neg = ms < 0;
+  const t = Math.round(Math.abs(ms) / 60000);
+  return (neg ? '-' : '') + Math.floor(t / 60) + 'h' + String(t % 60).padStart(2, '0');
+}
+
+// Les barrieres sont des heures absolues, identiques pour toutes les vagues.
+let _barrieres = null;
+function barrieres() {
+  if (_barrieres) return _barrieres;
+  const out = [];
+  let prec = DEPART;
+  PLAN_A.rows.forEach(r => { const d = horaireVersDate(r.barriere, prec); out.push(d); prec = d; });
+  _barrieres = out;
+  return out;
+}
+
+// Duree de chaque section pour un plan donne.
+function dureesDe(plan) {
+  const j = jalonsHoraires(plan), d = [];
+  for (let i = 1; i < j.length; i++) d.push(j[i].date - j[i - 1].date);
+  return d;
+}
+
+const dernierPointage = () => course.pointages[course.pointages.length - 1] || null;
+
+function prochainIndex() {
+  const d = dernierPointage();
+  const i = d ? d.i + 1 : 0;
+  return i < SECTIONS.length ? i : -1;
+}
+
+// ETA de chaque poste. Avant tout pointage c'est le plan brut ; ensuite tout est
+// recale sur l'heure reelle du dernier pointage, section par section.
+function etas() {
+  const plan = scenarioActif();
+  const base = jalonsHoraires(plan);
+  const out = SECTIONS.map((s, i) => base[i + 1].date);
+  const dur = dureesDe(course.ralenti ? PLAN_B : plan);
+  const d = dernierPointage();
+  if (d) {
+    let t = new Date(d.t).getTime();
+    for (let i = d.i + 1; i < SECTIONS.length; i++) { t += dur[i]; out[i] = new Date(t); }
+  }
+  course.pointages.forEach(p => { out[p.i] = new Date(p.t); });
+  return out;
+}
+
+// Position estimee en km, par interpolation temporelle sur les ETA.
+function positionKm(now) {
+  const e = etas();
+  const d = dernierPointage();
+  let kmA = d ? SECTIONS[d.i].cumKm : 0;
+  let tA = d ? new Date(d.t) : DEPART;
+  if (now <= tA) return kmA;
+  for (let i = (d ? d.i + 1 : 0); i < SECTIONS.length; i++) {
+    const kmB = SECTIONS[i].cumKm, tB = e[i];
+    if (now <= tB) return kmA + (kmB - kmA) * ((now - tA) / ((tB - tA) || 1));
+    kmA = kmB; tA = tB;
+  }
+  return RACE.distanceKm;
+}
+
+/* ---- mini profil ---- */
+
+const M_W = 486, M_PAD = 7, M_TOP = 9, M_BASE = 66, M_H = 86;
+const mx = k => M_PAD + (k / PROFIL.kmTotal) * M_W;
+const my = a => M_BASE - ((a - A_MIN) / (A_MAX - A_MIN)) * (M_BASE - M_TOP);
+
+function traceMiniProfil(km) {
+  let d = '';
+  PROFIL.points.forEach(([k, a], i) => { d += (i ? 'L' : 'M') + mx(k).toFixed(1) + ' ' + my(a).toFixed(1) + ' '; });
+  const x = mx(km), y = my(altAt(km));
+  const ticks = SECTIONS.map(s =>
+    '<rect class="tick' + (s.arret === 'grand' ? ' grand' : '') + '" x="' +
+    (mx(s.cumKm) - 1).toFixed(1) + '" y="' + (M_BASE + 3) + '" width="2" height="' +
+    (s.arret === 'grand' ? 8 : 5) + '" rx="1"/>').join('');
+
+  return '<svg class="co-mini" viewBox="0 0 500 ' + M_H + '" role="img" aria-label="Position estimée sur le parcours">' +
+    '<rect class="fait" x="0" y="0" width="' + x.toFixed(1) + '" height="' + M_BASE + '"/>' +
+    '<path class="tr" d="' + d + '"/>' + ticks +
+    '<line class="lig" x1="' + x.toFixed(1) + '" y1="' + M_TOP + '" x2="' + x.toFixed(1) + '" y2="' + (M_BASE + 2) + '"/>' +
+    '<circle class="moi" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4.5"/>' +
+    '<text class="pf-axe-txt" x="' + M_PAD + '" y="' + (M_H - 2) + '">km ' + kmFmt(km) + '</text>' +
+    '<text class="pf-axe-txt" x="' + (500 - M_PAD) + '" y="' + (M_H - 2) + '" text-anchor="end">' +
+      kmFmt(RACE.distanceKm - km) + ' km restants</text>' +
+    '</svg>';
+}
+
+/* ---- alertes ---- */
+
+function alertesActives() {
+  const out = [];
+  const faits = new Set(course.pointages.map(p => p.i));
+  // une alerte vaut pour le poste ou elle se declenche et le troncon qui suit :
+  // des que le poste suivant est pointe, elle n'a plus lieu d'etre
+  ALERTES.forEach(a => {
+    if (faits.has(a.apres) && !faits.has(a.apres + 1) && !course.vues[a.cle]) out.push(a);
+  });
+
+  // marge serree sur la prochaine barriere
+  const i = prochainIndex();
+  if (i >= 0) {
+    const marge = barrieres()[i] - etas()[i];
+    if (marge < 45 * 60000 && !course.vues['marge' + i]) {
+      out.push({ cle: 'marge' + i, icone: "⚠️", barriere: true,
+        t: 'Marge ' + dureeTxt(marge) + ' sur ' + court(SECTIONS[i].nom),
+        d: "Ralentis les arrêts, pas la marche. Tu manges en marchant." });
+    }
+  }
+  return out;
+}
+
+/* ---- rendu ---- */
+
+function traceCourse() {
+  const now = maintenant();
+  const simu = store.get('simu', 0);
+
+  const barreSimu = '<div class="co-simu"><span>Simuler l\'horloge</span><div class="lignes">' +
+    [['Départ', '2026-08-28T09:16'], ['Bertone', '2026-08-28T12:40'],
+     ['Champex', '2026-08-28T19:30'], ['Trient', '2026-08-28T22:55'],
+     ['Vallorcine', '2026-08-29T01:45'], ['Flégère', '2026-08-29T04:40']]
+      .map(([l, t]) => '<button data-simu="' + t + '">' + l + '</button>').join('') +
+    '<button data-simu="reel" class="reel">horloge réelle</button>' +
+    '</div></div>';
+
+  if (now < DEPART) {
+    return '<div class="carte co-attente"><b>La course n\'a pas commencé</b>' +
+      '<p>Le mode course s\'allumera tout seul le 28 août à ' + hhmm(DEPART) + '.<br>' +
+      'En attendant, tu peux la rejouer en décalant l\'horloge.</p></div>' + barreSimu;
+  }
+
+  const i = prochainIndex();
+  const e = etas();
+  const b = barrieres();
+  const km = positionKm(now);
+
+  let h = '<div class="co-haut"><div class="h">' + hhmm(now) + '</div>' +
+    '<div class="e">' + dureeTxt(now - DEPART) + ' <i>de course</i></div></div>';
+
+  h += alertesActives().map(a =>
+    '<div class="co-alerte' + (a.barriere ? ' barriere' : '') + '">' +
+    '<div class="ico">' + a.icone + '</div><div class="txt"><b>' + a.t + '</b><small>' + a.d + '</small></div>' +
+    '<button data-vu="' + a.cle + '" aria-label="Vu">&#10005;</button></div>').join('');
+
+  if (i < 0) {
+    const fin = new Date(dernierPointage().t);
+    h += '<div class="carte co-carte"><div class="co-oeil">Arrivée</div>' +
+      '<div class="co-nom">Chamonix</div>' +
+      '<div class="co-trio">' +
+        '<div><span>arrivé à</span><b>' + hhmm(fin) + '</b></div>' +
+        '<div><span>temps</span><b>' + dureeTxt(fin - DEPART) + '</b></div>' +
+        '<div><span>marge</span><b class="ok">' + dureeTxt(b[8] - fin) + '</b></div>' +
+      '</div><div class="co-consigne"><span>Fini</span>C\'est fait. 101,5 km et 6 062 m de D+.</div></div>';
+  } else {
+    const s = SECTIONS[i];
+    const marge = b[i] - e[i];
+    const cls = marge >= 90 * 60000 ? 'ok' : (marge >= 45 * 60000 ? 'tiede' : 'chaud');
+    const reste = Math.max(0, s.cumKm - km);
+
+    h += '<div class="carte co-carte">' +
+      '<div class="co-oeil">Prochain &#183; ' + kmFmt(reste) + ' km</div>' +
+      '<div class="co-nom">' + court(s.nom) + '</div>' +
+      '<div class="co-trio">' +
+        '<div><span>arrivée</span><b>' + hhmm(e[i]) + '</b></div>' +
+        '<div><span>barrière</span><b>' + hhmm(b[i]) + '</b></div>' +
+        '<div><span>marge</span><b class="' + cls + '">' + dureeTxt(marge) + '</b></div>' +
+      '</div>' +
+      '<div class="co-consigne"><span>Maintenant</span>' + s.consigne + '</div></div>';
+
+    h += traceMiniProfil(km);
+    h += '<button class="co-pointer" data-point="' + i + '">✅ Je suis à ' + court(s.nom) + '</button>';
+  }
+
+  h += '<div class="co-actions">' +
+    '<button class="panik" id="btnPanic">🧭 Ça va mal</button>' +
+    '<button id="btnRalenti" class="' + (course.ralenti ? 'on' : '') + '">' +
+      (course.ralenti ? 'Je ralentis ✓' : 'Je ralentis') + '</button></div>';
+
+  if (course.pointages.length) {
+    const planA = jalonsHoraires(PLAN_A);
+    h += '<div class="titre">Pointages</div><div class="carte">' +
+      course.pointages.map(p => {
+        const t = new Date(p.t);
+        const ec = t - planA[p.i + 1].date;
+        const pile = Math.abs(ec) < 60000;
+        return '<div class="hi"><b>' + hhmm(t) + '</b><div class="n">' + court(SECTIONS[p.i].nom) + '</div>' +
+          '<div class="ec ' + (ec <= 0 ? 'avance' : 'retard') + '">' +
+            (pile ? "pile sur A" : (ec < 0 ? '' : '+') + dureeTxt(ec) + ' / A') + '</div></div>';
+      }).join('') +
+      '</div><div class="co-actions"><button id="btnUndo">Annuler le dernier</button>' +
+      '<button id="btnReset">Tout effacer</button></div>';
+  }
+
+  if (simu) h += barreSimu;
+  else h += '<div class="co-simu"><span>Mise au point</span><div class="lignes">' +
+    '<button data-simu="2026-08-28T09:16">rejouer la course</button></div></div>';
+
+  return h;
+}
+
+let signatureCourse = '';
+
+function majCourse(force) {
+  const hote = document.getElementById('courseHote');
+  if (!hote) return;
+  const now = maintenant();
+  const sig = hhmm(now) + '|' + course.pointages.length + '|' + course.ralenti + '|' +
+    Object.keys(course.vues).join() + '|' + etat.scenario + '|' + (now < DEPART);
+  if (!force && sig === signatureCourse) return;
+  signatureCourse = sig;
+  hote.innerHTML = traceCourse();
+  brancheCourse();
+}
+
+function brancheCourse() {
+  const q = (sel, fn) => document.querySelectorAll(sel).forEach(fn);
+
+  q('#courseHote [data-point]', b => b.addEventListener('click', () => {
+    course.pointages.push({ i: +b.dataset.point, t: maintenant().toISOString() });
+    sauveCourse(); majCourse(true);
+  }));
+
+  q('#courseHote [data-vu]', b => b.addEventListener('click', () => {
+    course.vues[b.dataset.vu] = true; sauveCourse(); majCourse(true);
+  }));
+
+  q('#courseHote [data-simu]', b => b.addEventListener('click', () => {
+    const v = b.dataset.simu;
+    simuler(v === 'reel' ? null : v);
+    dernierCompte = '';
+    if (!store.get('theme', null)) appliqueTheme();
+    majCompte(); majCourse(true);
+  }));
+
+  const panic = document.getElementById('btnPanic');
+  if (panic) panic.addEventListener('click', ouvrePanic);
+
+  const ral = document.getElementById('btnRalenti');
+  if (ral) ral.addEventListener('click', () => {
+    course.ralenti = !course.ralenti; sauveCourse(); majCourse(true);
+  });
+
+  const undo = document.getElementById('btnUndo');
+  if (undo) undo.addEventListener('click', () => {
+    course.pointages.pop(); sauveCourse(); majCourse(true);
+  });
+
+  const reset = document.getElementById('btnReset');
+  if (reset) reset.addEventListener('click', () => {
+    course.pointages = []; course.vues = {}; course.ralenti = false;
+    sauveCourse(); majCourse(true);
+  });
+}
+
+/* ---- panic card ---- */
+
+function ouvrePanic() {
+  const i = prochainIndex();
+  const marge = i >= 0 ? barrieres()[i] - etas()[i] : (barrieres()[8] - new Date(dernierPointage().t));
+
+  const entete = marge > 0
+    ? 'Tu as ' + dureeTxt(marge) + ' de marge'
+    : 'Barrière dépassée de ' + dureeTxt(-marge);
+
+  let h = '<div class="pk-mantra"><span class="pk-marge">' + entete + '</span>' +
+    PANIC.mantra + '</div>';
+
+  h += PANIC.arbre.map(b =>
+    '<div class="pk-branche ' + (b.n === 'vert' ? '' : b.n) + '">' +
+    '<b>' + (b.n === 'vert' ? '🟢' : b.n === 'orange' ? '🟠' : '🔴') + ' ' + b.t + '</b>' +
+    '<i>' + b.q + '</i><p>' + b.a + '</p></div>').join('');
+
+  h += '<div class="fi-titre">Protocole pieds, au ravito</div><ol class="pk-etapes">' +
+    PANIC.protocole.map(p => '<li>' + p + '</li>').join('') + '</ol>';
+
+  ouvreFeuille('Ça va mal', h);
+}
+
 /* ============================ nutrition ============================ */
 
 function traceNutrition() {
@@ -687,9 +981,10 @@ document.querySelectorAll('.gros button').forEach(b => {
 
 function init() {
   appliqueTheme();
+  document.documentElement.dataset.course = '0';
   majCompte();
   majRegleDuJour();
-  setInterval(majCompte, 1000);
+  setInterval(() => { majCompte(); if (etat.vue === 'course') majCourse(); }, 1000);
 
   document.getElementById('profilHote').innerHTML = traceProfil();
 
@@ -714,6 +1009,11 @@ function init() {
   document.getElementById('nutriHote').innerHTML = traceNutrition();
   document.getElementById('ckAttente').innerHTML = traceAttente();
   majChecklist();
+  majCourse(true);
+
+  // Le jour J, l'app s'ouvre sur le mode course. Le reste de l'annee, sur l'accueil.
+  const now = maintenant();
+  montre(now >= DEPART && now <= FIN ? 'course' : 'accueil');
 }
 
 init();

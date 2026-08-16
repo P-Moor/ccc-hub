@@ -181,6 +181,43 @@ export const EN_ATTENTE = [
   { l:"Dose de caféine par prise", quand:"avant le 25", s:"3 cafés prévus : Champex, Trient, Vallorcine" }
 ];
 
+// Panic card. Contenu reconstruit a partir des 5 regles, du suivi du pied droit
+// (5e metatarsien, IRM du 5 septembre) et des protocoles pieds du scenario B.
+// A relire par Pierre : c'est le seul bloc du carnet qui ne vient pas d'un
+// document deja valide.
+export const PANIC = {
+  mantra: "Souffrir ou ralentir. Jamais souffrir ou abandonner.",
+  arbre: [
+    { n:"vert", t:"Point chaud, ampoule, frottement",
+      q:"C'est la peau. Ça se traite et ça ne t'arrêtera pas.",
+      a:"Protocole pieds au prochain ravito, puis tu repars." },
+    { n:"orange", t:"Douleur diffuse qui monte",
+      q:"Muscle, tendon, fatigue. Ça se gère en changeant de rythme, pas en serrant les dents.",
+      a:"Foulée plus courte, bâtons, marche les raidillons. Tu réévalues au ravito suivant." },
+    { n:"rouge", t:"Douleur osseuse localisée, 5ᵉ métatarsien",
+      q:"Elle augmente au repos, ou le pied gonfle.",
+      a:"Tu marches, tu ne cours plus. Tu finis en marchant s'il le faut. Ralentir, pas abandonner." }
+  ],
+  protocole: [
+    "S'asseoir. Chaussures ET chaussettes off, sans négocier.",
+    "Regarder : point chaud, ampoule, rougeur, gonflement.",
+    "Sécher le pied, deux minutes à l'air.",
+    "NOK ou Epitact sur les zones qui parlent.",
+    "Chaussettes sèches.",
+    "Relacer, plus lâche à l'avant-pied si ça gonfle.",
+    "Repartir en marchant cinq minutes avant de relancer."
+  ]
+};
+
+// Alertes visuelles du mode course. Pas de son : declenchees au pointage.
+// apres = index du poste qui declenche l'alerte.
+export const ALERTES = [
+  { apres:3, cle:'front1', icone:"🔦", t:"Frontale sur la tête", d:"La nuit tombe vers 20:30, tu ne repars pas de Champex sans elle." },
+  { apres:3, cle:'cafe1',  icone:"☕", t:"Café n°1 maintenant",   d:"Au départ de Champex, vers 19:45." },
+  { apres:5, cle:'cafe2',  icone:"☕", t:"Café n°2 maintenant",   d:"Trient, vers 23:00. Veste AVANT de t'asseoir." },
+  { apres:6, cle:'cafe3',  icone:"☕", t:"Café n°3 maintenant",   d:"Vallorcine, vers 01:45. Dernier vrai ravito." }
+];
+
 // Libelles des modes d'arret
 export const ARRETS = {
   express: { l:"Express", c:"express" },

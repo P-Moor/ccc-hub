@@ -488,6 +488,179 @@ button.tl-ligne:active { background: var(--surface-2); }
 .fi-dure p { font-size: 15px; line-height: 1.4; }
 .fi-dure p em { font-style: normal; font-weight: 600; }
 
+/* ===================== mode course ===================== */
+
+#v-course { padding-top: 12px; }
+
+.co-haut {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 0 2px 10px;
+  font-family: var(--display); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.co-haut .h { font-size: 30px; letter-spacing: .01em; }
+.co-haut .e { font-size: 20px; color: var(--texte-doux); }
+.co-haut .e i { font-style: normal; font-size: 13px; color: var(--texte-pale); }
+
+/* la carte qui repond a LA question */
+.co-carte { padding: 16px 14px; margin-bottom: 12px; }
+.co-oeil {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 4px;
+}
+.co-nom {
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(38px, 12vw, 52px); line-height: .96; letter-spacing: .01em;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.co-trio {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--bord); border: 1px solid var(--bord); border-radius: 12px; overflow: hidden;
+}
+.co-trio div { background: var(--surface); padding: 9px 5px; text-align: center; }
+.co-trio span {
+  display: block; font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--texte-pale); margin-bottom: 2px;
+}
+.co-trio b {
+  font-family: var(--display); font-weight: 700; font-size: 23px;
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.co-trio b.ok { color: var(--ok); }
+.co-trio b.tiede { color: var(--accent-txt); }
+.co-trio b.chaud { color: var(--alerte); }
+
+.co-consigne {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bord);
+  font-size: 16px; line-height: 1.38;
+}
+.co-consigne span {
+  display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 4px;
+}
+
+/* mini profil avec la position estimee */
+.co-mini { display: block; width: 100%; height: auto; margin-bottom: 12px; }
+.co-mini .tr { fill: none; stroke: var(--trace); stroke-width: 1.6; stroke-linejoin: round; }
+.co-mini .fait { fill: var(--accent); fill-opacity: .22; }
+.co-mini .tick { fill: var(--texte-pale); }
+.co-mini .tick.grand { fill: var(--teal); }
+.co-mini .moi { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.co-mini .lig { stroke: var(--accent); stroke-width: 1.2; }
+
+/* le gros bouton */
+.co-pointer {
+  width: 100%; min-height: 66px; border-radius: var(--r); margin-bottom: 10px;
+  background: var(--encre); color: var(--papier);
+  font-family: var(--display); font-weight: 700; font-size: 21px;
+  letter-spacing: .05em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform var(--tempo);
+}
+.co-pointer:active { transform: scale(.98); }
+[data-theme="nuit"] .co-pointer { background: var(--jour); color: #11151C; }
+
+.co-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.co-actions button {
+  min-height: var(--tap); border-radius: 12px;
+  border: 1px solid var(--bord); background: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 14px;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--texte-doux);
+}
+.co-actions button.panik { border-color: var(--alerte); color: var(--alerte); }
+.co-actions button.on { background: var(--accent); border-color: var(--accent); color: #11151C; }
+
+/* alertes douces */
+.co-alerte {
+  display: flex; gap: 11px; align-items: flex-start;
+  border-radius: var(--r); padding: 12px 13px; margin-bottom: 10px;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--jour) 14%, transparent);
+}
+.co-alerte.barriere { border-color: var(--alerte); background: color-mix(in srgb, var(--alerte) 12%, transparent); }
+.co-alerte .ico { font-size: 22px; line-height: 1.1; }
+.co-alerte .txt { flex: 1; }
+.co-alerte b { display: block; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .02em; }
+.co-alerte small { display: block; font-size: 13.5px; color: var(--texte-doux); margin-top: 2px; line-height: 1.35; }
+.co-alerte button {
+  flex: none; width: var(--tap); height: var(--tap); margin: -8px -8px 0 0;
+  border-radius: 10px; font-size: 17px; color: var(--texte-pale);
+}
+
+/* etat avant depart et simulation */
+.co-attente { padding: 22px 16px; text-align: center; }
+.co-attente b {
+  display: block; font-family: var(--display); font-weight: 700;
+  font-size: 24px; margin-bottom: 6px;
+}
+.co-attente p { font-size: 15px; color: var(--texte-doux); line-height: 1.4; }
+
+.co-simu { margin-top: 12px; }
+.co-simu > span {
+  display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 7px;
+}
+.co-simu .lignes { display: flex; flex-wrap: wrap; gap: 6px; }
+.co-simu button {
+  min-height: 38px; padding: 0 12px; border-radius: 999px;
+  border: 1px dashed var(--bord); background: none;
+  font-family: var(--mono); font-size: 12px; color: var(--texte-doux);
+}
+.co-simu button.reel { border-style: solid; border-color: var(--accent); color: var(--accent-txt); }
+
+/* historique */
+.hi { display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-top: 1px solid var(--bord); }
+.hi:first-child { border-top: 0; }
+.hi b { font-family: var(--display); font-weight: 700; font-size: 19px; font-variant-numeric: tabular-nums; min-width: 58px; }
+.hi .n { flex: 1; font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+.hi .ec { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.hi .ec.avance { color: var(--ok); }
+.hi .ec.retard { color: var(--alerte); }
+
+/* panic card */
+.pk-mantra {
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(24px, 7.5vw, 32px); line-height: 1.06; letter-spacing: .01em;
+  padding: 14px; border-radius: var(--r); margin-bottom: 14px;
+  background: var(--encre); color: var(--papier);
+}
+[data-theme="nuit"] .pk-mantra { background: var(--jour); color: #11151C; }
+.pk-marge { display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .72; margin-bottom: 6px; }
+
+.pk-branche { border-left: 5px solid var(--ok); padding: 4px 0 4px 12px; margin-bottom: 14px; }
+.pk-branche.orange { border-color: var(--jour); }
+.pk-branche.rouge { border-color: var(--alerte); }
+.pk-branche b { display: block; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .02em; }
+.pk-branche i { display: block; font-style: normal; font-size: 14px; color: var(--texte-doux); margin: 3px 0 5px; }
+.pk-branche p { font-size: 16px; line-height: 1.35; font-weight: 500; }
+
+.pk-etapes { list-style: none; counter-reset: pk; }
+.pk-etapes li {
+  counter-increment: pk; display: flex; gap: 11px; align-items: baseline;
+  padding: 9px 0; border-top: 1px solid var(--bord); font-size: 16px; line-height: 1.32;
+}
+.pk-etapes li::before {
+  content: counter(pk); flex: none;
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+  color: var(--accent-txt); min-width: 16px;
+}
+
+/* ---- mode 3h du matin : nuit + onglet course ---- */
+[data-theme="nuit"][data-course="1"] {
+  --bg: #000000; --surface: #0A0D14; --surface-2: #12161F; --bord: #2C3444;
+  --texte: #F2EFE6; --texte-doux: #B8BDC8; --texte-pale: #8992A2;
+}
+[data-course="1"] #v-course .co-haut .h { font-size: 36px; }
+[data-course="1"] #v-course .co-haut .e { font-size: 23px; }
+[data-course="1"] #v-course .co-trio b { font-size: 27px; }
+[data-course="1"] #v-course .co-trio span { font-size: 11px; }
+[data-course="1"] #v-course .co-consigne { font-size: 19px; }
+[data-course="1"] #v-course .co-pointer { min-height: 76px; font-size: 24px; }
+[data-course="1"] #v-course .co-actions button { min-height: 52px; font-size: 16px; }
+[data-course="1"] #v-course .co-alerte b { font-size: 22px; }
+[data-course="1"] #v-course .co-alerte small { font-size: 15px; }
+[data-theme="nuit"][data-course="1"] .tabbar { background: #000; }
+
 /* ===================== nutrition ===================== */
 
 .nu-cible { padding-bottom: 12px; border-bottom: 1px solid var(--bord); }
