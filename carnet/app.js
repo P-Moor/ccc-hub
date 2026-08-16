@@ -2,7 +2,7 @@
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
 import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
-         PANIC, ALERTES, NAAK, SAC, REPERES } from './data.js';
+         PANIC, ALERTES, NAAK, NAAK_SOURCE, NAAK_LISTE, SAC, REPERES } from './data.js';
 import { AFFUTAGE } from './prepa-data.js';
 import { PROFIL, altAt } from './profil.js';
 
@@ -1017,9 +1017,80 @@ function traceNutrition() {
     '<table class="nu-tab"><tr><th></th><th>gluc</th><th>kcal</th></tr>' +
     NAAK.map(p => '<tr><td><b>' + p.n + '</b><small>' + p.u + ' &#183; ' + p.note + '</small></td>' +
       '<td>' + p.g + ' g</td><td>' + p.kcal + '</td></tr>').join('') +
-    '</table></details>';
+    '</table><p class="nu-src">' + NAAK_SOURCE + '</p></details>';
 
   return h;
+}
+
+/* ---- le compte des glucides, avec les vraies valeurs ---- */
+
+const CIBLE_G = 1400;
+
+function bilanGlucides() {
+  // tout ce qui est porte, calcule sur les valeurs officielles Naak
+  let porte = 0;
+  NAAK_LISTE.forEach(g => {
+    if (g.id === 'ach' || g.id === 'ctr') return;   // achat et controles ne se portent pas
+    g.items.forEach(i => { if (i.ref !== undefined && i.qte) porte += i.qte * NAAK[i.ref].g; });
+  });
+  const ravitos = Math.max(0, CIBLE_G - porte);
+  const portions = Math.round(ravitos / NAAK[5].g);
+  return { porte, ravitos, portions };
+}
+
+function traceBilan() {
+  const b = bilanGlucides();
+  const pct = Math.min(100, Math.round((b.porte / CIBLE_G) * 100));
+
+  return document.getElementById('bilanHote').innerHTML =
+    '<div class="bl-h"><div><span>porté sur moi</span><b>' + b.porte + ' g</b></div>' +
+      '<div><span>cible course</span><b>' + CIBLE_G + ' g</b></div></div>' +
+    '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="bl-t"><b>' + b.ravitos + ' g à prendre aux ravitos</b>, soit environ <b>' +
+      b.portions + ' recharges</b> de Näak Ultra Drink à 55 g. ' +
+      'Les ravitos CCC servent du Näak : gels, barres, gaufres et boisson.</div>' +
+    '<div class="bl-avert"><b>Correction :</b> ta base d\'aliments comptait 44 g par gel et 40 g par purée. ' +
+      'Näak annonce <b>27 g</b> et <b>26 g</b>. Sur 17 gels, ça fait 289 g de glucides que tu croyais avoir ' +
+      'et que tu n\'as pas, soit environ 4 heures de course. D\'où les recharges ci-dessus.</div>';
+}
+
+/* ---- checklist Näak, au meme titre que celle du matos ---- */
+
+const TOTAL_NAAK = NAAK_LISTE.reduce((n, g) => n + g.items.length, 0);
+const naakFait = id => coches[id] === true;
+
+function traceNaak() {
+  const n = NAAK_LISTE.reduce((s, g) => s + g.items.filter(i => naakFait(i.id)).length, 0);
+  const pct = TOTAL_NAAK ? Math.round((n / TOTAL_NAAK) * 100) : 0;
+
+  let h = '<div class="carte ck-tete"><div class="ck-pct"><b>' + pct + '</b><i>%</i><span>préparé</span></div>' +
+    '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="ck-compte">' + n + ' / ' + TOTAL_NAAK + ' lignes</div></div>';
+
+  h += NAAK_LISTE.map(g => {
+    const f = g.items.filter(i => naakFait(i.id)).length;
+    const gr = g.items.reduce((s, i) => s + (i.ref !== undefined && i.qte ? i.qte * NAAK[i.ref].g : 0), 0);
+    return '<div class="ck-grp' + (f === g.items.length ? ' fini' : '') + '">' +
+      '<div class="ck-grp-tete">' + anneau(g.items.length ? (f / g.items.length) * 100 : 0) +
+        '<div class="ck-grp-nom">' + g.t + '<small>' + g.s + '</small></div>' +
+        '<div class="ck-grp-cpt">' + f + '/' + g.items.length + '</div></div>' +
+      '<div class="ck-liste">' + g.items.map(i =>
+        '<button class="ck-item' + (naakFait(i.id) ? ' ok' : '') + '" data-ck="' + i.id + '">' +
+        '<i class="ck-box"></i><span class="ck-txt">' + i.l +
+        (i.note ? '<small>' + i.note + '</small>' : '') + '</span>' +
+        (i.ref !== undefined && i.qte ? '<em class="ck-g">' + (i.qte * NAAK[i.ref].g) + ' g</em>' : '') +
+        '</button>').join('') + '</div>' +
+      (gr ? '<div class="ck-grp-tot">' + gr + ' g de glucides</div>' : '') +
+    '</div>';
+  }).join('');
+
+  document.getElementById('naakHote').innerHTML = h;
+  document.querySelectorAll('#naakHote [data-ck]').forEach(b =>
+    b.addEventListener('click', () => {
+      coches[b.dataset.ck] = !naakFait(b.dataset.ck);
+      store.set('check', coches);
+      traceNaak();
+    }));
 }
 
 /* ============================ checklists ============================ */
@@ -1499,6 +1570,8 @@ function init() {
   majScenario();
 
   document.getElementById('nutriHote').innerHTML = traceNutrition();
+  traceBilan();
+  traceNaak();
   document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
   document.getElementById('ckAttente').innerHTML = traceAttente();
   majChecklist();

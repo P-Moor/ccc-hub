@@ -1123,6 +1123,43 @@ button.tl-ligne:active { background: var(--surface-2); }
 }
 .nu-ch small { display: block; font-size: 12.5px; color: var(--texte-pale); margin-top: 5px; }
 
+.nu-src { margin-top: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
+
+/* le compte des glucides */
+.bl-h { display: flex; gap: 14px; margin-bottom: 9px; }
+.bl-h div { flex: 1; }
+.bl-h span {
+  display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 2px;
+}
+.bl-h b { font-family: var(--display); font-weight: 700; font-size: 27px; line-height: 1; }
+.bl-h div:last-child { text-align: right; }
+.bl-h div:last-child b { color: var(--texte-pale); }
+.bl-t { margin-top: 10px; font-size: 14.5px; line-height: 1.42; }
+.bl-t b { font-weight: 600; }
+.bl-avert {
+  margin-top: 12px; padding: 11px 12px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--alerte) 38%, transparent);
+  background: color-mix(in srgb, var(--alerte) 8%, transparent);
+  font-size: 13.5px; line-height: 1.42;
+}
+.bl-avert b { font-weight: 600; color: var(--alerte); }
+
+/* la valeur en grammes dans la checklist Naak */
+.ck-g {
+  flex: none; align-self: center; font-style: normal;
+  font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--texte-pale);
+}
+.ck-item.ok .ck-g { opacity: .5; }
+.ck-grp-tot {
+  padding: 7px 13px; margin-top: -1px;
+  border: 1px solid var(--bord); border-top: 0;
+  border-radius: 0 0 var(--r) var(--r);
+  background: var(--surface-2);
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: var(--texte-doux);
+  text-align: right;
+}
+
 /* le detail repliable */
 .nu-det { margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--bord); }
 .nu-det summary {

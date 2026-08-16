@@ -195,15 +195,52 @@ export const REPERES = [
     r:"Le dernier vrai point haut. Après, c'est fini." }
 ];
 
-// Catalogue Näak, macros reprises de la base d'aliments du Hub
-// (backend/foods-database.js, etiquettes fabricant, partenaire officiel UTMB).
+// Catalogue Näak, valeurs relevees sur naak.com le 2026-08-16.
+// ATTENTION : la base d'aliments du Hub (backend/foods-database.js) donne 44 g
+// pour le gel et 40 g pour la puree. Le fabricant annonce 27 g et 26 g.
+// Ce sont les valeurs officielles qui font foi ici, et elles changent le calcul.
 export const NAAK = [
-  { n:"Ultra Energy Gel",        u:"1 gel",     g:44, kcal:200, note:"servi aux ravitos CCC" },
-  { n:"Ultra Energy Bar",        u:"1 barre 50 g", g:28, kcal:200, note:"ratio 4:1, servie aux ravitos" },
-  { n:"Ultra Energy Waffle",     u:"1 gaufre 30 g", g:16, kcal:140, note:"servie aux ravitos" },
-  { n:"Ultra Energy Purée",      u:"1 gourde 90 g", g:40, kcal:200, note:"texture purée, passe quand plus rien ne passe" },
-  { n:"Boost Energy Drink Mix",  u:"1 sachet / 500 ml", g:60, kcal:240, note:"ta flasque 1, parfum concombre" },
-  { n:"Ultra Energy Drink Mix",  u:"1 portion / 500 ml", g:55, kcal:250, note:"la recharge dispo aux ravitos" }
+  { n:"Ultra Energy Gel", u:"1 gel", g:27, kcal:200, prot:2, na:"420-460 mg",
+    note:"35 mg de caféine, parfum chocolat uniquement" },
+  { n:"Ultra Energy Bar", u:"1 barre 50 g", g:28, kcal:200, prot:7, na:"405 mg",
+    note:"ratio 4:1, servie aux ravitos" },
+  { n:"Ultra Energy Waffle", u:"1 gaufre", g:16, kcal:140, prot:3, na:"210 mg",
+    note:"servie aux ravitos" },
+  { n:"Ultra Energy Purée", u:"1 gourde", g:26, kcal:200, prot:5, na:"160 mg",
+    note:"passe quand plus rien ne passe" },
+  { n:"Boost Drink Mix 60", u:"1 sachet / 500 ml", g:60, kcal:250, prot:0, na:"500 mg",
+    note:"ta flasque 1, concombre salé" },
+  { n:"Ultra Drink Mix 250", u:"1 portion / 500 ml", g:55, kcal:250, prot:6, na:"400 mg",
+    note:"la recharge servie aux ravitos" }
+];
+export const NAAK_SOURCE = "Relevé sur naak.com le 16/08/2026";
+
+// Checklist nutrition, au meme titre que celle du matos.
+// qte = nombre d'unites, ref = cle du catalogue NAAK pour le calcul des glucides.
+export const NAAK_LISTE = [
+  { id:'ach', t:"À acheter", s:"TraKKs Rocourt, lundi 17 · liste fermée, zéro poudre", items:[
+    { id:'na1', l:"12 gels Ultra Energy", qte:12, ref:0 },
+    { id:'na2', l:"5 gels caféinés (chocolat)", qte:5, ref:0, note:"35 mg de caféine chacun" },
+    { id:'na3', l:"5 barres Ultra Energy", qte:5, ref:1 },
+    { id:'na4', l:"Noter les mg de caféine sur l'étiquette", qte:0 }
+  ]},
+  { id:'dep', t:"Sur moi au départ", s:"Ce que je porte de Courmayeur à Champex", items:[
+    { id:'nd1', l:"7 gels", qte:7, ref:0 },
+    { id:'nd2', l:"3 barres", qte:3, ref:1 },
+    { id:'nd3', l:"2 ziplocks de Boost concombre", qte:2, ref:4 },
+    { id:'nd4', l:"2 gels de réserve", qte:2, ref:0, note:"on n'y touche pas avant Vallorcine" },
+    { id:'nd5', l:"Flasque 1 remplie de Boost, flasque 2 d'eau", qte:0 }
+  ]},
+  { id:'cha', t:"Dans le sac Champex", s:"Récupéré au km 54,6", items:[
+    { id:'nc1', l:"8 gels dont 5 caféinés", qte:8, ref:0 },
+    { id:'nc2', l:"2 barres", qte:2, ref:1 },
+    { id:'nc3', l:"2 ziplocks de Boost concombre", qte:2, ref:4 }
+  ]},
+  { id:'ctr', t:"Contrôles", s:"À faire avant de fermer le sac", items:[
+    { id:'nx1', l:"Vérifier l'absence de céleri sur les étiquettes", qte:0, note:"Apiacées" },
+    { id:'nx2', l:"Compter les portions une dernière fois", qte:0 },
+    { id:'nx3', l:"Racheter ce qui manque avant le 20/08", qte:0, note:"ici, pas à Chamonix" }
+  ]}
 ];
 
 // Les echeances des 12 derniers jours, pour que l'accueil serve a quelque chose.
