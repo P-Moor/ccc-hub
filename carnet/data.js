@@ -12,27 +12,32 @@ export const RACE = {
 // sections[i] = du point i-1 (ou depart) vers .nom
 export const SECTIONS = [
   { nom:"Refuge Bertone", km:13.7, cumKm:13.7, dplus:1456, dminus:669, sommet:"Tête de la Tronche 2556 m",
-    consigne:"Marche + bâtons dès le km 1 · VAM 450-480 m/h · FC < 145", arret:"express", arretMin:4 },
+    consigne:"Marche + bâtons dès le km 1 · VAM 450-480 m/h · FC < 145", arret:"express", arretMin:4,
+    ravito:"complet", assist:false },
   { nom:"Arnouvaz", km:12.8, cumKm:26.5, dplus:441, dminus:663, sommet:"balcon 2062 m",
-    consigne:"Ça roule · manger en marchant", arret:"moyen", arretMin:9 },
+    consigne:"Ça roule · manger en marchant", arret:"moyen", arretMin:9,
+    ravito:"complet", assist:false },
   { nom:"La Fouly", km:14.4, cumKm:40.9, dplus:863, dminus:1037, sommet:"Grand Col Ferret 2529 m",
-    consigne:"Toit de la course · vent possible · veste à portée", arret:"moyen", arretMin:9 },
+    consigne:"Toit de la course · vent possible · veste à portée", arret:"moyen", arretMin:9,
+    ravito:"complet", assist:false },
   { nom:"Champex-Lac", km:13.7, cumKm:54.6, dplus:520, dminus:720, sommet:"",
-    consigne:"Vallée roulante · relance douce, ne pas courir vite", arret:"grand", arretMin:18,
+    consigne:"Vallée roulante · relance douce, ne pas courir vite", arret:"grand", arretMin:18, ravito:"base", assist:true,
     todo:["Sac d'allègement","Chaussettes sèches","NOK","Frontale sur la tête","☕ Café n°1","Repas assis"] },
   { nom:"Plan de l'Au", km:4.8, cumKm:59.4, dplus:122, dminus:147, sommet:"",
-    consigne:"Frontale allumée · ~20:30 la nuit tombe", arret:"express", arretMin:4 },
+    consigne:"Frontale allumée · ~20:30 la nuit tombe", arret:"express", arretMin:4,
+    ravito:"controle", assist:false },
   { nom:"Trient", km:11.7, cumKm:71.2, dplus:778, dminus:817, sommet:"Bovine 2044 m",
-    consigne:"De nuit · rythme régulier · personne ne va vite ici", arret:"grand", arretMin:15,
+    consigne:"De nuit · rythme régulier · personne ne va vite ici", arret:"grand", arretMin:15, ravito:"complet", assist:false,
     todo:["Soupe chaude","VESTE avant de s'asseoir","☕ Café n°2","Point bas prévu, normal"] },
   { nom:"Vallorcine", km:12.0, cumKm:83.2, dplus:829, dminus:907, sommet:"Catogne 2070 m",
-    consigne:"Un pas après l'autre · le mantra sert ici", arret:"moyen", arretMin:9,
+    consigne:"Un pas après l'autre · le mantra sert ici", arret:"moyen", arretMin:9, ravito:"complet", assist:true,
     todo:["☕ Café n°3","Dernier vrai ravito"] },
   { nom:"La Flégère", km:11.4, cumKm:94.6, dplus:969, dminus:376, sommet:"Tête aux Vents 1886 m",
     consigne:"LA plus dure · 2h45 · blocs, de nuit · ELLE EST PRÉVUE. Après elle, c'est fini.",
-    arret:"express", arretMin:4, laPlusDure:true },
+    arret:"express", arretMin:4, laPlusDure:true, ravito:"eau", assist:false },
   { nom:"Chamonix", km:6.8, cumKm:101.5, dplus:14, dminus:845, sommet:"",
-    consigne:"Descente finale · rien à gérer, juste descendre", arret:"arrivee", arretMin:0 }
+    consigne:"Descente finale · rien à gérer, juste descendre", arret:"arrivee", arretMin:0,
+    ravito:"arrivee", assist:false }
 ];
 
 // horloge = heure d'arrivee au point · marge vs barriere
@@ -88,6 +93,89 @@ export const NUTRITION = {
     champex: "8 gels dont 5 caféinés + 2 barres + 2 ziplocks"
   }
 };
+
+// ============================ PREPA ============================
+// Plan jour par jour du 17 au 28 aout. L'affutage vient de la charge reelle
+// lue dans Strava (pic a 165 km / 2 488 m fin juillet, sortie longue de
+// 25,4 km et 1 195 m le 15/08). A valider par Pierre, ce n'est pas fige.
+export const JOURS = [
+  { d:"2026-08-16", seance:"Récupération", detail:"8,7 km faits ce matin. La sortie longue d'hier (25,4 km, 1 195 m) était la dernière grosse. À partir de maintenant on ne construit plus, on récupère.",
+    faire:[], cle:false },
+  { d:"2026-08-17", seance:"Repos", detail:"Ou marche 30 min si tu tournes en rond.",
+    faire:[], cle:false },
+  { d:"2026-08-18", seance:"8 à 10 km facile", detail:"Terrain souple, FC sous 140. Rien qui pique.",
+    faire:[], cle:false },
+  { d:"2026-08-19", seance:"Renfo léger + marche 30 min", detail:"Gainage, pas de charge lourde.",
+    faire:["Verdict chaussures Reveal"], cle:true },
+  { d:"2026-08-20", seance:"12 à 14 km, 400 à 500 m D+", detail:"En config course complète : sac, bâtons, chaussures, flasques. C'est la dernière vraie séance.",
+    faire:["Vérification finale du matériel, pièce par pièce","Racheter la nutrition manquante, ici et pas à Chamonix","Rien de nouveau dans l'assiette après aujourd'hui"], cle:true },
+  { d:"2026-08-21", seance:"Repos", detail:"Complet. Tu as fait le travail.",
+    faire:[], cle:false },
+  { d:"2026-08-22", seance:"8 à 10 km + 3 ou 4 côtes courtes", detail:"Côtes en marche-bâtons. Rappel neuromusculaire, surtout pas de la charge.",
+    faire:[], cle:false },
+  { d:"2026-08-23", seance:"Marche 45 à 60 min", detail:"Dehors, tranquille.",
+    faire:[], cle:false },
+  { d:"2026-08-24", seance:"6 à 8 km très facile", detail:"Les jambes se souviennent, elles ne travaillent plus.",
+    faire:["Glucides à chaque repas, à ta faim, sans compter","Dernier bain chaud"], cle:false },
+  { d:"2026-08-25", seance:"Repos", detail:"Jour des sacs.",
+    faire:["Préparer le sac de course ET le sac d'allègement","Hydratation régulière toute la journée","Coucher tôt, c'est le levier numéro 1"], cle:true },
+  { d:"2026-08-26", seance:"Voyage, marche 20 à 30 min", detail:"Dégourdir les jambes après le train.",
+    faire:["Eurostar 9414, Liège-Guillemins 07h53","TGV 9773, Paris-Lyon 12h16 vers Genève 15h36","FlixBus N504, Genève 16h05 vers Chamonix 17h20"], cle:true },
+  { d:"2026-08-27", seance:"20 min de footing le matin", detail:"Très léger, juste pour ouvrir.",
+    faire:["Retrait du dossard 12h à 14h, Espace Michel Croz","Repas du soir simple, connu, tôt","Tenue posée, alarme + alarme de secours","Coucher tôt, même sans dormir tu te reposes"], cle:true },
+  { d:"2026-08-28", seance:"CCC", detail:"Départ 09:15, Courmayeur, vague 2.",
+    faire:["Réveil vers 5h30","Petit-déj testé : pain, miel, banane","NOK sur les pieds, chaussettes propres"], cle:true }
+];
+
+// Repartition du materiel : le meme objet ne doit pas se retrouver a deux endroits.
+export const SAC = [
+  { id:'moi', t:"Sur moi en permanence", s:"Contrôlable du départ à l'arrivée", items:[
+    "Dossard visible", "Téléphone chargé, 3 pays, numéros de secours enregistrés",
+    "Gobelet 15 cl minimum", "Sifflet", "Couverture de survie 1,40 × 2 m",
+    "Bande élastique 100 × 6 cm", "Pièce d'identité"
+  ]},
+  { id:'sac', t:"Dans le sac de course", s:"Ce que tu portes sur 101,5 km", items:[
+    "2 frontales + piles de rechange pour chacune",
+    "Veste imperméable à capuche, coutures soudées",
+    "Seconde couche chaude ≥ 180 g", "Pantalon ou collant long",
+    "Sur-pantalon imperméable", "Bonnet", "Gants chauds imperméables",
+    "Casquette ou Buff", "Réserve d'eau 1 L minimum, 2 L si kit canicule",
+    "2 flasques : Boost concombre + eau",
+    "7 gels + 3 barres + 2 ziplocks + 2 gels de réserve",
+    "Bâtons Leki + carquois", "Batterie externe + câble",
+    "Trousse : traitement, antihistaminique, pansements en curatif, sel"
+  ]},
+  { id:'champex', t:"Sac d'allègement Champex", s:"Déposé au départ, retrouvé au km 54,6, puis à Chamonix", items:[
+    "Chaussettes Injinji sèches", "2ᵉ paire d'Epitact", "NOK en recharge",
+    "8 gels dont 5 caféinés + 2 barres + 2 ziplocks",
+    "Couche chaude sèche", "Lingettes ou serviette", "Piles de rechange frontale"
+  ], interdit:["Bâtons", "Objets de valeur", "Objets fragiles"],
+     note:"Le rapatriement peut avoir du retard : rien dedans dont tu aies besoin dans l'heure qui suit l'arrivée." },
+  { id:'voyage', t:"Bagage voyage", s:"Reste à Chamonix", items:[
+    "Tenue de rechange complète pour l'arrivée", "Chaussures de repos ou claquettes",
+    "Vêtements pour 3 à 4 jours", "Nécessaire de toilette",
+    "Chargeurs : téléphone, montre, frontale, batterie",
+    "Nutrition course complète + nutrition avant et après",
+    "Petit-déj du jour J : pain, miel, banane", "Sac plastique pour le linge sale"
+  ], note:"Les bâtons Leki ne passent pas en cabine au retour, ils partent en soute." }
+];
+
+// Points de passage sans ravitaillement, repris du plan de course du Hub.
+// Ils comptent autant que les postes : ce sont les reperes entre deux ravitos.
+export const REPERES = [
+  { km:9.3,  nom:"Tête de la Tronche", alt:2556, t:"sommet",
+    r:"Point haut de la première montée. 1 300 m de D+ d'entrée, sans transition." },
+  { km:19.2, nom:"Refuge Bonatti", alt:2025, t:"eau",
+    r:"Point d'eau. Sentier balcon en surplomb du val Ferret." },
+  { km:30.5, nom:"Grand Col Ferret", alt:2537, t:"col",
+    r:"Toit de la course, frontière Italie / Suisse. Aucun ravitaillement, vent possible." },
+  { km:65.1, nom:"Bovine", alt:2044, t:"sommet",
+    r:"Casse le rythme après Champex. De nuit." },
+  { km:77.0, nom:"Catogne", alt:2070, t:"sommet",
+    r:"Entre Trient et Vallorcine. Un pas après l'autre." },
+  { km:93.7, nom:"Tête aux Vents", alt:1886, t:"sommet",
+    r:"Le dernier vrai point haut. Après, c'est fini." }
+];
 
 // Catalogue Näak, macros reprises de la base d'aliments du Hub
 // (backend/foods-database.js, etiquettes fabricant, partenaire officiel UTMB).

@@ -39,11 +39,9 @@
       </div>
     </div>
     <div class="barre-jn" aria-hidden="true"><i class="j"></i><i class="n"></i></div>
-    <div class="dossard-faits">
-      <span><b>101,5</b> km</span>
-      <span><b>6 062</b> m D+</span>
-      <span>cible <b>20h15</b></span>
-      <span>ven <b>28/08</b></span>
+    <div class="parties" role="tablist">
+      <button data-partie="prepa" role="tab">Préparer<span id="sousPrepa">&#8230;</span></button>
+      <button data-partie="course" role="tab">Courir<span>28/08 &#183; 09:15</span></button>
     </div>
   </header>
 
@@ -53,30 +51,45 @@
 
   <main>
 
-    <section class="vue actif" id="v-accueil">
+    <!-- ===================== PRÉPARER ===================== -->
+
+    <section class="vue actif" id="v-aujourdhui">
       <div class="carte cd" id="cdCarte">
         <div class="cd-oeil" id="cdOeil">Départ dans</div>
         <div class="cd-grille" id="cdGrille"></div>
         <div class="cd-sous" id="cdSous"></div>
       </div>
 
+      <div class="titre">Aujourd'hui</div>
+      <div class="carte" id="jourHote"></div>
+
       <div class="titre">Où j'en suis</div>
       <div class="carte" id="etatHote"></div>
 
-      <div class="titre">Ce qui vient</div>
-      <div class="carte" id="echeancesHote"></div>
-
-      <div class="gros">
-        <button data-va="deroule">Déroulé<span>9 ravitos, heure par heure</span></button>
-        <button data-va="listes">Checklists<span id="ckResume">&#8230;</span></button>
-        <button class="plein course" data-va="course">Mode course<span>pointage et marge en direct</span></button>
-      </div>
+      <div class="titre">Les 12 jours</div>
+      <div class="carte" id="planHote"></div>
 
       <div class="titre">Rappel</div>
       <div class="carte" id="regleDuJour"></div>
     </section>
 
+    <section class="vue" id="v-sac">
+      <div class="titre">Où va quoi</div>
+      <div id="sacHote"></div>
+    </section>
+
+    <section class="vue" id="v-nutrition">
+      <div class="titre">Nutrition</div>
+      <div class="carte" id="nutriHote"></div>
+    </section>
+
+    <!-- ===================== COURIR ===================== -->
+
     <section class="vue" id="v-profil">
+      <div class="faits">
+        <span><b>101,5</b> km</span><span><b>6 062</b> m D+</span>
+        <span>cible <b>20h15</b></span><span>barrière <b>26h30</b></span>
+      </div>
       <div class="switch" data-role="scenario"></div>
       <div class="titre">Le profil</div>
       <div class="carte profil-carte">
@@ -103,9 +116,11 @@
       <div class="carte scenar" id="scenarInfo"></div>
       <div class="titre" id="titreDeroule">Le déroulé</div>
       <div class="carte"><div class="tl" id="timeline"></div></div>
+    </section>
 
-      <div class="titre">Nutrition</div>
-      <div class="carte" id="nutriHote"></div>
+    <section class="vue" id="v-ravitos">
+      <div class="titre">Tous les points de passage</div>
+      <div id="ravitosHote"></div>
     </section>
 
     <section class="vue" id="v-listes">
@@ -134,18 +149,7 @@
     <div id="feuilleCorps"></div>
   </aside>
 
-  <nav class="tabbar" role="tablist">
-    <button class="tab actif" data-vue="accueil" role="tab">
-      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Accueil</button>
-    <button class="tab" data-vue="profil" role="tab">
-      <svg viewBox="0 0 24 24"><path d="M2 18l6-9 4 5 3-4 7 8z"/></svg>Profil</button>
-    <button class="tab" data-vue="deroule" role="tab">
-      <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8"/><path d="M11 6h9"/><path d="M11 18h9"/></svg>Déroulé</button>
-    <button class="tab" data-vue="listes" role="tab">
-      <svg viewBox="0 0 24 24"><path d="M4 7l2 2 4-4"/><path d="M4 17l2 2 4-4"/><path d="M13 8h7"/><path d="M13 18h7"/></svg>Listes</button>
-    <button class="tab" data-vue="course" role="tab">
-      <svg viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z"/></svg>Course</button>
-  </nav>
+  <nav class="tabbar" id="tabbar" role="tablist"></nav>
 
 </div>
 

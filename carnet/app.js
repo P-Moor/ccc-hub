@@ -2,7 +2,7 @@
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
 import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
-         PANIC, ALERTES, ECHEANCES, NAAK } from './data.js';
+         PANIC, ALERTES, NAAK, JOURS, SAC, REPERES } from './data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -128,19 +128,60 @@ document.getElementById('btnTheme').addEventListener('click', () => {
 
 /* ============================ navigation ============================ */
 
+// L'app a deux moities : preparer jusqu'au 28, et courir le 28.
+const PARTIES = {
+  prepa: [
+    ['aujourdhui', "Aujourd'hui", '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 11h18"/><path d="M9 16l1.8 1.8L14.5 14"/>'],
+    ['sac', 'Le sac', '<path d="M8 8V6.5a4 4 0 0 1 8 0V8"/><rect x="4" y="8" width="16" height="13" rx="3"/><path d="M9 13h6"/>'],
+    ['listes', 'Matos', '<path d="M4 7l2 2 4-4"/><path d="M4 17l2 2 4-4"/><path d="M13 8h7"/><path d="M13 18h7"/>'],
+    ['nutrition', 'Nutrition', '<path d="M10 3v6l-4.6 9.2A2 2 0 0 0 7.2 21h9.6a2 2 0 0 0 1.8-2.8L14 9V3"/><path d="M9 3h6"/>']
+  ],
+  course: [
+    ['profil', 'Tracé', '<path d="M2 18l6-9 4 5 3-4 7 8z"/>'],
+    ['deroule', 'Pacing', '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8"/><path d="M11 6h9"/><path d="M11 18h9"/>'],
+    ['ravitos', 'Ravitos', '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/>'],
+    ['course', 'Jour J', '<path d="M6 4l13 8-13 8z"/>']
+  ]
+};
+
+etat.partie = store.get('partie', 'prepa');
+if (!PARTIES[etat.partie]) etat.partie = 'prepa';
+
+const vueParDefaut = p => PARTIES[p][0][0];
+
+function traceTabbar() {
+  const bar = document.getElementById('tabbar');
+  bar.innerHTML = PARTIES[etat.partie].map(([id, lbl, ico]) =>
+    '<button class="tab' + (id === etat.vue ? ' actif' : '') + '" data-vue="' + id + '" role="tab">' +
+    '<svg viewBox="0 0 24 24">' + ico + '</svg>' + lbl + '</button>').join('');
+  bar.querySelectorAll('.tab').forEach(t =>
+    t.addEventListener('click', () => montre(t.dataset.vue)));
+  document.querySelectorAll('.parties button').forEach(b =>
+    b.classList.toggle('on', b.dataset.partie === etat.partie));
+}
+
 function montre(nom) {
   etat.vue = nom;
-  // pilote le mode 3h du matin : typo XXL et fond noir sur l'onglet course
+  store.set('vue-' + etat.partie, nom);
+  // pilote le mode 3h du matin : typo XXL et fond noir sur l'onglet du jour J
   document.documentElement.dataset.course = nom === 'course' ? '1' : '0';
   document.querySelectorAll('.vue').forEach(v => v.classList.toggle('actif', v.id === 'v-' + nom));
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('actif', t.dataset.vue === nom));
+  traceTabbar();
   window.scrollTo(0, 0);
   if (nom === 'course') majCourse(true);
 }
 
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => montre(t.dataset.vue));
-});
+function changePartie(p) {
+  if (!PARTIES[p]) return;
+  etat.partie = p;
+  store.set('partie', p);
+  const memorisee = store.get('vue-' + p, null);
+  const valide = PARTIES[p].some(x => x[0] === memorisee);
+  montre(valide ? memorisee : vueParDefaut(p));
+}
+
+document.querySelectorAll('.parties button').forEach(b =>
+  b.addEventListener('click', () => changePartie(b.dataset.partie)));
 
 /* ============================ profil ============================ */
 
@@ -438,6 +479,7 @@ function majScenario() {
     '<span>' + court(SECTIONS[SECTIONS.length - 1].nom) + ' ' + margeDe(s, SECTIONS.length - 1) + '</span>';
 
   litProfil(kmCourant);
+  if (document.getElementById('ravitosHote')) traceRavitos();
 }
 
 function traceTimeline() {
@@ -995,7 +1037,8 @@ function majChecklist() {
   document.getElementById('ckPct').textContent = pct;
   document.getElementById('ckJauge').style.width = pct + '%';
   document.getElementById('ckCompte').textContent = n + ' / ' + TOTAL_ITEMS + ' items';
-  document.getElementById('ckResume').innerHTML =
+  const res = document.getElementById('ckResume');
+  if (res) res.innerHTML =
     n === TOTAL_ITEMS ? 'tout est coché' : 'prêt à ' + pct + ' % &#183; ' + (TOTAL_ITEMS - n) + ' restants';
 
   document.getElementById('ckGroupes').innerHTML = traceChecklist();
@@ -1102,23 +1145,106 @@ function majEtat() {
 }
 
 const MOIS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+const JSEM = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
 
-function majEcheances() {
+const minuit = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+/* ---- la journee du jour ---- */
+
+function majJour() {
   const now = maintenant();
-  const jour0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  let suivanteVue = false;
+  const j0 = minuit(now);
+  const auj = JOURS.find(j => new Date(j.d + 'T00:00:00').getTime() === j0.getTime());
+  const hote = document.getElementById('jourHote');
 
-  document.getElementById('echeancesHote').innerHTML = ECHEANCES.map(e => {
-    const d = new Date(e.d + 'T00:00:00');
-    const j = Math.round((d - jour0) / 86400000);
-    const passe = j < 0;
-    const suivante = !passe && !suivanteVue;
-    if (suivante) suivanteVue = true;
-    const quand = passe ? 'passé' : (j === 0 ? "aujourd'hui" : (j === 1 ? 'demain' : 'dans ' + j + ' j'));
-    return '<div class="ech' + (passe ? ' passe' : '') + (suivante ? ' suivante' : '') + '">' +
-      '<div class="j"><b>' + d.getDate() + '</b><i>' + MOIS[d.getMonth()] + '</i></div>' +
-      '<div class="c"><b>' + e.t + '</b><small>' + e.s + '</small></div>' +
-      '<div class="d">' + quand + '</div></div>';
+  if (!auj) {
+    const prochain = JOURS.find(j => new Date(j.d + 'T00:00:00') > j0);
+    hote.innerHTML = '<div class="jr-vide">' + (prochain
+      ? 'Le plan démarre le ' + new Date(prochain.d + 'T00:00:00').getDate() + ' août.'
+      : 'La course est passée. Repos, hydratation, et note l\'état du pied.') + '</div>';
+    return;
+  }
+
+  const d = new Date(auj.d + 'T00:00:00');
+  hote.innerHTML =
+    '<div class="jr-tete"><span>' + JSEM[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</span>' +
+      '<b>' + auj.seance + '</b><p>' + auj.detail + '</p></div>' +
+    (auj.faire.length
+      ? '<div class="jr-faire"><span>Et aussi</span><ul>' +
+        auj.faire.map(f => '<li>' + f + '</li>').join('') + '</ul></div>'
+      : '');
+}
+
+/* ---- les 12 jours d'un coup d'oeil ---- */
+
+function tracePlan() {
+  const j0 = minuit(maintenant());
+  document.getElementById('planHote').innerHTML = JOURS.map(j => {
+    const d = new Date(j.d + 'T00:00:00');
+    const ecart = Math.round((d - j0) / 86400000);
+    const cls = ecart < 0 ? ' passe' : (ecart === 0 ? ' auj' : '');
+    return '<div class="pl' + cls + (j.cle ? ' cle' : '') + '">' +
+      '<div class="pl-j"><b>' + d.getDate() + '</b><i>' + JSEM[d.getDay()] + '</i></div>' +
+      '<div class="pl-c"><b>' + j.seance + '</b>' +
+        (j.faire.length ? '<small>' + j.faire[0] + (j.faire.length > 1 ? ' &#183; +' + (j.faire.length - 1) : '') + '</small>' : '') +
+      '</div>' +
+      '<div class="pl-d">' + (ecart === 0 ? "auj." : (ecart < 0 ? '' : 'dans ' + ecart + ' j')) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ---- le sac, piece par piece ---- */
+
+function traceSac() {
+  document.getElementById('sacHote').innerHTML = SAC.map(g =>
+    '<div class="titre">' + g.t + '</div>' +
+    '<div class="carte sac-c"><div class="sac-s">' + g.s + '</div>' +
+    '<ul class="sac-l">' + g.items.map(i => '<li>' + i + '</li>').join('') + '</ul>' +
+    (g.interdit ? '<div class="sac-non"><span>Interdit dedans</span>' +
+      g.interdit.map(i => '<b>' + i + '</b>').join(' &#183; ') + '</div>' : '') +
+    (g.note ? '<div class="sac-note">' + g.note + '</div>' : '') +
+    '</div>').join('');
+}
+
+/* ---- tous les points de passage ---- */
+
+const RAVITO_LBL = {
+  complet: { l: 'Ravito complet', c: 'teal' },
+  base:    { l: 'Base vie', c: 'teal' },
+  eau:     { l: 'Eau seulement', c: 'tiede' },
+  controle:{ l: 'Point de contrôle', c: 'tiede' },
+  arrivee: { l: 'Arrivée', c: 'ok' }
+};
+
+function traceRavitos() {
+  const plan = scenarioActif();
+  // on fusionne les 9 postes et les 6 reperes, tout ce qui compte entre deux ravitos
+  const tout = SECTIONS.map((s, i) => ({
+    km: s.cumKm, nom: s.nom, poste: true, s, i,
+    alt: Math.round(altAt(s.cumKm) / 5) * 5
+  })).concat(REPERES.map(r => ({ km: r.km, nom: r.nom, poste: false, r, alt: r.alt })))
+    .sort((a, b) => a.km - b.km);
+
+  return document.getElementById('ravitosHote').innerHTML = tout.map(x => {
+    if (!x.poste) {
+      return '<div class="rv rv-rep"><div class="rv-km">' + kmFmt(x.km) + '</div>' +
+        '<div class="rv-c"><b>' + x.nom + '</b>' +
+        '<span class="rv-t">' + x.r.t + ' &#183; ' + x.alt + ' m</span>' +
+        '<p>' + x.r.r + '</p></div></div>';
+    }
+    const s = x.s, a = plan.rows[x.i], rl = RAVITO_LBL[s.ravito] || RAVITO_LBL.complet;
+    return '<div class="rv rv-poste' + (s.arret === 'grand' ? ' grand' : '') + '">' +
+      '<div class="rv-km">' + kmFmt(x.km) + '</div>' +
+      '<div class="rv-c">' +
+        '<div class="rv-h"><b>' + court(s.nom) + '</b><i>' + (a.horloge || a.max) + '</i></div>' +
+        '<div class="rv-tags"><span class="pastille ' + rl.c + '">' + rl.l + '</span>' +
+          (s.assist ? '<span class="pastille teal">Assistance équipe</span>' :
+            (s.ravito === 'complet' || s.ravito === 'base' ? '<span class="pastille">Sans assistance</span>' : '')) +
+          (s.arretMin ? '<span class="pastille">' + s.arretMin + ' min sur place</span>' : '') +
+        '</div>' +
+        '<p>' + s.consigne + '</p>' +
+        (s.todo ? '<ul class="rv-todo">' + s.todo.map(t => '<li>' + t + '</li>').join('') + '</ul>' : '') +
+      '</div></div>';
   }).join('');
 }
 
@@ -1141,7 +1267,9 @@ function init() {
   document.documentElement.dataset.course = '0';
   majCompte();
   majRegleDuJour();
-  majEcheances();
+  majJour();
+  tracePlan();
+  traceSac();
   setInterval(() => { majCompte(); if (etat.vue === 'course') majCourse(); }, 1000);
 
   document.getElementById('profilHote').innerHTML = traceProfil();
@@ -1170,9 +1298,20 @@ function init() {
   majChecklist();
   majCourse(true);
 
-  // Le jour J, l'app s'ouvre sur le mode course. Le reste de l'annee, sur l'accueil.
+  traceRavitos();
+
+  // Le jour J, l'app s'ouvre sur Courir. Le reste du temps, sur Préparer.
   const now = maintenant();
-  montre(now >= DEPART && now <= FIN ? 'course' : 'accueil');
+  if (now >= DEPART && now <= FIN) changePartie('course');
+  else {
+    const memorisee = store.get('vue-' + etat.partie, null);
+    const valide = PARTIES[etat.partie].some(x => x[0] === memorisee);
+    montre(valide ? memorisee : vueParDefaut(etat.partie));
+  }
+
+  // sous-titre de l'onglet Preparer : le nombre de jours restants
+  const jours = Math.max(0, Math.ceil((DEPART - now) / 86400000));
+  document.getElementById('sousPrepa').textContent = jours > 0 ? 'J-' + jours : 'jour J';
 }
 
 init();
