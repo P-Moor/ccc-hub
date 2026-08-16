@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-9';
+const CACHE = 'ccc-v2-carnet-10';
 
 const NOYAU = [
   './',
@@ -17,6 +17,7 @@ const NOYAU = [
   'data.js',
   'profil.js',
   'prepa-data.js',
+  'nutrition-data.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

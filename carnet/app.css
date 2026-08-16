@@ -937,6 +937,25 @@ button.tl-ligne:active { background: var(--surface-2); }
 .co-mini .moi { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
 .co-mini .lig { stroke: var(--accent); stroke-width: 1.2; }
 
+/* la fiche du poste, ouverte 20 min avant l'arrivee */
+.co-rav {
+  border: 2px solid var(--teal); border-radius: var(--r);
+  background: color-mix(in srgb, var(--teal) 10%, transparent);
+  padding: 13px; margin-bottom: 11px;
+}
+.co-rav-h span {
+  display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 2px;
+}
+.co-rav-h b {
+  display: block; font-family: var(--display); font-weight: 700;
+  font-size: 24px; letter-spacing: .02em; text-transform: uppercase; line-height: 1.05;
+}
+.co-rav-h i {
+  display: block; font-style: normal; font-family: var(--mono); font-size: 11px;
+  color: var(--texte-doux); margin: 3px 0 9px;
+}
+
 /* le gros bouton */
 .co-pointer {
   width: 100%; min-height: 66px; border-radius: var(--r); margin-bottom: 10px;
@@ -1123,7 +1142,103 @@ button.tl-ligne:active { background: var(--surface-2); }
 }
 .nu-ch small { display: block; font-size: 12.5px; color: var(--texte-pale); margin-top: 5px; }
 
-.nu-src { margin-top: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
+.nu-src { margin-top: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); line-height: 1.45; }
+.nu-fl-t { font-size: 14.5px; line-height: 1.42; }
+.nu-ul { list-style: none; margin-top: 4px; }
+.nu-ul li { font-size: 14px; line-height: 1.45; padding-left: 12px; position: relative; }
+.nu-ul li::before { content: "\25AA"; position: absolute; left: 0; color: var(--texte-pale); font-size: 10px; }
+.nu-reg { padding-left: 17px; }
+.nu-reg li { font-size: 14.5px; line-height: 1.4; padding: 3px 0; }
+.nu-cf.res > b { background: var(--surface-2); color: var(--alerte); }
+
+/* alertes permanentes */
+.al { display: flex; gap: 11px; align-items: flex-start; }
+.al-i { flex: none; font-size: 21px; line-height: 1.1; }
+.al b { display: block; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: .02em; }
+.al p { font-size: 14px; line-height: 1.42; margin-top: 3px; }
+.al-crit {
+  border: 2px solid var(--alerte); border-radius: var(--r);
+  background: color-mix(in srgb, var(--alerte) 8%, transparent);
+  padding: 12px 13px; margin-bottom: 10px;
+}
+.al-crit b { color: var(--alerte); }
+.al-plus { padding: 4px 14px 12px; }
+.al-info + .al-info { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bord); }
+
+/* section par section */
+.sn {
+  background: var(--surface); border: 1px solid var(--bord); border-radius: var(--r);
+  box-shadow: var(--ombre); padding: 14px; margin-bottom: 12px;
+}
+.sn.auto { border-color: var(--alerte); border-width: 1.5px; }
+.sn-trajet { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; }
+.sn-trajet b { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .02em; }
+.sn-trajet i { font-style: normal; color: var(--texte-pale); }
+.sn-chiffres { font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale); margin-top: 3px; }
+.sn-point {
+  margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: var(--surface-2);
+  font-size: 13px; color: var(--texte-doux);
+}
+.sn-g { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+.sn-g > div { flex: 0 0 auto; padding: 7px 11px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--bord); }
+.sn-g span {
+  display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.sn-g b { font-family: var(--display); font-weight: 700; font-size: 18px; }
+.sn-g b.ok { color: var(--ok); }
+.sn-g b.chaud { color: var(--alerte); }
+.sn-porte { flex: 1 1 100%; }
+.sn-porte p { font-size: 13.5px; line-height: 1.35; margin-top: 2px; }
+.sn-al {
+  margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--alerte) 40%, transparent);
+  background: color-mix(in srgb, var(--alerte) 8%, transparent);
+  font-size: 14px; line-height: 1.4;
+}
+.sn-bloc { margin-top: 12px; }
+.sn-bloc > span, .sn-l > span {
+  display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 5px;
+}
+.sn-bloc ul, .sn-l ul { list-style: none; }
+.sn-bloc li, .sn-l li {
+  font-size: 14.5px; line-height: 1.4; padding: 3px 0 3px 13px; position: relative;
+}
+.sn-bloc li::before, .sn-l li::before {
+  content: "\25AA"; position: absolute; left: 0; top: 4px; font-size: 10px; color: var(--texte-pale);
+}
+.sn-rav {
+  margin-top: 13px; padding: 12px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.sn-rav.assist { border-color: var(--teal); }
+.sn-rav-h { display: flex; align-items: baseline; gap: 9px; }
+.sn-rav-h b {
+  flex: 1; font-family: var(--display); font-weight: 700; font-size: 18px;
+  letter-spacing: .03em; text-transform: uppercase; line-height: 1.1;
+}
+.sn-rav-h i { font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--texte-pale); }
+.sn-rav-t {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+  color: var(--accent-txt); margin: 3px 0 9px;
+}
+.sn-l + .sn-l { margin-top: 9px; }
+.sn-l.oui li::before { content: "\2713"; color: var(--ok); font-size: 12px; }
+.sn-l.non li::before { content: "\2715"; color: var(--alerte); font-size: 11px; }
+.sn-note { margin-top: 9px; font-size: 13.5px; line-height: 1.4; color: var(--texte-doux); }
+
+.ach-regle {
+  margin-bottom: 12px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--alerte) 35%, transparent);
+  background: color-mix(in srgb, var(--alerte) 7%, transparent);
+  font-size: 14.5px; font-weight: 600;
+}
+.cor { padding: 10px 0; border-top: 1px solid var(--bord); }
+.cor:first-of-type { border-top: 0; }
+.cor b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.4; }
+.cor p { font-size: 13.5px; color: var(--texte-doux); margin-top: 4px; line-height: 1.4; }
+.cor small { display: block; font-size: 12px; color: var(--accent-txt); margin-top: 4px; }
 
 /* le compte des glucides */
 .bl-h { display: flex; gap: 14px; margin-bottom: 9px; }

@@ -1,9 +1,10 @@
 // CCC 4330 &#183; carnet de course v2
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
-import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
-         PANIC, ALERTES, NAAK, NAAK_SOURCE, NAAK_LISTE, SAC, REPERES } from './data.js';
+import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE,
+         PANIC, ALERTES, NAAK, NAAK_SOURCE, SAC, REPERES } from './data.js';
 import { AFFUTAGE } from './prepa-data.js';
+import { NUTRITION as NUT } from './nutrition-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -630,6 +631,16 @@ function dureesDe(plan) {
   return d;
 }
 
+// Le plan nutrition n'a que 8 postes : Plan de l'Au est un pointage seul.
+// On relie donc chaque poste du carnet a sa fiche par le nom.
+const norm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/[^a-z]/g, '');
+function ravitoNut(i) {
+  const cible = norm(court(SECTIONS[i].nom));
+  const s = NUT.sections.find(x => norm(x.ravito.nom).includes(cible) || cible.includes(norm(x.vers)));
+  return s ? s.ravito : null;
+}
+
 const dernierPointage = () => course.pointages[course.pointages.length - 1] || null;
 
 function prochainIndex() {
@@ -778,6 +789,21 @@ function traceCourse() {
       '<div class="co-consigne"><span>Maintenant</span>' + s.consigne + '</div></div>';
 
     h += traceMiniProfil(km);
+
+    // 6. la fiche du poste s'ouvre 20 min avant l'heure d'arrivee prevue
+    const dans = e[i] - now;
+    const rn = ravitoNut(i);
+    if (rn && dans > 0 && dans <= 20 * 60000) {
+      h += '<div class="co-rav"><div class="co-rav-h"><span>Dans ' + Math.round(dans / 60000) +
+        ' min</span><b>' + rn.nom + '</b><i>' + rn.type + ' &#183; ' + rn.duree + '</i></div>' +
+        '<div class="sn-l oui"><span>Sur place</span><ul>' +
+          rn.surPlace.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' +
+        (rn.eviter.length ? '<div class="sn-l non"><span>À éviter</span><ul>' +
+          rn.eviter.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' : '') +
+        (rn.note ? '<div class="sn-note">' + rn.note + '</div>' : '') +
+      '</div>';
+    }
+
     h += '<button class="co-pointer" data-point="' + i + '">✅ Je suis à ' + court(s.nom) + '</button>';
   }
 
@@ -930,9 +956,9 @@ function traceFeuilleCourse() {
     REGLES.map(r => '<li>' + r.t + '</li>').join('') + '</ol></div>';
 
   const nutri = '<div class="fc-bloc"><h3>Nutrition</h3>' +
-    '<p><b>' + NUTRITION.cible + '</b><br>' + NUTRITION.regle + '</p>' +
-    '<p>' + NUTRITION.cafeine.map(c => '<b>' + c.quoi + '</b> ' + c.ou).join(' &#183; ') + '</p>' +
-    '<p><b>Départ</b> ' + NUTRITION.portage.depart + '<br><b>Champex</b> ' + NUTRITION.portage.champex + '</p>' +
+    '<p><b>' + NUT.meta.cibleGlucidesParHeure + ' g/h</b><br>' + NUT.meta.regleOr + '</p>' +
+    '<p>' + NUT.cafeine.filter(c => c.n !== 'R').map(c => '<b>Café ' + c.n + '</b> ' + c.ou + ' ' + c.quand).join(' &#183; ') + '</p>' +
+    '<p><b>Départ</b> ' + NUT.portage.sacDepart.contenu.join(' &#183; ') + '<br><b>Champex</b> ' + NUT.portage.sacChampex.contenu.slice(0,3).join(' &#183; ') + '</p>' +
     '<p class="fc-menu">' + NAAK.map(p => p.n.replace('Ultra Energy ', '').replace('Energy ', '') +
       ' ' + p.g + ' g').join(' &#183; ') + '</p></div>';
 
@@ -986,110 +1012,160 @@ function traceFeuilleCourse() {
 /* ============================ nutrition ============================ */
 
 function traceNutrition() {
-  // deux chiffres, une regle, puis des blocs qui se lisent d'un coup d'oeil
+  const m = NUT.meta;
   let h = '<div class="nu-gros">' +
-      '<div><b>70</b><i>g/h</i><span>la cadence</span></div>' +
+      '<div><b>' + m.cibleGlucidesParHeure + '</b><i>g/h</i><span>la cadence</span></div>' +
       '<div><b>1 400</b><i>g</i><span>sur la course</span></div>' +
     '</div>' +
-    '<div class="nu-regle">Une prise = <b>manger ET boire</b>, ensemble.' +
-      '<span>⏰ Alarme Fenix toutes les 30 min</span></div>';
+    '<div class="nu-regle">' + m.regleOr + '<span>' + m.pourquoi + '</span></div>';
 
-  h += '<div class="nu-sec"><span>Les deux flasques</span>' +
-    NUTRITION.flasques.map(f => '<div class="nu-fl"><b>' + f.n + '</b>' +
-      '<div><b>' + f.quoi + '</b><small>' + f.d + '</small></div></div>').join('') +
-    '<p class="nu-rech">' + NUTRITION.recharge + '</p></div>';
+  h += '<div class="nu-sec"><span>Les flasques</span><p class="nu-fl-t">' + NUT.portage.flasques + '</p></div>';
 
-  h += '<div class="nu-sec"><span>Les trois cafés</span>' +
-    NUTRITION.cafes.map(c => '<div class="nu-cf"><b>' + c.n + '</b>' +
-      '<div class="nu-cf-c"><b>' + c.ou + '</b><small>km ' + kmFmt(c.km) + '</small></div>' +
-      '<i>' + c.h + '</i></div>').join('') +
-    '<p class="nu-rech alerte">' + NUTRITION.cafeRegle + '</p></div>';
+  h += '<div class="nu-sec"><span>La caféine</span>' +
+    NUT.cafeine.map(c => '<div class="nu-cf' + (c.n === 'R' ? ' res' : '') + '"><b>' + c.n + '</b>' +
+      '<div class="nu-cf-c"><b>' + c.ou + '</b><small>' + c.pourquoi + '</small></div>' +
+      '<i>' + c.quand + '</i></div>').join('') +
+    '<p class="nu-rech">' + (NUT.cafeineMgParGel
+      ? NUT.cafeineMgParGel + ' mg par gel.'
+      : 'Les mg par gel restent à relever sur l\'étiquette, lundi chez TraKKs.') +
+    '</p></div>';
 
-  h += '<div class="nu-sec"><span>Ce que je porte</span>' +
-    NUTRITION.charge.map(c => '<div class="nu-ch"><b>' + c.q + '</b>' +
-      '<div class="nu-ch-l">' +
-        '<span><b>' + c.g + '</b>gels</span>' +
-        '<span><b>' + c.b + '</b>barres</span>' +
-        '<span><b>' + c.z + '</b>ziplocks</span>' +
-      '</div><small>' + c.plus + '</small></div>').join('') + '</div>';
+  h += '<div class="nu-sec"><span>Les deux sacs</span>' +
+    [NUT.portage.sacDepart, NUT.portage.sacChampex].map(s =>
+      '<div class="nu-ch"><b>' + s.label + '</b><ul class="nu-ul">' +
+      s.contenu.map(c => '<li>' + c + '</li>').join('') + '</ul></div>').join('') +
+    '<p class="nu-rech">' + NUT.portage.note + '</p></div>';
+
+  h += '<div class="nu-sec"><span>Les cinq règles</span><ol class="nu-reg">' +
+    NUT.reglesAbsolues.map(r => '<li>' + r + '</li>').join('') + '</ol></div>';
 
   h += '<details class="nu-det"><summary>Ce que vaut chaque Näak</summary>' +
     '<table class="nu-tab"><tr><th></th><th>gluc</th><th>kcal</th></tr>' +
     NAAK.map(p => '<tr><td><b>' + p.n + '</b><small>' + p.u + ' &#183; ' + p.note + '</small></td>' +
       '<td>' + p.g + ' g</td><td>' + p.kcal + '</td></tr>').join('') +
-    '</table><p class="nu-src">' + NAAK_SOURCE + '</p></details>';
+    '</table><p class="nu-src">' + NAAK_SOURCE + '. Ces valeurs sont celles de la gamme ' +
+    'Ultra Energy ; les gels Boost que tu achètes lundi peuvent différer, d\'où l\'étiquette à lire.</p></details>';
 
   return h;
 }
 
-/* ---- le compte des glucides, avec les vraies valeurs ---- */
+/* ==================== nutrition : plan officiel ====================
+   Source : nutrition-data.js, bati sur le PDF officiel UTMB 2026.
+   Les huit sections portent leur propre besoin en glucides et le contenu
+   reel du poste qui les termine. */
 
-const CIBLE_G = 1400;
-
-function bilanGlucides() {
-  // tout ce qui est porte, calcule sur les valeurs officielles Naak
-  let porte = 0;
-  NAAK_LISTE.forEach(g => {
-    if (g.id === 'ach' || g.id === 'ctr') return;   // achat et controles ne se portent pas
-    g.items.forEach(i => { if (i.ref !== undefined && i.qte) porte += i.qte * NAAK[i.ref].g; });
-  });
-  const ravitos = Math.max(0, CIBLE_G - porte);
-  const portions = Math.round(ravitos / NAAK[5].g);
-  return { porte, ravitos, portions };
+/* 3. les alertes, en bandeau permanent */
+function traceAlertes() {
+  const crit = NUT.alertes.filter(a => a.niveau === 'critique');
+  const info = NUT.alertes.filter(a => a.niveau !== 'critique');
+  return document.getElementById('alertesHote').innerHTML =
+    crit.map(a => '<div class="al al-crit"><div class="al-i">' + a.icone + '</div>' +
+      '<div><b>' + a.titre + '</b><p>' + a.texte + '</p></div></div>').join('') +
+    '<details class="carte al-plus"><summary>Deux rappels de plus</summary>' +
+      info.map(a => '<div class="al al-info"><div class="al-i">' + a.icone + '</div>' +
+        '<div><b>' + a.titre + '</b><p>' + a.texte + '</p></div></div>').join('') +
+    '</details>';
 }
 
+/* 4. le compte des glucides, section par section */
 function traceBilan() {
-  const b = bilanGlucides();
-  const pct = Math.min(100, Math.round((b.porte / CIBLE_G) * 100));
+  const besoin = NUT.sections.reduce((s, x) => s + x.besoinG, 0);
+  const apport = NUT.sections.reduce((s, x) => s + x.apportG, 0);
+  const ecart = apport - besoin;
+  const pct = Math.min(100, Math.round((apport / besoin) * 100));
+  const auto = NUT.sections.filter(s => s.autonomieRequise);
 
   return document.getElementById('bilanHote').innerHTML =
-    '<div class="bl-h"><div><span>porté sur moi</span><b>' + b.porte + ' g</b></div>' +
-      '<div><span>cible course</span><b>' + CIBLE_G + ' g</b></div></div>' +
+    '<div class="bl-h"><div><span>ce que le plan apporte</span><b>' + apport + ' g</b></div>' +
+      '<div><span>ce que la course demande</span><b>' + besoin + ' g</b></div></div>' +
     '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
-    '<div class="bl-t"><b>' + b.ravitos + ' g à prendre aux ravitos</b>, soit environ <b>' +
-      b.portions + ' recharges</b> de Näak Ultra Drink à 55 g. ' +
-      'Les ravitos CCC servent du Näak : gels, barres, gaufres et boisson.</div>' +
-    '<div class="bl-avert"><b>Correction :</b> ta base d\'aliments comptait 44 g par gel et 40 g par purée. ' +
-      'Näak annonce <b>27 g</b> et <b>26 g</b>. Sur 17 gels, ça fait 289 g de glucides que tu croyais avoir ' +
-      'et que tu n\'as pas, soit environ 4 heures de course. D\'où les recharges ci-dessus.</div>';
+    '<div class="bl-t">' + (ecart < 0
+      ? '<b>' + Math.abs(ecart) + ' g de moins</b> que la cible sur les 20h15, soit environ ' +
+        Math.round(Math.abs(ecart) / NUT.meta.dureeCibleH) + ' g par heure. C\'est assumé : la première section ' +
+        'vise 55 à 60 g/h, pas 70.'
+      : 'Le plan couvre la cible.') + '</div>' +
+    '<div class="bl-avert"><b>' + auto.length + ' sections sans aucun ravito :</b> ' +
+      auto.map(s => s.de + ' vers ' + s.vers + ' (' + s.duree + ')').join(' et ') +
+      '. Sur celles-là, ce que tu n\'as pas sur le dos, tu ne l\'auras pas.</div>';
 }
 
-/* ---- checklist Näak, au meme titre que celle du matos ---- */
+/* 1 et 2. pacing et nutrition, avec la fiche du poste qui termine la section */
+function traceSectionsNut() {
+  return document.getElementById('secNutHote').innerHTML = NUT.sections.map((s, i) => {
+    const r = s.ravito;
+    const manque = s.apportG - s.besoinG;
 
-const TOTAL_NAAK = NAAK_LISTE.reduce((n, g) => n + g.items.length, 0);
-const naakFait = id => coches[id] === true;
+    let h = '<div class="sn' + (s.autonomieRequise ? ' auto' : '') + '">' +
+      '<div class="sn-tete"><div class="sn-trajet"><b>' + s.de + '</b><i>&#8594;</i><b>' + s.vers + '</b></div>' +
+        '<div class="sn-chiffres">' + kmFmt(s.km) + ' km &#183; ' + s.duree + ' &#183; arrivée ' + s.eta + '</div></div>';
 
-function traceNaak() {
-  const n = NAAK_LISTE.reduce((s, g) => s + g.items.filter(i => naakFait(i.id)).length, 0);
-  const pct = TOTAL_NAAK ? Math.round((n / TOTAL_NAAK) * 100) : 0;
+    if (s.viaPointage) h += '<div class="sn-point">Au passage : ' + s.viaPointage + '</div>';
 
-  let h = '<div class="carte ck-tete"><div class="ck-pct"><b>' + pct + '</b><i>%</i><span>préparé</span></div>' +
-    '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
-    '<div class="ck-compte">' + n + ' / ' + TOTAL_NAAK + ' lignes</div></div>';
+    h += '<div class="sn-g"><div><span>besoin</span><b>' + s.besoinG + ' g</b></div>' +
+      '<div><span>apporté</span><b class="' + (manque < 0 ? 'chaud' : 'ok') + '">' + s.apportG + ' g</b></div>' +
+      '<div class="sn-porte"><span>porté</span><p>' + s.porte + '</p></div></div>';
 
-  h += NAAK_LISTE.map(g => {
-    const f = g.items.filter(i => naakFait(i.id)).length;
-    const gr = g.items.reduce((s, i) => s + (i.ref !== undefined && i.qte ? i.qte * NAAK[i.ref].g : 0), 0);
-    return '<div class="ck-grp' + (f === g.items.length ? ' fini' : '') + '">' +
-      '<div class="ck-grp-tete">' + anneau(g.items.length ? (f / g.items.length) * 100 : 0) +
-        '<div class="ck-grp-nom">' + g.t + '<small>' + g.s + '</small></div>' +
-        '<div class="ck-grp-cpt">' + f + '/' + g.items.length + '</div></div>' +
-      '<div class="ck-liste">' + g.items.map(i =>
-        '<button class="ck-item' + (naakFait(i.id) ? ' ok' : '') + '" data-ck="' + i.id + '">' +
-        '<i class="ck-box"></i><span class="ck-txt">' + i.l +
-        (i.note ? '<small>' + i.note + '</small>' : '') + '</span>' +
-        (i.ref !== undefined && i.qte ? '<em class="ck-g">' + (i.qte * NAAK[i.ref].g) + ' g</em>' : '') +
-        '</button>').join('') + '</div>' +
-      (gr ? '<div class="ck-grp-tot">' + gr + ' g de glucides</div>' : '') +
-    '</div>';
+    if (s.alerte) h += '<div class="sn-al">' + s.alerte + '</div>';
+
+    h += '<div class="sn-bloc"><span>En courant</span><ul>' +
+      s.enCourant.map(c => '<li>' + c + '</li>').join('') + '</ul></div>';
+
+    h += '<div class="sn-rav' + (r.assistance ? ' assist' : '') + '">' +
+      '<div class="sn-rav-h"><b>' + r.nom + '</b><i>' + r.duree + '</i></div>' +
+      '<div class="sn-rav-t">' + r.type + (r.assistance ? ' &#183; assistance équipe' : '') + '</div>';
+
+    if (r.surPlace.length) h += '<div class="sn-l oui"><span>Sur place</span><ul>' +
+      r.surPlace.map(x => '<li>' + x + '</li>').join('') + '</ul></div>';
+    if (r.eviter.length) h += '<div class="sn-l non"><span>À éviter</span><ul>' +
+      r.eviter.map(x => '<li>' + x + '</li>').join('') + '</ul></div>';
+    if (r.note) h += '<div class="sn-note">' + r.note + '</div>';
+
+    h += '</div></div>';
+    return h;
   }).join('');
+}
 
-  document.getElementById('naakHote').innerHTML = h;
-  document.querySelectorAll('#naakHote [data-ck]').forEach(b =>
+/* 5. la liste d'achat, cochable */
+const listeAchatTout = () => NUT.listeAchat.trakks.concat(NUT.listeAchat.maison);
+const achatFait = id => coches[id] === true;
+
+function traceAchat() {
+  const tout = listeAchatTout();
+  const n = tout.filter(i => achatFait(i.id)).length;
+  const pct = tout.length ? Math.round((n / tout.length) * 100) : 0;
+
+  const groupe = (t, s, items) => {
+    const f = items.filter(i => achatFait(i.id)).length;
+    return '<div class="ck-grp' + (f === items.length ? ' fini' : '') + '">' +
+      '<div class="ck-grp-tete">' + anneau(items.length ? (f / items.length) * 100 : 0) +
+        '<div class="ck-grp-nom">' + t + '<small>' + s + '</small></div>' +
+        '<div class="ck-grp-cpt">' + f + '/' + items.length + '</div></div>' +
+      '<div class="ck-liste">' + items.map(i =>
+        '<button class="ck-item' + (achatFait(i.id) ? ' ok' : '') + '" data-ck="' + i.id + '">' +
+        '<i class="ck-box"></i><span class="ck-txt">' + i.txt +
+        (i.detail ? '<small>' + i.detail + '</small>' : '') + '</span></button>').join('') +
+      '</div></div>';
+  };
+
+  document.getElementById('achatHote').innerHTML =
+    '<div class="carte ck-tete"><div class="ck-pct"><b>' + pct + '</b><i>%</i><span>acheté</span></div>' +
+      '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="ck-compte">' + n + ' / ' + tout.length + ' lignes &#183; ' + NUT.listeAchat.budget + '</div></div>' +
+    '<div class="ach-regle">' + NUT.listeAchat.regle + '</div>' +
+    groupe('Chez TraKKs', 'Rocourt, lundi 17', NUT.listeAchat.trakks) +
+    groupe('Déjà en stock, à préparer', 'À la maison', NUT.listeAchat.maison) +
+    '<details class="carte nu-det"><summary>Ce que le document officiel corrige</summary>' +
+      NUT.corrections.map(c => '<div class="cor"><b>' + c.apres + '</b>' +
+        '<p>' + c.consequence + '</p>' +
+        (c.aVerifier ? '<small>' + c.aVerifier + '</small>' : '') + '</div>').join('') +
+      '<p class="nu-src">' + NUT.meta.sourceRavitos + '</p>' +
+    '</details>';
+
+  document.querySelectorAll('#achatHote [data-ck]').forEach(b =>
     b.addEventListener('click', () => {
-      coches[b.dataset.ck] = !naakFait(b.dataset.ck);
+      coches[b.dataset.ck] = !achatFait(b.dataset.ck);
       store.set('check', coches);
-      traceNaak();
+      traceAchat();
     }));
 }
 
@@ -1570,8 +1646,10 @@ function init() {
   majScenario();
 
   document.getElementById('nutriHote').innerHTML = traceNutrition();
+  traceAlertes();
   traceBilan();
-  traceNaak();
+  traceSectionsNut();
+  traceAchat();
   document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
   document.getElementById('ckAttente').innerHTML = traceAttente();
   majChecklist();
