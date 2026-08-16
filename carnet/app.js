@@ -2,7 +2,8 @@
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
 import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
-         PANIC, ALERTES, NAAK, JOURS, SAC, REPERES } from './data.js';
+         PANIC, ALERTES, NAAK, SAC, REPERES } from './data.js';
+import { AFFUTAGE } from './prepa-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -410,8 +411,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') fermeFeuille
 const htmlRegles = () => REGLES.map(r =>
   '<div class="regle"><b>' + r.n + '</b><p>' + r.t + '</p></div>').join('');
 
+// 4. Les regles, accessibles partout. Celles de la prepa d'un cote, celles de
+// la course de l'autre : ce ne sont pas les memes et elles ne servent pas au
+// meme moment.
 document.getElementById('btnRegles').addEventListener('click', () => {
-  ouvreFeuille('Les 5 règles', htmlRegles());
+  if (etat.partie === 'prepa') {
+    ouvreFeuille('Les 4 règles de la prépa', AFFUTAGE.regles.map(r =>
+      '<div class="regle"><b>' + r.n + '</b><p><b style="display:block;background:none;color:inherit;width:auto;height:auto;font-size:17px">' +
+      r.titre + '</b><span style="color:var(--texte-doux);font-size:14.5px">' + r.detail + '</span></p></div>').join('') +
+      '<div class="jr-note" style="margin-top:14px">' + AFFUTAGE.meta.meteoSemaine + '</div>');
+  } else {
+    ouvreFeuille('Les 5 règles', htmlRegles());
+  }
 });
 
 /* ============================ deroule ============================ */
@@ -1115,33 +1126,44 @@ function majCompte() {
 /* ---- ou j'en suis ---- */
 
 function majEtat() {
+  const hote = document.getElementById('etatHote');
+  if (!hote) return;
   const now = maintenant();
-  const n = CHECKLIST.reduce((s, g) => s + faits(g), 0);
-  const pct = TOTAL_ITEMS ? Math.round((n / TOTAL_ITEMS) * 100) : 0;
+  const j0 = minuit(now);
+
+  // 3. « pret a X % » : les taches de l'affutage, plus les points a verifier
+  const tk = toutesTaches();
+  const totalTk = tk.length + AFFUTAGE.aVerifier.length;
+  const faitsTk = tk.filter(t => tacheFaite(t.id)).length +
+                  AFFUTAGE.aVerifier.filter(v => prepa.verif[v.id]).length;
+  const pct = totalTk ? Math.round((faitsTk / totalTk) * 100) : 0;
+
+  const nMat = CHECKLIST.reduce((s, g) => s + faits(g), 0);
+  const pctMat = TOTAL_ITEMS ? Math.round((nMat / TOTAL_ITEMS) * 100) : 0;
+  const trous = AFFUTAGE.inconnues.filter(i => !prepa.inconnues[i.id]).length;
   const jours = Math.max(0, Math.ceil((DEPART - now) / 86400000));
 
-  // les groupes ou il reste le plus a faire
-  const restants = CHECKLIST
-    .map(g => ({ t: g.t, r: g.items.length - faits(g) }))
-    .filter(g => g.r > 0)
-    .sort((a, b) => b.r - a.r);
-
-  const cls = pct >= 90 ? 'ok' : (pct >= 50 ? 'tiede' : '');
+  const cls = p => p >= 90 ? 'ok' : (p >= 50 ? 'tiede' : '');
   let h = '<div class="et">' +
     '<div><span>jours</span><b>' + jours + '</b></div>' +
-    '<div><span>matériel</span><b class="' + cls + '">' + pct + '<i>%</i></b></div>' +
-    '<div><span>en attente</span><b class="' + (EN_ATTENTE.length ? 'tiede' : 'ok') + '">' +
-      EN_ATTENTE.length + '</b></div></div>' +
+    '<div><span>prêt</span><b class="' + cls(pct) + '">' + pct + '<i>%</i></b></div>' +
+    '<div><span>trous</span><b class="' + (trous ? 'tiede' : 'ok') + '">' + trous + '</b></div></div>' +
     '<div class="et-piste"><i style="width:' + pct + '%"></i></div>';
 
-  h += '<div class="et-reste">';
-  if (!restants.length) h += 'Tout est coché. Il ne reste qu\'à partir.';
-  else h += '<b>' + (TOTAL_ITEMS - n) + ' items</b> à cocher, surtout dans ' +
-    restants.slice(0, 2).map(g => g.t.toLowerCase() + ' (' + g.r + ')').join(' et ') + '.';
-  if (EN_ATTENTE.length) h += '<br>Non tranché : ' + EN_ATTENTE.map(a => a.l).join(' &#183; ') + '.';
-  h += '</div>';
+  // 7. le volume des deux semaines
+  const s2 = j0 >= dateDe('2026-08-24');
+  h += '<div class="et-sem">' +
+    '<div class="' + (s2 ? '' : 'on') + '"><span>semaine 1 &#183; 17 au 23</span><b>' +
+      AFFUTAGE.meta.volumeS1Km + ' km</b></div>' +
+    '<div class="' + (s2 ? 'on' : '') + '"><span>semaine 2 &#183; 24 au 28</span><b>' +
+      AFFUTAGE.meta.volumeS2Km + ' km</b></div></div>';
 
-  document.getElementById('etatHote').innerHTML = h;
+  h += '<div class="et-reste">' +
+    '<b>' + (totalTk - faitsTk) + ' tâches</b> de prépa restantes &#183; ' +
+    'matériel à <b>' + pctMat + ' %</b> (' + (TOTAL_ITEMS - nMat) + ' items).' +
+    '<br>' + AFFUTAGE.meta.meteoSemaine + '</div>';
+
+  hote.innerHTML = h;
 }
 
 const MOIS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
@@ -1149,48 +1171,188 @@ const JSEM = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
 
 const minuit = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-/* ---- la journee du jour ---- */
+/* ==================== affutage : source de verite ====================
+   Les donnees viennent de prepa-data.js, l'agenda PRO de Pierre.
+   Rien n'est invente ici, on met en forme. */
 
-function majJour() {
-  const now = maintenant();
-  const j0 = minuit(now);
-  const auj = JOURS.find(j => new Date(j.d + 'T00:00:00').getTime() === j0.getTime());
-  const hote = document.getElementById('jourHote');
+let prepa = store.get('prepa', null) || {};
+if (!prepa.taches) prepa.taches = {};
+if (!prepa.inconnues) prepa.inconnues = {};
+if (!prepa.verif) prepa.verif = {};
+const sauvePrepa = () => store.set('prepa', prepa);
 
-  if (!auj) {
-    const prochain = JOURS.find(j => new Date(j.d + 'T00:00:00') > j0);
-    hote.innerHTML = '<div class="jr-vide">' + (prochain
-      ? 'Le plan démarre le ' + new Date(prochain.d + 'T00:00:00').getDate() + ' août.'
-      : 'La course est passée. Repos, hydratation, et note l\'état du pied.') + '</div>';
-    return;
-  }
+const dateDe = s => new Date(s + 'T00:00:00');
+const jourAuj = () => AFFUTAGE.jours.find(j => dateDe(j.date).getTime() === minuit(maintenant()).getTime());
+const jourCle = () => AFFUTAGE.jours.find(j => j.date === AFFUTAGE.meta.seanceCle);
 
-  const d = new Date(auj.d + 'T00:00:00');
-  hote.innerHTML =
-    '<div class="jr-tete"><span>' + JSEM[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</span>' +
-      '<b>' + auj.seance + '</b><p>' + auj.detail + '</p></div>' +
-    (auj.faire.length
-      ? '<div class="jr-faire"><span>Et aussi</span><ul>' +
-        auj.faire.map(f => '<li>' + f + '</li>').join('') + '</ul></div>'
-      : '');
+const toutesTaches = () => AFFUTAGE.jours.reduce((a, j) => a.concat(j.taches || []), []);
+const tacheFaite = id => prepa.taches[id] === true;
+
+/* ---- 1. timeline horizontale J-11 -> J-0 ---- */
+
+function traceTimelineH() {
+  const j0 = minuit(maintenant());
+  document.getElementById('tlhHote').innerHTML = AFFUTAGE.jours.map(j => {
+    const d = dateDe(j.date);
+    const ecart = Math.round((d - j0) / 86400000);
+    const t = (j.taches || []);
+    const reste = t.filter(x => !tacheFaite(x.id)).length;
+    return '<button class="tlh-j t-' + j.type + (ecart < 0 ? ' passe' : '') +
+      (ecart === 0 ? ' auj' : '') + (j.date === AFFUTAGE.meta.seanceCle ? ' cle' : '') +
+      '" data-jour="' + j.date + '">' +
+      '<i>' + j.j + '</i><b>' + d.getDate() + '</b><span>' + JSEM[d.getDay()] + '</span>' +
+      (reste ? '<em>' + reste + '</em>' : '') + '</button>';
+  }).join('');
+  document.querySelectorAll('#tlhHote [data-jour]').forEach(b =>
+    b.addEventListener('click', () => majJour(b.dataset.jour)));
 }
 
-/* ---- les 12 jours d'un coup d'oeil ---- */
+/* ---- 2. la carte du jour ---- */
 
-function tracePlan() {
-  const j0 = minuit(maintenant());
-  document.getElementById('planHote').innerHTML = JOURS.map(j => {
-    const d = new Date(j.d + 'T00:00:00');
-    const ecart = Math.round((d - j0) / 86400000);
-    const cls = ecart < 0 ? ' passe' : (ecart === 0 ? ' auj' : '');
-    return '<div class="pl' + cls + (j.cle ? ' cle' : '') + '">' +
-      '<div class="pl-j"><b>' + d.getDate() + '</b><i>' + JSEM[d.getDay()] + '</i></div>' +
-      '<div class="pl-c"><b>' + j.seance + '</b>' +
-        (j.faire.length ? '<small>' + j.faire[0] + (j.faire.length > 1 ? ' &#183; +' + (j.faire.length - 1) : '') + '</small>' : '') +
+let jourAffiche = null;
+
+function majJour(date) {
+  const j = date ? AFFUTAGE.jours.find(x => x.date === date) : (jourAuj() || AFFUTAGE.jours[0]);
+  if (!j) return;
+  jourAffiche = j.date;
+  const d = dateDe(j.date);
+  const estAuj = d.getTime() === minuit(maintenant()).getTime();
+  const s = j.seance || {};
+
+  let h = '<div class="carte jr t-' + j.type + '">' +
+    '<div class="jr-oeil"><span>' + (estAuj ? "Aujourd'hui" : j.jour + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()]) +
+      '</span><i>' + j.j + '</i></div>' +
+    '<div class="jr-titre">' + j.titre + '</div>';
+
+  if (s.contenu) {
+    h += '<div class="jr-seance">' +
+      (s.heure ? '<b class="h">' + s.heure + '</b>' : '') +
+      '<div class="jr-sc"><b>' + s.contenu + '</b>' +
+      '<div class="jr-tags">' +
+        (s.fcMax ? '<span class="pastille chaud">FC max ' + s.fcMax + '</span>' : '') +
+        (s.distanceKm ? '<span class="pastille">' + s.distanceKm + ' km</span>' : '') +
+        (s.dplus ? '<span class="pastille">+' + s.dplus + ' m</span>' : '') +
       '</div>' +
-      '<div class="pl-d">' + (ecart === 0 ? "auj." : (ecart < 0 ? '' : 'dans ' + ecart + ' j')) + '</div>' +
-    '</div>';
+      (s.config ? '<p class="jr-config">' + s.config + '</p>' : '') +
+      '</div></div>';
+  }
+
+  if (j.rdv) h += '<div class="jr-rdv"><b>' + j.rdv.heure + '</b><div>' + j.rdv.quoi +
+    (j.rdv.ou ? '<small>' + j.rdv.ou + '</small>' : '') + '</div></div>';
+
+  if (j.trajet) h += '<div class="jr-liste"><span>Trajet</span>' + j.trajet.map(t =>
+    '<div class="jr-h"><b>' + t.h + '</b><p>' + t.quoi + '</p></div>').join('') + '</div>';
+
+  if (j.matin) h += '<div class="jr-liste"><span>Le matin</span>' + j.matin.map(t =>
+    '<div class="jr-h"><b>' + t.h + '</b><p>' + t.quoi + '</p></div>').join('') + '</div>';
+
+  if (j.consignes) h += '<div class="jr-consignes">' + j.consignes.map(c => '<p>' + c + '</p>').join('') + '</div>';
+
+  if (j.consignesRdv) h += '<div class="jr-liste"><span>À dire et à ne pas faire</span>' +
+    j.consignesRdv.map(c => '<p class="jr-cr">' + c + '</p>').join('') + '</div>';
+
+  if (j.aNoter) h += '<div class="jr-liste"><span>À noter pendant et après</span>' +
+    j.aNoter.map(c => '<p class="jr-cr">&#9744; ' + c + '</p>').join('') + '</div>';
+
+  if (j.branche) h += '<div class="jr-branche"><b>Si ' + j.branche.si + '</b><p>' + j.branche.alors + '</p>' +
+    '<b class="non">Sinon</b><p>' + j.branche.sinon + '</p></div>';
+
+  if (j.taches && j.taches.length) h += '<div class="jr-taches"><span>À faire</span>' +
+    j.taches.map(t => '<button class="tk' + (tacheFaite(t.id) ? ' ok' : '') +
+      (t.priorite === 'critique' ? ' crit' : '') + '" data-tk="' + t.id + '">' +
+      '<i class="ck-box"></i><span>' + t.txt + '</span></button>').join('') + '</div>';
+
+  if (j.note) h += '<div class="jr-note">' + j.note + '</div>';
+
+  h += '</div>';
+
+  document.getElementById('jourHote').innerHTML = h;
+  document.querySelectorAll('#jourHote [data-tk]').forEach(b =>
+    b.addEventListener('click', () => {
+      prepa.taches[b.dataset.tk] = !tacheFaite(b.dataset.tk);
+      sauvePrepa(); majJour(jourAffiche); traceTimelineH(); majEtat();
+    }));
+  traceTimelineH();
+}
+
+/* ---- 6. la seance cle, mise en avant tant qu'elle n'est pas passee ---- */
+
+function traceCle() {
+  const j = jourCle();
+  const hote = document.getElementById('cleHote');
+  if (!j || minuit(maintenant()) > dateDe(j.date)) { hote.innerHTML = ''; return; }
+  const d = dateDe(j.date);
+  const ecart = Math.round((d - minuit(maintenant())) / 86400000);
+  hote.innerHTML = '<button class="cle-b" data-jour="' + j.date + '">' +
+    '<span>Séance clé &#183; ' + (ecart === 0 ? "aujourd'hui" : 'dans ' + ecart + ' j') + '</span>' +
+    '<b>' + j.titre + '</b><p>' + j.note + '</p></button>';
+  hote.querySelector('[data-jour]').addEventListener('click', () => {
+    majJour(j.date);
+    document.getElementById('jourHote').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+}
+
+/* ---- 5. les trous ouverts ---- */
+
+function traceInconnues() {
+  const j0 = minuit(maintenant());
+  document.getElementById('inconnuesHote').innerHTML = AFFUTAGE.inconnues.map(i => {
+    const d = dateDe(i.resoudreLe);
+    const ecart = Math.round((d - j0) / 86400000);
+    const val = prepa.inconnues[i.id];
+    return '<div class="inc' + (val ? ' ok' : '') + '">' +
+      '<div class="inc-h"><b>' + i.label + '</b>' +
+      '<span class="pastille ' + (val ? 'ok' : (ecart <= 0 ? 'chaud' : 'tiede')) + '">' +
+        (val ? 'réglé' : (ecart === 0 ? "aujourd'hui" : (ecart < 0 ? 'en retard' : 'dans ' + ecart + ' j'))) +
+      '</span></div>' +
+      '<small>Via ' + i.via + ' &#183; impacte ' + i.impacte.join(', ') + '</small>' +
+      (val ? '<div class="inc-val"><b>' + val + '</b><button data-eff="' + i.id + '">modifier</button></div>'
+           : '<div class="inc-saisie"><input type="text" data-inc="' + i.id + '" placeholder="La réponse, dès que tu l\'as"><button data-ok="' + i.id + '">Noter</button></div>') +
+      '</div>';
   }).join('');
+
+  const hote = document.getElementById('inconnuesHote');
+  hote.querySelectorAll('[data-ok]').forEach(b => b.addEventListener('click', () => {
+    const inp = hote.querySelector('[data-inc="' + b.dataset.ok + '"]');
+    const v = (inp.value || '').trim();
+    if (!v) { inp.focus(); return; }
+    prepa.inconnues[b.dataset.ok] = v; sauvePrepa(); traceInconnues(); majEtat();
+  }));
+  hote.querySelectorAll('[data-eff]').forEach(b => b.addEventListener('click', () => {
+    delete prepa.inconnues[b.dataset.eff]; sauvePrepa(); traceInconnues(); majEtat();
+  }));
+}
+
+function traceVerif() {
+  document.getElementById('verifHote').innerHTML = AFFUTAGE.aVerifier.map(v =>
+    '<button class="tk' + (prepa.verif[v.id] ? ' ok' : '') + '" data-vf="' + v.id + '">' +
+    '<i class="ck-box"></i><span>' + v.txt + '</span></button>').join('');
+  document.querySelectorAll('#verifHote [data-vf]').forEach(b =>
+    b.addEventListener('click', () => {
+      prepa.verif[b.dataset.vf] = !prepa.verif[b.dataset.vf];
+      sauvePrepa(); traceVerif(); majEtat();
+    }));
+}
+
+/* ---- le contrat nutrition ---- */
+
+function traceContrat() {
+  const c = AFFUTAGE.contratNutrition;
+  const d1 = dateDe(c.du), d2 = dateDe(c.au), now = minuit(maintenant());
+  const actif = now >= d1 && now <= d2;
+  return document.getElementById('contratHote').innerHTML =
+    '<div class="ct-etat ' + (actif ? 'on' : '') + '">' +
+      (actif ? 'En vigueur' : (now < d1 ? 'À partir du ' + d1.getDate() + ' août' : 'Terminé, place à la recharge')) +
+      ' &#183; ' + d1.getDate() + ' au ' + d2.getDate() + ' août</div>' +
+    '<div class="ct-p"><b>' + c.principe + '</b></div>' +
+    '<div class="nu-bloc"><span>La base</span><p>' + c.base + '</p></div>' +
+    '<div class="nu-bloc"><span>Zéro</span><p>' + c.zero + '</p></div>' +
+    '<div class="nu-bloc"><span>Quantité</span><p>' + c.quantite + '</p></div>' +
+    '<div class="nu-bloc"><span>Le verrou</span><p>' + c.verrou + '</p></div>' +
+    '<div class="nu-bloc"><span>Hydratation</span><p>' + c.hydratation + '</p></div>' +
+    '<div class="nu-bloc"><span>Exceptions</span>' + c.exceptions.map(e => '<p>&#183; ' + e + '</p>').join('') + '</div>' +
+    '<div class="ct-garde">' + c.gardeFou + '</div>' +
+    '<div class="nu-bloc"><span>Mesure</span><p>' + c.mesure + '</p></div>';
 }
 
 /* ---- le sac, piece par piece ---- */
@@ -1248,14 +1410,6 @@ function traceRavitos() {
   }).join('');
 }
 
-function majRegleDuJour() {
-  const now = maintenant();
-  const jour = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-  const r = REGLES[jour % REGLES.length];
-  document.getElementById('regleDuJour').innerHTML =
-    '<div class="regle"><b>' + r.n + '</b><p>' + r.t + '</p></div>';
-}
-
 document.querySelectorAll('.gros button').forEach(b => {
   b.addEventListener('click', () => montre(b.dataset.va));
 });
@@ -1266,9 +1420,12 @@ function init() {
   appliqueTheme();
   document.documentElement.dataset.course = '0';
   majCompte();
-  majRegleDuJour();
+  traceTimelineH();
   majJour();
-  tracePlan();
+  traceCle();
+  traceInconnues();
+  traceVerif();
+  traceContrat();
   traceSac();
   setInterval(() => { majCompte(); if (etat.vue === 'course') majCourse(); }, 1000);
 
@@ -1328,7 +1485,7 @@ window.CCC = {
   simuler(quand) {
     const r = simuler(quand);
     dernierCompte = '';
-    majCompte(); majRegleDuJour();
+    majCompte(); traceTimelineH(); majJour(); traceCle(); traceInconnues(); traceContrat(); majEtat();
     if (!store.get('theme', null)) appliqueTheme();
     return r;
   },
