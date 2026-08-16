@@ -76,8 +76,25 @@
     </section>
 
     <section class="vue" id="v-sac">
-      <div class="titre">Où va quoi</div>
+      <div class="carte ck-tete" id="sacTete"></div>
+      <div class="switch" id="sacMode">
+        <button data-mode="jour">Par jour<small>quand je m'en occupe</small></button>
+        <button data-mode="zone">Par zone<small>où ça va</small></button>
+      </div>
+      <div class="sac-filtres">
+        <button id="fRouge"><i></i>Que le réglementaire</button>
+        <button id="fReste"><i></i>Il reste</button>
+      </div>
+      <div id="kitsHote"></div>
       <div id="sacHote"></div>
+    </section>
+
+    <section class="vue" id="v-listes">
+      <div class="titre">Les vérifications</div>
+      <div class="carte" id="verifIntro"></div>
+      <div id="verifsHote"></div>
+      <div class="titre">Non tranché</div>
+      <div class="carte" id="attHote"></div>
     </section>
 
     <section class="vue" id="v-nutrition">
@@ -136,17 +153,6 @@
       <div id="ravitosHote"></div>
     </section>
 
-    <section class="vue" id="v-listes">
-      <div class="carte ck-tete">
-        <div class="ck-pct"><b id="ckPct">0</b><i>%</i><span>prêt</span></div>
-        <div class="ck-piste"><i id="ckJauge"></i></div>
-        <div class="ck-compte" id="ckCompte"></div>
-      </div>
-      <button class="ck-filtre" id="ckFiltre"><i></i>Ne montrer que ce qui reste</button>
-      <div id="ckGroupes"></div>
-      <div class="titre">En attente</div>
-      <div class="carte" id="ckAttente"></div>
-    </section>
 
     <section class="vue" id="v-course">
       <div id="courseHote"></div>

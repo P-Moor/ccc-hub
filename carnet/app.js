@@ -1,10 +1,11 @@
 // CCC 4330 &#183; carnet de course v2
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
-import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE,
-         PANIC, ALERTES, NAAK, NAAK_SOURCE, SAC, REPERES } from './data.js';
+import { RACE, SECTIONS, SCENARIOS, REGLES,
+         PANIC, ALERTES, NAAK, NAAK_SOURCE, REPERES } from './data.js';
 import { AFFUTAGE } from './prepa-data.js';
 import { NUTRITION as NUT } from './nutrition-data.js';
+import { SAC } from './sac-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -135,7 +136,7 @@ const PARTIES = {
   prepa: [
     ['aujourdhui', "Aujourd'hui", '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 11h18"/><path d="M9 16l1.8 1.8L14.5 14"/>'],
     ['sac', 'Le sac', '<path d="M8 8V6.5a4 4 0 0 1 8 0V8"/><rect x="4" y="8" width="16" height="13" rx="3"/><path d="M9 13h6"/>'],
-    ['listes', 'Matos', '<path d="M4 7l2 2 4-4"/><path d="M4 17l2 2 4-4"/><path d="M13 8h7"/><path d="M13 18h7"/>'],
+    ['listes', 'Vérifs', '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M8 10.5l1.8 1.8L13.5 8.5"/>'],
     ['nutrition', 'Nutrition', '<path d="M10 3v6l-4.6 9.2A2 2 0 0 0 7.2 21h9.6a2 2 0 0 0 1.8-2.8L14 9V3"/><path d="M9 3h6"/>']
   ],
   course: [
@@ -184,6 +185,14 @@ function changePartie(p) {
 
 document.querySelectorAll('.parties button').forEach(b =>
   b.addEventListener('click', () => changePartie(b.dataset.partie)));
+
+// les deux axes de lecture du sac, et les deux filtres
+document.addEventListener('click', e => {
+  const m = e.target.closest('#sacMode button');
+  if (m) { sacMode = m.dataset.mode; store.set('sacMode', sacMode); traceSac(); return; }
+  if (e.target.closest('#fRouge')) { fRouge = !fRouge; store.set('sacRouge', fRouge); traceSac(); return; }
+  if (e.target.closest('#fReste')) { fReste = !fReste; store.set('sacReste', fReste); traceSac(); }
+});
 
 /* ============================ profil ============================ */
 
@@ -1169,19 +1178,48 @@ function traceAchat() {
     }));
 }
 
-/* ============================ checklists ============================ */
+/* ==================== le sac : checklist materiel ====================
+   Source : sac-data.js. Deux axes de lecture, trois niveaux de criticite,
+   kits conditionnels, et les verifications traitees a part. */
 
-const TOTAL_ITEMS = CHECKLIST.reduce((n, g) => n + g.items.length, 0);
-
-// { id: true } des items coches
 let coches = store.get('check', {}) || {};
-let filtreReste = store.get('ckReste', false);
+let sacMode = store.get('sacMode', 'jour');
+let fRouge = store.get('sacRouge', false);
+let fReste = store.get('sacReste', false);
+let kitsActifs = store.get('kits', null);
+if (!kitsActifs) {
+  kitsActifs = {};
+  SAC.kits.forEach(k => { kitsActifs[k.id] = !!k.defautActif; });
+  store.set('kits', kitsActifs);
+}
 
-const estCoche = id => coches[id] === true;
-const faits = g => g.items.filter(i => estCoche(i.id)).length;
+const coche = id => coches[id] === true;
+function basculeCoche(id) { coches[id] = !coche(id); store.set('check', coches); }
 
+// les items des kits actifs comptent comme des items reglementaires du sac
+function itemsKits() {
+  const out = [];
+  SAC.kits.forEach(k => {
+    if (!kitsActifs[k.id]) return;
+    k.items.forEach(i => out.push(Object.assign({}, i, {
+      zone: 'sac', phase: 'verif', kit: k.label
+    })));
+  });
+  return out;
+}
+const tousItems = () => SAC.items.concat(itemsKits());
+
+// 6. la progression exclut le confort, sinon 100 % ne veut rien dire
+function avancement(liste) {
+  const compte = liste.filter(i => i.crit !== 'confort');
+  const f = compte.filter(i => coche(i.id)).length;
+  return { f, t: compte.length, pct: compte.length ? Math.round((f / compte.length) * 100) : 100 };
+}
+
+const PUCE = { reglementaire: '🔴', perso: '🟠', confort: '⚪' };
+
+// anneau de progression : a zero, le bout arrondi laisserait un point parasite
 function anneau(pct) {
-  // a zero, le bout arrondi laisserait un point parasite : on n'affiche rien
   const arc = pct > 0
     ? '<circle class="fg" cx="18" cy="18" r="15.5" pathLength="100" stroke-dasharray="' +
       pct.toFixed(1) + ' 100"/>'
@@ -1190,72 +1228,131 @@ function anneau(pct) {
     '<circle class="bg" cx="18" cy="18" r="15.5" pathLength="100"/>' + arc + '</svg>';
 }
 
-function traceChecklist() {
-  return CHECKLIST.map(g => {
-    const n = faits(g), tot = g.items.length;
-    const pct = tot ? (n / tot) * 100 : 0;
-    const fini = n === tot;
+function ligneItem(i) {
+  if (fRouge && i.crit !== 'reglementaire') return '';
+  if (fReste && coche(i.id)) return '';
+  return '<button class="sk sk-' + i.crit + (coche(i.id) ? ' ok' : '') + '" data-sac="' + i.id + '">' +
+    '<i class="ck-box"></i><span class="sk-t">' + i.txt +
+    (i.kit ? ' <em class="sk-kit">' + i.kit + '</em>' : '') +
+    (i.detail ? '<small>' + i.detail + '</small>' : '') + '</span></button>';
+}
 
-    const visibles = filtreReste ? g.items.filter(i => !estCoche(i.id)) : g.items;
-    const liste = visibles.length
-      ? visibles.map(i =>
-          '<button class="ck-item' + (estCoche(i.id) ? ' ok' : '') + '" data-ck="' + i.id + '">' +
-          '<i class="ck-box"></i><span class="ck-txt">' + i.l +
-          (i.s ? '<small>' + i.s + '</small>' : '') + '</span></button>').join('')
-      : '<div class="ck-vide">Ce groupe est bouclé.</div>';
+function bloc(titre, sous, items, extra) {
+  const lignes = items.map(ligneItem).join('');
+  if (!lignes) return '';
+  const a = avancement(items);
+  return '<div class="ck-grp' + (a.f === a.t ? ' fini' : '') + '">' +
+    '<div class="ck-grp-tete">' + anneau(a.pct) +
+      '<div class="ck-grp-nom">' + titre + (sous ? '<small>' + sous + '</small>' : '') + '</div>' +
+      '<div class="ck-grp-cpt">' + a.f + '/' + a.t + '</div></div>' +
+    (extra || '') +
+    '<div class="ck-liste">' + lignes + '</div></div>';
+}
 
-    return '<div class="ck-grp' + (fini ? ' fini' : '') + '">' +
-      '<div class="ck-grp-tete">' + anneau(pct) +
-        '<div class="ck-grp-nom">' + g.t + (g.s ? '<small>' + g.s + '</small>' : '') + '</div>' +
-        '<div class="ck-grp-cpt">' + n + '/' + tot + '</div>' +
-      '</div><div class="ck-liste">' + liste + '</div></div>';
+function traceSac() {
+  const tous = tousItems();
+  const a = avancement(tous);
+  const rouges = tous.filter(i => i.crit === 'reglementaire');
+  const ar = avancement(rouges);
+
+  document.getElementById('sacTete').innerHTML =
+    '<div class="ck-pct"><b>' + a.pct + '</b><i>%</i><span>prêt</span></div>' +
+    '<div class="ck-piste"><i style="width:' + a.pct + '%"></i></div>' +
+    '<div class="ck-compte">' + a.f + ' / ' + a.t + ' hors confort &#183; ' +
+      '<b class="sk-rouge">' + ar.f + '/' + ar.t + ' réglementaires</b></div>' +
+    '<div class="sk-leg">🔴 contrôlable, DSQ si absent &#183; 🟠 critique pour toi &#183; ⚪ confort</div>';
+
+  let h = '';
+  if (sacMode === 'jour') {
+    SAC.meta.phases.forEach(p => {
+      const d = dateDe(p.date);
+      const items = tous.filter(i => i.phase === p.id);
+      h += bloc(p.label + ' &#183; ' + d.getDate() + ' ' + MOIS[d.getMonth()], p.note, items);
+    });
+  } else {
+    SAC.meta.zones.forEach(z => {
+      const items = tous.filter(i => i.zone === z.id);
+      // 8. les interdits remontent en tete du sac d'allegement
+      const extra = z.id === 'allegement'
+        ? '<div class="sk-non"><span>' + SAC.interdits.allegement.titre + '</span>' +
+          SAC.interdits.allegement.items.map(x => '<b>' + x + '</b>').join(' &#183; ') +
+          '<p>' + SAC.interdits.allegement.note + '</p></div>'
+        : (z.id === 'bagage'
+          ? '<div class="sk-non info"><span>' + SAC.interdits.retour.titre + '</span><p>' +
+            SAC.interdits.retour.note + '</p></div>' : '');
+      h += bloc(z.label, z.sub, items, extra);
+    });
+  }
+  if (!h) h = '<div class="vide">Rien à afficher avec ces filtres.</div>';
+  document.getElementById('sacHote').innerHTML = h;
+
+  document.querySelectorAll('#sacHote [data-sac]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.sac); traceSac(); majEtat(); }));
+
+  document.querySelectorAll('#sacMode button').forEach(b =>
+    b.classList.toggle('on', b.dataset.mode === sacMode));
+  document.getElementById('fRouge').classList.toggle('on', fRouge);
+  document.getElementById('fReste').classList.toggle('on', fReste);
+  traceKits();
+}
+
+// 5. les kits conditionnels
+function traceKits() {
+  document.getElementById('kitsHote').innerHTML =
+    '<details class="carte kits"' + '><summary>Kits conditionnels &#183; ' +
+      SAC.kits.filter(k => kitsActifs[k.id]).length + ' actif(s)</summary>' +
+      '<p class="kits-r">' + SAC.meta.reglement2026 + '</p>' +
+      SAC.kits.map(k => '<div class="kit">' +
+        '<button class="kit-t' + (kitsActifs[k.id] ? ' on' : '') + '" data-kit="' + k.id + '">' +
+          '<i></i>' + k.label + '</button>' +
+        (k.pourquoi ? '<p>' + k.pourquoi + '</p>' : '') +
+        '<ul>' + k.items.map(i => '<li>' + i.txt + '</li>').join('') + '</ul>' +
+      '</div>').join('') +
+    '</details>';
+  document.querySelectorAll('#kitsHote [data-kit]').forEach(b =>
+    b.addEventListener('click', e => {
+      e.preventDefault();
+      kitsActifs[b.dataset.kit] = !kitsActifs[b.dataset.kit];
+      store.set('kits', kitsActifs); traceSac(); majEtat();
+    }));
+}
+
+// 4. les verifications sont des ACTIONS, pas des rangements
+function traceVerifs() {
+  const v = SAC.verifications;
+  v.forEach(x => { if (x.fait && coches[x.id] === undefined) coches[x.id] = true; });
+  const f = v.filter(x => coche(x.id)).length;
+
+  document.getElementById('verifIntro').innerHTML =
+    '<div class="ck-pct"><b>' + f + '</b><i>/ ' + v.length + '</i><span>faites</span></div>' +
+    '<div class="vf-i">Ce ne sont pas des objets à ranger mais des gestes à faire. ' +
+    'Cocher « gobelet » sans l\'avoir mesuré, c\'est le piège.</div>';
+
+  document.getElementById('verifsHote').innerHTML = v.map(x => {
+    const d = dateDe(x.quand);
+    return '<button class="vf' + (coche(x.id) ? ' ok' : '') + ' vf-' + x.crit + '" data-vf2="' + x.id + '">' +
+      '<div class="vf-l">🔍</div><div class="vf-c"><b>' + x.txt + '</b>' +
+      '<small>' + x.pourquoi + '</small>' +
+      '<em>' + PUCE[x.crit] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</em></div>' +
+      '<i class="ck-box"></i></button>';
+  }).join('');
+
+  document.querySelectorAll('#verifsHote [data-vf2]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.vf2); traceVerifs(); majEtat(); }));
+
+  document.getElementById('attHote').innerHTML = SAC.enAttente.map(a => {
+    const d = dateDe(a.resoudreLe);
+    const ec = Math.round((d - minuit(maintenant())) / 86400000);
+    return '<div class="att"><i class="att-p"></i><div class="att-c">' + a.txt +
+      '<small>Via ' + a.via + '</small></div>' +
+      '<span class="att-q">' + (ec <= 0 ? 'à faire' : 'dans ' + ec + ' j') + '</span></div>';
   }).join('');
 }
 
-function traceAttente() {
-  return EN_ATTENTE.map(a =>
-    '<div class="att"><i class="att-p"></i><div class="att-c">' + a.l +
-    (a.s ? '<small>' + a.s + '</small>' : '') + '</div>' +
-    '<span class="att-q">' + a.quand + '</span></div>').join('');
-}
-
-function majChecklist() {
-  const n = CHECKLIST.reduce((s, g) => s + faits(g), 0);
-  const pct = TOTAL_ITEMS ? Math.round((n / TOTAL_ITEMS) * 100) : 0;
-
-  document.getElementById('ckPct').textContent = pct;
-  document.getElementById('ckJauge').style.width = pct + '%';
-  document.getElementById('ckCompte').textContent = n + ' / ' + TOTAL_ITEMS + ' items';
-  const res = document.getElementById('ckResume');
-  if (res) res.innerHTML =
-    n === TOTAL_ITEMS ? 'tout est coché' : 'prêt à ' + pct + ' % &#183; ' + (TOTAL_ITEMS - n) + ' restants';
-
-  document.getElementById('ckGroupes').innerHTML = traceChecklist();
-  document.querySelectorAll('#ckGroupes button[data-ck]').forEach(b => {
-    b.addEventListener('click', () => basculeItem(b.dataset.ck));
-  });
-
-  const f = document.getElementById('ckFiltre');
-  f.classList.toggle('on', filtreReste);
-
-  if (document.getElementById('etatHote')) majEtat();
-}
-
-function basculeItem(id) {
-  coches[id] = !estCoche(id);
-  store.set('check', coches);
-  majChecklist();
-}
-
-document.getElementById('ckFiltre').addEventListener('click', () => {
-  filtreReste = !filtreReste;
-  store.set('ckReste', filtreReste);
-  majChecklist();
-});
 
 /* ============================ accueil ============================ */
 
-const bloc = (val, unite) => '<div class="cd-bloc"><b>' + val + '</b><i>' + unite + '</i></div>';
+const blocCd = (val, unite) => '<div class="cd-bloc"><b>' + val + '</b><i>' + unite + '</i></div>';
 const sep = '<div class="cd-sep"></div>';
 
 let dernierCompte = '';
@@ -1275,8 +1372,8 @@ function majCompte() {
     const h = Math.floor(reste / 3600000) % 24;
     const m = Math.floor(reste / 60000) % 60;
     etiq = 'Départ dans';
-    corps = bloc(j, 'j') + sep + bloc(String(h).padStart(2, '0'), 'h') + sep +
-            bloc(String(m).padStart(2, '0'), 'min');
+    corps = blocCd(j, 'j') + sep + blocCd(String(h).padStart(2, '0'), 'h') + sep +
+            blocCd(String(m).padStart(2, '0'), 'min');
     dessous = DEPART.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) +
               ' &#183; <b>' + hhmm(DEPART) + '</b> &#183; Courmayeur';
     carte.classList.remove('encours');
@@ -1285,7 +1382,7 @@ function majCompte() {
     const h = Math.floor(ecoule / 3600000);
     const m = Math.floor(ecoule / 60000) % 60;
     etiq = now > FIN ? 'Course terminée' : 'En course depuis';
-    corps = bloc(h, 'h') + sep + bloc(String(m).padStart(2, '0'), 'min');
+    corps = blocCd(h, 'h') + sep + blocCd(String(m).padStart(2, '0'), 'min');
     dessous = 'il est <b>' + hhmm(now) + '</b> &#183; barrière finale <b>' + hhmm(FIN) + '</b>';
     carte.classList.add('encours');
   }
@@ -1316,8 +1413,7 @@ function majEtat() {
                   AFFUTAGE.aVerifier.filter(v => prepa.verif[v.id]).length;
   const pct = totalTk ? Math.round((faitsTk / totalTk) * 100) : 0;
 
-  const nMat = CHECKLIST.reduce((s, g) => s + faits(g), 0);
-  const pctMat = TOTAL_ITEMS ? Math.round((nMat / TOTAL_ITEMS) * 100) : 0;
+  const mat = avancement(tousItems());
   const trous = AFFUTAGE.inconnues.filter(i => !prepa.inconnues[i.id]).length;
   const jours = Math.max(0, Math.ceil((DEPART - now) / 86400000));
 
@@ -1338,7 +1434,7 @@ function majEtat() {
 
   h += '<div class="et-reste">' +
     '<b>' + (totalTk - faitsTk) + ' tâches</b> de prépa restantes &#183; ' +
-    'matériel à <b>' + pctMat + ' %</b> (' + (TOTAL_ITEMS - nMat) + ' items).' +
+    'matériel à <b>' + mat.pct + ' %</b> (' + (mat.t - mat.f) + ' items hors confort).' +
     '<br>' + AFFUTAGE.meta.meteoSemaine + '</div>';
 
   hote.innerHTML = h;
@@ -1551,18 +1647,6 @@ function traceContrat() {
     '</details>';
 }
 
-/* ---- le sac, piece par piece ---- */
-
-function traceSac() {
-  document.getElementById('sacHote').innerHTML = SAC.map(g =>
-    '<div class="titre">' + g.t + '</div>' +
-    '<div class="carte sac-c"><div class="sac-s">' + g.s + '</div>' +
-    '<ul class="sac-l">' + g.items.map(i => '<li>' + i + '</li>').join('') + '</ul>' +
-    (g.interdit ? '<div class="sac-non"><span>Interdit dedans</span>' +
-      g.interdit.map(i => '<b>' + i + '</b>').join(' &#183; ') + '</div>' : '') +
-    (g.note ? '<div class="sac-note">' + g.note + '</div>' : '') +
-    '</div>').join('');
-}
 
 /* ---- tous les points de passage ---- */
 
@@ -1622,7 +1706,6 @@ function init() {
   traceInconnues();
   traceVerif();
   traceContrat();
-  traceSac();
   setInterval(() => { majCompte(); if (etat.vue === 'course') majCourse(); }, 1000);
 
   document.getElementById('profilHote').innerHTML = traceProfil();
@@ -1651,8 +1734,8 @@ function init() {
   traceSectionsNut();
   traceAchat();
   document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
-  document.getElementById('ckAttente').innerHTML = traceAttente();
-  majChecklist();
+  traceSac();
+  traceVerifs();
   majCourse(true);
 
   traceRavitos();

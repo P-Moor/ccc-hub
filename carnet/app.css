@@ -605,27 +605,118 @@ body::before {
 .pl-c small { display: block; font-size: 12px; color: var(--texte-pale); margin-top: 1px; line-height: 1.3; }
 .pl-d { flex: none; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
 
-/* ---- le sac ---- */
-.sac-c { padding: 13px 14px; }
-.sac-s { font-size: 13px; color: var(--texte-pale); margin-bottom: 9px; }
-.sac-l { list-style: none; }
-.sac-l li {
-  display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
-  border-top: 1px solid var(--bord); font-size: 15.5px; line-height: 1.3;
+/* ---- le sac : vraie checklist ---- */
+.sk-leg { margin-top: 7px; font-size: 11.5px; color: var(--texte-pale); line-height: 1.4; }
+.sk-rouge { color: var(--alerte); font-weight: 600; }
+
+.sac-filtres { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.sac-filtres button {
+  min-height: var(--tap); border-radius: 12px; padding: 0 12px;
+  border: 1px solid var(--bord); background: var(--surface);
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--display); font-weight: 700; font-size: 13px;
+  letter-spacing: .04em; text-transform: uppercase; color: var(--texte-doux);
 }
-.sac-l li:first-child { border-top: 0; }
-.sac-l li::before { content: "\25AA"; color: var(--texte-pale); font-size: 11px; }
-.sac-non {
-  margin-top: 11px; padding: 9px 11px; border-radius: 10px;
+.sac-filtres button i {
+  flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--bord);
+  position: relative; transition: background var(--tempo);
+}
+.sac-filtres button i::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--surface); transition: transform var(--tempo);
+}
+.sac-filtres button.on { color: var(--texte); border-color: var(--accent); }
+.sac-filtres button.on i { background: var(--accent); }
+.sac-filtres button.on i::after { transform: translateX(12px); }
+
+.sk {
+  width: 100%; text-align: left; min-height: var(--tap);
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 10px 13px; border-top: 1px solid var(--bord);
+  border-left: 3px solid transparent;
+}
+.sk:first-child { border-top: 0; }
+.sk-reglementaire { border-left-color: var(--alerte); }
+.sk-perso { border-left-color: var(--jour); }
+.sk .ck-box { margin-top: 1px; }
+.sk-t { flex: 1; font-size: 15.5px; line-height: 1.32; }
+.sk-t small { display: block; font-size: 12.5px; color: var(--texte-pale); margin-top: 2px; line-height: 1.35; }
+.sk-kit {
+  font-style: normal; font-family: var(--mono); font-size: 10px;
+  padding: 1px 6px; border-radius: 999px; background: var(--surface-2); color: var(--texte-pale);
+}
+.sk.ok .sk-t { color: var(--texte-pale); text-decoration: line-through; }
+.sk.ok .sk-t small { text-decoration: none; }
+.sk.ok .ck-box { background: var(--ok); border-color: var(--ok); }
+.sk.ok .ck-box::after { opacity: 1; transform: none; }
+
+.sk-non {
+  margin: 0 0 1px; padding: 10px 13px;
   background: color-mix(in srgb, var(--alerte) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--alerte) 35%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--alerte) 30%, transparent);
   font-size: 14px;
 }
-.sac-non span {
+.sk-non.info { background: var(--surface-2); border-bottom-color: var(--bord); }
+.sk-non span {
   display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
   text-transform: uppercase; color: var(--alerte); margin-bottom: 3px;
 }
-.sac-note { margin-top: 10px; font-size: 13px; color: var(--texte-doux); line-height: 1.4; }
+.sk-non.info span { color: var(--texte-pale); }
+.sk-non p { font-size: 12.5px; color: var(--texte-doux); margin-top: 4px; line-height: 1.4; }
+
+/* kits conditionnels */
+.kits { padding: 4px 14px 12px; margin-bottom: 12px; }
+.kits summary {
+  cursor: pointer; list-style: none; min-height: var(--tap);
+  display: flex; align-items: center;
+  font-family: var(--display); font-weight: 700; font-size: 14px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--texte-doux);
+}
+.kits summary::-webkit-details-marker { display: none; }
+.kits summary::after { content: "\25BE"; margin-left: auto; }
+.kits[open] summary::after { transform: rotate(180deg); }
+.kits-r { font-size: 12.5px; color: var(--texte-pale); line-height: 1.4; margin-bottom: 10px; }
+.kit { padding: 10px 0; border-top: 1px solid var(--bord); }
+.kit-t {
+  display: flex; align-items: center; gap: 9px; min-height: 38px;
+  font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: .02em;
+}
+.kit-t i {
+  flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--bord);
+  position: relative; transition: background var(--tempo);
+}
+.kit-t i::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--surface); transition: transform var(--tempo);
+}
+.kit-t.on i { background: var(--ok); }
+.kit-t.on i::after { transform: translateX(12px); }
+.kit p { font-size: 12.5px; color: var(--texte-doux); margin: 3px 0 5px; line-height: 1.4; }
+.kit ul { list-style: none; }
+.kit li { font-size: 13.5px; line-height: 1.5; padding-left: 12px; position: relative; color: var(--texte-doux); }
+.kit li::before { content: "\25AA"; position: absolute; left: 0; font-size: 9px; }
+
+/* verifications : des actions */
+.vf-i { font-size: 13.5px; color: var(--texte-doux); line-height: 1.4; margin-top: 8px; }
+.vf {
+  width: 100%; text-align: left; display: flex; gap: 11px; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--bord); border-left: 3px solid var(--jour);
+  border-radius: 12px; padding: 12px 13px; margin-bottom: 9px; box-shadow: var(--ombre);
+}
+.vf-reglementaire { border-left-color: var(--alerte); }
+.vf-l { flex: none; font-size: 17px; line-height: 1.2; }
+.vf-c { flex: 1; }
+.vf-c b { display: block; font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+.vf-c small { display: block; font-size: 12.5px; color: var(--texte-pale); margin-top: 3px; line-height: 1.4; }
+.vf-c em {
+  display: block; font-style: normal; font-family: var(--mono); font-size: 11px;
+  color: var(--texte-doux); margin-top: 5px;
+}
+.vf .ck-box { flex: none; margin-top: 1px; }
+.vf.ok { opacity: .55; }
+.vf.ok .vf-c b { text-decoration: line-through; }
+.vf.ok .ck-box { background: var(--ok); border-color: var(--ok); }
+.vf.ok .ck-box::after { opacity: 1; transform: none; }
 
 /* ---- tous les points de passage ---- */
 .rv { display: flex; gap: 12px; margin-bottom: 10px; }
