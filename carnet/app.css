@@ -5,21 +5,28 @@
    =========================================================== */
 
 :root {
-  /* palette validee */
-  --papier:      #F7F4EC;
-  --papier-2:    #EFEBE0;
-  --papier-3:    #E4DFD1;
-  --encre:       #1E2430;
-  --encre-doux:  #545B69;
-  /* assombri pour passer AA sur les trois fonds : 5,26 / 5,78 / 4,85 */
-  --encre-pale:  #5E6675;
-  --jour:        #E08A1E;
-  --jour-fonce:  #8A5410;
-  --nuit:        #4A4494;
-  --nuit-clair:  #8B85D6;
-  --teal:        #0F6E56;
-  --alerte:      #B3362E;
-  --ok:          #3B6D11;
+  /* ---- charte carte topographique ----
+     Le carnet n'est plus un dossard sur du papier : c'est une carte pliee.
+     Papier creme de carte d'etat-major, bistre des courbes de niveau, bleu
+     des torrents, vert des forets, et l'ambre garde pour ce qui presse. */
+  --papier:      #F4F0E4;   /* papier de carte */
+  --papier-2:    #EBE5D4;   /* pli */
+  --papier-3:    #D8CFB8;   /* trait de decoupe */
+  --encre:       #2B2A24;   /* noir brun des cartouches */
+  --encre-doux:  #55503F;
+  --encre-pale:  #5D5747;   /* AA verifie sur les trois fonds */
+  --courbe:      #A97B4F;   /* bistre des courbes de niveau */
+  --torrent:     #2F6F8F;   /* bleu des cours d'eau */
+  --jour:        #D48425;   /* ambre de carte · AA 4,88 avec l'encre par-dessus */
+  --jour-fonce:  #7A4A0E;
+  --nuit:        #33436B;   /* bleu de nuit de la carte */
+  --nuit-clair:  #7C88AE;
+  --teal:        #2F6B4F;   /* vert des forets */
+  --alerte:      #A8342A;
+  --ok:          #4A6B23;
+
+  /* fond : courbes de niveau en filigrane, index une sur cinq */
+  --topo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%23A97B4F' stroke-opacity='0.20'%3E%3Cpath stroke-width='1.6' d='M-30 34C30 6 96 62 150 40S240 8 300 30'/%3E%3Cpath stroke-width='0.8' d='M-30 62C34 32 98 90 152 68S242 36 300 58'/%3E%3Cpath stroke-width='0.8' d='M-30 92C38 60 100 118 154 96S244 66 300 88'/%3E%3Cpath stroke-width='0.8' d='M-30 124C42 90 104 148 156 126S246 98 300 120'/%3E%3Cpath stroke-width='0.8' d='M-30 158C46 122 108 178 158 158S248 132 300 154'/%3E%3Cpath stroke-width='1.6' d='M-30 194C50 156 112 210 160 192S250 168 300 190'/%3E%3Cpath stroke-width='0.8' d='M-30 228C54 192 116 242 162 226S252 204 300 226'/%3E%3C/g%3E%3C/svg%3E");
 
   /* roles */
   --bg:          var(--papier);
@@ -32,9 +39,9 @@
   --accent:      var(--jour);
   --accent-txt:  var(--jour-fonce);
   --trace:       var(--encre);
-  --ombre:       0 1px 2px rgba(30,36,48,.06), 0 8px 24px rgba(30,36,48,.06);
+  --ombre:       0 1px 0 rgba(43,42,36,.05);
 
-  --r:           14px;
+  --r:           10px;
   --tap:         44px;
   --pad:         16px;
   --tempo:       .28s cubic-bezier(.22,.61,.36,1);
@@ -44,24 +51,28 @@
   --mono:    ui-monospace, "SF Mono", Menlo, monospace;
 }
 
-/* ---- mode nuit ---- */
+/* ---- mode nuit : la meme carte, lue a la frontale ---- */
 [data-theme="nuit"] {
-  --bg:          #0D0F16;
-  --surface:     #161A24;
-  --surface-2:   #1E2430;
-  --bord:        #2A3140;
-  --texte:       #E8E4D8;
-  --texte-doux:  #9AA0AE;
-  --texte-pale:  #858E9E;   /* AA sur les trois fonds nuit : 5,80 / 5,27 / 4,71 */
-  --jour:        #C9832F;
-  --nuit-clair:  #9A94DE;
-  --teal:        #2E8F74;
-  --alerte:      #D4655C;
-  --ok:          #7BA648;
-  --accent:      #C9832F;
-  --accent-txt:  #E5A94F;
-  --trace:       #E8E4D8;
-  --ombre:       0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --bg:          #12140F;   /* la carte dans le noir, chaude et non bleue */
+  --surface:     #1B1E17;
+  --surface-2:   #23271E;
+  --bord:        #3A3E30;
+  --texte:       #EDE7D6;
+  --texte-doux:  #A9A390;
+  --texte-pale:  #928C79;   /* AA sur les trois fonds nuit */
+  --courbe:      #8A6B45;
+  --torrent:     #5E9CBC;
+  --jour:        #D08C2E;
+  --nuit:        #4E5E8C;
+  --nuit-clair:  #97A2C6;
+  --teal:        #58936F;
+  --alerte:      #D66F63;   /* AA sur les trois fonds nuit : 5,57 / 5,07 / 4,57 */
+  --ok:          #8AA84E;
+  --accent:      #D08C2E;
+  --accent-txt:  #E7AB55;
+  --trace:       #EDE7D6;
+  --ombre:       0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.4);
+  --topo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%23C79A63' stroke-opacity='0.13'%3E%3Cpath stroke-width='1.6' d='M-30 34C30 6 96 62 150 40S240 8 300 30'/%3E%3Cpath stroke-width='0.8' d='M-30 62C34 32 98 90 152 68S242 36 300 58'/%3E%3Cpath stroke-width='0.8' d='M-30 92C38 60 100 118 154 96S244 66 300 88'/%3E%3Cpath stroke-width='0.8' d='M-30 124C42 90 104 148 156 126S246 98 300 120'/%3E%3Cpath stroke-width='0.8' d='M-30 158C46 122 108 178 158 158S248 132 300 154'/%3E%3Cpath stroke-width='1.6' d='M-30 194C50 156 112 210 160 192S250 168 300 190'/%3E%3Cpath stroke-width='0.8' d='M-30 228C54 192 116 242 162 226S252 204 300 226'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -94,15 +105,12 @@ a { color: inherit; }
 :focus { outline: none; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
 
-/* texture papier discrete, disparait la nuit */
+/* les courbes de niveau, en filigrane, sur toute la hauteur */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: .5;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(30,36,48,.022) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(30,36,48,.022) 0 1px, transparent 1px 3px);
+  background-image: var(--topo);
+  background-size: 260px 260px;
 }
-[data-theme="nuit"] body::before { opacity: 0; }
 
 /* ===================== ossature ===================== */
 
@@ -120,7 +128,8 @@ body::before {
   color: var(--papier);
   padding: calc(env(safe-area-inset-top) + 10px) var(--pad) 0;
 }
-[data-theme="nuit"] .dossard { background: #05070C; }
+.dossard { border-bottom: 2px solid var(--courbe); }
+[data-theme="nuit"] .dossard { background: #0B0D08; }
 
 .dossard-haut { display: flex; align-items: center; gap: 10px; }
 
@@ -187,10 +196,13 @@ body::before {
 @keyframes entre { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .titre {
+  display: flex; align-items: center; gap: 10px;
   font-family: var(--display); font-weight: 700;
   font-size: 13px; letter-spacing: .16em; text-transform: uppercase;
   color: var(--texte-pale); margin-bottom: 10px;
 }
+/* filet de cartouche, comme les intitules d'une carte */
+.titre::after { content: ""; flex: 1; height: 1px; background: var(--bord); }
 
 .carte {
   background: var(--surface); border: 1px solid var(--bord);
@@ -1773,12 +1785,14 @@ button.tl-ligne:active { background: var(--surface-2); }
 @media print {
   /* On imprime sur du papier : palette claire quelle que soit l'heure,
      et contrastes un cran plus fonces pour rester lisibles a l'encre. */
+  /* la feuille imprimee est une carte, elle aussi : memes encres, sans le fond */
   :root, [data-theme="nuit"], [data-theme="jour"] {
-    --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #F3F0E7; --bord: #C4BEAF;
-    --texte: #1E2430; --texte-doux: #454C5A; --texte-pale: #6B7280;
-    --jour: #C07512; --jour-fonce: #7A4A0E; --nuit: #413C86; --nuit-clair: #6E68B8;
-    --teal: #0C5A46; --alerte: #9C2B23; --ok: #2F5A0D;
-    --accent: #C07512; --accent-txt: #7A4A0E; --trace: #1E2430;
+    --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #F2EEE2; --bord: #BFB59D;
+    --texte: #2B2A24; --texte-doux: #4E4838; --texte-pale: #6A6353;
+    --courbe: #8A6237; --torrent: #245C79;
+    --jour: #A9640F; --jour-fonce: #7A4A0E; --nuit: #2C3A5E; --nuit-clair: #5C6890;
+    --teal: #245740; --alerte: #96291F; --ok: #3D5A18;
+    --accent: #A9640F; --accent-txt: #7A4A0E; --trace: #2B2A24;
     --ombre: none;
   }
 
