@@ -6,6 +6,7 @@ import { RACE, SECTIONS, SCENARIOS, REGLES,
 import { AFFUTAGE } from './prepa-data.js';
 import { NUTRITION as NUT } from './nutrition-data.js';
 import { SAC } from './sac-data.js';
+import { VOYAGE } from './voyage-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -137,7 +138,8 @@ const PARTIES = {
     ['aujourdhui', "Aujourd'hui", '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 11h18"/><path d="M9 16l1.8 1.8L14.5 14"/>'],
     ['sac', 'Le sac', '<path d="M8 8V6.5a4 4 0 0 1 8 0V8"/><rect x="4" y="8" width="16" height="13" rx="3"/><path d="M9 13h6"/>'],
     ['listes', 'Vérifs', '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M8 10.5l1.8 1.8L13.5 8.5"/>'],
-    ['nutrition', 'Nutrition', '<path d="M10 3v6l-4.6 9.2A2 2 0 0 0 7.2 21h9.6a2 2 0 0 0 1.8-2.8L14 9V3"/><path d="M9 3h6"/>']
+    ['nutrition', 'Nutrition', '<path d="M10 3v6l-4.6 9.2A2 2 0 0 0 7.2 21h9.6a2 2 0 0 0 1.8-2.8L14 9V3"/><path d="M9 3h6"/>'],
+    ['voyage', 'Voyage', '<path d="M4 17V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10"/><path d="M4 13h16"/><circle cx="8" cy="17" r="1.6"/><circle cx="16" cy="17" r="1.6"/><path d="M9 4V2h6v2"/>']
   ],
   course: [
     ['profil', 'Tracé', '<path d="M2 18l6-9 4 5 3-4 7 8z"/>'],
@@ -1178,6 +1180,111 @@ function traceAchat() {
     }));
 }
 
+/* ==================== voyage et logistique ====================
+   Source : voyage-data.js. Le trou de la prepa : le 26 aout, trois
+   correspondances sur dix heures, avec un maillon faible identifie. */
+
+let voyMode = store.get('voyMode', 'aller');
+
+const battClasse = n => n < 30 ? 'chaud' : (n < 60 ? 'tiede' : 'ok');
+
+function segTrain(s) {
+  const t = { train: '🚄', bus: '🚌', avion: '✈️', arrivee: '🏠' }[s.type] || '•';
+  return '<div class="vy vy-' + s.type + '">' +
+    '<div class="vy-h"><b>' + (s.depart || '') + '</b>' +
+    (s.arrivee ? '<i>&#8594; ' + s.arrivee + '</i>' : '') +
+    (s.duree ? '<em>' + s.duree + '</em>' : '') + '</div>' +
+    '<div class="vy-c"><div class="vy-t">' + t + ' ' + s.de + ' &#8594; ' + s.vers + '</div>' +
+    (s.ref ? '<div class="vy-ref">' + s.ref + '</div>' : '') +
+    (s.date ? '<div class="vy-ref alerte">' + s.date + '</div>' : '') +
+    (s.bagages ? '<div class="vy-ref">' + s.bagages + '</div>' : '') +
+    (s.alerte ? '<div class="vy-al">' + s.alerte + '</div>' : '') +
+    (s.aFaire ? '<ul class="vy-l">' + s.aFaire.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '') +
+    '</div></div>';
+}
+
+function segCorr(s) {
+  return '<div class="vy-corr ' + battClasse(s.battement) + '">' +
+    '<div class="vy-corr-h"><span>Correspondance</span><b>' + s.battementLabel + '</b></div>' +
+    '<div class="vy-corr-t">' + s.de + ' &#8594; ' + s.vers + '</div>' +
+    (s.alerte ? '<div class="vy-al">' + s.alerte + '</div>' : '') +
+    '<ul class="vy-l">' + s.aFaire.map(x => '<li>' + x + '</li>').join('') + '</ul></div>';
+}
+
+function traceVoyage() {
+  const a = VOYAGE.aller;
+  document.getElementById('voyAlerte').innerHTML =
+    '<div class="al al-crit vy-reveal"><div class="al-i">👟</div><div>' +
+    '<b>Pas les Reveal le 26</b><p>' + VOYAGE.meta.risquePrincipal + '</p></div></div>';
+
+  let h = '';
+  if (voyMode === 'aller') {
+    // compte a rebours discret vers le prochain segment, le jour meme
+    const now = maintenant();
+    let prochain = '';
+    if (minuit(now).getTime() === dateDe(a.date).getTime()) {
+      const suiv = a.segments.filter(s => s.depart && s.depart.match(/^\d\d:/))
+        .map(s => ({ s, t: horaireVersDate(s.depart, new Date(now.getTime() - 86400000)) }))
+        .find(x => x.t > now);
+      if (suiv) prochain = '<div class="vy-next">Prochain segment dans <b>' +
+        dureeTxt(suiv.t - now) + '</b> &#183; ' + suiv.s.de + '</div>';
+    }
+
+    h = prochain + '<div class="carte vy-tete"><b>' + a.label + '</b>' +
+      '<div class="vy-duree">' + a.dureeTotale + '</div>' +
+      '<div class="vy-conflit">' + a.conflitAgenda + '</div></div>' +
+      a.segments.map(s => s.type === 'correspondance' ? segCorr(s) : segTrain(s)).join('') +
+      '<div class="titre">Sur moi dans le train</div><div class="ck-liste carte-l">' +
+      a.surMoiDansLeTrain.map(i =>
+        '<button class="sk' + (i.crit ? ' sk-reglementaire' : ' sk-perso') +
+        (coche(i.id) ? ' ok' : '') + '" data-voyck="' + i.id + '">' +
+        '<i class="ck-box"></i><span class="sk-t">' + i.txt +
+        (i.detail ? '<small>' + i.detail + '</small>' : '') + '</span></button>').join('') +
+      '</div>' +
+      '<div class="titre">Documents hors ligne</div><div class="ck-liste carte-l">' +
+      VOYAGE.documentsHorsLigne.map(d =>
+        '<button class="sk' + (d.crit ? ' sk-reglementaire' : '') + (coche(d.id) ? ' ok' : '') +
+        '" data-voyck="' + d.id + '"><i class="ck-box"></i><span class="sk-t">' + d.txt +
+        (d.detail ? '<small>' + d.detail + '</small>' : '') + '</span></button>').join('') +
+      '</div>';
+
+  } else if (voyMode === 'place') {
+    h = VOYAGE.surPlace.map(j => {
+      const d = dateDe(j.date);
+      return '<div class="titre">' + j.label + '</div><div class="carte vy-jour">' +
+        j.bloc.map(b => '<div class="vy-b' + (b.crit ? ' crit' : '') + '">' +
+          '<b>' + b.h + '</b><div><p>' + b.quoi + '</p>' +
+          (b.detail ? '<small>' + b.detail + '</small>' : '') + '</div></div>').join('') +
+        '</div>';
+    }).join('');
+
+  } else {
+    h = '<div class="al al-crit"><div class="al-i">📅</div><div><b>Trois dates qui ne collent pas</b>' +
+      '<p>' + VOYAGE.retour.alerte + '</p></div></div>' +
+      VOYAGE.retour.segments.map(segTrain).join('') +
+      '<div class="titre">À régler</div><div class="ck-liste carte-l">' +
+      VOYAGE.retour.aFaire.map(i =>
+        '<button class="sk' + (i.crit ? ' sk-reglementaire' : '') + (coche(i.id) ? ' ok' : '') +
+        '" data-voyck="' + i.id + '"><i class="ck-box"></i><span class="sk-t">' + i.txt +
+        '</span></button>').join('') + '</div>';
+  }
+
+  h += '<div class="titre">Contacts</div><div class="carte">' +
+    VOYAGE.contacts.map(c => '<div class="vy-ct"><b>' + c.qui + '</b><span>' + c.num + '</span></div>').join('') +
+    '</div>';
+
+  document.getElementById('voyHote').innerHTML = h;
+  document.querySelectorAll('#voyMode button').forEach(b =>
+    b.classList.toggle('on', b.dataset.voy === voyMode));
+  document.querySelectorAll('#voyHote [data-voyck]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.voyck); traceVoyage(); }));
+}
+
+document.addEventListener('click', e => {
+  const v = e.target.closest('#voyMode button');
+  if (v) { voyMode = v.dataset.voy; store.set('voyMode', voyMode); traceVoyage(); }
+});
+
 /* ==================== le sac : checklist materiel ====================
    Source : sac-data.js. Deux axes de lecture, trois niveaux de criticite,
    kits conditionnels, et les verifications traitees a part. */
@@ -1736,6 +1843,7 @@ function init() {
   document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
   traceSac();
   traceVerifs();
+  traceVoyage();
   majCourse(true);
 
   traceRavitos();

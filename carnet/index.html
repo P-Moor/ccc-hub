@@ -54,10 +54,12 @@
     <!-- ===================== PRÉPARER ===================== -->
 
     <section class="vue actif" id="v-aujourdhui">
-      <div class="carte cd" id="cdCarte">
-        <div class="cd-oeil" id="cdOeil">Départ dans</div>
-        <div class="cd-grille" id="cdGrille"></div>
-        <div class="cd-sous" id="cdSous"></div>
+      <!-- Le compte a rebours passe en bandeau : ce qui compte, c'est la
+           journee du jour, pas le decompte. -->
+      <div class="cdb" id="cdCarte">
+        <span class="cd-oeil" id="cdOeil">Départ dans</span>
+        <span class="cd-grille" id="cdGrille"></span>
+        <span class="cd-sous" id="cdSous"></span>
       </div>
 
       <div class="tlh" id="tlhHote"></div>
@@ -95,6 +97,16 @@
       <div id="verifsHote"></div>
       <div class="titre">Non tranché</div>
       <div class="carte" id="attHote"></div>
+    </section>
+
+    <section class="vue" id="v-voyage">
+      <div id="voyAlerte"></div>
+      <div class="switch" id="voyMode">
+        <button data-voy="aller">Aller<small>mercredi 26</small></button>
+        <button data-voy="place">Sur place<small>27 et 28</small></button>
+        <button data-voy="retour">Retour<small>29 ou 30</small></button>
+      </div>
+      <div id="voyHote"></div>
     </section>
 
     <section class="vue" id="v-nutrition">
