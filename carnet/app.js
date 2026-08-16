@@ -2,7 +2,7 @@
 // Socle : preferences, theme jour/nuit, navigation, profil interactif.
 
 import { RACE, SECTIONS, SCENARIOS, REGLES, CHECKLIST, EN_ATTENTE, NUTRITION,
-         PANIC, ALERTES } from './data.js';
+         PANIC, ALERTES, ECHEANCES, NAAK } from './data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -755,8 +755,11 @@ function majCourse(force) {
     Object.keys(course.vues).join() + '|' + etat.scenario + '|' + (now < DEPART);
   if (!force && sig === signatureCourse) return;
   signatureCourse = sig;
+  // le rendu se refait a chaque minute : on ne bouge pas sous les doigts
+  const y = window.scrollY;
   hote.innerHTML = traceCourse();
   brancheCourse();
+  if (window.scrollY !== y) window.scrollTo(0, y);
 }
 
 function brancheCourse() {
@@ -823,6 +826,100 @@ function ouvrePanic() {
   ouvreFeuille('Ça va mal', h);
 }
 
+/* ==================== feuille de course (papier) ==================== */
+
+// Un roadbook dense, pense pour etre plie et lu a la frontale, sans telephone.
+function traceFeuilleCourse() {
+  const b = barrieres();
+  const jourB = jalonsHoraires(PLAN_B);
+
+  let lignes = '<tr class="fc-poste depart"><td class="p">Courmayeur</td><td>0</td><td></td>' +
+    '<td class="t">' + hhmm(DEPART) + '</td><td></td><td></td><td></td></tr>';
+
+  SECTIONS.forEach((s, i) => {
+    const a = PLAN_A.rows[i];
+    lignes += '<tr class="fc-sec"><td colspan="7">' +
+      '<b>' + kmFmt(s.km) + ' km</b> &#183; +' + s.dplus.toLocaleString('fr-FR') + ' m &#183; -' +
+      s.dminus.toLocaleString('fr-FR') + ' m &#183; <b>' + a.section + '</b>' +
+      (s.sommet ? ' &#183; ' + s.sommet : '') +
+      '<i>' + s.consigne + '</i></td></tr>';
+
+    lignes += '<tr class="fc-poste' + (s.arret === 'grand' ? ' grand' : '') + '">' +
+      '<td class="p">' + court(s.nom) + '</td>' +
+      '<td>' + kmFmt(s.cumKm) + '</td>' +
+      '<td>' + (s.arretMin ? s.arretMin + "'" : '') + '</td>' +
+      '<td class="t">' + a.horloge + '</td>' +
+      '<td class="b">' + a.barriere + '</td>' +
+      '<td class="m">' + a.marge + '</td>' +
+      '<td class="pb">' + hhmm(jourB[i + 1].date) + '</td></tr>';
+
+    if (s.todo && s.todo.length) {
+      lignes += '<tr class="fc-todo"><td colspan="7"><b>' + court(s.nom).toUpperCase() + '</b>' +
+        s.todo.map(t => '<span>&#9744; ' + t + '</span>').join('') + '</td></tr>';
+    }
+  });
+
+  const tableau = '<table class="fc-tab"><thead><tr>' +
+    '<th>Poste</th><th>km</th><th>arrêt</th><th>cible A</th><th>barrière</th><th>marge</th><th>plan B</th>' +
+    '</tr></thead><tbody>' + lignes + '</tbody></table>';
+
+  const regles = '<div class="fc-bloc"><h3>Les 5 règles</h3><ol class="fc-regles">' +
+    REGLES.map(r => '<li>' + r.t + '</li>').join('') + '</ol></div>';
+
+  const nutri = '<div class="fc-bloc"><h3>Nutrition</h3>' +
+    '<p><b>' + NUTRITION.cible + '</b><br>' + NUTRITION.regle + '</p>' +
+    '<p>' + NUTRITION.cafeine.map(c => '<b>' + c.quoi + '</b> ' + c.ou).join(' &#183; ') + '</p>' +
+    '<p><b>Départ</b> ' + NUTRITION.portage.depart + '<br><b>Champex</b> ' + NUTRITION.portage.champex + '</p>' +
+    '<p class="fc-menu">' + NAAK.map(p => p.n.replace('Ultra Energy ', '').replace('Energy ', '') +
+      ' ' + p.g + ' g').join(' &#183; ') + '</p></div>';
+
+  const panic = '<div class="fc-bloc fc-panic"><h3>Si ça va mal</h3>' +
+    '<p class="fc-mantra">' + PANIC.mantra + '</p>' +
+    PANIC.arbre.map(x => '<p><b>' + (x.n === 'vert' ? '(V)' : x.n === 'orange' ? '(O)' : '(R)') + ' ' +
+      x.t + '</b> ' + x.a + '</p>').join('') +
+    '<p><b>Protocole pieds :</b> ' + PANIC.protocole.map((p, i) => (i + 1) + '. ' + p).join(' ') + '</p></div>';
+
+  // profil statique, sans interaction, pour le verso
+  const PW = 700, PPAD = 4, PTOP = 18, PBASE = 152;
+  const fx = k => PPAD + (k / PROFIL.kmTotal) * (PW - PPAD * 2);
+  const fy = a => PBASE - ((a - A_MIN) / (A_MAX - A_MIN)) * (PBASE - PTOP);
+  let dp = '';
+  PROFIL.points.forEach(([k, a], i) => { dp += (i ? 'L' : 'M') + fx(k).toFixed(1) + ' ' + fy(a).toFixed(1) + ' '; });
+  const xn = fx(RACE.nuit.kmEstime);
+  // etiquettes sur deux rangees alternees : neuf noms sur 700 unites se
+  // chevauchent sur une seule ligne
+  const pastilles = SECTIONS.map((s, i) => {
+    const x = fx(s.cumKm);
+    const y = PBASE + 11 + (i % 2) * 10;
+    const ancre = i === SECTIONS.length - 1 ? 'end' : 'middle';
+    return '<circle cx="' + x.toFixed(1) + '" cy="' + fy(altAt(s.cumKm)).toFixed(1) + '" r="' +
+      (s.arret === 'grand' ? 4 : 2.8) + '" fill="#fff" stroke="#1E2430" stroke-width="1.6"/>' +
+      '<line class="fcp-tick" x1="' + x.toFixed(1) + '" y1="' + PBASE + '" x2="' + x.toFixed(1) +
+        '" y2="' + (y - 7) + '"/>' +
+      '<text class="fcp-l" x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="' + ancre + '">' +
+      court(s.nom) + '</text>';
+  }).join('');
+
+  const profil = '<div class="fc-bloc fc-profil"><h3>Le profil</h3>' +
+    '<svg viewBox="0 0 ' + PW + ' 178" class="fcp">' +
+      '<path d="' + dp + 'L' + fx(PROFIL.kmTotal).toFixed(1) + ' ' + PBASE + ' L' + PPAD + ' ' + PBASE + ' Z" class="fcp-a"/>' +
+      '<rect class="fcp-n" x="' + xn.toFixed(1) + '" y="' + PTOP + '" width="' + (PW - PPAD - xn).toFixed(1) +
+        '" height="' + (PBASE - PTOP) + '"/>' +
+      '<path d="' + dp + '" class="fcp-t"/>' +
+      '<line class="fcp-nl" x1="' + xn.toFixed(1) + '" y1="' + PTOP + '" x2="' + xn.toFixed(1) + '" y2="' + PBASE + '"/>' +
+      '<text class="fcp-l" x="' + (xn + 4).toFixed(1) + '" y="' + (PTOP - 4) + '">nuit ~20:30</text>' +
+      pastilles +
+    '</svg></div>';
+
+  return '<div class="fc-tete">' +
+      '<div class="fc-titre">CCC <b>4330</b></div>' +
+      '<div class="fc-faits">vendredi 28 août &#183; départ <b>' + hhmm(DEPART) + '</b> Courmayeur &#183; vague 2 &#183; ' +
+        '101,5 km &#183; 6 062 m D+ &#183; barrière finale <b>' + hhmm(FIN) + '</b> &#183; cible 20h15</div>' +
+    '</div>' + tableau +
+    '<div class="fc-verso">' + profil +
+      '<div class="fc-colonnes">' + regles + nutri + '</div>' + panic + '</div>';
+}
+
 /* ============================ nutrition ============================ */
 
 function traceNutrition() {
@@ -833,7 +930,12 @@ function traceNutrition() {
         '<li><b>' + c.quoi + '</b><i>' + c.ou + '</i></li>').join('') +
     '</ul></div>' +
     '<div class="nu-bloc"><span>Portage</span><p><b>Au départ</b> ' + NUTRITION.portage.depart +
-      '<br><b>À Champex</b> ' + NUTRITION.portage.champex + '</p></div>';
+      '<br><b>À Champex</b> ' + NUTRITION.portage.champex + '</p></div>' +
+    '<div class="nu-bloc"><span>Ce que vaut un Näak</span><table class="nu-tab">' +
+      '<tr><th></th><th>gluc</th><th>kcal</th></tr>' +
+      NAAK.map(p => '<tr><td><b>' + p.n + '</b><small>' + p.u + ' &#183; ' + p.note + '</small></td>' +
+        '<td>' + p.g + ' g</td><td>' + p.kcal + '</td></tr>').join('') +
+    '</table></div>';
 }
 
 /* ============================ checklists ============================ */
@@ -903,6 +1005,8 @@ function majChecklist() {
 
   const f = document.getElementById('ckFiltre');
   f.classList.toggle('on', filtreReste);
+
+  if (document.getElementById('etatHote')) majEtat();
 }
 
 function basculeItem(id) {
@@ -965,6 +1069,59 @@ function majCompte() {
   sous.innerHTML = dessous;
 }
 
+/* ---- ou j'en suis ---- */
+
+function majEtat() {
+  const now = maintenant();
+  const n = CHECKLIST.reduce((s, g) => s + faits(g), 0);
+  const pct = TOTAL_ITEMS ? Math.round((n / TOTAL_ITEMS) * 100) : 0;
+  const jours = Math.max(0, Math.ceil((DEPART - now) / 86400000));
+
+  // les groupes ou il reste le plus a faire
+  const restants = CHECKLIST
+    .map(g => ({ t: g.t, r: g.items.length - faits(g) }))
+    .filter(g => g.r > 0)
+    .sort((a, b) => b.r - a.r);
+
+  const cls = pct >= 90 ? 'ok' : (pct >= 50 ? 'tiede' : '');
+  let h = '<div class="et">' +
+    '<div><span>jours</span><b>' + jours + '</b></div>' +
+    '<div><span>matériel</span><b class="' + cls + '">' + pct + '<i>%</i></b></div>' +
+    '<div><span>en attente</span><b class="' + (EN_ATTENTE.length ? 'tiede' : 'ok') + '">' +
+      EN_ATTENTE.length + '</b></div></div>' +
+    '<div class="et-piste"><i style="width:' + pct + '%"></i></div>';
+
+  h += '<div class="et-reste">';
+  if (!restants.length) h += 'Tout est coché. Il ne reste qu\'à partir.';
+  else h += '<b>' + (TOTAL_ITEMS - n) + ' items</b> à cocher, surtout dans ' +
+    restants.slice(0, 2).map(g => g.t.toLowerCase() + ' (' + g.r + ')').join(' et ') + '.';
+  if (EN_ATTENTE.length) h += '<br>Non tranché : ' + EN_ATTENTE.map(a => a.l).join(' &#183; ') + '.';
+  h += '</div>';
+
+  document.getElementById('etatHote').innerHTML = h;
+}
+
+const MOIS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+
+function majEcheances() {
+  const now = maintenant();
+  const jour0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let suivanteVue = false;
+
+  document.getElementById('echeancesHote').innerHTML = ECHEANCES.map(e => {
+    const d = new Date(e.d + 'T00:00:00');
+    const j = Math.round((d - jour0) / 86400000);
+    const passe = j < 0;
+    const suivante = !passe && !suivanteVue;
+    if (suivante) suivanteVue = true;
+    const quand = passe ? 'passé' : (j === 0 ? "aujourd'hui" : (j === 1 ? 'demain' : 'dans ' + j + ' j'));
+    return '<div class="ech' + (passe ? ' passe' : '') + (suivante ? ' suivante' : '') + '">' +
+      '<div class="j"><b>' + d.getDate() + '</b><i>' + MOIS[d.getMonth()] + '</i></div>' +
+      '<div class="c"><b>' + e.t + '</b><small>' + e.s + '</small></div>' +
+      '<div class="d">' + quand + '</div></div>';
+  }).join('');
+}
+
 function majRegleDuJour() {
   const now = maintenant();
   const jour = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
@@ -984,6 +1141,7 @@ function init() {
   document.documentElement.dataset.course = '0';
   majCompte();
   majRegleDuJour();
+  majEcheances();
   setInterval(() => { majCompte(); if (etat.vue === 'course') majCourse(); }, 1000);
 
   document.getElementById('profilHote').innerHTML = traceProfil();
@@ -1007,6 +1165,7 @@ function init() {
   majScenario();
 
   document.getElementById('nutriHote').innerHTML = traceNutrition();
+  document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
   document.getElementById('ckAttente').innerHTML = traceAttente();
   majChecklist();
   majCourse(true);

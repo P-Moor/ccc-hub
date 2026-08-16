@@ -10,10 +10,18 @@
 <meta name="description" content="Carnet de course CCC by UTMB 2026 &#183; dossard 4330">
 <title>CCC 4330 &#183; carnet de course</title>
 
+<meta name="color-scheme" content="light dark">
+
+<link rel="stylesheet" href="app.css">
+
+<!-- Les polices ne bloquent pas le rendu : l'app doit s'afficher tout de suite,
+     et rester belle avec les polices systeme si Google ne repond pas. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap"></noscript>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192">
@@ -39,6 +47,10 @@
     </div>
   </header>
 
+  <!-- Feuille de course : invisible a l'ecran, c'est le document papier du jour J.
+       Le telephone reste dans le sac, cette feuille est l'outil. -->
+  <section id="feuille-course" aria-hidden="true"></section>
+
   <main>
 
     <section class="vue actif" id="v-accueil">
@@ -47,6 +59,12 @@
         <div class="cd-grille" id="cdGrille"></div>
         <div class="cd-sous" id="cdSous"></div>
       </div>
+
+      <div class="titre">Où j'en suis</div>
+      <div class="carte" id="etatHote"></div>
+
+      <div class="titre">Ce qui vient</div>
+      <div class="carte" id="echeancesHote"></div>
 
       <div class="gros">
         <button data-va="deroule">Déroulé<span>9 ravitos, heure par heure</span></button>

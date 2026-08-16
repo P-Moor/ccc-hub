@@ -89,6 +89,28 @@ export const NUTRITION = {
   }
 };
 
+// Catalogue Näak, macros reprises de la base d'aliments du Hub
+// (backend/foods-database.js, etiquettes fabricant, partenaire officiel UTMB).
+export const NAAK = [
+  { n:"Ultra Energy Gel",        u:"1 gel",     g:44, kcal:200, note:"servi aux ravitos CCC" },
+  { n:"Ultra Energy Bar",        u:"1 barre 50 g", g:28, kcal:200, note:"ratio 4:1, servie aux ravitos" },
+  { n:"Ultra Energy Waffle",     u:"1 gaufre 30 g", g:16, kcal:140, note:"servie aux ravitos" },
+  { n:"Ultra Energy Purée",      u:"1 gourde 90 g", g:40, kcal:200, note:"texture purée, passe quand plus rien ne passe" },
+  { n:"Boost Energy Drink Mix",  u:"1 sachet / 500 ml", g:60, kcal:240, note:"ta flasque 1, parfum concombre" },
+  { n:"Ultra Energy Drink Mix",  u:"1 portion / 500 ml", g:55, kcal:250, note:"la recharge dispo aux ravitos" }
+];
+
+// Les echeances des 12 derniers jours, pour que l'accueil serve a quelque chose.
+export const ECHEANCES = [
+  { d:"2026-08-19", t:"Verdict chaussures Reveal", s:"Décision finale, S/Lab Ultra Glide" },
+  { d:"2026-08-20", t:"Vérification finale du matériel", s:"Pièce par pièce, liste en main" },
+  { d:"2026-08-20", t:"Racheter la nutrition manquante", s:"Ici, pas à Chamonix. Rien de nouveau après cette date." },
+  { d:"2026-08-24", t:"Préparation des sacs", s:"Sac de course et sac d'allègement" },
+  { d:"2026-08-26", t:"Départ", s:"Eurostar 9414, Liège-Guillemins 07h53" },
+  { d:"2026-08-27", t:"Retrait du dossard, 12h à 14h", s:"Espace Michel Croz · pièce d'identité + sac de course" },
+  { d:"2026-08-28", t:"CCC, départ 09:15", s:"Courmayeur, vague 2, dossard 4330" }
+];
+
 // §6.8 du brief
 export const REGLES = [
   { n:1, t:"Marche + bâtons dès le km 1" },
@@ -147,6 +169,16 @@ export const CHECKLIST = [
     { id:'cf10', l:"Garmin Fenix 8 chargée à 100 %", s:"GPX et ClimbPro configurés · alarme nutrition 30 min" },
     { id:'cf11', l:"Balise GPS", s:"Remise au retrait du dossard · caution reference dans le coffre" },
     { id:'cf12', l:"Trousse : traitement, antihistaminique, pansements en curatif, sel" }
+  ]},
+
+  { id:'nu', t:"Nutrition à emporter", s:"Compté pour 1 400 g de glucides, marge comprise", items:[
+    { id:'nu1', l:"15 Näak Ultra Energy Gel", s:"7 au départ + 8 dans le sac Champex, dont 5 caféinés · 44 g de gluc chacun, 660 g au total" },
+    { id:'nu2', l:"2 gels de réserve", s:"On n'y touche pas avant Vallorcine · 88 g" },
+    { id:'nu3', l:"5 Näak Ultra Energy Bar", s:"3 au départ + 2 à Champex · 28 g chacune, 140 g · ratio 4:1" },
+    { id:'nu4', l:"4 ziplocks de Näak Boost concombre", s:"2 au départ + 2 à Champex · 1 sachet = 60 g gluc et 500 mg Na par 500 ml, 240 g" },
+    { id:'nu5', l:"Compter les portions avant de partir", s:"Course + sac Champex + une marge. Le reste se recharge en Ultra Energy aux ravitos, 55 g par 500 ml." },
+    { id:'nu6', l:"Lire les étiquettes : pas de céleri", s:"Apiacées, jusqu'à l'allergologue" },
+    { id:'nu7', l:"Racheter ce qui manque avant le 20/08", s:"Ici, pas à Chamonix. Rien de nouveau dans l'assiette après cette date." }
   ]},
 
   { id:'sc', t:"Sac d'allègement Champex", s:"Déposé au départ à Courmayeur, retrouvé au km 54,6", items:[
