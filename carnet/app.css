@@ -69,7 +69,7 @@
 /* App, pas document : le glissement sur le profil ne doit jamais selectionner
    du texte ni ouvrir la loupe iOS. La selection reste permise sur le contenu
    que l'on peut vouloir copier. */
-body, .dossard, .tabbar, .profil-svg, .titre, .pf-lecture, .marge-barre, .marge-legende {
+body, .dossard, .tabbar, .profil-svg, .titre, .pf-lecture, .mg {
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
 
@@ -276,18 +276,35 @@ body::before {
   font-size: 12px; color: var(--texte-pale);
 }
 
-/* barre de marge */
-.marge-barre { margin-top: 4px; }
-.marge-piste {
-  height: 12px; border-radius: 6px; overflow: hidden;
+/* la marge sur les barrieres : une ligne par poste, lisible d'un coup */
+.mg { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.mg-n {
+  flex: 0 0 88px; font-family: var(--display); font-weight: 700;
+  font-size: 14px; letter-spacing: .03em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mg-p {
+  flex: 1; height: 12px; border-radius: 6px; overflow: hidden;
   background: var(--surface-2); border: 1px solid var(--bord);
-  display: flex;
 }
-.marge-piste i { display: block; height: 100%; background: linear-gradient(90deg, var(--alerte) 0%, var(--jour) 42%, var(--ok) 100%); }
-.marge-legende {
-  display: flex; justify-content: space-between; margin-top: 5px;
-  font-family: var(--mono); font-size: 11px; color: var(--texte-pale);
+.mg-p i { display: block; height: 100%; border-radius: 6px; }
+.mg-p i.ok    { background: var(--ok); }
+.mg-p i.tiede { background: var(--jour); }
+.mg-p i.chaud { background: var(--alerte); }
+.mg-v {
+  flex: 0 0 44px; text-align: right;
+  font-family: var(--display); font-weight: 700; font-size: 16px;
+  font-variant-numeric: tabular-nums;
 }
+.mg-v.ok { color: var(--ok); }
+.mg-v.tiede { color: var(--accent-txt); }
+.mg-v.chaud { color: var(--alerte); }
+.mg.serre .mg-n { color: var(--alerte); }
+.mg-mot {
+  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--bord);
+  font-size: 14px; line-height: 1.4; color: var(--texte-doux);
+}
+.mg-mot b { color: var(--texte); font-weight: 600; }
 
 /* ===================== accueil ===================== */
 
@@ -1367,7 +1384,7 @@ button.tl-ligne:active { background: var(--surface-2); }
   .carte { border: 1px solid var(--bord); box-shadow: none; break-inside: avoid; }
 
   /* Rien ne doit se couper au milieu */
-  .tl-ligne, .ck-grp, .att, .nu-bloc, .pf-lecture, .marge-barre { break-inside: avoid; }
+  .tl-ligne, .ck-grp, .att, .nu-bloc, .pf-lecture, .mg { break-inside: avoid; }
   .titre { break-after: avoid; }
 
   /* Le profil prend toute la largeur de la page */

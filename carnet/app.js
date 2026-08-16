@@ -369,21 +369,34 @@ function brancheScrub() {
 
 /* ---- barre de marge ---- */
 
+// Une ligne par poste : le nom, une barre proportionnelle, la valeur.
+// La couleur suit la convention du carnet : vert au dela de 1h30, ambre au
+// dela de 45 min, rouge en dessous. Pas de degrade decoratif.
 function traceMarge() {
   const plan = scenarioActif();
   const marges = SECTIONS.map((s, i) => versMin(margeDe(plan, i)));
-  const max = Math.max(...marges);
-  const h = 46;
-  const bars = SECTIONS.map((s, i) => {
-    const x = px(s.cumKm), v = marges[i] / max;
-    const bh = Math.max(3, v * h);
-    return '<rect x="' + (x - 8).toFixed(1) + '" y="' + (h - bh).toFixed(1) + '" width="16" height="' + bh.toFixed(1) +
-           '" rx="2.5" fill="url(#gradMarge)" opacity="' + (0.45 + v * 0.55).toFixed(2) + '"/>';
+  const max = Math.max(...marges, 1);
+  const mini = Math.min(...marges);
+  const iMini = marges.indexOf(mini);
+
+  const lignes = SECTIONS.map((s, i) => {
+    const txt = margeDe(plan, i);
+    const cl = classeMarge(txt);
+    return '<div class="mg' + (i === iMini ? ' serre' : '') + '">' +
+      '<div class="mg-n">' + court(s.nom) + '</div>' +
+      '<div class="mg-p"><i class="' + cl + '" style="width:' +
+        Math.max(3, (marges[i] / max) * 100).toFixed(1) + '%"></i></div>' +
+      '<div class="mg-v ' + cl + '">' + txt + '</div></div>';
   }).join('');
-  return '<svg viewBox="0 0 ' + VB_W + ' ' + (h + 2) + '" style="display:block;width:100%;height:auto" role="img" aria-label="Marge sur les barrieres horaires">' +
-    '<defs><linearGradient id="gradMarge" x1="0" y1="1" x2="0" y2="0">' +
-      '<stop offset="0%" stop-color="var(--alerte)"/><stop offset="55%" stop-color="var(--jour)"/><stop offset="100%" stop-color="var(--ok)"/>' +
-    '</linearGradient></defs>' + bars + '</svg>';
+
+  return lignes + '<div class="mg-mot">' + motMarge(plan, marges, iMini) + '</div>';
+}
+
+function motMarge(plan, marges, iMini) {
+  if (plan.id === 'C') return "Vingt minutes partout. Ce n'est pas une marge, c'est une limite.";
+  const nom = court(SECTIONS[iMini].nom);
+  return 'La barrière la plus serrée est <b>' + nom + '</b>, avec ' + margeDe(plan, iMini) +
+    '. Elle passe, tout le reste respire : la marge ne fait que grandir ensuite.';
 }
 
 /* ============================ feuille ============================ */
@@ -485,9 +498,6 @@ function majScenario() {
   document.getElementById('lecPlan').textContent = 'passage ' + s.id;
 
   document.getElementById('margeHote').innerHTML = traceMarge();
-  document.getElementById('margeLegende').innerHTML =
-    '<span>' + court(SECTIONS[0].nom) + ' ' + margeDe(s, 0) + '</span>' +
-    '<span>' + court(SECTIONS[SECTIONS.length - 1].nom) + ' ' + margeDe(s, SECTIONS.length - 1) + '</span>';
 
   litProfil(kmCourant);
   if (document.getElementById('ravitosHote')) traceRavitos();
