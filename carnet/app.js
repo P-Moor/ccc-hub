@@ -603,7 +603,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-24';
+const VERSION = 'ccc-v2-carnet-25';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1866,7 +1866,7 @@ function traceCoffre() {
     '<div class="cff-note">' + L.retour.marge + '</div>' +
 
     (L.documents ? '<div class="fi-titre">Les documents</div>' +
-      ['course', 'aller', 'sur place', 'retour', 'notes'].map(cat => {
+      ['course', 'santé', 'aller', 'sur place', 'retour', 'notes'].map(cat => {
         const liste = L.documents.filter(d => d.cat === cat);
         if (!liste.length) return '';
         return '<div class="dc-cat">' + cat + '</div>' + liste.map(d => {
