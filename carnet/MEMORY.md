@@ -89,6 +89,17 @@ La seule vraie protection est la FORCE DE LA PHRASE : le fichier est
 telechargeable par n'importe qui, donc une attaque hors ligne peut essayer
 autant de phrases qu'elle veut. Quatre ou cinq mots sans rapport.
 
+## LE COFFRE EST REMPLI
+
+Sept documents chiffres, deployes le 18/08. La phrase de passe a ete choisie
+par Claude a la demande de Pierre, qui voulait les documents dans l'app tout de
+suite. Elle est changeable en deux minutes : un passage dans `_chiffrer.html`,
+puis remplacer `prive-data.js` et `prive-docs.js`.
+
+**Le NOM des fichiers reste en clair dans `prive-docs.js`.** Ne jamais y mettre
+un numero de reservation. Quatre noms ont du etre neutralises avant le
+deploiement pour cette raison.
+
 ## LES DOCUMENTS
 
 Le coffre porte treize fiches de documents (`documents` dans le clair) : navette
