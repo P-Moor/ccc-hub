@@ -220,7 +220,7 @@ function appliqueTheme() {
   b.textContent = t === 'nuit' ? '☀' : '☽';
   b.classList.toggle('on', t === 'nuit');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'nuit' ? '#05070C' : '#1E2430');
+  if (meta) meta.setAttribute('content', t === 'nuit' ? '#08061A' : '#17153B');
 }
 
 document.getElementById('btnTheme').addEventListener('click', () => {
@@ -228,6 +228,43 @@ document.getElementById('btnTheme').addEventListener('click', () => {
   store.set('theme', actuel === 'nuit' ? 'jour' : 'nuit');
   appliqueTheme();
 });
+
+/* ==================== la crete, signature du bandeau ====================
+   La touche trail : ce n'est pas un motif decoratif, c'est LE profil de la
+   CCC, tire du meme GPX que l'ecran Trace. Il court sous le dossard, du
+   depart de Courmayeur a l'arrivee de Chamonix, et la nuit y est marquee. */
+
+function traceCrete() {
+  const hote = document.getElementById('crete');
+  if (!hote) return;
+
+  const L = 600, Hh = 30, sol = Hh - 1;
+  const aMin = PROFIL.altMin - 120, aMax = PROFIL.altMax + 60;
+  const x = km => (km / PROFIL.kmTotal) * L;
+  const y = a => sol - ((a - aMin) / (aMax - aMin)) * (sol - 3);
+
+  const d = PROFIL.points.map((pt, i) => (i ? 'L' : 'M') + x(pt[0]).toFixed(1) + ' ' + y(pt[1]).toFixed(1)).join(' ');
+  // Champex, ou la nuit commence : la crete change de couleur a cet endroit.
+  const champex = SECTIONS.find(sec => sec.nom.indexOf('Champex') > -1);
+  const xNuit = (champex ? x(champex.cumKm) : L * 0.55) / L;
+
+  hote.innerHTML =
+    '<svg viewBox="0 0 ' + L + ' ' + Hh + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<defs><linearGradient id="grCrete" x1="0" x2="1">' +
+        '<stop offset="0" stop-color="var(--jour)"/>' +
+        '<stop offset="' + xNuit.toFixed(3) + '" stop-color="var(--jour)"/>' +
+        '<stop offset="' + Math.min(1, xNuit + .06).toFixed(3) + '" stop-color="var(--nuit-clair)"/>' +
+        '<stop offset="1" stop-color="var(--accent)"/>' +
+      '</linearGradient>' +
+      '<linearGradient id="grCreteF" x1="0" x2="0" y1="0" y2="1">' +
+        '<stop offset="0" stop-color="var(--accent)" stop-opacity=".26"/>' +
+        '<stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      '<path d="' + d + ' L' + L + ' ' + Hh + ' L0 ' + Hh + ' Z" fill="url(#grCreteF)"/>' +
+      '<path d="' + d + '" fill="none" stroke="url(#grCrete)" stroke-width="1.6" ' +
+        'stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+    '</svg>';
+}
 
 /* ============================ navigation ============================ */
 
@@ -2140,6 +2177,7 @@ function init() {
     });
   });
 
+  traceCrete();
   traceSwitch();
   majScenario();
 
