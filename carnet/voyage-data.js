@@ -9,7 +9,7 @@
 export const VOYAGE = {
 
   meta: {
-    principe: "9 h 27 de transport porte-à-porte, deux jours avant 101 km. Le seul objectif : arriver avec des pieds en état.",
+    principe: "10 h 07 de transport porte-à-porte, deux jours avant 101 km. Le seul objectif : arriver avec des pieds en état.",
     risquePrincipal: "Le pied de Pierre gonfle en position assise — c'est le mécanisme qui a disqualifié les S/Lab Ultra Glide 2 (couture de languette sur l'exostose MTP1 en conduisant). C'est le risque le moins surveillé de la préparation."
   },
 
@@ -93,27 +93,24 @@ export const VOYAGE = {
 
   retour: {
     label: "Retour",
-    alerte: "🔴 INCOHÉRENCE À VÉRIFIER : le séjour est noté jusqu'au 30/08, le FlixBus retour est réservé le 29/08 à 07:30, et l'agenda Famille contient « 50 ans Pierre » le 29 à 19h. Tu finis la CCC le 29 au matin. Ces trois choses ne peuvent pas être vraies en même temps.",
+    resolu: "\u2705 Dates coherentes : sejour jusqu'au 30, retour le 30. L'incoherence signalee le 16 est levee.",
+    renvoi: "Les references completes sont dans logistique-data.js, qui fait foi.",
     segments: [
-      {
-        id: "r1", type: "bus", ref: "FlixBus Alpine Fleet · réservation reference dans le coffre",
-        de: "Chamonix Centre", vers: "Aéroport de Genève",
-        depart: "07:30", date: "à vérifier — 29 ou 30/08 ?"
-      },
-      {
-        id: "r2", type: "avion", ref: "Brussels Airlines SN2714 · réf. reference dans le coffre · e-billet e-billet dans le coffre",
-        de: "Genève (GVA)", vers: "Bruxelles (BRU)",
-        depart: "11:25", arrivee: "12:45", duree: "1h20",
-        bagages: "1 petit bagage à main + 1 cabine 8 kg + 1 soute 23 kg",
-        alerte: "⚠️ Les bâtons Leki ne passent PAS en cabine — ils partent en soute. Prévoir de quoi les protéger."
-      }
+      { id: "r1", type: "bus", ref: "Bus CDE3294 \u00b7 Alpine Fleet \u00b7 r\u00e9f. references dans le coffre",
+        de: "Chamonix Centre", vers: "A\u00e9roport de Gen\u00e8ve",
+        depart: "07:30", arrivee: "09:00", date: "dimanche 30 ao\u00fbt" },
+      { id: "r2", type: "avion", ref: "Brussels Airlines SN2714 \u00b7 r\u00e9f. reference dans le coffre",
+        de: "Gen\u00e8ve (GVA)", vers: "Bruxelles (BRU)",
+        depart: "11:25", arrivee: "12:45", duree: "1h20", date: "dimanche 30 ao\u00fbt",
+        bagages: "1 petit bagage \u00e0 main + 1 cabine 8 kg + 1 soute 23 kg",
+        alerte: "\u26a0\ufe0f Les b\u00e2tons Leki ne passent PAS en cabine \u2014 ils partent en soute. Pr\u00e9voir de quoi les prot\u00e9ger." }
     ],
+    marge: "2h25 entre l'arriv\u00e9e du bus et le d\u00e9collage \u2014 confortable apr\u00e8s 101 km",
     aFaire: [
-      { id:"r10", txt:"Vérifier la date du FlixBus retour vs fin de séjour", crit:"critique" },
-      { id:"r11", txt:"Vérifier l'événement « 50 ans Pierre » du 29 à 19h", crit:"critique" },
-      { id:"r12", txt:"Récupérer le sac d'allègement à l'arrivée avant de quitter Chamonix" },
-      { id:"r13", txt:"Récupérer la caution balise GPS (Swikly reference dans le coffre)" },
-      { id:"r14", txt:"Protéger les bâtons pour la soute" }
+      { id:"r12", txt:"R\u00e9cup\u00e9rer le sac d'all\u00e8gement avant de quitter Chamonix" },
+      { id:"r13", txt:"R\u00e9cup\u00e9rer la caution balise GPS (Swikly reference dans le coffre)" },
+      { id:"r14", txt:"Prot\u00e9ger les b\u00e2tons pour la soute" },
+      { id:"r15", txt:"D\u00e9part du logement \u00e0 7h, deux heures avant la fen\u00eatre de check-out", crit:"critique" }
     ]
   },
 

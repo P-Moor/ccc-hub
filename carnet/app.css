@@ -1631,6 +1631,245 @@ button.tl-ligne:active { background: var(--surface-2); }
   background: color-mix(in srgb, var(--jour) 18%, transparent); color: var(--accent-txt);
 }
 
+/* ===================== journal, meteo, carb, gants, stock ===================== */
+
+/* -- journal : la seule zone de l'app ou Pierre ecrit -- */
+.jn-l { margin-bottom: 10px; }
+.jn-l label {
+  display: block; margin-bottom: 4px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.jn-l textarea, .jn-l input, .jn-l select {
+  width: 100%; min-height: var(--tap); padding: 9px 10px;
+  border: 1px solid var(--bord); border-radius: 9px;
+  background: var(--surface-2); color: var(--texte);
+  font-family: var(--texte-f); font-size: 15.5px; line-height: 1.35;
+  -webkit-appearance: none; appearance: none;
+}
+.jn-l textarea { resize: vertical; }
+.jn-l select { background-image: none; }
+.jn-g { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.jn-e {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 11px 12px; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--bord);
+  border-radius: var(--r); box-shadow: var(--ombre);
+}
+.jn-d {
+  flex: 0 0 46px; font-family: var(--display); font-weight: 700;
+  font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--texte-pale); padding-top: 2px;
+}
+.jn-c { flex: 1; min-width: 0; }
+.jn-c p { font-size: 15.5px; line-height: 1.4; word-wrap: break-word; }
+.jn-t { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.jn-t span {
+  padding: 2px 7px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--mono); font-size: 10.5px; color: var(--texte-doux);
+}
+.jn-x {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
+  background: none; border: 0; color: var(--texte-pale); font-size: 13px;
+}
+
+/* -- meteo : ce qu'on ne sait pas encore compte autant que ce qu'on sait -- */
+.mt-av {
+  padding: 10px 12px; border-radius: 9px; margin-bottom: 10px;
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 14.5px; line-height: 1.42; color: var(--texte);
+}
+.mt-q { font-size: 14.5px; line-height: 1.42; color: var(--texte-doux); }
+.mt-t { width: 100%; border-collapse: collapse; }
+.mt-t td { padding: 7px 0; border-top: 1px solid var(--bord); font-size: 15px; vertical-align: top; }
+.mt-t tr:first-child td { border-top: 0; }
+.mt-t td:last-child {
+  text-align: right; white-space: nowrap;
+  font-family: var(--mono); font-size: 13px; color: var(--texte-doux);
+}
+.mt-t small { display: block; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.mt-t tr.crit td { color: var(--alerte); font-weight: 600; }
+.mt-t tr.crit td small { color: var(--alerte); opacity: .82; }
+.mt-c {
+  margin-top: 12px; padding: 10px 12px; border-radius: 9px;
+  background: var(--surface-2); font-size: 14.5px; line-height: 1.45;
+}
+.mt-p { margin-top: 8px; font-size: 13.5px; line-height: 1.42; color: var(--texte-pale); }
+
+/* -- carb cycling : neuf jours, un coup d'oeil -- */
+.cb-x { font-size: 14px; line-height: 1.42; color: var(--texte-doux); margin-bottom: 10px; }
+.cb-g { display: flex; gap: 5px; }
+.cb {
+  flex: 1; min-width: 0; padding: 7px 2px; border-radius: 8px; text-align: center;
+  border: 1px solid var(--bord); background: var(--surface-2);
+}
+.cb b { display: block; font-family: var(--display); font-size: 18px; line-height: 1; }
+.cb span {
+  display: block; margin-top: 3px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .02em;
+  text-transform: uppercase; color: var(--texte-doux);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* sur les deux teintes vertes les plus denses, le doux tombe sous AA */
+.cb.n-high span, .cb.n-rech span { color: var(--texte); }
+.cb.n-low     { border-color: var(--alerte); }
+.cb.n-med     { background: color-mix(in srgb, var(--jour) 8%, var(--surface-2)); }
+.cb.n-medhigh { background: color-mix(in srgb, var(--jour) 16%, var(--surface-2)); }
+.cb.n-high    { background: color-mix(in srgb, var(--ok) 20%, var(--surface-2)); border-color: var(--ok); }
+.cb.n-rech    { background: color-mix(in srgb, var(--ok) 34%, var(--surface-2)); border-color: var(--ok); }
+.cb.auj { outline: 2px solid var(--trace); outline-offset: 1px; }
+.cb.auj b { color: var(--texte); }
+.cb-r {
+  margin-top: 11px; padding: 9px 11px; border-radius: 9px;
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-family: var(--display); font-size: 15px; letter-spacing: .03em;
+}
+.cb-n { display: flex; gap: 9px; margin-top: 8px; font-size: 13.5px; line-height: 1.42; color: var(--texte-doux); }
+.cb-n b {
+  flex: 0 0 22px; height: 22px; border-radius: 6px; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--display); font-size: 13px; color: var(--texte);
+}
+
+/* -- gants et telephone : deux decisions au ressenti -- */
+.gt-r {
+  padding: 10px 12px; border-radius: 9px; margin-bottom: 10px;
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 15px; line-height: 1.42; font-weight: 500;
+}
+.gt-m { font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 6px; }
+.gt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--bord); }
+.gt > b {
+  flex: 0 0 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--display); font-size: 13px;
+}
+.gt > div { flex: 1; }
+.gt > div > b { display: block; font-size: 15px; font-weight: 600; }
+.gt small { display: block; font-size: 13px; color: var(--texte-doux); margin-top: 2px; line-height: 1.35; }
+.gt-res, .gt-reg {
+  margin-top: 10px; padding: 9px 11px; border-radius: 9px;
+  background: var(--surface-2); font-size: 14px; line-height: 1.42;
+}
+.gt-res span, .gt-reg span {
+  display: block; margin-bottom: 3px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.gt-res small { display: block; margin-top: 3px; font-size: 12.5px; color: var(--texte-pale); }
+.tl-int {
+  padding: 10px 12px; border-radius: 9px; margin-bottom: 8px;
+  background: color-mix(in srgb, var(--alerte) 12%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 15px; line-height: 1.42; font-weight: 500;
+}
+.tl-d { font-family: var(--mono); font-size: 11.5px; line-height: 1.45; color: var(--texte-pale); margin-bottom: 10px; }
+
+/* -- stock et cafeine : l'inventaire est ferme -- */
+.st-h { display: flex; gap: 8px; margin-bottom: 12px; }
+.st-h > div {
+  flex: 1; padding: 8px 4px; border-radius: 9px; text-align: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.st-h span {
+  display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.st-h b { display: block; margin-top: 2px; font-family: var(--display); font-size: 20px; line-height: 1.1; }
+.st-h b.ok { color: var(--ok); font-size: 17px; }
+.st { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-top: 1px solid var(--bord); }
+.st-l .st:first-child { border-top: 0; }
+.st > b {
+  flex: 0 0 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--display); font-size: 14px;
+}
+.st-c { flex: 1; min-width: 0; }
+.st-c b { display: block; font-size: 15px; font-weight: 500; line-height: 1.28; }
+.st-c small { display: block; margin-top: 2px; font-size: 12px; color: var(--texte-pale); line-height: 1.38; }
+.st-ss { margin-top: 14px; padding: 11px 12px; border-radius: 9px; background: var(--surface-2); }
+.st-ss > b { display: block; font-size: 15px; line-height: 1.4; }
+.st-ss p { margin-top: 6px; font-size: 14px; line-height: 1.42; color: var(--texte-doux); }
+.st-trou {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: color-mix(in srgb, var(--alerte) 12%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 14px; line-height: 1.42;
+}
+.st-r { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--bord); }
+.st-r p { font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); margin-bottom: 4px; }
+.nu-cf.res { opacity: .88; }
+.nu-cf.res > b { background: var(--surface-2); color: var(--texte-doux); }
+
+/* -- pourquoi tu peux le faire -- */
+.cf-btn {
+  width: 100%; margin-top: 20px; padding: 14px 16px; text-align: left;
+  border-radius: var(--r); border: 1px solid var(--bord);
+  background: var(--surface); color: var(--texte); box-shadow: var(--ombre);
+  font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .02em;
+}
+.cf-btn span {
+  display: block; margin-top: 3px;
+  font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.cf-ref {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 10px;
+}
+.cf-t { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.cf-t th {
+  padding: 5px 0; text-align: right; border-bottom: 1px solid var(--bord);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--texte-pale); font-weight: 400;
+}
+.cf-t th:first-child { text-align: left; }
+.cf-t td { padding: 7px 0; border-top: 1px solid var(--bord); font-size: 14.5px; text-align: right; }
+.cf-t td:first-child { text-align: left; color: var(--texte-doux); }
+.cf-t tr.cle td { font-weight: 600; color: var(--texte); }
+.cf-t tr.cle td:last-child { color: var(--ok); }
+.cf-m { padding: 11px 0; border-top: 1px solid var(--bord); }
+.cf-m > b { display: block; font-family: var(--display); font-size: 17px; letter-spacing: .01em; }
+.cf-m p { margin-top: 5px; font-size: 15px; line-height: 1.48; color: var(--texte-doux); }
+.cf-v {
+  margin-top: 12px; padding: 11px 12px; border-radius: 9px;
+  background: color-mix(in srgb, var(--jour) 12%, transparent);
+  border-left: 3px solid var(--accent);
+}
+.cf-v > b { display: block; font-family: var(--display); font-size: 16px; }
+.cf-v p { margin-top: 5px; font-size: 14.5px; line-height: 1.45; color: var(--texte-doux); }
+.cf-v p.cc { color: var(--texte); font-weight: 500; }
+
+/* -- le RDV medecin, replie sous les trous ouverts -- */
+.rdv {
+  margin-top: 10px; border: 1px solid var(--bord); border-radius: var(--r);
+  background: var(--surface); box-shadow: var(--ombre); overflow: hidden;
+}
+.rdv > summary { padding: 11px 13px; min-height: var(--tap); cursor: pointer; list-style: none; }
+.rdv > summary::-webkit-details-marker { display: none; }
+.rdv > summary b { display: block; font-family: var(--display); font-size: 16px; }
+.rdv > summary span {
+  display: block; margin-top: 2px;
+  font-family: var(--mono); font-size: 11px; color: var(--texte-pale);
+}
+.rdv-s { display: flex; gap: 10px; padding: 9px 13px; border-top: 1px solid var(--bord); }
+.rdv-s > b {
+  flex: 0 0 22px; height: 22px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--display); font-size: 12px;
+}
+.rdv-s > div { flex: 1; }
+.rdv-s > div > b { display: block; font-size: 14.5px; font-weight: 600; }
+.rdv-s > div > b i { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-txt); font-style: normal; }
+.rdv-s p { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--texte-doux); }
+.rdv-s.neuf { background: color-mix(in srgb, var(--jour) 7%, transparent); }
+
 /* ===================== feuille (bottom sheet) ===================== */
 
 .feuille-fond {

@@ -67,8 +67,14 @@ export const SAC = {
     { id:"c27", zone:"sac", crit:"perso", phase:"sacs", txt:"🍫 Nutrition sac de départ", detail:"7 gels + 3 barres + 2 mini-ziplocks Boost + 2 gels de réserve" },
     { id:"c28", zone:"sac", crit:"perso", phase:"sacs", txt:"💊 Trousse perso", detail:"Allopurinol + colchicine (⏳ selon avis médecin) · antihistaminique non sédatif (⏳) · Compeed EN CURATIF uniquement · sels/électrolytes" },
     { id:"c29", zone:"sac", crit:"perso", phase:"sacs", txt:"🔋 Batterie externe + câble" },
-    { id:"c30", zone:"sac", crit:"perso", phase:"matin", txt:"Short 2-en-1 + t-shirt Salomon Sense Aero Graphic (S) + S/Lab Ultra Seamless" },
-    { id:"c31", zone:"sac", crit:"confort", phase:"sacs", txt:"Epitact Epithelium Tact 05", detail:"⚠️ NON VALIDÉ — testé le 08/08 dans une chaussure disqualifiée (pire brûlure du dossier). Emporter seulement si le test du 19 le confirme. Retirable à Champex." },
+    { id:"c30", zone:"sac", crit:"perso", phase:"matin", txt:"👕 BV Sport RTECH PRO + short 2-en-1", detail:"Compression, poches ventrales, DRYARN. Candidat n°1, à valider le mercredi 19. Pas de ceinture (carquois à bâtons) donc aucune superposition : les poches ventrales sont un gain, gels et téléphone accessibles sans ouvrir le sac." },
+    { id:"c30b", zone:"sac", crit:"perso", phase:"matin", txt:"👕 T-shirt Asics noir", detail:"Plan B si le RTECH PRO frotte au test du 19" },
+    { id:"c31", zone:"sac", crit:"confort", phase:"sacs", txt:"Epitact Epithelium Tact 05", detail:"⚠️ NON VALIDÉ — testé le 08/08 dans une chaussure disqualifiée, pire brûlure du dossier. Optionnel conditionnel : n'entre dans le sac que si le test du 19 le confirme. Retirable à Champex." },
+
+    { id:"c32", zone:"allegement", crit:"perso", phase:"veille", txt:"🔥 Chauffe-mains TerraTherm 12 h — 2 paires", detail:"Activer 20 min AVANT d'en avoir besoin, en s'asseyant à Champex · jamais à même la peau, entre les Asics et les Overglove · vérifier la date de péremption" },
+    { id:"c33", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥣 Bol pliable silicone 400-500 ml", detail:"Lifeventure · BYOU, l'organisation ne distribue aucune vaisselle" },
+    { id:"c34", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥄 Spork ou cuillère légère", detail:"BYOU également" },
+    { id:"c35", zone:"bagage", crit:"perso", phase:"sacs", txt:"🧤 Moufles Salomon rembourrées", detail:"Réserve grand froid · restent en VALISE à Chamonix · décision le 27 au soir selon la météo réelle et le kit annoncé par l'orga" },
 
     { id:"a01", zone:"allegement", crit:"perso", phase:"veille", txt:"🧦 Chaussettes BV Sport SÈCHES" },
     { id:"a02", zone:"allegement", crit:"perso", phase:"veille", txt:"🍫 Nutrition 2ᵉ moitié", detail:"8 gels DONT LES 5 CAFÉINÉS + 2 barres + 2 mini-ziplocks Boost" },
@@ -95,6 +101,45 @@ export const SAC = {
     { id:"b15", zone:"bagage", crit:"confort", phase:"sacs", txt:"🛍️ Sac plastique pour le linge sale" },
     { id:"b16", zone:"bagage", crit:"perso", phase:"sacs", txt:"👟 Chaussures larges pour le train", detail:"⛔ NE PAS voyager en Reveal — 9 h assis, le pied gonfle" }
   ],
+
+  // Au ressenti, pas de seuil impose. La regle est de devancer, pas de reagir.
+  gants: {
+    mode: "au ressenti — pas de seuil imposé",
+    paliers: [
+      { conditions: "Journée",             config: "Gantelets Leki Trigger Shark" },
+      { conditions: "Soir / nuit fraîche", config: "Gants Leki Ultra" },
+      { conditions: "+ Pluie",             config: "+ Sur-gants Leki Overglove" },
+      { conditions: "Froid",               config: "Asics + gantelets (+ sur-gants si besoin)" }
+    ],
+    regleUnique: "Gants AVANT d'avoir froid, jamais quand tu as froid. Une fois le spasme déclenché, il ne s'inverse pas en mouvement.",
+    reserve: { objet: "Moufles Salomon rembourrées", ou: "VALISE à Chamonix",
+               decision: "le 27 au soir, selon météo réelle + kit orga annoncé" },
+    reglementaire: { statut: "risque assumé par Pierre",
+                     note: "Pas de mail à l'orga. Si un contrôle refuse la combinaison, Pierre accepte la conséquence." }
+  },
+
+  // Les deux longs chauds : le mouille part a Champex, le sec prend le relais.
+  longsChauds: {
+    principe: "Le n°1 conforme est porté ou transporté au départ. À Champex, le mouillé part dans le sac de délestage et le n°2 sec prend le relais.",
+    conformite: "La conformité n'est JAMAIS rompue : à tout moment tu portes ou transportes un long chaud conforme.",
+    consequence: "🔴 Les DEUX doivent faire ≥ 180 g. C'est l'objet de la vérification v02."
+  },
+
+  // Diagnostic du 17/08 : rien a changer avant le 28.
+  telephone: {
+    diagnostic: "iPhone 15 Pro Max · batterie 84 % état Normal · 103 Go libres sur 256 · 794 cycles. Aucune cause matérielle aux ralentissements.",
+    interdit: "⛔ PAS DE MODE AVION. Le règlement exige un téléphone allumé, joignable, numéro non masqué. C'est du matériel obligatoire de sécurité : le mode avion coupe exactement ce pour quoi il est obligatoire.",
+    protocole: [
+      { id:"tel1", txt:"🔋 Mode économie d'énergie dès le départ" },
+      { id:"tel2", txt:"📶 Wi-Fi et Bluetooth désactivés", detail:"le plus gros levier autorisé" },
+      { id:"tel3", txt:"🌑 Luminosité minimale + mode sombre", detail:"écran OLED" },
+      { id:"tel4", txt:"🔕 Ne pas déranger" },
+      { id:"tel5", txt:"⛔ Actualisation en arrière-plan désactivée" },
+      { id:"tel6", txt:"🌡️ Téléphone contre le corps la nuit", detail:"le froid tue les batteries" },
+      { id:"tel7", txt:"🔌 Recharge à Champex", detail:"brancher en s'asseyant, débrancher en repartant" },
+      { id:"tel8", txt:"🛰️ Ne PAS doubler le suivi live", detail:"la balise GPS de l'orga suffit — meilleur gain de batterie disponible" }
+    ]
+  },
 
   kits: [
     {
@@ -126,7 +171,7 @@ export const SAC = {
 
   verifications: [
     { id:"v01", txt:"Mesurer le gobelet au mètre", pourquoi:"Beaucoup de gobelets souples font 125 ml → non conformes. Il faut ≥ 150 ml.", quand:"2026-08-20", crit:"reglementaire" },
-    { id:"v02", txt:"Peser la seconde couche chaude", pourquoi:"Elle doit faire ≥ 180 g (homme M), ou 110 g + coupe-vent DWR.", quand:"2026-08-20", crit:"reglementaire" },
+    { id:"v02", txt:"Peser LES DEUX t-shirts longs chauds", pourquoi:"Le n°1 part au départ, le n°2 prend le relais à Champex quand le premier est mouillé. La conformité n'est jamais rompue, donc LES DEUX doivent faire ≥ 180 g (ou 110 g + coupe-vent DWR).", quand:"2026-08-20", crit:"reglementaire" },
     { id:"v03", txt:"Remplir le sac à 2 L et le porter", pourquoi:"Si le kit canicule est activé, 2 L sont obligatoires. Vérifier que le sac les accepte ET que ça reste confortable.", quand:"2026-08-20", crit:"reglementaire" },
     { id:"v04", txt:"Vérifier la validité de la carte d'identité", pourquoi:"Obligatoire au retrait du dossard. Sans elle, pas de dossard.", quand:"2026-08-20", crit:"reglementaire" },
     { id:"v05", txt:"Vérifier que les Leki Overglove comptent comme gants chauds", pourquoi:"Ce sont des sur-gants de bâtons. Si non acceptés, il faut une vraie paire imperméable.", quand:"2026-08-20", crit:"reglementaire" },

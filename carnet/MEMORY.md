@@ -83,3 +83,26 @@ indépendante et n'est jamais touchée par une mise à jour.
   l'écran Journal, l'écran Pourquoi tu peux le faire.
 - **Question ouverte pour Pierre** : décocher `c30` et `v02` une fois ?
   Que fait-on des données personnelles dans un dépôt public ?
+
+- **Fait, deuxième passe** : toutes les corrections de contenu du 18/08 sont
+  livrées. `sac-data.js` (RTECH PRO en c30, plan B Asics c30b, Epitact
+  conditionnel, chauffe-mains, bol pliable, spork, moufles, les deux longs
+  chauds, les quatre paliers de gants, le protocole téléphone en huit points),
+  `nutrition-data.js` (inventaire fermé à 29 unités et 974 g, sucré/salé et le
+  trou Champex → Trient, répartition des deux sacs, plan caféine à quatre doses
+  plus réserve), `prepa-data.js` (médecin déplacé au jeudi 20, quatrième sujet
+  mains au froid, carb cycling en neuf jours), `voyage-data.js` (10 h 07,
+  retour du dimanche 30), plus `meteo-data.js` et `confiance-data.js`.
+- **Nouveaux écrans** : Journal (clé `ccc-journal-v1`, note libre plus pied,
+  zone, km, nuit, poids) qui remplace l'onglet Vérifs dans la barre ; les
+  vérifications sont repliées dans Le sac. « Pourquoi tu peux le faire » ouvre
+  en feuille depuis Aujourd'hui.
+- **Migration schéma 2** : `c30` et `v02` décochés une seule fois, les
+  identifiants inconnus archivés dans `ccc-v2-orphelins`, jamais effacés.
+- **Deux bogues corrigés au passage** : « Où j'en suis » restait vide au
+  chargement (`majEtat` n'était appelé qu'après une coche) et la date du
+  journal partait d'un jour en arrière (`toISOString` repasse en UTC).
+- **Non déployé volontairement** : `logistique-data.js`, qui attend le coffre
+  chiffré.
+- **Vérifié** : zéro erreur console, zéro échec de contraste AA sur les cinq
+  écrans de Préparer, en thème jour et en thème nuit.

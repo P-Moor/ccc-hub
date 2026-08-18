@@ -7,6 +7,8 @@ import { AFFUTAGE } from './prepa-data.js';
 import { NUTRITION as NUT } from './nutrition-data.js';
 import { SAC } from './sac-data.js';
 import { VOYAGE } from './voyage-data.js';
+import { METEO } from './meteo-data.js';
+import { CONFIANCE } from './confiance-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -38,7 +40,7 @@ const store = {
    Ce qui suit ajoute le reste : un numero de schema, l'archivage des ids
    orphelins plutot que leur suppression, et l'export / import complet. */
 
-const SCHEMA = 1;
+const SCHEMA = 2;
 const CLE_JOURNAL = 'ccc-journal-v1';
 
 const CLES_ETAT = [
@@ -60,11 +62,27 @@ function archiveOrphelins(idsConnus) {
   return n;
 }
 
+// Deux items ont change d'objet, pas seulement de libelle : c30 est passe du
+// Salomon Sense Aero au BV Sport RTECH PRO, et v02 demande maintenant de peser
+// DEUX t-shirts au lieu d'un. Un item coche qui ne correspond plus a la realite
+// est plus dangereux qu'un item decoche : on les remet a zero, une seule fois.
+const DECOCHAGES = { 2: ['c30', 'v02'] };
+
 function migre(idsConnus) {
   const v = store.get('schema', 0);
   const n = archiveOrphelins(idsConnus);
-  if (v !== SCHEMA) store.set('schema', SCHEMA);
-  return { de: v, vers: SCHEMA, archives: n };
+  let remis = [];
+  if (v < SCHEMA) {
+    const etat = store.get('check', {}) || {};
+    for (let k = v + 1; k <= SCHEMA; k++) {
+      (DECOCHAGES[k] || []).forEach(id => {
+        if (etat[id]) { delete etat[id]; remis.push(id); }
+      });
+    }
+    if (remis.length) store.set('check', etat);
+    store.set('schema', SCHEMA);
+  }
+  return { de: v, vers: SCHEMA, archives: n, remisAZero: remis };
 }
 
 function exporteEtat() {
@@ -218,7 +236,7 @@ const PARTIES = {
   prepa: [
     ['aujourdhui', "Aujourd'hui", '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 11h18"/><path d="M9 16l1.8 1.8L14.5 14"/>'],
     ['sac', 'Le sac', '<path d="M8 8V6.5a4 4 0 0 1 8 0V8"/><rect x="4" y="8" width="16" height="13" rx="3"/><path d="M9 13h6"/>'],
-    ['listes', 'Vérifs', '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M8 10.5l1.8 1.8L13.5 8.5"/>'],
+    ['journal', 'Journal', '<path d="M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M4 17h15"/><path d="M9 8h6"/><path d="M9 12h4"/>'],
     ['nutrition', 'Nutrition', '<path d="M10 3v6l-4.6 9.2A2 2 0 0 0 7.2 21h9.6a2 2 0 0 0 1.8-2.8L14 9V3"/><path d="M9 3h6"/>'],
     ['voyage', 'Voyage', '<path d="M4 17V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10"/><path d="M4 13h16"/><circle cx="8" cy="17" r="1.6"/><circle cx="16" cy="17" r="1.6"/><path d="M9 4V2h6v2"/>']
   ],
@@ -539,6 +557,7 @@ function idsConnusCheck() {
   SAC.items.forEach(i => e.add(i.id));
   SAC.kits.forEach(k => k.items.forEach(i => e.add(i.id)));
   SAC.verifications.forEach(v => e.add(v.id));
+  SAC.telephone.protocole.forEach(i => e.add(i.id));
   NUT.listeAchat.trakks.concat(NUT.listeAchat.maison).forEach(i => e.add(i.id));
   VOYAGE.aller.surMoiDansLeTrain.forEach(i => e.add(i.id));
   VOYAGE.documentsHorsLigne.forEach(i => e.add(i.id));
@@ -549,7 +568,7 @@ function idsConnusCheck() {
 function ouvreDonnees() {
   const c = compteEtat();
   const json = exporteEtat();
-  const nom = 'carnet-ccc-' + new Date().toISOString().slice(0, 10) + '.json';
+  const nom = 'carnet-ccc-' + isoLocal(new Date()) + '.json';
   const href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
 
   ouvreFeuille('Mes données', '' +
@@ -593,6 +612,7 @@ function ouvreDonnees() {
 }
 
 document.getElementById('btnDonnees').addEventListener('click', ouvreDonnees);
+document.getElementById('btnConfiance').addEventListener('click', () => ouvreConfiance());
 
 /* ============================ deroule ============================ */
 
@@ -1280,49 +1300,8 @@ function traceSectionsNut() {
   }).join('');
 }
 
-/* 5. la liste d'achat, cochable */
+/* 5. l'inventaire remplace la liste d'achat : le stock est ferme depuis le 17. */
 const listeAchatTout = () => NUT.listeAchat.trakks.concat(NUT.listeAchat.maison);
-const achatFait = id => coches[id] === true;
-
-function traceAchat() {
-  const tout = listeAchatTout();
-  const n = tout.filter(i => achatFait(i.id)).length;
-  const pct = tout.length ? Math.round((n / tout.length) * 100) : 0;
-
-  const groupe = (t, s, items) => {
-    const f = items.filter(i => achatFait(i.id)).length;
-    return '<div class="ck-grp' + (f === items.length ? ' fini' : '') + '">' +
-      '<div class="ck-grp-tete">' + anneau(items.length ? (f / items.length) * 100 : 0) +
-        '<div class="ck-grp-nom">' + t + '<small>' + s + '</small></div>' +
-        '<div class="ck-grp-cpt">' + f + '/' + items.length + '</div></div>' +
-      '<div class="ck-liste">' + items.map(i =>
-        '<button class="ck-item' + (achatFait(i.id) ? ' ok' : '') + '" data-ck="' + i.id + '">' +
-        '<i class="ck-box"></i><span class="ck-txt">' + i.txt +
-        (i.detail ? '<small>' + i.detail + '</small>' : '') + '</span></button>').join('') +
-      '</div></div>';
-  };
-
-  document.getElementById('achatHote').innerHTML =
-    '<div class="carte ck-tete"><div class="ck-pct"><b>' + pct + '</b><i>%</i><span>acheté</span></div>' +
-      '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="ck-compte">' + n + ' / ' + tout.length + ' lignes &#183; ' + NUT.listeAchat.budget + '</div></div>' +
-    '<div class="ach-regle">' + NUT.listeAchat.regle + '</div>' +
-    groupe('Chez TraKKs', 'Rocourt, lundi 17', NUT.listeAchat.trakks) +
-    groupe('Déjà en stock, à préparer', 'À la maison', NUT.listeAchat.maison) +
-    '<details class="carte nu-det"><summary>Ce que le document officiel corrige</summary>' +
-      NUT.corrections.map(c => '<div class="cor"><b>' + c.apres + '</b>' +
-        '<p>' + c.consequence + '</p>' +
-        (c.aVerifier ? '<small>' + c.aVerifier + '</small>' : '') + '</div>').join('') +
-      '<p class="nu-src">' + NUT.meta.sourceRavitos + '</p>' +
-    '</details>';
-
-  document.querySelectorAll('#achatHote [data-ck]').forEach(b =>
-    b.addEventListener('click', () => {
-      coches[b.dataset.ck] = !achatFait(b.dataset.ck);
-      store.set('check', coches);
-      traceAchat();
-    }));
-}
 
 /* ==================== voyage et logistique ====================
    Source : voyage-data.js. Le trou de la prepa : le 26 aout, trois
@@ -1428,6 +1407,175 @@ document.addEventListener('click', e => {
   const v = e.target.closest('#voyMode button');
   if (v) { voyMode = v.dataset.voy; store.set('voyMode', voyMode); traceVoyage(); }
 });
+
+/* ==================== journal, meteo, confiance, blocs 18/08 ==================== */
+
+const CLE_JN = CLE_JOURNAL;
+const litJournal = () => { try { return JSON.parse(localStorage.getItem(CLE_JN) || '[]'); } catch (e) { return []; } };
+const ecritJournal = j => { try { localStorage.setItem(CLE_JN, JSON.stringify(j)); } catch (e) {} };
+
+function traceJournal() {
+  const j = litJournal();
+  const auj = isoLocal(maintenant());
+
+  document.getElementById('jnSaisie').innerHTML =
+    '<div class="jn-l"><label>Note libre</label>' +
+    '<textarea id="jnTxt" rows="2" placeholder="Une ligne, un ressenti, ce que tu veux"></textarea></div>' +
+    '<div class="jn-g">' +
+      '<div class="jn-l"><label>Pied 0-3</label><select id="jnPied">' +
+        '<option value="">—</option><option value="0">0 · rien</option><option value="1">1 · léger</option>' +
+        '<option value="2">2 · net</option><option value="3">3 · fort</option></select></div>' +
+      '<div class="jn-l"><label>Zone</label><select id="jnZone">' +
+        '<option value="">—</option><option>Avant-pied</option><option>5ᵉ méta</option>' +
+        '<option>Talon</option><option>Cheville G</option><option>Autre</option></select></div>' +
+      '<div class="jn-l"><label>km d\'apparition</label><input id="jnKm" type="text" inputmode="decimal" placeholder="ex. 12"></div>' +
+      '<div class="jn-l"><label>Nuit</label><select id="jnNuit">' +
+        '<option value="">—</option><option>Bonne</option><option>Moyenne</option><option>Mauvaise</option></select></div>' +
+      '<div class="jn-l"><label>Poids (facultatif)</label><input id="jnPoids" type="text" inputmode="decimal" placeholder="kg"></div>' +
+    '</div>' +
+    '<button class="dn-btn large" id="jnAjout">Enregistrer</button>';
+
+  document.getElementById('jnAjout').addEventListener('click', () => {
+    const e = {
+      d: auj, t: new Date().toISOString(),
+      txt: document.getElementById('jnTxt').value.trim(),
+      pied: document.getElementById('jnPied').value,
+      zone: document.getElementById('jnZone').value,
+      km: document.getElementById('jnKm').value.trim(),
+      nuit: document.getElementById('jnNuit').value,
+      poids: document.getElementById('jnPoids').value.trim()
+    };
+    if (!e.txt && !e.pied && !e.km && !e.nuit && !e.poids) return;
+    const l = litJournal(); l.unshift(e); ecritJournal(l); traceJournal();
+  });
+
+  document.getElementById('jnHote').innerHTML = j.length
+    ? j.map((e, i) => {
+        const d = dateDe(e.d);
+        const tags = [];
+        if (e.pied !== '') tags.push('pied ' + e.pied);
+        if (e.zone) tags.push(e.zone);
+        if (e.km) tags.push('km ' + e.km);
+        if (e.nuit) tags.push('nuit ' + e.nuit.toLowerCase());
+        if (e.poids) tags.push(e.poids + ' kg');
+        return '<div class="jn-e"><div class="jn-d">' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</div>' +
+          '<div class="jn-c">' + (e.txt ? '<p>' + e.txt + '</p>' : '') +
+          (tags.length ? '<div class="jn-t">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' : '') +
+          '</div><button class="jn-x" data-jn="' + i + '" aria-label="Supprimer">&#10005;</button></div>';
+      }).join('')
+    : '<div class="vide">Rien encore. La première note peut être le débrief de mercredi.</div>';
+
+  document.querySelectorAll('#jnHote [data-jn]').forEach(b =>
+    b.addEventListener('click', () => {
+      const l = litJournal(); l.splice(+b.dataset.jn, 1); ecritJournal(l); traceJournal();
+    }));
+}
+
+/* ---- meteo ---- */
+function traceMeteo() {
+  const utile = dateDe(METEO.dateUtile);
+  const j = Math.round((utile - minuit(maintenant())) / 86400000);
+  return document.getElementById('meteoHote').innerHTML =
+    '<div class="mt-av">' + METEO.avertissement + '</div>' +
+    '<div class="mt-q">' + METEO.quandRegarder + (j > 0 ? ' <b>Dans ' + j + ' jours.</b>' : ' <b>C\'est maintenant.</b>') + '</div>' +
+    '<div class="fi-titre">Ce que la course traverse</div>' +
+    '<table class="mt-t">' + METEO.profilAltitude.map(x =>
+      '<tr class="' + (x.critique ? 'crit' : '') + '"><td>' + x.lieu + '<small>' + x.alt + ' m · ' + x.heure + '</small></td>' +
+      '<td>' + x.temp + '</td></tr>').join('') + '</table>' +
+    '<div class="mt-c">' + METEO.conclusion + '</div>' +
+    '<div class="mt-p">' + METEO.aRegarderAussi + '</div>';
+}
+
+/* ---- carb cycling ---- */
+const NIV = { 'LOW':'low', 'MEDIUM':'med', 'MEDIUM / HIGH':'medhigh', 'HIGH':'high', 'RECHARGE':'rech' };
+// abrege : « MEDI... » et « MEDI... » se ressemblaient trop sur neuf cases de 38 px
+const NIV_L = { 'LOW':'low', 'MEDIUM':'med', 'MEDIUM / HIGH':'med+', 'HIGH':'high', 'RECHARGE':'rech' };
+function traceCarb() {
+  const c = AFFUTAGE.carbCycling;
+  const auj = minuit(maintenant()).getTime();
+  return document.getElementById('carbHote').innerHTML =
+    '<div class="cb-x">' + c.contexte + '</div>' +
+    '<div class="cb-g">' + c.plan.map(x => {
+      const d = dateDe(x.date);
+      const est = d.getTime() === auj;
+      return '<div class="cb' + (est ? ' auj' : '') + ' n-' + NIV[x.niveau] + '">' +
+        '<b>' + d.getDate() + '</b><span>' + NIV_L[x.niveau] + '</span></div>';
+    }).join('') + '</div>' +
+    '<div class="cb-r">' + c.regleAbsolue + '</div>' +
+    (c.plan.filter(x => x.note).map(x => '<div class="cb-n"><b>' + dateDe(x.date).getDate() + '</b>' + x.note + '</div>').join(''));
+}
+
+/* ---- gants et telephone ---- */
+function traceGants() {
+  const g = SAC.gants;
+  document.getElementById('gantsHote').innerHTML =
+    '<div class="gt-r">' + g.regleUnique + '</div>' +
+    '<div class="gt-m">' + g.mode + '</div>' +
+    g.paliers.map((x, i) => '<div class="gt"><b>' + (i + 1) + '</b><div><b>' + x.conditions + '</b>' +
+      '<small>' + x.config + '</small></div></div>').join('') +
+    '<div class="gt-res"><span>Réserve</span>' + g.reserve.objet + ' — ' + g.reserve.ou +
+      '<small>' + g.reserve.decision + '</small></div>' +
+    '<div class="gt-reg"><span>Réglementaire</span>' + g.reglementaire.note + '</div>';
+
+  const t = SAC.telephone;
+  document.getElementById('telHote').innerHTML =
+    '<div class="tl-int">' + t.interdit + '</div>' +
+    '<div class="tl-d">' + t.diagnostic + '</div>' +
+    '<div class="ck-liste carte-l">' + t.protocole.map(x =>
+      '<button class="sk sk-perso' + (coche(x.id) ? ' ok' : '') + '" data-sac="' + x.id + '">' +
+      '<i class="ck-box"></i><span class="sk-t">' + x.txt +
+      (x.detail ? '<small>' + x.detail + '</small>' : '') + '</span></button>').join('') + '</div>' +
+    '<div class="gt-res"><span>Les deux longs chauds</span>' + SAC.longsChauds.principe +
+      '<small>' + SAC.longsChauds.consequence + '</small></div>';
+
+  document.querySelectorAll('#telHote [data-sac]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.sac); traceGants(); }));
+}
+
+/* ---- stock et cafeine ---- */
+function traceStock() {
+  const st = NUT.stock;
+  document.getElementById('stockHote').innerHTML =
+    '<div class="st-h"><div><span>unités</span><b>' + st.totalUnites + '</b></div>' +
+      '<div><span>glucides</span><b>' + st.totalGlucidesG + ' g</b></div>' +
+      '<div><span>statut</span><b class="ok">fermé</b></div></div>' +
+    '<div class="st-l">' + st.items.map(x =>
+      '<div class="st"><b>' + x.qte + '</b><div class="st-c"><b>' + x.nom + '</b>' +
+      '<small>' + x.glucides + ' g' + (x.cafeine ? ' · ☕ ' + x.cafeine + ' mg' : '') +
+      (x.note ? ' · ' + x.note : '') + '</small></div></div>').join('') + '</div>' +
+    '<div class="st-ss"><b>' + NUT.sucreSale.principe + '</b>' +
+      '<div class="st-trou">' + NUT.sucreSale.trou + '</div>' +
+      '<p>' + NUT.sucreSale.action + '</p><p>' + NUT.sucreSale.action2 + '</p></div>' +
+    '<div class="fi-titre">Répartition</div>' +
+    [NUT.repartition.depart, NUT.repartition.champex].map(r =>
+      '<div class="nu-ch"><b>' + r.label + '</b><ul class="nu-ul">' +
+      r.contenu.map(c => '<li>' + c + '</li>').join('') + '</ul></div>').join('') +
+    '<details class="nu-det"><summary>Ce que le document officiel corrige</summary>' +
+      NUT.corrections.map(c => '<div class="cor"><b>' + c.apres + '</b>' +
+        '<p>' + c.consequence + '</p>' +
+        (c.aVerifier ? '<small>' + c.aVerifier + '</small>' : '') + '</div>').join('') +
+      '<p class="nu-src">' + NUT.meta.sourceRavitos + '</p></details>';
+
+  document.getElementById('cafHote').innerHTML =
+    '<div class="st-h"><div><span>total</span><b>' + NUT.cafeineTotal + '</b></div></div>' +
+    NUT.cafeine.map(c => '<div class="nu-cf' + (c.n === 'R' ? ' res' : '') + '"><b>' + c.n + '</b>' +
+      '<div class="nu-cf-c"><b>' + c.ou + '</b><small>' + c.produit + (c.mg ? ' · ' + c.mg + ' mg' : '') +
+      '<br>' + c.pourquoi + '</small></div><i>' + c.quand + '</i></div>').join('') +
+    '<div class="st-r">' + NUT.cafeineRegles.map(r => '<p>' + r + '</p>').join('') + '</div>';
+}
+
+/* ---- pourquoi tu peux le faire ---- */
+function ouvreConfiance() {
+  const c = CONFIANCE;
+  ouvreFeuille(c.titre,
+    '<div class="cf-ref">' + c.reference + '</div>' +
+    '<table class="cf-t"><tr><th></th><th>Wildstrubel</th><th>CCC</th></tr>' +
+    c.comparaison.map(x => '<tr class="' + (x.cle ? 'cle' : '') + '"><td>' + x.quoi + '</td>' +
+      '<td>' + x.wild + '</td><td>' + x.ccc + '</td></tr>').join('') + '</table>' +
+    c.messages.map(m => '<div class="cf-m"><b>' + m.n + ' &#183; ' + m.titre + '</b><p>' + m.txt + '</p></div>').join('') +
+    '<div class="cf-v"><b>' + c.vigilance.titre + '</b><p>' + c.vigilance.txt + '</p>' +
+    '<p class="cc">' + c.vigilance.conclusion + '</p></div>');
+}
 
 /* ==================== le sac : checklist materiel ====================
    Source : sac-data.js. Deux axes de lecture, trois niveaux de criticite,
@@ -1695,6 +1843,9 @@ const MOIS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 's
 const JSEM = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
 
 const minuit = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+// Date locale en AAAA-MM-JJ. toISOString() repasse en UTC et perd un jour a l'est de Greenwich.
+const isoLocal = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
+                      '-' + String(d.getDate()).padStart(2, '0');
 
 /* ==================== affutage : source de verite ====================
    Les donnees viennent de prepa-data.js, l'agenda PRO de Pierre.
@@ -1843,6 +1994,14 @@ function traceInconnues() {
     if (!v) { inp.focus(); return; }
     prepa.inconnues[b.dataset.ok] = v; sauvePrepa(); traceInconnues(); majEtat();
   }));
+  const m = AFFUTAGE.rdvMedecin, dm = dateDe(m.date);
+  hote.insertAdjacentHTML('beforeend',
+    '<details class="rdv"><summary><b>Le RDV qui en referme deux</b>' +
+      '<span>' + dm.getDate() + ' ' + MOIS[dm.getMonth()] + ' au ' + m.moment + ' &#183; ' + m.medecin + '</span></summary>' +
+    m.sujets.map(x => '<div class="rdv-s' + (x.nouveau ? ' neuf' : '') + '"><b>' + x.n + '</b>' +
+      '<div><b>' + x.titre + (x.nouveau ? ' <i>nouveau</i>' : '') + '</b><p>' + x.detail + '</p></div></div>').join('') +
+    '</details>');
+
   hote.querySelectorAll('[data-eff]').forEach(b => b.addEventListener('click', () => {
     delete prepa.inconnues[b.dataset.eff]; sauvePrepa(); traceInconnues(); majEtat();
   }));
@@ -1984,14 +2143,19 @@ function init() {
   traceAlertes();
   traceBilan();
   traceSectionsNut();
-  traceAchat();
   document.getElementById('feuille-course').innerHTML = traceFeuilleCourse();
   traceSac();
   traceVerifs();
+  traceGants();
   traceVoyage();
+  traceCarb();
+  traceMeteo();
+  traceStock();
+  traceJournal();
   majCourse(true);
 
   traceRavitos();
+  majEtat();   // « Ou j'en suis » etait vide au chargement : il n'etait rempli qu'apres une coche
 
   // Le jour J, l'app s'ouvre sur Courir. Le reste du temps, sur Préparer.
   const now = maintenant();

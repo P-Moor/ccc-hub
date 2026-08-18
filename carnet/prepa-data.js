@@ -41,12 +41,12 @@ export const AFFUTAGE = {
       titre: "Renfo 6/9 · pas de course",
       seance: { heure: "18:30", contenu: "Renfo 6/9", distanceKm: 0 },
       taches: [
-        { id: "p17a", txt: "📞 Appel médecin traitant — 3 sujets en un seul appel", priorite: "critique" },
+        { id: "p17a", txt: "📞 RDV médecin DÉPLACÉ au jeudi 20 au matin", priorite: "normale", detail: "Dr Alexandra Nunes de Sousa · 4 sujets · rien à faire lundi" },
         { id: "p17b", txt: "🛒 TraKKs Rocourt — liste fermée : 12 gels + 5 caféinés + 5 barres · zéro poudre" },
         { id: "p17c", txt: "☕ Noter les mg de caféine par gel sur l'étiquette" },
         { id: "p17d", txt: "🛁 Bain chaud (38-40 °C, 20-25 min)" }
       ],
-      note: "L'appel médecin est le seul élément de la semaine avec une vraie échéance."
+      note: "Le RDV médecin est passé au jeudi 20 au matin. Reste TraKKs et le bain chaud."
     },
     {
       date: "2026-08-18", j: "J-10", jour: "Mardi", type: "ef", priorite: "normale",
@@ -86,9 +86,10 @@ export const AFFUTAGE = {
     },
     {
       date: "2026-08-20", j: "J-8", jour: "Jeudi", type: "repos", priorite: "haute",
-      titre: "Repos + vérification matériel",
+      titre: "Médecin le matin · vérif matériel · renfo léger",
       seance: { contenu: "Repos", distanceKm: 0 },
       taches: [
+        { id: "p20f", txt: "🩺 RDV Dr Alexandra Nunes de Sousa — 4 sujets", priorite: "critique", detail: "Colchicine le jour J · antihistaminique non sédatif · pied droit et cheville gauche · mains au froid et ongles" },
         { id: "p20a", txt: "📋 Vérification matériel obligatoire, pièce par pièce, liste en main", priorite: "haute" },
         { id: "p20b", txt: "🔋 Piles ×2 frontales" },
         { id: "p20c", txt: "🥣 Couverts + bol (BYOU)" },
@@ -204,10 +205,43 @@ export const AFFUTAGE = {
     }
   ],
 
+  /** Le rendez-vous medecin, deplace du lundi 17 au jeudi 20 au matin. */
+  rdvMedecin: {
+    date: "2026-08-20", moment: "matin",
+    medecin: "Dr Alexandra Nunes de Sousa",
+    sujets: [
+      { n:1, titre:"Colchicine le jour J",
+        detail:"Risques digestifs et musculaires sur 20 h d'effort. Arreter, maintenir, ou emporter en secours ?" },
+      { n:2, titre:"Antihistaminique non sedatif",
+        detail:"A emporter dans le sac. Urticaire nocturne, piste persil et Apiacees." },
+      { n:3, titre:"Pied droit et entorse cheville gauche",
+        detail:"Aucune douleur a la marche a froid, proeminence percue mais indolore. La douleur apparait sous repetition d'appuis, persiste apres l'effort au point de faire marcher sur le talon, et disparait completement apres une nuit. Le podologue observe qu'en decharge sur table, les deux pieds partent spontanement vers l'avant-pied externe. Plus l'entorse en inversion du 15/08, sans suite a 24 h." },
+      { n:4, titre:"Mains au froid et ongles", nouveau:true,
+        detail:"Tres vite mal au bout des doigts quand il fait froid, ET ongles de mains epais, durs et friables. Est-ce que ca peut etre lie ? Est-ce que ca ressemble a un Raynaud ? Demander aussi s'il faut en parler au rhumatologue : un Raynaud peut etre secondaire." }
+    ]
+  },
+
+  /** Carb cycling : un outil maitrise depuis plus de 2 ans, pas un signal d'alerte. */
+  carbCycling: {
+    contexte: "Pierre pratique le carb cycling depuis plus de 2 ans. C'est un outil maitrise, pas un signal d'alerte.",
+    plan: [
+      { date:"2026-08-17", niveau:"LOW",    note:"Jour sans cardio, place volontairement" },
+      { date:"2026-08-18", niveau:"MEDIUM" },
+      { date:"2026-08-19", niveau:"HIGH",   note:"Test Reveal #2 : la seance cle se court sur des reserves pleines" },
+      { date:"2026-08-20", niveau:"MEDIUM / HIGH" },
+      { date:"2026-08-21", niveau:"MEDIUM / HIGH" },
+      { date:"2026-08-22", niveau:"HIGH",   note:"Derniere sortie avec D+" },
+      { date:"2026-08-23", niveau:"MEDIUM / HIGH" },
+      { date:"2026-08-24", niveau:"HIGH",   note:"Fin du contrat propre" },
+      { date:"2026-08-25", niveau:"RECHARGE", note:"La recharge n'est pas un peu plus : c'est un cran au-dessus des jours high." }
+    ],
+    regleAbsolue: "PLUS AUCUN JOUR LOW apres le 17/08. Uniquement medium et high en alternance."
+  },
+
   /** Trous ouverts — l'UI affiche la date de résolution et attend la saisie. */
   inconnues: [
     { id: "medoc",   label: "Colchicine le jour J + antihistaminique non sédatif",
-      resoudreLe: "2026-08-17", via: "Appel médecin traitant", impacte: ["Trousse perso", "Checklist matériel"] },
+      resoudreLe: "2026-08-20", via: "RDV Dr Nunes de Sousa", impacte: ["Trousse perso", "Checklist matériel"] },
     { id: "cafeine", label: "mg de caféine par gel Näak Boost caféiné",
       resoudreLe: "2026-08-17", via: "Étiquette à TraKKs", impacte: ["Plan caféine"] },
     { id: "reveal",  label: "Verdict chaussures — Reveal validée ou plan B",
