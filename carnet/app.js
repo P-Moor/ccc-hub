@@ -1503,6 +1503,57 @@ async function ouvreCoffre(phrase) {
   return JSON.parse(new TextDecoder().decode(brut));
 }
 
+/* Les pieces jointes vivent dans un second fichier, charge seulement quand le
+   coffre s'ouvre : inutile de trainer un mega-octet de billets a chaque
+   demarrage. Une fois dechiffres, ils restent en memoire sous forme d'URL
+   d'objet, revoquees a la fermeture. */
+let docs = null;          // { id -> {nom, type, url} }
+let docsCharges = false;
+
+async function chargeDocs(cle) {
+  if (docsCharges) return;
+  docsCharges = true;
+  let mod;
+  try { mod = await import('./prive-docs.js'); }
+  catch (e) { return; }                     // pas de pieces jointes deployees
+  const b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+  docs = {};
+  for (const p of (mod.DOCS && mod.DOCS.pieces) || []) {
+    try {
+      const oct = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: b(p.iv) }, cle, b(p.donnees));
+      docs[p.id] = {
+        nom: p.nom, type: p.type, taille: p.taille,
+        url: URL.createObjectURL(new Blob([oct], { type: p.type }))
+      };
+    } catch (e) { /* une piece illisible n'empeche pas les autres */ }
+  }
+}
+
+function libereDocs() {
+  if (docs) Object.values(docs).forEach(d => URL.revokeObjectURL(d.url));
+  docs = null; docsCharges = false;
+}
+
+function ouvreDoc(id) {
+  const d = docs && docs[id];
+  if (!d) return;
+  const image = /^image\//.test(d.type);
+  // Les PDF dans un cadre embarque ne s'affichent pas de facon fiable, ni ici
+  // ni sur iOS : on les ouvre en plein ecran, ou le lecteur natif prend le
+  // relais. Les images, elles, s'affichent tout de suite.
+  ouvreFeuille(d.nom,
+    (image
+      ? '<div class="dv"><img src="' + d.url + '" alt=""></div>'
+      : '<div class="dv dv-pdf"><b>PDF</b><span>' +
+        (d.taille > 1024 ? Math.round(d.taille / 1024) + ' Ko' : d.taille + ' o') +
+        '</span></div>') +
+    '<a class="dn-btn plein large" href="' + d.url + '" target="_blank" rel="noopener">' +
+      (image ? 'Ouvrir en plein ecran' : 'Ouvrir le document') + '</a>' +
+    '<p class="dv-n">Ce fichier est dans le coffre, pas sur le reseau. ' +
+      'Il reste lisible en mode avion.</p>');
+}
+
 function traceCoffre() {
   const hote = document.getElementById('coffreHote');
   if (!hote) return;
@@ -1538,6 +1589,7 @@ function traceCoffre() {
       await new Promise(r => setTimeout(r, 20));
       try {
         coffre = await ouvreCoffre(phrase);
+        await chargeDocs(await cleDuCoffre(phrase));
         traceCoffre();
       } catch (e) {
         msg.className = 'cff-msg ko';
@@ -1603,6 +1655,29 @@ function traceCoffre() {
       '</div>').join('') +
     '<div class="cff-note">' + L.retour.marge + '</div>' +
 
+    (L.documents ? '<div class="fi-titre">Les documents</div>' +
+      ['course', 'aller', 'sur place', 'retour'].map(cat => {
+        const liste = L.documents.filter(d => d.cat === cat);
+        if (!liste.length) return '';
+        return '<div class="dc-cat">' + cat + '</div>' + liste.map(d => {
+          const f = docs && docs[d.id];
+          return '<div class="dc">' +
+            '<div class="dc-h"><b>' + d.nom + '</b><span>' + d.quand + '</span></div>' +
+            '<ul class="dc-r">' + d.refs.map(r => '<li>' + r + '</li>').join('') + '</ul>' +
+            (d.note ? '<p class="dc-n">' + d.note + '</p>' : '') +
+            '<div class="dc-b">' +
+              (f ? '<button class="dc-v" data-doc="' + d.id + '">Voir le document</button>' : '') +
+              (d.lien ? '<a href="' + d.lien + '" target="_blank" rel="noopener">' +
+                (d.lienNom || 'Le site') + '</a>' : '') +
+              (d.app ? '<a href="' + d.app + '" target="_blank" rel="noopener">' +
+                (d.appNom || 'Dans l\'app') + '</a>' : '') +
+              (d.mail ? '<a href="' + d.mail + '" target="_blank" rel="noopener">Le mail</a>' : '') +
+            '</div>' +
+            (f ? '' : '<div class="dc-abs">Fichier pas encore depose dans le coffre</div>') +
+            '</div>';
+        }).join('');
+      }).join('') : '') +
+
     (L.contacts ? '<div class="fi-titre">Numeros et references</div>' +
       '<div class="cff-bloc">' + L.contacts.map(c =>
         '<div class="cff-l"><span>' + c.qui + '</span><b>' + c.num + '</b></div>').join('') +
@@ -1616,10 +1691,12 @@ function traceCoffre() {
     '</div>';
 
   document.getElementById('cffFerme').addEventListener('click', () => {
-    coffre = null; traceCoffre();
+    coffre = null; libereDocs(); traceCoffre();
   });
   document.querySelectorAll('#coffreHote [data-cff]').forEach(b =>
     b.addEventListener('click', () => { basculeCoche(b.dataset.cff); traceCoffre(); }));
+  document.querySelectorAll('#coffreHote [data-doc]').forEach(b =>
+    b.addEventListener('click', () => ouvreDoc(b.dataset.doc)));
 }
 
 /* ==================== journal, meteo, confiance, blocs 18/08 ==================== */
@@ -2405,6 +2482,19 @@ window.CCC = {
     coffre = objet || null;
     traceCoffre();
     return coffre ? 'coffre peint' : 'coffre referme';
+  },
+  /* Charge les pieces jointes sans passer par prive-data.js : sert a verifier
+     le rendu en preview quand seul prive-docs.js est en place. */
+  async docsEssai(phrase, sel, tours) {
+    const b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+    const base = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(phrase), 'PBKDF2', false, ['deriveKey']);
+    const k = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: b(sel), iterations: tours || 1000000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    docsCharges = false;
+    await chargeDocs(k);
+    return docs ? Object.keys(docs) : 'aucune piece';
   },
   async coffreDepuis(bloc, phrase) {
     const b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));

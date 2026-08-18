@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-21';
+const CACHE = 'ccc-v2-carnet-22';
 
 const NOYAU = [
   './',
@@ -29,10 +29,16 @@ const NOYAU = [
   'icons/apple-touch-icon.png'
 ];
 
+// `prive-docs.js` n'existe que si Pierre a depose des pieces jointes. Un
+// addAll echouerait en bloc sur un seul 404 : on met donc en cache fichier par
+// fichier, et un absent n'empeche pas les autres.
+const EN_PLUS = ['prive-docs.js'];
+
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(NOYAU))
+      .then(c => c.addAll(NOYAU).then(() =>
+        Promise.allSettled(EN_PLUS.map(u => c.add(u)))))
       .then(() => self.skipWaiting())
   );
 });
