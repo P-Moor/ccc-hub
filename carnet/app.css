@@ -1954,6 +1954,20 @@ button.tl-ligne:active { background: var(--surface-2); }
 /* ===================== le coffre ===================== */
 
 .cf-vide { font-size: 14px; line-height: 1.45; color: var(--texte-pale); }
+.cf-att { list-style: none; margin: 12px 0 0; }
+.cf-att li {
+  font-size: 14px; line-height: 1.45; padding: 5px 0 5px 16px;
+  position: relative; color: var(--texte-doux);
+}
+.cf-att li::before {
+  content: ""; position: absolute; left: 0; top: 12px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+}
+.cf-quoi {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--r-s);
+  background: var(--voile); font-size: 13.5px; line-height: 1.45;
+  color: var(--texte-doux);
+}
 
 .cff-tete { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
 .cff-tete > i { flex: none; font-style: normal; font-size: 22px; line-height: 1.1; }

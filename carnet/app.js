@@ -1559,8 +1559,22 @@ function traceCoffre() {
   if (!hote) return;
 
   if (PRIVE.vide && !coffre) {
-    hote.innerHTML = '<div class="cf-vide">Le coffre n\'a pas encore ete rempli. ' +
-      'Les references de reservation restent hors ligne en attendant.</div>';
+    // Etat vide utile : il dit ce qui viendra ici et ce qu'il reste a faire.
+    hote.innerHTML =
+      '<div class="cff-tete"><i>&#128274;</i><div><b>Le coffre est encore vide</b>' +
+      '<small>C\'est ici que vivront tes billets, tes réservations et tes ' +
+      'références, chiffrés. Ce dépôt est public, donc rien n\'y est jamais ' +
+      'écrit en clair.</small></div></div>' +
+      '<ul class="cf-att">' +
+        '<li>Billets de train, QR Eurostar et TGV, places comprises</li>' +
+        '<li>Cartes d\'embarquement FlixBus, aller et retour</li>' +
+        '<li>Contremarque de la navette CCC et créneau du dossard</li>' +
+        '<li>Logement, caution, assurance, vol</li>' +
+        '<li>Matériel obligatoire, et la place pour ta carte d\'identité</li>' +
+      '</ul>' +
+      '<div class="cf-quoi">Pour le remplir : ouvrir <b>_chiffrer.html</b> ' +
+      'sur le Mac, déposer les fichiers, choisir la phrase de passe. ' +
+      'Ensuite tout est lisible ici, hors ligne.</div>';
     return;
   }
 
