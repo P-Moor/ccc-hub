@@ -42,7 +42,7 @@ export const SAC = {
     { id:"s06", zone:"surmoi", crit:"reglementaire", phase:"verif", txt:"Couverture de survie ≥ 1,40 × 2 m" },
     { id:"s07", zone:"surmoi", crit:"reglementaire", phase:"verif", txt:"Bande élastique adhésive ≥ 100 × 6 cm" },
     { id:"s08", zone:"surmoi", crit:"reglementaire", phase:"veille", txt:"Pièce d'identité", detail:"Carte d'identité belge — vérifier la date de validité" },
-    { id:"s09", zone:"surmoi", crit:"reglementaire", phase:"veille", txt:"Balise GPS", detail:"Remise au retrait du dossard · caution Swikly réf. reference dans le coffre" },
+    { id:"s09", zone:"surmoi", crit:"reglementaire", phase:"veille", txt:"Balise GPS", detail:"Remise au retrait du dossard · caution Swikly, réf. dans le coffre" },
     { id:"s10", zone:"surmoi", crit:"perso", phase:"matin", txt:"Montre Garmin Fenix 8", detail:"Chargée 100 % · GPX CCC + ClimbPro · alarme nutrition 30 min · alerte FC" },
 
     { id:"c01", zone:"sac", crit:"reglementaire", phase:"verif", txt:"2 lampes frontales en état de marche", detail:"Petzl Swift RL 1100 lm (principale) + Petzl Aria 1R RGB (secours) · mode rouge ✅ vérifié le 14/08" },
@@ -84,9 +84,9 @@ export const SAC = {
     { id:"a06", zone:"allegement", crit:"confort", phase:"veille", txt:"Lingettes / petite serviette" },
     { id:"a07", zone:"allegement", crit:"confort", phase:"veille", txt:"2ᵉ paire d'Epitact", detail:"⚠️ Uniquement si l'Epitact est validé au test du 19" },
 
-    { id:"b01", zone:"bagage", crit:"reglementaire", phase:"sacs", txt:"📄 Attestation d'assurance rapatriement — PDF HORS LIGNE", detail:"Souscription souscription dans le coffre · MUTUAIDE via Assurinco · renouvelée le 14/08 · ⚠️ vérifier que la période couvre bien le 28/08" },
+    { id:"b01", zone:"bagage", crit:"reglementaire", phase:"sacs", txt:"📄 Attestation d'assurance rapatriement — PDF HORS LIGNE", detail:"MUTUAIDE via Assurinco · renouvelée le 14/08 · numéro dans le coffre · ⚠️ vérifier que la période couvre bien le 28/08" },
     { id:"b02", zone:"bagage", crit:"reglementaire", phase:"sacs", txt:"📸 Photos de tous les documents, accessibles hors ligne", detail:"CI recto-verso · assurance · billets aller ET retour · ordonnances" },
-    { id:"b03", zone:"bagage", crit:"reglementaire", phase:"sacs", txt:"🎫 Billets aller + retour", detail:"Eurostar 9414 · TGV 9773 · FlixBus N504 · FlixBus retour reference dans le coffre · SN2714 réf. reference dans le coffre" },
+    { id:"b03", zone:"bagage", crit:"reglementaire", phase:"sacs", txt:"🎫 Billets aller + retour", detail:"Eurostar 9414 · TGV 9773 · FlixBus N504 · SN2714 · références dans le coffre" },
     { id:"b04", zone:"bagage", crit:"perso", phase:"sacs", txt:"🛂 Passeport", detail:"Pas obligatoire mais utile en secours si perte de la CI" },
     { id:"b05", zone:"bagage", crit:"perso", phase:"sacs", txt:"💳 Carte bancaire + espèces EUR et CHF", detail:"Tu traverses 3 pays · Champex et Trient sont en Suisse" },
     { id:"b06", zone:"bagage", crit:"perso", phase:"sacs", txt:"🏥 Carte européenne d'assurance maladie" },

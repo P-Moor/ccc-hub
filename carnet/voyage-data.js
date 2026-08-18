@@ -68,9 +68,9 @@ export const VOYAGE = {
       },
       {
         id: "a4", type: "arrivee",
-        de: "Arrêt Chamonix", vers: "adresse dans le coffre",
+        de: "Arrêt Chamonix", vers: "le logement",
         depart: "17:20", arrivee: "~18:00",
-        ref: "Appartement réf. reference dans le coffre",
+        ref: "Adresse et référence dans le coffre",
         aFaire: [
           "🚶 15-20 MIN DE MARCHE avant de dîner — non négociable après 9h assis",
           "Repérer l'arrêt Grépon Bus (600 m, 8 min) tant qu'il fait jour",
@@ -96,10 +96,10 @@ export const VOYAGE = {
     resolu: "\u2705 Dates coherentes : sejour jusqu'au 30, retour le 30. L'incoherence signalee le 16 est levee.",
     renvoi: "Les references completes sont dans le coffre, en haut de cet ecran.",
     segments: [
-      { id: "r1", type: "bus", ref: "Bus CDE3294 \u00b7 Alpine Fleet \u00b7 r\u00e9f. references dans le coffre",
+      { id: "r1", type: "bus", ref: "Bus \u00b7 Alpine Fleet \u00b7 r\u00e9f\u00e9rences dans le coffre",
         de: "Chamonix Centre", vers: "A\u00e9roport de Gen\u00e8ve",
         depart: "07:30", arrivee: "09:00", date: "dimanche 30 ao\u00fbt" },
-      { id: "r2", type: "avion", ref: "Brussels Airlines SN2714 \u00b7 r\u00e9f. reference dans le coffre",
+      { id: "r2", type: "avion", ref: "Brussels Airlines SN2714 \u00b7 r\u00e9f\u00e9rence dans le coffre",
         de: "Gen\u00e8ve (GVA)", vers: "Bruxelles (BRU)",
         depart: "11:25", arrivee: "12:45", duree: "1h20", date: "dimanche 30 ao\u00fbt",
         bagages: "1 petit bagage \u00e0 main + 1 cabine 8 kg + 1 soute 23 kg",
@@ -108,7 +108,7 @@ export const VOYAGE = {
     marge: "2h25 entre l'arriv\u00e9e du bus et le d\u00e9collage \u2014 confortable apr\u00e8s 101 km",
     aFaire: [
       { id:"r12", txt:"R\u00e9cup\u00e9rer le sac d'all\u00e8gement avant de quitter Chamonix" },
-      { id:"r13", txt:"R\u00e9cup\u00e9rer la caution balise GPS (Swikly reference dans le coffre)" },
+      { id:"r13", txt:"R\u00e9cup\u00e9rer la caution balise GPS (r\u00e9f\u00e9rence dans le coffre)" },
       { id:"r14", txt:"Prot\u00e9ger les b\u00e2tons pour la soute" },
       { id:"r15", txt:"D\u00e9part du logement \u00e0 7h, deux heures avant la fen\u00eatre de check-out", crit:"critique" }
     ]
@@ -120,7 +120,7 @@ export const VOYAGE = {
       bloc: [
         { h: "10:00", quoi: "🏃 Déblocage 3 km plat dans Chamonix", detail: "Rien de plus. Les jambes tournent, c'est tout." },
         { h: "12:00-14:00", quoi: "🎫 RETRAIT DU DOSSARD — Espace Michel Croz", crit: "critique",
-          detail: "Carte d'identité + confirmation d'inscription. Balise GPS remise ici (caution Swikly reference dans le coffre). Le SAC D'ALLÈGEMENT est remis ici aussi. Contrôle matériel facultatif." },
+          detail: "Carte d'identité + confirmation d'inscription. Balise GPS remise ici (caution Swikly, référence dans le coffre). Le SAC D'ALLÈGEMENT est remis ici aussi. Contrôle matériel facultatif." },
         { h: "après", quoi: "📞 Enregistrer le numéro de sécurité de l'orga", detail: "Il est au dos du dossard — donc disponible seulement maintenant." },
         { h: "15:00", quoi: "🛒 Courses à Chamonix", detail: "Pain frais, bananes, eau, de quoi petit-déjeuner le 28." },
         { h: "18:00", quoi: "🎒 Boucler les deux sacs", detail: "Sac de course pesé · sac d'allègement bouclé · tenue posée sur une chaise." },
@@ -134,7 +134,7 @@ export const VOYAGE = {
         { h: "05:00", quoi: "⏰ Réveil" },
         { h: "05:20-05:45", quoi: "🥣 Petit-déj testé", detail: "Pain + miel, banane, café noir. Peu de gras, pas de gros bol de skyr (vidange lente)." },
         { h: "05:50", quoi: "🧴 NOK sur les pieds · chaussettes course · traitement" },
-        { h: "06:10", quoi: "🚶 Départ à pied — 600 m, 8 min", detail: "Descendre la la rue du logement vers le sud. L'arrêt est au grand parking de l'Aiguille du Midi." },
+        { h: "06:10", quoi: "🚶 Départ à pied — 600 m, 8 min", detail: "Descendre vers le sud, l'adresse est dans le coffre. L'arrêt est au grand parking de l'Aiguille du Midi." },
         { h: "06:20", quoi: "📍 À l'arrêt Grépon", detail: "QR du dossard ou contremarque MyUTMB prêt. Sac bouclé, dossard épinglé." },
         { h: "06:30", quoi: "🚌 NAVETTE CCC Start Line → Courmayeur", crit: "critique" },
         { h: "~07:20", quoi: "🏔️ Arrivée Courmayeur Sport Center", detail: "Horaire exact : app UTMB GO." },
@@ -149,7 +149,7 @@ export const VOYAGE = {
   documentsHorsLigne: [
     { id:"d1", txt:"Ticket de navette (PDF MyUTMB)", statut:"aFaire", crit:"critique" },
     { id:"d2", txt:"Contremarque MyUTMB", statut:"aFaire" },
-    { id:"d3", txt:"Attestation d'assurance rapatriement", statut:"aFaire", crit:"critique", detail:"Souscription souscription dans le coffre · vérifier que la période couvre le 28/08" },
+    { id:"d3", txt:"Attestation d'assurance rapatriement", statut:"aFaire", crit:"critique", detail:"Numéro de souscription dans le coffre · vérifier que la période couvre le 28/08" },
     { id:"d4", txt:"Photos CI recto-verso", statut:"aFaire", crit:"critique" },
     { id:"d5", txt:"Billets aller (Eurostar, TGV, FlixBus)", statut:"aFaire", crit:"critique" },
     { id:"d6", txt:"Billets retour (FlixBus, SN2714)", statut:"aFaire" },
@@ -161,8 +161,8 @@ export const VOYAGE = {
   contacts: [
     { qui: "Urgence orga CCC", num: "au dos du dossard — à enregistrer le 27" },
     { qui: "Contact d'urgence personnel", num: "dans le coffre" },
-    { qui: "Appartement", num: "adresse dans le coffre · réf. reference dans le coffre" },
-    { qui: "Caution balise GPS", num: "Swikly réf. reference dans le coffre" }
+    { qui: "Appartement", num: "adresse et référence dans le coffre" },
+    { qui: "Caution balise GPS", num: "Swikly, référence dans le coffre" }
   ]
 };
 

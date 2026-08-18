@@ -166,7 +166,7 @@ export const AFFUTAGE = {
         { h: "07:53", quoi: "Eurostar 9414 · Liège-Guillemins → Paris-Nord" },
         { h: "12:16", quoi: "TGV 9773 · Paris-Lyon → Genève-Cornavin (15:36)" },
         { h: "16:05", quoi: "FlixBus N504 · Genève → Chamonix (17:20) — maillon faible" },
-        { h: "16-18h", quoi: "Appartement · adresse dans le coffre · réf. reference dans le coffre" }
+        { h: "16-18h", quoi: "Appartement · adresse et référence dans le coffre" }
       ],
       taches: [
         { id: "p26a", txt: "⛔ NE PAS voyager en Reveal — chaussures larges, lacées lâche", priorite: "critique" },
@@ -182,7 +182,7 @@ export const AFFUTAGE = {
       seance: { heure: "10:00", contenu: "Déblocage 3 km plat dans Chamonix", distanceKm: 3 },
       taches: [
         { id: "p27a", txt: "🎽 Retrait dossard 12h-14h — Espace Michel Croz · carte d'identité + confirmation", priorite: "critique" },
-        { id: "p27b", txt: "🛰️ Balise GPS remise (caution Swikly reference dans le coffre)" },
+        { id: "p27b", txt: "🛰️ Balise GPS remise (caution Swikly, réf. dans le coffre)" },
         { id: "p27c", txt: "🎒 Sac d'allègement remis au retrait du dossard" },
         { id: "p27d", txt: "📞 Numéro sécurité orga (dos du dossard) enregistré dans le téléphone" },
         { id: "p27e", txt: "🛒 Courses : pain frais, bananes, eau, petit-déj du 28" },

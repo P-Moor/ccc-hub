@@ -1580,6 +1580,11 @@ function traceCoffre() {
       '</div>').join('') +
     '<div class="cff-note">' + L.retour.marge + '</div>' +
 
+    (L.contacts ? '<div class="fi-titre">Numeros et references</div>' +
+      '<div class="cff-bloc">' + L.contacts.map(c =>
+        '<div class="cff-l"><span>' + c.qui + '</span><b>' + c.num + '</b></div>').join('') +
+      '</div>' : '') +
+
     '<div class="fi-titre">A regler</div>' +
     '<div class="ck-liste carte-l">' + L.aRegler.map(x =>
       '<button class="sk' + (x.crit ? ' sk-reglementaire' : ' sk-perso') +

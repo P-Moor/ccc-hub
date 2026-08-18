@@ -310,7 +310,7 @@ export const CHECKLIST = [
     { id:'cf8', l:"Tenue : short 2-en-1, S/Lab Ultra Seamless, Sense Aero" },
     { id:'cf9', l:"Casquette claire" },
     { id:'cf10', l:"Garmin Fenix 8 chargée à 100 %", s:"GPX et ClimbPro configurés · alarme nutrition 30 min" },
-    { id:'cf11', l:"Balise GPS", s:"Remise au retrait du dossard · caution reference dans le coffre" },
+    { id:'cf11', l:"Balise GPS", s:"Remise au retrait du dossard · caution, réf. dans le coffre" },
     { id:'cf12', l:"Trousse : traitement, antihistaminique, pansements en curatif, sel" }
   ]},
 
