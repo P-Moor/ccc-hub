@@ -1951,6 +1951,53 @@ button.tl-ligne:active { background: var(--surface-2); }
 .rdv-s p { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--texte-doux); }
 .rdv-s.neuf { background: color-mix(in srgb, var(--jour) 7%, transparent); }
 
+/* ---- le dossier chaussettes ---- */
+.ch-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.ch { padding: 12px 13px; border-radius: var(--r-s); border: 1px solid var(--bord); background: var(--surface-2); }
+.ch i {
+  display: block; font-style: normal; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px;
+}
+.ch.ok  { border-color: color-mix(in srgb, var(--ok) 55%, var(--bord)); }
+.ch.ok i  { color: var(--ok); }
+.ch.att { border-color: color-mix(in srgb, var(--jour) 55%, var(--bord)); }
+.ch.att i { color: var(--accent-txt); }
+.ch b { display: block; font-family: var(--display); font-weight: 700; font-size: 16px; line-height: 1.2; }
+.ch small { display: block; margin-top: 3px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
+.ch p { margin-top: 6px; font-size: 13px; line-height: 1.4; color: var(--texte-doux); }
+.ch-risque {
+  margin-top: 10px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 14px; line-height: 1.45;
+}
+.ch-risque b { display: block; font-family: var(--display); font-size: 15px; margin-bottom: 2px; }
+.ch-t { width: 100%; border-collapse: collapse; }
+.ch-t td { padding: 8px 0; border-top: 1px solid var(--bord); vertical-align: top; }
+.ch-t tr:first-child td { border-top: 0; }
+.ch-t td:first-child {
+  width: 74px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale);
+  white-space: nowrap; padding-right: 10px;
+}
+.ch-t td b { display: block; font-size: 15px; font-weight: 600; }
+.ch-t td small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--texte-doux); line-height: 1.38; }
+.ch-r { padding: 11px 13px; margin-bottom: 8px; border-radius: var(--r-s); background: var(--surface-2); }
+.ch-r > b { display: block; font-family: var(--display); font-weight: 700; font-size: 15px; margin-bottom: 5px; }
+.ch-r.oui > b { color: var(--ok); }
+.ch-r.non > b { color: var(--texte-doux); }
+.ch-rl { display: flex; gap: 10px; padding: 4px 0; font-size: 14px; line-height: 1.35; }
+.ch-rl span {
+  flex: 0 0 96px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--texte-pale); padding-top: 3px;
+}
+.ch-reg { padding: 11px 13px; border-radius: var(--r-s); background: var(--voile); }
+.ch-reg b { display: block; font-size: 15px; line-height: 1.4; }
+.ch-reg small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-doux); line-height: 1.5; }
+.ch-sig { margin-top: 8px; padding: 10px 12px; border-radius: var(--r-s); font-size: 14px; line-height: 1.42; }
+.ch-sig.rouge { background: color-mix(in srgb, var(--alerte) 11%, transparent); border-left: 3px solid var(--alerte); }
+.ch-sig.verte { background: color-mix(in srgb, var(--ok) 11%, transparent); border-left: 3px solid var(--ok); }
+.ch-af { list-style: none; margin-top: 12px; }
+.ch-af li { padding: 5px 0; font-size: 14px; line-height: 1.42; color: var(--texte-doux); }
+
 /* ===================== le coffre ===================== */
 
 .cf-vide { font-size: 14px; line-height: 1.45; color: var(--texte-pale); }

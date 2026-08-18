@@ -603,7 +603,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-26';
+const VERSION = 'ccc-v2-carnet-27';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -2067,6 +2067,52 @@ function traceCarb() {
     (c.plan.filter(x => x.note).map(x => '<div class="cb-n"><b>' + dateDe(x.date).getDate() + '</b>' + x.note + '</div>').join(''));
 }
 
+/* ---- le dossier chaussettes ----
+   Deux modeles, une decision au 27. L'ecran doit montrer les deux colonnes de
+   la bifurcation, sinon le jour J on hesite. */
+function traceChaussettes() {
+  const hote = document.getElementById('chaussHote');
+  if (!hote || !SAC.chaussettes) return;
+  const C = SAC.chaussettes;
+
+  const paires = n => n + (n > 1 ? ' paires' : ' paire');
+  const repart = (titre, r, cls) =>
+    '<div class="ch-r ' + cls + '"><b>' + titre + '</b>' +
+    Object.keys(r).map(k => '<div class="ch-rl"><span>' +
+      ({ auxPieds: 'aux pieds', sacDeCourse: 'sac de course', sacChampex: 'sac de Champex', valise: 'valise' }[k] || k) +
+      '</span>' + r[k] + '</div>').join('') + '</div>';
+
+  hote.innerHTML =
+    '<div class="ch-duo">' +
+      '<div class="ch ok"><i>validée</i><b>' + C.validee.modele + '</b>' +
+        '<small>' + paires(C.validee.paires) + ' &#183; ' + C.validee.ref + '</small>' +
+        '<p>' + C.validee.preuve + '</p></div>' +
+      '<div class="ch att"><i>à valider le 22</i><b>' + C.candidate.modele + '</b>' +
+        '<small>' + paires(C.candidate.paires) + ' &#183; ' + C.candidate.ref + '</small>' +
+        '<p>' + C.candidate.hypothese + '</p></div>' +
+    '</div>' +
+    '<div class="ch-risque"><b>Le risque de la double</b>' + C.candidate.risque + '</div>' +
+
+    '<div class="fi-titre">Le calendrier</div>' +
+    '<table class="ch-t">' + C.planning.map(x => {
+      const d = dateDe(x.date);
+      return '<tr><td>' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</td>' +
+        '<td><b>' + x.modele + '</b><small>' + x.note + '</small></td></tr>';
+    }).join('') + '</table>' +
+
+    '<div class="fi-titre">Le jour J, selon le verdict</div>' +
+    repart('Si les Double passent', C.repartitionJourJ.siDoubleValidees, 'oui') +
+    repart('Si elles ne passent pas', C.repartitionJourJ.siDoubleRefusees, 'non') +
+
+    '<div class="fi-titre">En course</div>' +
+    '<div class="ch-reg"><b>' + C.regleEnCourse.quand + '</b>' +
+      '<small>' + C.regleEnCourse.ou + '</small></div>' +
+    '<div class="ch-sig rouge">' + C.regleEnCourse.signalRouge + '</div>' +
+    '<div class="ch-sig verte">' + C.regleEnCourse.signalOk + '</div>' +
+
+    '<ul class="ch-af">' + C.aFaire.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+}
+
 /* ---- gants et telephone ---- */
 function traceGants() {
   const g = SAC.gants;
@@ -2710,6 +2756,7 @@ function init() {
   traceSac();
   traceVerifs();
   traceGants();
+  traceChaussettes();
   traceVoyage();
   traceCarb();
   traceMeteo();

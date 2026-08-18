@@ -159,6 +159,33 @@ depot fermerait ce trou, et elle demande les mains de Pierre.
 
 ## JOURNAL DES SESSIONS
 
+### 18/08/2026 — Correctif chaussettes
+
+- **Erreur trouvee** : la chaussette validee etait notee « BV Sport Trail Ultra 2
+  Mid » depuis le debut des modules. C'est FAUX.
+- **Correction** : ce sont les **Sidas Trail Protect**, ref. CSORUTPROT20_BKWH,
+  2 paires. Preuve : 25,4 km, 1 195 m D+, jusqu'a 30,8 °C le 15/08, brulure
+  quasi nulle, avec Reveal et lacage heel-lock.
+- **Ajout** : Sidas Trail Double en candidate (ref. CSORUTDBLE24_BKTU, 1 paire),
+  test le 22/08. Hypothese : plus d'amorti donc moins de friction. Risque
+  inverse : l'epaisseur reduit le volume et peut aggraver la compression
+  laterale sur un pied gonfle. Decision le 27 au soir.
+- **Portee reelle du correctif** : il annoncait `sac-data.js` et `prepa-data.js`,
+  mais `data.js` portait encore « Chaussettes Injinji » a TROIS endroits
+  (`cf2`, `sc1`, et la liste du sac de Champex), et les notes de Pierre dans le
+  coffre aussi. Tout est corrige.
+- **Les notes du coffre sont un archive** : la ligne fausse est corrigee mais la
+  correction est datee et visible (« corrige le 18/08 au soir, etait note
+  BV Sport »). On ne reecrit pas silencieusement ce que Pierre a ecrit.
+- **Lecon** : les references materiel derivent de conversation en conversation.
+  Toute reference produit doit etre confirmee par Pierre avant d'etre figee.
+- **BV Sport reste correct pour le HAUT** (RTECH PRO, `c30`). Ne pas
+  sur-corriger : cinq mentions doivent subsister.
+- **Aucun compteur remis a zero** : `c21` change de libelle mais garde son id,
+  `c21b` arrive vierge, SCHEMA reste a 2, aucun orphelin. Verifie en semant un
+  etat coche avant rechargement.
+
+
 ### 18/08/2026
 
 - **Fait** : plan de la mise à jour validé. Écran « Mes données » livré :

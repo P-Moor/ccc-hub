@@ -5,9 +5,12 @@
  * Ici : une vraie checklist, cochable, hiérarchisée, séquencée dans le temps.
  *
  * Erreurs corrigées par rapport à la version precedente :
- *   Chaussettes BV Sport Trail Ultra 2 Mid, validees le 15/08 sur 25,4 km,
- *   et non les Injinji. L'Epitact n'est PAS valide (teste le 08/08 dans une
- *   chaussure disqualifiee, pire brulure du dossier) : optionnel conditionnel.
+ *   Chaussettes SIDAS TRAIL PROTECT, validees le 15/08 sur 25,4 km. Ce sont
+ *   bien les Sidas et non les Injinji, et non plus les BV Sport : la reference
+ *   avait derive de conversation en conversation, corrigee par Pierre le 18/08
+ *   au soir. BV Sport reste juste pour le HAUT (RTECH PRO), pas pour les pieds.
+ *   L'Epitact n'est PAS valide (teste le 08/08 dans une chaussure disqualifiee,
+ *   pire brulure du dossier) : optionnel conditionnel.
  *   Ajoutes : chaussures, montre, reserve alimentaire, balise GPS, epingles,
  *   kit canicule, tenue, documents hors ligne.
  */
@@ -58,7 +61,10 @@ export const SAC = {
     { id:"c11", zone:"sac", crit:"reglementaire", phase:"matin", txt:"Réserve alimentaire", detail:"Distincte de la nutrition planifiée — garder 2 gels intouchés comme réserve" },
 
     { id:"c20", zone:"sac", crit:"perso", phase:"matin", txt:"👟 S/Lab Ultra Glide Reveal 44⅔", detail:"⏳ Confirmation finale au test du mercredi 19" },
-    { id:"c21", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes BV Sport Trail Ultra 2 Mid", detail:"✅ Validées le 15/08 sur 25,4 km · PAS les Injinji" },
+    { id:"c21", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL PROTECT",
+      detail:"✅ VALIDÉES — 25,4 km le 15/08 sans brûlure, avec Reveal + laçage heel-lock. Réf. CSORUTPROT20_BKWH. 2 paires en possession.", statut:"valide" },
+    { id:"c21b", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL DOUBLE — candidate",
+      detail:"⏳ À VALIDER le samedi 22. Réf. CSORUTDBLE24_BKTU. Même gamme, double épaisseur. L'hypothèse : plus d'amorti, donc moins de friction diffuse sous l'avant-pied et moins de chocs sur la proéminence du 5ᵉ méta. ⚠️ Le risque est l'inverse : l'épaisseur réduit le volume, et la compression latérale peut empirer sur un pied gonflé après 10 h. 12 km ne diront rien du km 60. 1 seule paire.", statut:"aValider" },
     { id:"c22", zone:"sac", crit:"perso", phase:"matin", txt:"🧴 NOK Akileïne appliqué avant le départ", detail:"Sur les zones de friction, pas sur la boule du 5ᵉ méta" },
     { id:"c23", zone:"sac", crit:"perso", phase:"sacs", txt:"🥢 Bâtons Leki Ultratrail TR + système Shark", detail:"Conformes CCC ✅ · dès le km 1" },
     { id:"c24", zone:"sac", crit:"perso", phase:"sacs", txt:"Carquois à bâtons" },
@@ -76,7 +82,7 @@ export const SAC = {
     { id:"c34", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥄 Spork ou cuillère légère", detail:"BYOU également" },
     { id:"c35", zone:"bagage", crit:"perso", phase:"sacs", txt:"🧤 Moufles Salomon rembourrées", detail:"Réserve grand froid · restent en VALISE à Chamonix · décision le 27 au soir selon la météo réelle et le kit annoncé par l'orga" },
 
-    { id:"a01", zone:"allegement", crit:"perso", phase:"veille", txt:"🧦 Chaussettes BV Sport SÈCHES" },
+    { id:"a01", zone:"allegement", crit:"perso", phase:"veille", txt:"🧦 Chaussettes SIDAS SÈCHES", detail:"Sécher les pieds à la microfibre AVANT de les enfiler, sinon on perd la moitié du bénéfice." },
     { id:"a02", zone:"allegement", crit:"perso", phase:"veille", txt:"🍫 Nutrition 2ᵉ moitié", detail:"8 gels DONT LES 5 CAFÉINÉS + 2 barres + 2 mini-ziplocks Boost" },
     { id:"a03", zone:"allegement", crit:"perso", phase:"veille", txt:"🧴 NOK en recharge" },
     { id:"a04", zone:"allegement", crit:"perso", phase:"veille", txt:"👕 Couche chaude sèche", detail:"T-shirt manches longues — la nuit commence juste après" },
@@ -116,6 +122,53 @@ export const SAC = {
                decision: "le 27 au soir, selon météo réelle + kit orga annoncé" },
     reglementaire: { statut: "risque assumé par Pierre",
                      note: "Pas de mail à l'orga. Si un contrôle refuse la combinaison, Pierre accepte la conséquence." }
+  },
+
+  /* Le dossier chaussettes. Deux modeles de la meme marque : celle qui a fait
+     ses preuves, et celle qui pourrait faire mieux ou pire. La decision tombe
+     le 27 au soir, pas avant. */
+  chaussettes: {
+    validee: {
+      modele: "Sidas Trail Protect",
+      ref: "CSORUTPROT20_BKWH",
+      paires: 2,
+      preuve: "25,4 km · 1 195 m D+ · jusqu'à 30,8 °C le 15/08 — brûlure quasi nulle"
+    },
+    candidate: {
+      modele: "Sidas Trail Double",
+      ref: "CSORUTDBLE24_BKTU",
+      paires: 1,
+      testePrevu: "2026-08-22",
+      hypothese: "Plus d'amorti, donc moins de friction diffuse et moins de chocs sur la bosse du 5ᵉ méta",
+      risque: "L'épaisseur réduit le volume dans la chaussure : la compression latérale peut empirer quand le pied gonfle"
+    },
+    planning: [
+      { date: "2026-08-19", modele: "Trail Protect", note: "Test Reveal #2 — config validée, zéro variable neuve" },
+      { date: "2026-08-22", modele: "Trail Double",  note: "Dernière sortie avec D+, 12 à 14 km, sac chargé" },
+      { date: "2026-08-27", modele: "—",             note: "Décision de départ, le soir" }
+    ],
+    repartitionJourJ: {
+      siDoubleValidees: {
+        auxPieds:    "Sidas Trail Double",
+        sacDeCourse: "1 paire Trail Protect en secours",
+        sacChampex:  "1 paire Trail Protect, sèches ou bascule complète"
+      },
+      siDoubleRefusees: {
+        auxPieds:    "Sidas Trail Protect",
+        sacChampex:  "1 paire Trail Protect sèches",
+        valise:      "Les Trail Double restent à Chamonix"
+      }
+    },
+    regleEnCourse: {
+      quand: "Si ça fait vraiment mal : changement au PROCHAIN RAVITO OÙ TU PEUX T'ASSEOIR",
+      ou: "Arnouvaz · La Fouly · Champex · Trient · Vallorcine — en arrêt moyen ou grand, jamais sur un express de 3 à 5 min",
+      signalRouge: "🦴 Serrement ou compression sur le BORD EXTERNE : le volume s'est fermé, changer tout de suite",
+      signalOk: "🔥 Friction diffuse sous l'avant-pied : c'est précisément ce que les Double doivent traiter, on garde"
+    },
+    aFaire: [
+      "🧼 Lessive des 3 paires avant le 26 — elles partent propres et sèches",
+      "🧻 Microfibre dans le sac de Champex : sécher les pieds AVANT d'enfiler les sèches, sinon on perd la moitié du bénéfice"
+    ]
   },
 
   // Les deux longs chauds : le mouille part a Champex, le sec prend le relais.

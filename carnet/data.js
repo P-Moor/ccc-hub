@@ -164,7 +164,7 @@ export const SAC = [
     "Trousse : traitement, antihistaminique, pansements en curatif, sel"
   ]},
   { id:'champex', t:"Sac d'allègement Champex", s:"Déposé au départ, retrouvé au km 54,6, puis à Chamonix", items:[
-    "Chaussettes Injinji sèches", "2ᵉ paire d'Epitact", "NOK en recharge",
+    "Chaussettes Sidas sèches", "2ᵉ paire d'Epitact", "NOK en recharge",
     "8 gels dont 5 caféinés + 2 barres + 2 ziplocks",
     "Couche chaude sèche", "Lingettes ou serviette", "Piles de rechange frontale"
   ], interdit:["Bâtons", "Objets de valeur", "Objets fragiles"],
@@ -301,7 +301,7 @@ export const CHECKLIST = [
 
   { id:'cf', t:"Ma config course", s:"Ce que je porte et ce que j'emporte", items:[
     { id:'cf1', l:"S/Lab Ultra Glide Reveal 44⅔", s:"Validée sur 9,9 km, aucun point de pression MTP1" },
-    { id:'cf2', l:"Chaussettes Injinji + paire de secours" },
+    { id:'cf2', l:"Chaussettes Sidas Trail Protect + paire de secours" },
     { id:'cf3', l:"Epitact Epithelium Tact 05" },
     { id:'cf4', l:"NOK Akileïne appliqué avant le départ" },
     { id:'cf5', l:"Sac d'hydratation nettoyé et sec" },
@@ -325,7 +325,7 @@ export const CHECKLIST = [
   ]},
 
   { id:'sc', t:"Sac d'allègement Champex", s:"Déposé au départ à Courmayeur, retrouvé au km 54,6", items:[
-    { id:'sc1', l:"Chaussettes Injinji sèches" },
+    { id:'sc1', l:"Chaussettes Sidas sèches" },
     { id:'sc2', l:"2ᵉ paire d'Epitact" },
     { id:'sc3', l:"NOK Akileïne, recharge" },
     { id:'sc4', l:"Nutrition de secours", s:"8 gels dont 5 caféinés, 2 barres, 2 ziplocks" },
