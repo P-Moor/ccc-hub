@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-23';
+const CACHE = 'ccc-v2-carnet-24';
 
 const NOYAU = [
   './',
@@ -63,6 +63,11 @@ function revalide(req, cache) {
     })
     .catch(() => null);
 }
+
+// La page peut demander au nouveau worker de prendre la main tout de suite.
+self.addEventListener('message', e => {
+  if (e.data && e.data.action === 'prendreLaMain') self.skipWaiting();
+});
 
 self.addEventListener('fetch', e => {
   const req = e.request;

@@ -603,6 +603,8 @@ function idsConnusCheck() {
   return e;
 }
 
+const VERSION = 'ccc-v2-carnet-24';
+
 function ouvreDonnees() {
   const c = compteEtat();
   const json = exporteEtat();
@@ -627,7 +629,29 @@ function ouvreDonnees() {
     '<div class="fi-titre">Restaurer une sauvegarde</div>' +
     '<textarea class="dn-t" id="dnImport" rows="3" placeholder="Colle ici le contenu d\'une sauvegarde"></textarea>' +
     '<button class="dn-btn large" id="dnImporter">Restaurer</button>' +
-    '<div class="dn-msg" id="dnMsg"></div>');
+    '<div class="dn-msg" id="dnMsg"></div>' +
+    '<div class="fi-titre">Version</div>' +
+    '<div class="dn-vers"><b>' + VERSION + '</b>' +
+      '<small>Si le carnet te semble en retard sur ce qu\'on a fait, ' +
+      'c\'est le cache. Ce bouton va chercher la version fraiche.</small></div>' +
+    '<button class="dn-btn large" id="dnMaj">Chercher une mise à jour</button>' +
+    '<div class="dn-msg" id="dnMajMsg"></div>');
+
+  const bMaj = document.getElementById('dnMaj');
+  bMaj.addEventListener('click', async () => {
+    const msg = document.getElementById('dnMajMsg');
+    msg.textContent = 'Recherche…';
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) await r.update();
+      // on vide le cache et on repart du reseau : c'est brutal mais sur
+      for (const k of await caches.keys()) await caches.delete(k);
+      msg.textContent = 'Cache vidé. Rechargement…';
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      msg.textContent = 'Impossible ici. Ferme et rouvre le carnet.';
+    }
+  });
 
   const cop = document.getElementById('dnCopier');
   cop.addEventListener('click', () => {
@@ -1484,6 +1508,7 @@ document.addEventListener('click', e => {
    rien n'est ecrit dans localStorage, un rechargement redemande la phrase. */
 
 let coffre = null;          // le clair, en memoire vive uniquement
+let cleVive = null;         // la cle derivee, le temps de la session
 let coffreEnCours = false;
 
 const b64Vers = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
@@ -1493,7 +1518,8 @@ async function cleDuCoffre(phrase) {
     'raw', new TextEncoder().encode(phrase), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt: b64Vers(PRIVE.kdf.sel), iterations: PRIVE.kdf.tours, hash: PRIVE.kdf.hash },
-    base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    // 'encrypt' en plus : la meme cle sert aux pieces que Pierre ajoute lui-meme
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
 
 async function ouvreCoffre(phrase) {
@@ -1522,9 +1548,11 @@ async function chargeDocs(cle) {
     try {
       const oct = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: b(p.iv) }, cle, b(p.donnees));
+      const estTexte = /^text\/|markdown/.test(p.type) || /\.md$/i.test(p.nom);
       docs[p.id] = {
         nom: p.nom, type: p.type, taille: p.taille,
-        url: URL.createObjectURL(new Blob([oct], { type: p.type }))
+        octets: estTexte ? new Uint8Array(oct) : null,
+        url: URL.createObjectURL(new Blob([oct], { type: estTexte ? 'text/plain' : p.type }))
       };
     } catch (e) { /* une piece illisible n'empeche pas les autres */ }
   }
@@ -1535,14 +1563,98 @@ function libereDocs() {
   docs = null; docsCharges = false;
 }
 
+/* Rendu markdown minimal : titres, listes, citations, tableaux, gras, code.
+   Les notes de Pierre en sont pleines et il faut pouvoir les lire dans l'app,
+   hors ligne, sans embarquer de bibliotheque. */
+function md(txt) {
+  const ech = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const enligne = t => ech(t)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+  const lignes = txt.split('\n');
+  let h = '', liste = null, tableau = null, citation = false;
+
+  const fermeListe = () => { if (liste) { h += '</' + liste + '>'; liste = null; } };
+  const fermeTableau = () => { if (tableau) { h += '</table>'; tableau = null; } };
+  const fermeCitation = () => { if (citation) { h += '</blockquote>'; citation = false; } };
+  const fermeTout = () => { fermeListe(); fermeTableau(); fermeCitation(); };
+
+  for (let l of lignes) {
+    const brut = l;
+    l = l.replace(/\s+$/, '');
+
+    if (/^\s*$/.test(l)) { fermeTout(); continue; }
+
+    // tableau : on ignore la ligne de separation
+    if (/^\s*\|/.test(l)) {
+      if (/^\s*\|[\s:|-]+\|?\s*$/.test(l)) continue;
+      const cell = l.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim());
+      if (!tableau) { fermeListe(); fermeCitation(); h += '<table class="md-t">'; tableau = 'th'; }
+      const b = tableau === 'th' ? 'th' : 'td';
+      h += '<tr>' + cell.map(c => '<' + b + '>' + enligne(c) + '</' + b + '>').join('') + '</tr>';
+      tableau = 'td';
+      continue;
+    }
+    fermeTableau();
+
+    let m;
+    if ((m = l.match(/^(#{1,6})\s+(.*)$/))) {
+      fermeTout();
+      const n = Math.min(m[1].length, 4);
+      h += '<h' + n + '>' + enligne(m[2]) + '</h' + n + '>';
+      continue;
+    }
+    if (/^\s*(---+|===+|\*\*\*+)\s*$/.test(l)) { fermeTout(); h += '<hr>'; continue; }
+
+    if ((m = l.match(/^>\s?(.*)$/))) {
+      fermeListe(); fermeTableau();
+      if (!citation) { h += '<blockquote>'; citation = true; }
+      h += '<p>' + enligne(m[1]) + '</p>';
+      continue;
+    }
+    fermeCitation();
+
+    if ((m = l.match(/^\s*[-*+]\s+(.*)$/))) {
+      if (liste !== 'ul') { fermeListe(); h += '<ul>'; liste = 'ul'; }
+      h += '<li>' + enligne(m[1]) + '</li>';
+      continue;
+    }
+    if ((m = l.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      if (liste !== 'ol') { fermeListe(); h += '<ol>'; liste = 'ol'; }
+      h += '<li>' + enligne(m[1]) + '</li>';
+      continue;
+    }
+    fermeListe();
+    h += '<p>' + enligne(brut.trim()) + '</p>';
+  }
+  fermeTout();
+  return h;
+}
+
 function ouvreDoc(id) {
   const d = docs && docs[id];
   if (!d) return;
+  // on prefere le nom de la fiche au nom de fichier
+  const fiche = coffre && coffre.documents && coffre.documents.find(x => x.id === id);
+  if (fiche) d.titre = fiche.nom;
   const image = /^image\//.test(d.type);
+  const texte = /^text\/|markdown|\.md$/.test(d.type) || /\.md$/i.test(d.nom);
+
+  if (texte) {
+    let brut = '';
+    try { brut = new TextDecoder().decode(d.octets); } catch (e) { brut = ''; }
+    ouvreFeuille(d.titre || d.nom,
+      '<div class="md">' + md(brut) + '</div>');
+    return;
+  }
+
   // Les PDF dans un cadre embarque ne s'affichent pas de facon fiable, ni ici
   // ni sur iOS : on les ouvre en plein ecran, ou le lecteur natif prend le
   // relais. Les images, elles, s'affichent tout de suite.
-  ouvreFeuille(d.nom,
+  ouvreFeuille(d.titre || d.nom,
     (image
       ? '<div class="dv"><img src="' + d.url + '" alt=""></div>'
       : '<div class="dv dv-pdf"><b>PDF</b><span>' +
@@ -1552,6 +1664,88 @@ function ouvreDoc(id) {
       (image ? 'Ouvrir en plein ecran' : 'Ouvrir le document') + '</a>' +
     '<p class="dv-n">Ce fichier est dans le coffre, pas sur le reseau. ' +
       'Il reste lisible en mode avion.</p>');
+}
+
+/* ==================== ce que Pierre ajoute lui-meme ====================
+   Une piece ajoutee depuis le telephone ne repart PAS dans le depot public :
+   elle reste sur l'appareil, chiffree avec la meme phrase, dans IndexedDB.
+   C'est le bon endroit pour une copie de carte d'identite. */
+
+const RESERVE = 'ccc-coffre', MAGASIN = 'pieces';
+
+function ouvreBase() {
+  return new Promise((ok, ko) => {
+    const d = indexedDB.open(RESERVE, 1);
+    d.onupgradeneeded = () => {
+      if (!d.result.objectStoreNames.contains(MAGASIN)) d.result.createObjectStore(MAGASIN, { keyPath: 'cle' });
+    };
+    d.onsuccess = () => ok(d.result);
+    d.onerror = () => ko(d.error);
+  });
+}
+
+function transaction(mode, fn) {
+  return ouvreBase().then(db => new Promise((ok, ko) => {
+    const t = db.transaction(MAGASIN, mode);
+    const r = fn(t.objectStore(MAGASIN));
+    t.oncomplete = () => ok(r && r.result !== undefined ? r.result : r);
+    t.onerror = () => ko(t.error);
+  }));
+}
+
+async function chargeLocaux() {
+  if (!cleVive) return;
+  let lignes = [];
+  try { lignes = await transaction('readonly', m => m.getAll()) || []; } catch (e) { return; }
+  docs = docs || {};
+  for (const l of lignes) {
+    try {
+      const oct = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: new Uint8Array(l.iv) }, cleVive, l.donnees);
+      const estTexte = /^text\/|markdown/.test(l.type);
+      docs[l.cle] = {
+        nom: l.nom, type: l.type, taille: l.taille, local: true, ajoute: l.ajoute,
+        octets: estTexte ? new Uint8Array(oct) : null,
+        url: URL.createObjectURL(new Blob([oct], { type: estTexte ? 'text/plain' : l.type }))
+      };
+    } catch (e) { /* une piece illisible n'empeche pas les autres */ }
+  }
+}
+
+/* Une photo de carte d'identite fait 3 a 5 Mo : on la reduit avant de la
+   chiffrer, sinon la reserve du navigateur sature pour rien. */
+async function reduitImage(fichier, cote = 1800, qualite = 0.72) {
+  if (!/^image\//.test(fichier.type) || /svg/.test(fichier.type)) return fichier;
+  try {
+    const bmp = await createImageBitmap(fichier);
+    const r = Math.min(1, cote / Math.max(bmp.width, bmp.height));
+    if (r === 1 && fichier.size < 700000) return fichier;
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * r); c.height = Math.round(bmp.height * r);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', qualite));
+    return blob && blob.size < fichier.size ? blob : fichier;
+  } catch (e) { return fichier; }
+}
+
+async function ajouteLocal(fichier, cible) {
+  if (!cleVive) return;
+  const petit = await reduitImage(fichier);
+  const oct = new Uint8Array(await petit.arrayBuffer());
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const chiffre = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cleVive, oct);
+  const cle = cible || ('local-' + isoLocal(new Date()) + '-' + Math.round(oct.length % 9973));
+  await transaction('readwrite', m => m.put({
+    cle, nom: fichier.name || 'document', type: petit.type || fichier.type || 'application/octet-stream',
+    taille: oct.length, iv: Array.from(iv), donnees: chiffre, ajoute: isoLocal(new Date())
+  }));
+  if (docs && docs[cle] && docs[cle].url) URL.revokeObjectURL(docs[cle].url);
+  await chargeLocaux();
+}
+
+async function retireLocal(cle) {
+  await transaction('readwrite', m => m.delete(cle));
+  if (docs && docs[cle]) { URL.revokeObjectURL(docs[cle].url); delete docs[cle]; }
 }
 
 function traceCoffre() {
@@ -1603,7 +1797,9 @@ function traceCoffre() {
       await new Promise(r => setTimeout(r, 20));
       try {
         coffre = await ouvreCoffre(phrase);
-        await chargeDocs(await cleDuCoffre(phrase));
+        cleVive = await cleDuCoffre(phrase);
+        await chargeDocs(cleVive);
+        await chargeLocaux();
         traceCoffre();
       } catch (e) {
         msg.className = 'cff-msg ko';
@@ -1670,7 +1866,7 @@ function traceCoffre() {
     '<div class="cff-note">' + L.retour.marge + '</div>' +
 
     (L.documents ? '<div class="fi-titre">Les documents</div>' +
-      ['course', 'aller', 'sur place', 'retour'].map(cat => {
+      ['course', 'aller', 'sur place', 'retour', 'notes'].map(cat => {
         const liste = L.documents.filter(d => d.cat === cat);
         if (!liste.length) return '';
         return '<div class="dc-cat">' + cat + '</div>' + liste.map(d => {
@@ -1681,16 +1877,34 @@ function traceCoffre() {
             (d.note ? '<p class="dc-n">' + d.note + '</p>' : '') +
             '<div class="dc-b">' +
               (f ? '<button class="dc-v" data-doc="' + d.id + '">Voir le document</button>' : '') +
+              '<button class="dc-a" data-ajout="' + d.id + '">' +
+                (f ? 'Remplacer' : 'Ajouter le fichier') + '</button>' +
+              (f && f.local ? '<button class="dc-x" data-otelocal="' + d.id + '">Retirer</button>' : '') +
               (d.lien ? '<a href="' + d.lien + '" target="_blank" rel="noopener">' +
                 (d.lienNom || 'Le site') + '</a>' : '') +
               (d.app ? '<a href="' + d.app + '" target="_blank" rel="noopener">' +
                 (d.appNom || 'Dans l\'app') + '</a>' : '') +
               (d.mail ? '<a href="' + d.mail + '" target="_blank" rel="noopener">Le mail</a>' : '') +
             '</div>' +
-            (f ? '' : '<div class="dc-abs">Fichier pas encore depose dans le coffre</div>') +
+            (f ? '' : '<div class="dc-abs">Aucun fichier joint pour l\'instant</div>') +
             '</div>';
         }).join('');
       }).join('') : '') +
+
+    '<div class="fi-titre">Ajoutés depuis cet appareil</div>' +
+    '<div class="dc-loc">' +
+      (Object.keys(docs || {}).filter(k => docs[k].local && !(L.documents || []).some(d => d.id === k)).length
+        ? Object.keys(docs).filter(k => docs[k].local && !(L.documents || []).some(d => d.id === k)).map(k =>
+            '<div class="dc"><div class="dc-h"><b>' + docs[k].nom + '</b>' +
+            '<span>ajouté le ' + (docs[k].ajoute || '') + '</span></div>' +
+            '<div class="dc-b"><button class="dc-v" data-doc="' + k + '">Voir</button>' +
+            '<button class="dc-x" data-otelocal="' + k + '">Retirer</button></div></div>').join('')
+        : '<div class="dc-vide">Rien pour l\'instant. Ce que tu ajoutes ici reste ' +
+          'sur ce téléphone, chiffré, et ne part jamais en ligne.</div>') +
+      '<button class="dn-btn plein large" id="cffAjout">Ajouter un document</button>' +
+      '<input type="file" id="cffFichier" hidden accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.heic">' +
+      '<div class="dc-msg" id="cffAjoutMsg"></div>' +
+    '</div>' +
 
     (L.contacts ? '<div class="fi-titre">Numeros et references</div>' +
       '<div class="cff-bloc">' + L.contacts.map(c =>
@@ -1705,12 +1919,39 @@ function traceCoffre() {
     '</div>';
 
   document.getElementById('cffFerme').addEventListener('click', () => {
-    coffre = null; libereDocs(); traceCoffre();
+    coffre = null; cleVive = null; libereDocs(); traceCoffre();
   });
   document.querySelectorAll('#coffreHote [data-cff]').forEach(b =>
     b.addEventListener('click', () => { basculeCoche(b.dataset.cff); traceCoffre(); }));
   document.querySelectorAll('#coffreHote [data-doc]').forEach(b =>
     b.addEventListener('click', () => ouvreDoc(b.dataset.doc)));
+
+  const champFichier = document.getElementById('cffFichier');
+  const msgAjout = document.getElementById('cffAjoutMsg');
+  let cibleAjout = null;
+
+  const demande = cible => { cibleAjout = cible; champFichier.value = ''; champFichier.click(); };
+  document.getElementById('cffAjout').addEventListener('click', () => demande(null));
+  document.querySelectorAll('#coffreHote [data-ajout]').forEach(b =>
+    b.addEventListener('click', () => demande(b.dataset.ajout)));
+
+  champFichier.addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    msgAjout.textContent = 'Chiffrement…';
+    try {
+      await ajouteLocal(f, cibleAjout);
+      traceCoffre();
+    } catch (err) {
+      msgAjout.textContent = "Impossible d'ajouter ce fichier : " + (err && err.name ? err.name : err);
+    }
+  });
+
+  document.querySelectorAll('#coffreHote [data-otelocal]').forEach(b =>
+    b.addEventListener('click', async () => {
+      await retireLocal(b.dataset.otelocal);
+      traceCoffre();
+    }));
 }
 
 /* ==================== journal, meteo, confiance, blocs 18/08 ==================== */
@@ -2480,10 +2721,47 @@ function init() {
 
 init();
 
-// Service worker : tout le carnet doit repondre hors ligne.
+/* ==================== mises a jour ====================
+   Le service worker sert le cache d'abord : sans rien de plus, une nouvelle
+   version n'apparait qu'au deuxieme lancement, et Pierre voit l'ancienne app
+   sans savoir pourquoi. On lui dit, et on lui donne le bouton. */
+
+function bandeauMaj(sw) {
+  if (document.getElementById('majBandeau')) return;
+  const b = document.createElement('div');
+  b.id = 'majBandeau';
+  b.className = 'maj';
+  b.innerHTML = '<div><b>Nouvelle version prête</b>' +
+    '<small>Le carnet a été mis à jour. Recharge pour la voir.</small></div>' +
+    '<button id="majGo">Recharger</button>';
+  document.body.appendChild(b);
+  requestAnimationFrame(() => b.classList.add('on'));
+  document.getElementById('majGo').addEventListener('click', () => {
+    if (sw) sw.postMessage({ action: 'prendreLaMain' });
+    location.reload();
+  });
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* file:// ou refus */ });
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // une version deja en attente : on previent tout de suite
+      if (reg.waiting && navigator.serviceWorker.controller) bandeauMaj(reg.waiting);
+
+      reg.addEventListener('updatefound', () => {
+        const neuf = reg.installing;
+        if (!neuf) return;
+        neuf.addEventListener('statechange', () => {
+          if (neuf.state === 'installed' && navigator.serviceWorker.controller) bandeauMaj(neuf);
+        });
+      });
+
+      // on cherche une mise a jour a chaque ouverture et au retour d'arriere-plan
+      reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) reg.update().catch(() => {});
+      });
+    }).catch(() => { /* file:// ou refus */ });
   });
 }
 
