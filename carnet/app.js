@@ -1170,10 +1170,30 @@ function traceFeuilleCourse() {
 
   const nutri = '<div class="fc-bloc"><h3>Nutrition</h3>' +
     '<p><b>' + NUT.meta.cibleGlucidesParHeure + ' g/h</b><br>' + NUT.meta.regleOr + '</p>' +
-    '<p>' + NUT.cafeine.filter(c => c.n !== 'R').map(c => '<b>Café ' + c.n + '</b> ' + c.ou + ' ' + c.quand).join(' &#183; ') + '</p>' +
-    '<p><b>Départ</b> ' + NUT.portage.sacDepart.contenu.join(' &#183; ') + '<br><b>Champex</b> ' + NUT.portage.sacChampex.contenu.slice(0,3).join(' &#183; ') + '</p>' +
+    '<p class="fc-cadre"><b>Champex &#8594; Trient : 16,5 km, 3h05, aucun ravito.</b> ' +
+      'Prendre du salé au départ de Champex : pain, TUC, fromage. ' +
+      'L\'écœurement du sucré arrive entre la 11e et la 14e heure, ' +
+      'c\'est-à-dire exactement là.</p>' +
+    '<p>' + NUT.cafeine.filter(c => c.n !== 'R').map(c =>
+      '<b>Café ' + c.n + '</b> ' + c.ou + ' ' + c.quand).join(' &#183; ') + '</p>' +
+    '<p class="fc-petit">Zéro caféine avant Champex &#183; espacer de 2 h minimum &#183; ' +
+      'les caféinés dans un sachet à part, illisibles à la frontale</p>' +
+    '<p><b>Départ</b> ' + NUT.repartition.depart.contenu.join(' &#183; ') +
+      '<br><b>Champex</b> ' + NUT.repartition.champex.contenu.join(' &#183; ') + '</p>' +
     '<p class="fc-menu">' + NAAK.map(p => p.n.replace('Ultra Energy ', '').replace('Energy ', '') +
       ' ' + p.g + ' g').join(' &#183; ') + '</p></div>';
+
+  // Le froid de nuit en altitude est le vrai risque thermique, pas la chaleur.
+  const froid = '<div class="fc-bloc"><h3>Le froid, les gants</h3>' +
+    '<p class="fc-cadre"><b>' + SAC.gants.regleUnique + '</b></p>' +
+    '<ol class="fc-regles">' + SAC.gants.paliers.map(x =>
+      '<li><b>' + x.conditions + '</b> &#183; ' + x.config + '</li>').join('') + '</ol>' +
+    '<p class="fc-petit">Le point bas thermique : Tête aux Vents vers 03:30, ' +
+      '0 à 4 °C, après 18 h d\'effort, en mouvement lent.</p>' +
+    '<p><b>Champex</b> ' + SAC.longsChauds.principe + '</p>' +
+    '<p class="fc-petit">Téléphone : mode économie, Wi-Fi et Bluetooth coupés, ' +
+      'luminosité au minimum, contre le corps la nuit, recharge à Champex. ' +
+      'Il reste allumé et joignable, c\'est du matériel obligatoire.</p></div>';
 
   const panic = '<div class="fc-bloc fc-panic"><h3>Si ça va mal</h3>' +
     '<p class="fc-mantra">' + PANIC.mantra + '</p>' +
@@ -1195,7 +1215,7 @@ function traceFeuilleCourse() {
     const y = PBASE + 11 + (i % 2) * 10;
     const ancre = i === SECTIONS.length - 1 ? 'end' : 'middle';
     return '<circle cx="' + x.toFixed(1) + '" cy="' + fy(altAt(s.cumKm)).toFixed(1) + '" r="' +
-      (s.arret === 'grand' ? 4 : 2.8) + '" fill="#fff" stroke="#1E2430" stroke-width="1.6"/>' +
+      (s.arret === 'grand' ? 4 : 2.8) + '" fill="#fff" stroke="#17153B" stroke-width="1.6"/>' +
       '<line class="fcp-tick" x1="' + x.toFixed(1) + '" y1="' + PBASE + '" x2="' + x.toFixed(1) +
         '" y2="' + (y - 7) + '"/>' +
       '<text class="fcp-l" x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="' + ancre + '">' +
@@ -1219,7 +1239,7 @@ function traceFeuilleCourse() {
         '101,5 km &#183; 6 062 m D+ &#183; barrière finale <b>' + hhmm(FIN) + '</b> &#183; cible 20h15</div>' +
     '</div>' + tableau +
     '<div class="fc-verso">' + profil +
-      '<div class="fc-colonnes">' + regles + nutri + '</div>' + panic + '</div>';
+      '<div class="fc-colonnes">' + regles + nutri + froid + '</div>' + panic + '</div>';
 }
 
 /* ============================ nutrition ============================ */
@@ -1244,9 +1264,12 @@ function traceNutrition() {
     '</p></div>';
 
   h += '<div class="nu-sec"><span>Les deux sacs</span>' +
-    [NUT.portage.sacDepart, NUT.portage.sacChampex].map(s =>
+    [NUT.repartition.depart, NUT.repartition.champex].map(s =>
       '<div class="nu-ch"><b>' + s.label + '</b><ul class="nu-ul">' +
       s.contenu.map(c => '<li>' + c + '</li>').join('') + '</ul></div>').join('') +
+    '<div class="nu-ch"><b>Dans le sac de Champex, hors nourriture</b><ul class="nu-ul">' +
+      NUT.portage.sacChampex.contenu.filter(c => !/gels|barres|ziplocks/i.test(c))
+        .map(c => '<li>' + c + '</li>').join('') + '</ul></div>' +
     '<p class="nu-rech">' + NUT.portage.note + '</p></div>';
 
   h += '<div class="nu-sec"><span>Les cinq règles</span><ol class="nu-reg">' +
