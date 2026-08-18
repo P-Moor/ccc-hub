@@ -89,6 +89,29 @@ La seule vraie protection est la FORCE DE LA PHRASE : le fichier est
 telechargeable par n'importe qui, donc une attaque hors ligne peut essayer
 autant de phrases qu'elle veut. Quatre ou cinq mots sans rapport.
 
+## LES DOCUMENTS
+
+Le coffre porte treize fiches de documents (`documents` dans le clair) : navette
+CCC, creneau dossard, materiel obligatoire, Eurostar, TGV, billets PDF, FlixBus
+aller, logement, caution, assurance, FlixBus retour, vol, carte d'identite.
+
+Chaque fiche porte trois choses : les REFERENCES en clair, pour s'en sortir sans
+reseau ; le lien vers le MAIL d'origine ; le lien vers la SOURCE (site,
+telechargement, import dans l'app du transporteur). Le fichier lui-meme est
+facultatif : quand il est depose, il vit dans `prive-docs.js`.
+
+Les fichiers d'origine sont dans `carnet/_docs/` sur le Mac, jamais deployes.
+
+Pour ajouter ou remplacer un document : `_chiffrer.html`, glisser-deposer, la
+fiche se rattache par le nom de fichier (cle `fichier`). Deux fichiers sortent,
+`prive-data.js` et `prive-docs.js`, chiffres avec la MEME cle : une seule phrase
+ouvre tout. L'app ne charge `prive-docs.js` que si le coffre est ouvert.
+
+Les images s'affichent en pleine largeur sur fond blanc, scannables. **Les PDF
+ne s'affichent pas de facon fiable dans un cadre embarque**, ni dans le
+navigateur de preview ni sur iOS : ils s'ouvrent en plein ecran. Quand le QR
+compte, preferer une IMAGE (les mails SNCB et FlixBus fournissent les deux).
+
 ## JOURNAL DES SESSIONS
 
 ### 18/08/2026
