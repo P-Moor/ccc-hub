@@ -69,6 +69,26 @@ indépendante et n'est jamais touchée par une mise à jour.
 - Données personnelles dans un dépôt public — décision de Pierre attendue
 - Plan de l'Au : pointage seul, à confirmer sur le carnet de course officiel
 
+## LE COFFRE
+
+`prive-data.js` est deploye et PUBLIC : il ne contient que du chiffre.
+Le clair vit dans `_logistique-clair.js`, qui reste sur le Mac et ne sort
+jamais. Le trait de soulignement est la convention du projet pour tout ce qui
+ne se deploie pas (`_gen_profil.py`, `_audit.js`, `_chiffrer.html`), et
+`deploy_carnet.py` refuse desormais tout fichier qui commence par un `_`.
+
+Pour remplir ou regenerer le coffre : ouvrir `_chiffrer.html` depuis un serveur
+local, saisir la phrase de passe, telecharger le `prive-data.js` produit, le
+mettre a la place de l'actuel, puis deployer.
+
+PBKDF2-SHA256 a 1 000 000 de tours, puis AES-GCM 256. La phrase de passe n'est
+ecrite nulle part : ni dans le depot, ni dans une conversation, ni dans le
+localStorage. Le coffre s'ouvre en memoire vive et se referme au rechargement.
+
+La seule vraie protection est la FORCE DE LA PHRASE : le fichier est
+telechargeable par n'importe qui, donc une attaque hors ligne peut essayer
+autant de phrases qu'elle veut. Quatre ou cinq mots sans rapport.
+
 ## JOURNAL DES SESSIONS
 
 ### 18/08/2026

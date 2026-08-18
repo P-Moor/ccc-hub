@@ -94,7 +94,7 @@ export const VOYAGE = {
   retour: {
     label: "Retour",
     resolu: "\u2705 Dates coherentes : sejour jusqu'au 30, retour le 30. L'incoherence signalee le 16 est levee.",
-    renvoi: "Les references completes sont dans logistique-data.js, qui fait foi.",
+    renvoi: "Les references completes sont dans le coffre, en haut de cet ecran.",
     segments: [
       { id: "r1", type: "bus", ref: "Bus CDE3294 \u00b7 Alpine Fleet \u00b7 r\u00e9f. references dans le coffre",
         de: "Chamonix Centre", vers: "A\u00e9roport de Gen\u00e8ve",

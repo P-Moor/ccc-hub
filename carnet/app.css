@@ -1951,6 +1951,71 @@ button.tl-ligne:active { background: var(--surface-2); }
 .rdv-s p { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--texte-doux); }
 .rdv-s.neuf { background: color-mix(in srgb, var(--jour) 7%, transparent); }
 
+/* ===================== le coffre ===================== */
+
+.cf-vide { font-size: 14px; line-height: 1.45; color: var(--texte-pale); }
+
+.cff-tete { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.cff-tete > i { flex: none; font-style: normal; font-size: 22px; line-height: 1.1; }
+.cff-tete b { display: block; font-family: var(--display); font-weight: 700; font-size: 18px; }
+.cff-tete small { display: block; margin-top: 3px; font-size: 13px; color: var(--texte-pale); line-height: 1.4; }
+.cff-indice {
+  margin-bottom: 10px; padding: 8px 12px; border-radius: var(--pill);
+  background: var(--voile); font-family: var(--mono); font-size: 11.5px;
+  color: var(--texte-doux);
+}
+.cff-saisie { display: flex; gap: 8px; }
+.cff-saisie input {
+  flex: 1; min-width: 0; min-height: var(--tap); padding: 0 14px;
+  border-radius: var(--pill); border: 1px solid var(--bord);
+  background: var(--surface-2); color: var(--texte);
+  font-family: var(--mono); font-size: 15px; -webkit-appearance: none;
+}
+.cff-saisie .dn-btn { margin-top: 0; flex: none; }
+.cff-msg { margin-top: 10px; font-size: 14px; }
+.cff-msg.ko { color: var(--alerte); font-weight: 600; }
+.cff-msg.attente { color: var(--texte-pale); font-family: var(--mono); font-size: 12.5px; }
+
+.cff-haut { display: flex; gap: 10px; align-items: center; }
+.cff-haut b { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--ok); }
+.cff-haut small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--texte-pale); }
+.cff-x {
+  margin-left: auto; flex: none; min-height: var(--tap); padding: 0 16px;
+  border-radius: var(--pill); border: 1px solid var(--bord);
+  font-family: var(--display); font-weight: 700; font-size: 13px;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--texte-doux);
+}
+.cff-bloc { border-radius: var(--r-s); background: var(--surface-2); padding: 4px 12px; }
+.cff-l { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--bord); }
+.cff-l:first-child { border-top: 0; }
+.cff-l span {
+  flex: 0 0 108px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--texte-pale);
+}
+.cff-l b { flex: 1; font-size: 14.5px; font-weight: 500; line-height: 1.35; word-break: break-word; }
+.cff-contact {
+  padding: 8px 0; border-top: 1px solid var(--bord);
+  font-family: var(--mono); font-size: 11px; color: var(--texte-pale);
+  line-height: 1.45; word-break: break-all;
+}
+.cff-al {
+  margin-top: 8px; padding: 10px 12px; border-radius: var(--r-s);
+  font-size: 14px; line-height: 1.42;
+  background: color-mix(in srgb, var(--jour) 12%, transparent);
+  border-left: 3px solid var(--jour);
+}
+.cff-al.critique {
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left-color: var(--alerte);
+}
+.cff-note { margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--texte-doux); }
+.cff-seg { padding: 10px 0; border-top: 1px solid var(--bord); }
+.cff-seg:first-of-type { border-top: 0; }
+.cff-seg-h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.cff-seg-h b { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.cff-seg-h span { font-family: var(--mono); font-size: 12px; color: var(--texte-doux); }
+.cff-ref { margin-top: 3px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale); line-height: 1.45; }
+
 /* ===================== feuille (bottom sheet) ===================== */
 
 .feuille-fond {

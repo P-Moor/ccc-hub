@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-18';
+const CACHE = 'ccc-v2-carnet-19';
 
 const NOYAU = [
   './',
@@ -22,6 +22,7 @@ const NOYAU = [
   'voyage-data.js',
   'meteo-data.js',
   'confiance-data.js',
+  'prive-data.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

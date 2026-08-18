@@ -9,6 +9,7 @@ import { SAC } from './sac-data.js';
 import { VOYAGE } from './voyage-data.js';
 import { METEO } from './meteo-data.js';
 import { CONFIANCE } from './confiance-data.js';
+import { PRIVE } from './prive-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -1449,6 +1450,150 @@ document.addEventListener('click', e => {
   if (v) { voyMode = v.dataset.voy; store.set('voyMode', voyMode); traceVoyage(); }
 });
 
+/* ==================== le coffre ====================
+   Les references de reservation, l'adresse du logement, les cautions : tout
+   cela vit dans un depot PUBLIC. La seule reponse honnete est de ne jamais y
+   ecrire le clair. `prive-data.js` ne contient que du chiffre, la phrase de
+   passe n'existe que dans la tete de Pierre, et le dechiffrement se fait ici,
+   dans le telephone, hors ligne.
+
+   Le coffre reste ouvert le temps de la session et pas une seconde de plus :
+   rien n'est ecrit dans localStorage, un rechargement redemande la phrase. */
+
+let coffre = null;          // le clair, en memoire vive uniquement
+let coffreEnCours = false;
+
+const b64Vers = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+
+async function cleDuCoffre(phrase) {
+  const base = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(phrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: b64Vers(PRIVE.kdf.sel), iterations: PRIVE.kdf.tours, hash: PRIVE.kdf.hash },
+    base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+
+async function ouvreCoffre(phrase) {
+  const k = await cleDuCoffre(phrase);
+  const brut = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: b64Vers(PRIVE.chiffre.iv) }, k, b64Vers(PRIVE.chiffre.donnees));
+  return JSON.parse(new TextDecoder().decode(brut));
+}
+
+function traceCoffre() {
+  const hote = document.getElementById('coffreHote');
+  if (!hote) return;
+
+  if (PRIVE.vide && !coffre) {
+    hote.innerHTML = '<div class="cf-vide">Le coffre n\'a pas encore ete rempli. ' +
+      'Les references de reservation restent hors ligne en attendant.</div>';
+    return;
+  }
+
+  if (!coffre) {
+    hote.innerHTML =
+      '<div class="cff-tete"><i>&#128274;</i><div><b>Reservations et references</b>' +
+      '<small>Chiffre. Ce depot est public, le clair n\'y est jamais ecrit.</small></div></div>' +
+      (PRIVE.indice ? '<div class="cff-indice">Indice &#183; ' + PRIVE.indice + '</div>' : '') +
+      '<div class="cff-saisie">' +
+        '<input id="cffPhrase" type="password" autocomplete="current-password" ' +
+        'spellcheck="false" placeholder="Ta phrase de passe">' +
+        '<button class="dn-btn plein" id="cffGo">Ouvrir</button>' +
+      '</div><div id="cffMsg"></div>';
+
+    const go = document.getElementById('cffGo');
+    const champ = document.getElementById('cffPhrase');
+    const msg = document.getElementById('cffMsg');
+
+    const tente = async () => {
+      const phrase = champ.value;
+      if (!phrase || coffreEnCours) return;
+      coffreEnCours = true;
+      go.disabled = true;
+      msg.className = 'cff-msg attente';
+      msg.textContent = 'Ouverture…';
+      await new Promise(r => setTimeout(r, 20));
+      try {
+        coffre = await ouvreCoffre(phrase);
+        traceCoffre();
+      } catch (e) {
+        msg.className = 'cff-msg ko';
+        msg.textContent = 'Phrase refusee.';
+        champ.value = '';
+        champ.focus();
+      } finally {
+        coffreEnCours = false;
+        if (go) go.disabled = false;
+      }
+    };
+
+    go.addEventListener('click', tente);
+    champ.addEventListener('keydown', e => { if (e.key === 'Enter') tente(); });
+    return;
+  }
+
+  // ---- coffre ouvert ----
+  const L = coffre;
+  const ligne = (k, v) => '<div class="cff-l"><span>' + k + '</span><b>' + v + '</b></div>';
+
+  hote.innerHTML =
+    '<div class="cff-haut"><div><b>Coffre ouvert</b>' +
+      '<small>En memoire seulement. Un rechargement le referme.</small></div>' +
+      '<button class="cff-x" id="cffFerme">Refermer</button></div>' +
+
+    '<div class="fi-titre">Logement</div>' +
+    '<div class="cff-bloc">' +
+      ligne('Statut', L.logement.statut) +
+      ligne('Adresse', L.logement.adresseLogement) +
+      ligne('Remise des cles', L.logement.remiseCles) +
+      ligne('Dates', L.logement.dates) +
+      ligne('Montant', L.logement.montant) +
+      ligne('Reference', L.logement.reference) +
+      ligne('Autres refs', L.logement.referenceAlt) +
+      ligne('Gestionnaire', L.logement.gestionnaire) +
+      ligne('Interlocuteur', L.logement.interlocuteur) +
+      ligne('Arrivee', L.logement.horaires.arrivee) +
+      ligne('Depart', L.logement.horaires.depart) +
+      '<div class="cff-contact">' + L.logement.contact + '</div>' +
+    '</div>' +
+    L.logement.alertes.map(a =>
+      '<div class="cff-al ' + a.niveau + '">' + a.txt + '</div>').join('') +
+    '<div class="cff-note">' + L.logement.procedure + '</div>' +
+    '<div class="cff-note">' + L.logement.relanceEnvoyee + '</div>' +
+
+    '<div class="fi-titre">Caution</div>' +
+    '<div class="cff-bloc">' +
+      ligne('Montant', L.caution.montant) +
+      ligne('Statut', L.caution.statut) +
+      ligne('Systeme', L.caution.systeme) +
+      ligne('Contrat', L.caution.contrat) +
+    '</div>' +
+    '<div class="cff-note">' + L.caution.note + '</div>' +
+
+    '<div class="fi-titre">Retour &#183; ' + L.retour.note + '</div>' +
+    L.retour.segments.map(g =>
+      '<div class="cff-seg"><div class="cff-seg-h"><b>' + g.de + ' &#8594; ' + g.vers + '</b>' +
+      '<span>' + g.depart + ' &#8594; ' + g.arrivee + '</span></div>' +
+      '<div class="cff-ref">' + g.ref + '</div>' +
+      (g.bagages ? '<div class="cff-note">' + g.bagages + '</div>' : '') +
+      (g.alerte ? '<div class="cff-al attention">' + g.alerte + '</div>' : '') +
+      '</div>').join('') +
+    '<div class="cff-note">' + L.retour.marge + '</div>' +
+
+    '<div class="fi-titre">A regler</div>' +
+    '<div class="ck-liste carte-l">' + L.aRegler.map(x =>
+      '<button class="sk' + (x.crit ? ' sk-reglementaire' : ' sk-perso') +
+      (coche(x.id) ? ' ok' : '') + '" data-cff="' + x.id + '">' +
+      '<i class="ck-box"></i><span class="sk-t">' + x.txt + '</span></button>').join('') +
+    '</div>';
+
+  document.getElementById('cffFerme').addEventListener('click', () => {
+    coffre = null; traceCoffre();
+  });
+  document.querySelectorAll('#coffreHote [data-cff]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.cff); traceCoffre(); }));
+}
+
 /* ==================== journal, meteo, confiance, blocs 18/08 ==================== */
 
 const CLE_JN = CLE_JOURNAL;
@@ -2194,6 +2339,7 @@ function init() {
   traceMeteo();
   traceStock();
   traceJournal();
+  traceCoffre();
   majCourse(true);
 
   traceRavitos();
@@ -2224,6 +2370,25 @@ if ('serviceWorker' in navigator) {
 
 // Poignee de mise au point, utilisable depuis la console.
 window.CCC = {
+  /* Poignee de mise au point du coffre : elle ne dechiffre rien, elle permet
+     seulement de dessiner l'ecran ouvert avec un contenu quelconque pour le
+     verifier en preview. Aucune donnee n'est lue ni ecrite sur le disque. */
+  coffreEssai(objet) {
+    coffre = objet || null;
+    traceCoffre();
+    return coffre ? 'coffre peint' : 'coffre referme';
+  },
+  async coffreDepuis(bloc, phrase) {
+    const b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+    const base = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(phrase), 'PBKDF2', false, ['deriveKey']);
+    const k = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: b(bloc.kdf.sel), iterations: bloc.kdf.tours, hash: bloc.kdf.hash },
+      base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    const brut = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: b(bloc.chiffre.iv) }, k, b(bloc.chiffre.donnees));
+    return JSON.parse(new TextDecoder().decode(brut));
+  },
   simuler(quand) {
     const r = simuler(quand);
     dernierCompte = '';
