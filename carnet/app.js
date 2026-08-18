@@ -603,7 +603,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-25';
+const VERSION = 'ccc-v2-carnet-26';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1778,8 +1778,9 @@ function traceCoffre() {
       '<small>Chiffre. Ce depot est public, le clair n\'y est jamais ecrit.</small></div></div>' +
       (PRIVE.indice ? '<div class="cff-indice">Indice &#183; ' + PRIVE.indice + '</div>' : '') +
       '<div class="cff-saisie">' +
-        '<input id="cffPhrase" type="password" autocomplete="current-password" ' +
-        'spellcheck="false" placeholder="Ta phrase de passe">' +
+        '<input id="cffPhrase" type="password" autocomplete="off" ' +
+        'autocapitalize="none" autocorrect="off" spellcheck="false" ' +
+        'inputmode="text" enterkeyhint="go" placeholder="Ta phrase de passe">' +
         '<button class="dn-btn plein" id="cffGo">Ouvrir</button>' +
       '</div><div id="cffMsg"></div>';
 
@@ -1788,28 +1789,43 @@ function traceCoffre() {
     const msg = document.getElementById('cffMsg');
 
     const tente = async () => {
-      const phrase = champ.value;
-      if (!phrase || coffreEnCours) return;
+      // Le clavier iOS met une majuscule au premier mot et laisse parfois une
+      // espace finale. On nettoie, et on essaie quelques variantes plutot que
+      // de renvoyer Pierre a son clavier.
+      const saisie = champ.value.trim().replace(/\s+/g, ' ');
+      if (!saisie || coffreEnCours) return;
       coffreEnCours = true;
       go.disabled = true;
       msg.className = 'cff-msg attente';
       msg.textContent = 'Ouverture…';
       await new Promise(r => setTimeout(r, 20));
-      try {
-        coffre = await ouvreCoffre(phrase);
-        cleVive = await cleDuCoffre(phrase);
+
+      const variantes = [saisie, saisie.toLowerCase(), saisie.replace(/\s+/g, ''),
+                         saisie.toLowerCase().replace(/\s+/g, '')];
+      let clair = null, bonne = null;
+      for (const v of variantes) {
+        try { clair = await ouvreCoffre(v); bonne = v; break; } catch (e) { /* suivante */ }
+      }
+
+      if (clair) {
+        coffre = clair;
+        cleVive = await cleDuCoffre(bonne);
         await chargeDocs(cleVive);
         await chargeLocaux();
         traceCoffre();
-      } catch (e) {
+      } else {
         msg.className = 'cff-msg ko';
-        msg.textContent = 'Phrase refusee.';
+        msg.innerHTML = 'Phrase refusée.' +
+          (PRIVE.stamp && PRIVE.stamp !== VERSION
+            ? '<br><b>Et ton coffre est en retard</b> : il date de ' + PRIVE.stamp +
+              ', l\'app attend ' + VERSION + '. Ouvre Mes données, ' +
+              '« Chercher une mise à jour », puis réessaie.'
+            : '<br>Quatre mots, une espace entre chaque. Les majuscules ne comptent pas.');
         champ.value = '';
         champ.focus();
-      } finally {
-        coffreEnCours = false;
-        if (go) go.disabled = false;
       }
+      coffreEnCours = false;
+      if (go) go.disabled = false;
     };
 
     go.addEventListener('click', tente);
