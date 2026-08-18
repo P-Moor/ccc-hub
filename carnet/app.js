@@ -1382,8 +1382,12 @@ function traceVoyage() {
     }).join('');
 
   } else {
-    h = '<div class="al al-crit"><div class="al-i">📅</div><div><b>Trois dates qui ne collent pas</b>' +
-      '<p>' + VOYAGE.retour.alerte + '</p></div></div>' +
+    // l'incoherence de dates est levee depuis le 18 : le bandeau devient un
+    // constat, plus une alerte
+    h = '<div class="al al-ok"><div class="al-i">✅</div><div><b>Dates cohérentes</b>' +
+      '<p>' + VOYAGE.retour.resolu.replace('\u2705 ', '') + '</p>' +
+      '<small class="vy-renvoi">' + VOYAGE.retour.renvoi + '</small></div></div>' +
+      '<div class="vy-marge">' + VOYAGE.retour.marge + '</div>' +
       VOYAGE.retour.segments.map(segTrain).join('') +
       '<div class="titre">À régler</div><div class="ck-liste carte-l">' +
       VOYAGE.retour.aFaire.map(i =>
@@ -1433,7 +1437,7 @@ function traceJournal() {
         '<option value="">—</option><option>Bonne</option><option>Moyenne</option><option>Mauvaise</option></select></div>' +
       '<div class="jn-l"><label>Poids (facultatif)</label><input id="jnPoids" type="text" inputmode="decimal" placeholder="kg"></div>' +
     '</div>' +
-    '<button class="dn-btn large" id="jnAjout">Enregistrer</button>';
+    '<button class="dn-btn plein large" id="jnAjout">Enregistrer</button>';
 
   document.getElementById('jnAjout').addEventListener('click', () => {
     const e = {

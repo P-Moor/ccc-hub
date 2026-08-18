@@ -106,3 +106,35 @@ indépendante et n'est jamais touchée par une mise à jour.
   chiffré.
 - **Vérifié** : zéro erreur console, zéro échec de contraste AA sur les cinq
   écrans de Préparer, en thème jour et en thème nuit.
+
+### 18/08/2026 — passe de design
+
+Pierre a fourni un export HTML de référence (dashboard santé sombre, violet et
+menthe, Manrope, rayons de 24 px) et demandé « un coup de polish sur le design,
+inspiré de Whoop, juste l'UI, pas le contenu ».
+
+**Décision prise sans lui, à assumer** : la palette carte topo est conservée.
+Elle a été choisie la veille et elle porte l'identité du carnet ; c'est la
+GRAMMAIRE de la référence qui a été reprise, pas ses couleurs. Concrètement :
+
+- échelle de rayons nommée (`--r` 18 px, `--r-s` 12, `--r-xs` 9, `--pill`)
+  substituée à tous les rayons figés du fichier
+- deux niveaux d'ombre (`--ombre`, `--ombre-h`) et un voile de rail (`--voile`)
+- lumière rasante en haut de page (`body::after`), très diluée
+- les deux moitiés Préparer / Courir deviennent un segmenté à capsule
+- la barre d'onglets devient un dock : coins hauts arrondis, flou renforcé,
+  pastille d'accent qui grandit sous l'icône active
+- chiffres à chasse fixe partout où ils se comparent
+- jauges en capsule sans bordure, tuiles de jour à 15 px avec ombre
+- l'alerte critique passe de l'encadré 2 px à l'aplat teinté
+- la texture topographique baissée d'un cran (0,20 → 0,14 le jour)
+- le segmenté s'adapte au nombre de segments (le sac n'en a que deux)
+
+**Deux défauts de rendu corrigés au passage** : le bandeau retour affichait
+« undefined » depuis la reconstruction de `voyage-data.js` (il lit maintenant
+`resolu` et `renvoi`, et devient un constat vert au lieu d'une alerte rouge) ;
+la ligne Réserve du plan caféine écrasait sa colonne de gauche.
+
+**Vérifié** : zéro erreur console ; zéro échec AA et zéro cible sous 44 px sur
+les NEUF écrans, en jour et en nuit, plus les trois feuilles. Feuille de course
+et impression conservées (rayons ramenés à 8 px sur le papier, halo masqué).
