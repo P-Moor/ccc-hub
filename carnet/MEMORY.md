@@ -96,6 +96,13 @@ deuxieme lancement. Depuis le 18/08 un bandeau le dit et propose de recharger,
 et l'ecran Mes donnees porte le numero de version avec un bouton qui vide le
 cache. C'est la premiere chose a regarder.
 
+## REGENERER LE COFFRE
+
+`python3 scratchpad/coffre.py "<phrase>" "<indice>"`. Le script lit
+`_logistique-clair.js` et tout `_docs/`, chiffre, et ecrit `prive-data.js` et
+`prive-docs.js`. Huit secondes. Il refuse une phrase de moins de quatre mots et
+tout nom de fichier contenant un numero.
+
 ## AJOUTER UN DOCUMENT
 
 Bouton dans le coffre, sur chaque fiche et en libre. Le fichier est reduit s'il
