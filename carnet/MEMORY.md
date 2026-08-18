@@ -112,6 +112,19 @@ ne s'affichent pas de facon fiable dans un cadre embarque**, ni dans le
 navigateur de preview ni sur iOS : ils s'ouvrent en plein ecran. Quand le QR
 compte, preferer une IMAGE (les mails SNCB et FlixBus fournissent les deux).
 
+## L'HISTORIQUE GIT
+
+Reecrit et pousse le 18/08. Les 123 commits gardent messages, dates et arbre de
+travail ; 13 blobs sur 324 ont ete nettoyes. Plus aucune des quinze chaines
+sensibles n'apparait nulle part dans l'historique, verifie sur un clone frais.
+
+Methode : `git fast-export --all` puis un filtre Python sur les seuls blocs
+`data`, puis `git fast-import` dans un depot neuf, puis `push --force`.
+
+Reste ouvert : les anciens SHA sont encore annonces par l'API publique des
+evenements GitHub pendant environ 90 jours. Seule une suppression-recreation du
+depot fermerait ce trou, et elle demande les mains de Pierre.
+
 ## JOURNAL DES SESSIONS
 
 ### 18/08/2026
