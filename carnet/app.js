@@ -27,6 +27,87 @@ const store = {
   }
 };
 
+/* ==================== mes donnees : sauvegarde et migration ====================
+   Les modules *-data.js definissent la STRUCTURE, le localStorage detient
+   l'ETAT. Ce sont deux choses separees et l'etat gagne toujours.
+
+   Le chemin de lecture merge deja par construction : coche(id) lit par
+   identifiant, un id inconnu vaut false. Un nouvel item arrive donc non coche
+   sans toucher aux autres, et un id disparu n'efface rien.
+
+   Ce qui suit ajoute le reste : un numero de schema, l'archivage des ids
+   orphelins plutot que leur suppression, et l'export / import complet. */
+
+const SCHEMA = 1;
+const CLE_JOURNAL = 'ccc-journal-v1';
+
+const CLES_ETAT = [
+  'check', 'prepa', 'course', 'kits', 'scenario', 'theme',
+  'sacMode', 'sacRouge', 'sacReste', 'voyMode',
+  'partie', 'vue-prepa', 'vue-course', 'simu', 'schema', 'orphelins'
+];
+
+// Archive les identifiants qui n'existent plus dans les donnees, au lieu de
+// les jeter. Si un fichier de donnees part en vrille, l'etat est recuperable.
+function archiveOrphelins(idsConnus) {
+  const etat = store.get('check', {}) || {};
+  const orph = store.get('orphelins', {}) || {};
+  let n = 0;
+  Object.keys(etat).forEach(id => {
+    if (!idsConnus.has(id)) { orph[id] = etat[id]; delete etat[id]; n++; }
+  });
+  if (n) { store.set('check', etat); store.set('orphelins', orph); }
+  return n;
+}
+
+function migre(idsConnus) {
+  const v = store.get('schema', 0);
+  const n = archiveOrphelins(idsConnus);
+  if (v !== SCHEMA) store.set('schema', SCHEMA);
+  return { de: v, vers: SCHEMA, archives: n };
+}
+
+function exporteEtat() {
+  const d = { app: 'ccc-carnet', schema: SCHEMA, exporte: new Date().toISOString(), donnees: {} };
+  CLES_ETAT.forEach(k => {
+    const v = localStorage.getItem(CLE + k);
+    if (v !== null) d.donnees[CLE + k] = v;
+  });
+  const j = localStorage.getItem(CLE_JOURNAL);
+  if (j !== null) d.donnees[CLE_JOURNAL] = j;
+  return JSON.stringify(d, null, 2);
+}
+
+// Retourne un compte-rendu plutot que de lancer une exception : on est sur un
+// telephone, a J-10, il faut savoir ce qui s'est passe.
+function importeEtat(texte) {
+  let d;
+  try { d = JSON.parse(texte); } catch (e) { return { ok: false, msg: "Ce n'est pas du JSON valide." }; }
+  if (!d || d.app !== 'ccc-carnet' || !d.donnees) {
+    return { ok: false, msg: "Ce fichier ne vient pas du carnet." };
+  }
+  let n = 0;
+  Object.keys(d.donnees).forEach(k => {
+    if (k !== CLE_JOURNAL && k.indexOf(CLE) !== 0) return;
+    try { localStorage.setItem(k, d.donnees[k]); n++; } catch (e) { /* quota */ }
+  });
+  return { ok: true, msg: n + ' clés restaurées, sauvegarde du ' +
+    (d.exporte || '').slice(0, 16).replace('T', ' à ') + '.' };
+}
+
+function compteEtat() {
+  const c = store.get('check', {}) || {};
+  const p = store.get('prepa', null) || {};
+  const co = store.get('course', null) || {};
+  return {
+    coches: Object.values(c).filter(Boolean).length,
+    taches: Object.values(p.taches || {}).filter(Boolean).length,
+    reponses: Object.keys(p.inconnues || {}).length,
+    pointages: (co.pointages || []).length,
+    journal: (JSON.parse(localStorage.getItem(CLE_JOURNAL) || '[]') || []).length
+  };
+}
+
 /* ============================ temps ============================ */
 
 const DEPART = new Date(RACE.depart);
@@ -449,6 +530,69 @@ document.getElementById('btnRegles').addEventListener('click', () => {
     ouvreFeuille('Les 5 règles', htmlRegles());
   }
 });
+
+/* ---- l'ecran Mes donnees ---- */
+
+// Tous les identifiants cochables connus, toutes sources confondues.
+function idsConnusCheck() {
+  const e = new Set();
+  SAC.items.forEach(i => e.add(i.id));
+  SAC.kits.forEach(k => k.items.forEach(i => e.add(i.id)));
+  SAC.verifications.forEach(v => e.add(v.id));
+  NUT.listeAchat.trakks.concat(NUT.listeAchat.maison).forEach(i => e.add(i.id));
+  VOYAGE.aller.surMoiDansLeTrain.forEach(i => e.add(i.id));
+  VOYAGE.documentsHorsLigne.forEach(i => e.add(i.id));
+  VOYAGE.retour.aFaire.forEach(i => e.add(i.id));
+  return e;
+}
+
+function ouvreDonnees() {
+  const c = compteEtat();
+  const json = exporteEtat();
+  const nom = 'carnet-ccc-' + new Date().toISOString().slice(0, 10) + '.json';
+  const href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+
+  ouvreFeuille('Mes données', '' +
+    '<div class="dn-c">' +
+      '<div><b>' + c.coches + '</b><span>cases cochées</span></div>' +
+      '<div><b>' + c.taches + '</b><span>tâches de prépa</span></div>' +
+      '<div><b>' + c.reponses + '</b><span>réponses saisies</span></div>' +
+      '<div><b>' + c.pointages + '</b><span>pointages</span></div>' +
+    '</div>' +
+    '<p class="dn-p">Fais une sauvegarde avant chaque grosse mise à jour. ' +
+      'Si quelque chose se perd, tu restaures ici.</p>' +
+    '<div class="dn-b">' +
+      '<a class="dn-btn plein" download="' + nom + '" href="' + href + '">Télécharger</a>' +
+      '<button class="dn-btn" id="dnCopier">Copier</button>' +
+    '</div>' +
+    '<textarea class="dn-t" id="dnExport" readonly rows="4">' +
+      json.replace(/</g, '&lt;') + '</textarea>' +
+    '<div class="fi-titre">Restaurer une sauvegarde</div>' +
+    '<textarea class="dn-t" id="dnImport" rows="3" placeholder="Colle ici le contenu d\'une sauvegarde"></textarea>' +
+    '<button class="dn-btn large" id="dnImporter">Restaurer</button>' +
+    '<div class="dn-msg" id="dnMsg"></div>');
+
+  const cop = document.getElementById('dnCopier');
+  cop.addEventListener('click', () => {
+    const t = document.getElementById('dnExport');
+    t.select(); t.setSelectionRange(0, 999999);
+    const fini = () => { cop.textContent = 'Copié ✓'; setTimeout(() => cop.textContent = 'Copier', 2000); };
+    if (navigator.clipboard) navigator.clipboard.writeText(json).then(fini, fini);
+    else { try { document.execCommand('copy'); } catch (e) {} fini(); }
+  });
+
+  document.getElementById('dnImporter').addEventListener('click', () => {
+    const v = document.getElementById('dnImport').value.trim();
+    const msg = document.getElementById('dnMsg');
+    if (!v) { msg.className = 'dn-msg non'; msg.textContent = 'Colle d\'abord une sauvegarde.'; return; }
+    const r = importeEtat(v);
+    msg.className = 'dn-msg ' + (r.ok ? 'oui' : 'non');
+    msg.textContent = r.msg + (r.ok ? ' Rechargement…' : '');
+    if (r.ok) setTimeout(() => location.reload(), 1200);
+  });
+}
+
+document.getElementById('btnDonnees').addEventListener('click', ouvreDonnees);
 
 /* ============================ deroule ============================ */
 
@@ -1805,6 +1949,7 @@ document.querySelectorAll('.gros button').forEach(b => {
 
 function init() {
   appliqueTheme();
+  migre(idsConnusCheck());
   document.documentElement.dataset.course = '0';
   majCompte();
   traceTimelineH();
@@ -1864,7 +2009,7 @@ function init() {
 
 init();
 
-// Service worker : tout le carnet doit repondre en mode avion.
+// Service worker : tout le carnet doit repondre hors ligne.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => { /* file:// ou refus */ });

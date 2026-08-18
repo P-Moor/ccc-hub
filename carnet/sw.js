@@ -3,11 +3,11 @@
 // plus large ; pour toute page sous /carnet/ c'est celui-ci qui gagne, le
 // navigateur retenant toujours la portee la plus specifique.
 //
-// Strategie : cache d'abord, revalidation en arriere-plan. En mode avion tout
+// Strategie : cache d'abord, revalidation en arriere-plan. Hors ligne tout
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-13';
+const CACHE = 'ccc-v2-carnet-14';
 
 const NOYAU = [
   './',

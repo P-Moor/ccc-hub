@@ -1835,3 +1835,32 @@ button.tl-ligne:active { background: var(--surface-2); }
   .ck-grp { break-inside: auto; }
   .ck-liste { break-inside: auto; }
 }
+
+/* ---- mes donnees ---- */
+.dn-c { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--bord);
+  border: 1px solid var(--bord); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.dn-c div { background: var(--surface); padding: 10px 8px; text-align: center; }
+.dn-c b { display: block; font-family: var(--display); font-weight: 700; font-size: 25px; line-height: 1; }
+.dn-c span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--texte-pale); margin-top: 3px; }
+.dn-p { font-size: 14px; line-height: 1.42; color: var(--texte-doux); margin-bottom: 11px; }
+.dn-b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.dn-btn {
+  min-height: var(--tap); border-radius: 10px; padding: 0 14px;
+  display: flex; align-items: center; justify-content: center; text-decoration: none;
+  border: 1px solid var(--bord); background: var(--surface); color: var(--texte);
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.dn-btn.plein { background: var(--encre); color: var(--papier); border-color: var(--encre); }
+[data-theme="nuit"] .dn-btn.plein { background: var(--jour); color: #11151C; border-color: var(--jour); }
+.dn-btn.large { width: 100%; margin-top: 8px; }
+.dn-t {
+  width: 100%; border-radius: 10px; border: 1px solid var(--bord);
+  background: var(--surface-2); color: var(--texte-doux);
+  font-family: var(--mono); font-size: 11px; line-height: 1.4; padding: 9px 10px;
+  resize: vertical; margin-bottom: 4px;
+}
+.dn-msg { margin-top: 9px; font-size: 14px; line-height: 1.4; min-height: 20px; }
+.dn-msg.oui { color: var(--ok); font-weight: 600; }
+.dn-msg.non { color: var(--alerte); font-weight: 600; }
