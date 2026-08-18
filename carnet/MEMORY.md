@@ -89,6 +89,20 @@ La seule vraie protection est la FORCE DE LA PHRASE : le fichier est
 telechargeable par n'importe qui, donc une attaque hors ligne peut essayer
 autant de phrases qu'elle veut. Quatre ou cinq mots sans rapport.
 
+## SI TU NE VOIS PAS UN CHANGEMENT
+
+Le service worker sert le cache d'abord. Une nouvelle version n'arrive qu'au
+deuxieme lancement. Depuis le 18/08 un bandeau le dit et propose de recharger,
+et l'ecran Mes donnees porte le numero de version avec un bouton qui vide le
+cache. C'est la premiere chose a regarder.
+
+## AJOUTER UN DOCUMENT
+
+Bouton dans le coffre, sur chaque fiche et en libre. Le fichier est reduit s'il
+s'agit d'une image, chiffre avec la meme phrase, et garde dans le navigateur
+(IndexedDB). **Il ne part jamais dans le depot public.** C'est la que doit aller
+la copie de la carte d'identite.
+
 ## LE COFFRE EST REMPLI
 
 Sept documents chiffres, deployes le 18/08. La phrase de passe a ete choisie
