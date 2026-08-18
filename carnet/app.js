@@ -1427,14 +1427,14 @@ function traceJournal() {
     '<textarea id="jnTxt" rows="2" placeholder="Une ligne, un ressenti, ce que tu veux"></textarea></div>' +
     '<div class="jn-g">' +
       '<div class="jn-l"><label>Pied 0-3</label><select id="jnPied">' +
-        '<option value="">—</option><option value="0">0 · rien</option><option value="1">1 · léger</option>' +
+        '<option value="">&#183;</option><option value="0">0 · rien</option><option value="1">1 · léger</option>' +
         '<option value="2">2 · net</option><option value="3">3 · fort</option></select></div>' +
       '<div class="jn-l"><label>Zone</label><select id="jnZone">' +
-        '<option value="">—</option><option>Avant-pied</option><option>5ᵉ méta</option>' +
+        '<option value="">&#183;</option><option>Avant-pied</option><option>5ᵉ méta</option>' +
         '<option>Talon</option><option>Cheville G</option><option>Autre</option></select></div>' +
       '<div class="jn-l"><label>km d\'apparition</label><input id="jnKm" type="text" inputmode="decimal" placeholder="ex. 12"></div>' +
       '<div class="jn-l"><label>Nuit</label><select id="jnNuit">' +
-        '<option value="">—</option><option>Bonne</option><option>Moyenne</option><option>Mauvaise</option></select></div>' +
+        '<option value="">&#183;</option><option>Bonne</option><option>Moyenne</option><option>Mauvaise</option></select></div>' +
       '<div class="jn-l"><label>Poids (facultatif)</label><input id="jnPoids" type="text" inputmode="decimal" placeholder="kg"></div>' +
     '</div>' +
     '<button class="dn-btn plein large" id="jnAjout">Enregistrer</button>';
@@ -1517,7 +1517,7 @@ function traceGants() {
     '<div class="gt-m">' + g.mode + '</div>' +
     g.paliers.map((x, i) => '<div class="gt"><b>' + (i + 1) + '</b><div><b>' + x.conditions + '</b>' +
       '<small>' + x.config + '</small></div></div>').join('') +
-    '<div class="gt-res"><span>Réserve</span>' + g.reserve.objet + ' — ' + g.reserve.ou +
+    '<div class="gt-res"><span>Réserve</span>' + g.reserve.objet + ' &#183; ' + g.reserve.ou +
       '<small>' + g.reserve.decision + '</small></div>' +
     '<div class="gt-reg"><span>Réglementaire</span>' + g.reglementaire.note + '</div>';
 
