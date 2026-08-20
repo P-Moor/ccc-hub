@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-27';
+const CACHE = 'ccc-v2-carnet-28';
 
 const NOYAU = [
   './',
@@ -22,6 +22,7 @@ const NOYAU = [
   'voyage-data.js',
   'meteo-data.js',
   'confiance-data.js',
+  'maj20-data.js',
   'prive-data.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
@@ -32,7 +33,8 @@ const NOYAU = [
 // `prive-docs.js` n'existe que si Pierre a depose des pieces jointes. Un
 // addAll echouerait en bloc sur un seul 404 : on met donc en cache fichier par
 // fichier, et un absent n'empeche pas les autres.
-const EN_PLUS = ['prive-docs.js'];
+const EN_PLUS = ['prive-docs.js',
+  'assets/CCC_2026_RAVITOS_SOMMETS.gpx', 'assets/CCC_2026_RAVITOS.gpx'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

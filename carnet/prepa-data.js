@@ -60,7 +60,7 @@ export const AFFUTAGE = {
     },
     {
       date: "2026-08-19", j: "J-9", jour: "Mercredi", type: "cle", priorite: "critique",
-      titre: "TEST REVEAL #2 — SÉANCE CLÉ",
+      titre: "TEST REVEAL #2 — FAIT, REVEAL VALIDÉE",
       seance: { heure: "17:30", contenu: "12 km · ~300 m D+ · trail", distanceKm: 12, dplus: 300, fcMax: 145,
                 config: "S/Lab Ultra Glide Reveal 44⅔ · SIDAS TRAIL PROTECT · laçage heel-lock · bâtons dès la 1re montée · sac de course chargé · BV Sport RTECH PRO (haut) · les 3 couches de gants · NOK avant départ" },
       consignes: [
@@ -208,7 +208,7 @@ export const AFFUTAGE = {
   /** Le rendez-vous medecin, deplace du lundi 17 au jeudi 20 au matin. */
   rdvMedecin: {
     date: "2026-08-20", moment: "matin",
-    medecin: "Dr Alexandra Nunes de Sousa",
+    medecin: "Dr Alexandra Nunes de Sousa", fait: true, bilan: "Colchicine maintenue · antihistaminique prescrit · prise de sang faite · ongles signalés, suivi en cours",
     sujets: [
       { n:1, titre:"Colchicine le jour J",
         detail:"Risques digestifs et musculaires sur 20 h d'effort. Arreter, maintenir, ou emporter en secours ?" },
@@ -241,11 +241,17 @@ export const AFFUTAGE = {
   /** Trous ouverts — l'UI affiche la date de résolution et attend la saisie. */
   inconnues: [
     { id: "medoc",   label: "Colchicine le jour J + antihistaminique non sédatif",
-      resoudreLe: "2026-08-20", via: "RDV Dr Nunes de Sousa", impacte: ["Trousse perso", "Checklist matériel"] },
+      resoudreLe: "2026-08-20", via: "RDV Dr Nunes de Sousa", impacte: ["Trousse perso", "Checklist matériel"],
+      reponse: "Colchicine MAINTENUE le jour J. Antihistaminique non sédatif PRESCRIT. Reste à retirer l'ordonnance avant le 25.",
+      resoluLe: "2026-08-20" },
     { id: "cafeine", label: "mg de caféine par gel Näak Boost caféiné",
-      resoudreLe: "2026-08-17", via: "Étiquette à TraKKs", impacte: ["Plan caféine"] },
+      resoudreLe: "2026-08-17", via: "Étiquette à TraKKs", impacte: ["Plan caféine"],
+      reponse: "35 mg Ultra Energy Chocolat · 65 mg barre Caramel Macchiato · 100 mg Boost Peach Tea.",
+      resoluLe: "2026-08-17" },
     { id: "reveal",  label: "Verdict chaussures — Reveal validée ou plan B",
-      resoudreLe: "2026-08-19", via: "Test Reveal #2", impacte: ["Config course", "Séance du samedi 22"] }
+      resoudreLe: "2026-08-19", via: "Test Reveal #2", impacte: ["Config course", "Séance du samedi 22"],
+      reponse: "REVEAL VALIDÉE. Test #2 sous pluie battante, 13 km, pieds trempés 1h20 : zéro brûlure. Le laçage a même dû être RESSERRÉ.",
+      resoluLe: "2026-08-19" }
   ],
 
   /** Points à vérifier, sans échéance dure mais à ne pas oublier. */
@@ -255,7 +261,13 @@ export const AFFUTAGE = {
     { id: "gobelet", txt: "Mesurer le gobelet : beaucoup font 125 ml, il faut ≥ 150 ml" },
     { id: "couche", txt: "Peser la 2e couche chaude : ≥ 180 g (ou 110 g + coupe-vent DWR)" },
     { id: "sac2l", txt: "Vérifier que le sac porte 2 L (kit canicule probable)" },
-    { id: "collant", txt: "Collant long Salomon — re-tester à froid jeudi 20 au réveil" }
+    { id: "collant", txt: "Collant long Salomon — re-testé à froid le 20, OK", fait: true },
+    { id: "couche2", txt: "Peser LES DEUX t-shirts longs chauds : ≥ 180 g chacun, à cause de l'échange à Champex" },
+    { id: "ci", txt: "Vérifier la validité de la carte d'identité" },
+    { id: "ordo", txt: "💊 Retirer l'ordonnance antihistaminique en pharmacie AVANT le 25" },
+    { id: "taxe", txt: "💳 Virement de la taxe de séjour, 16 €, à Lamy, puis confirmation par mail — avant le 25" },
+    { id: "linge", txt: "🛏️ Trancher la question du linge de lit : mail à Sylvain Lazaille" },
+    { id: "horsligne", txt: "📱 Enregistrer hors ligne le code de la boîte à clés, le numéro de Sylvain et les 2 PDF du mail du 20" }
   ],
 
   /** Contrat nutrition en vigueur du 17 au 24 août inclus. */

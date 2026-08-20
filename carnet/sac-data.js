@@ -80,6 +80,10 @@ export const SAC = {
     { id:"c32", zone:"allegement", crit:"perso", phase:"veille", txt:"🔥 Chauffe-mains TerraTherm 12 h — 2 paires", detail:"Activer 20 min AVANT d'en avoir besoin, en s'asseyant à Champex · jamais à même la peau, entre les Asics et les Overglove · vérifier la date de péremption" },
     { id:"c33", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥣 Bol pliable silicone 400-500 ml", detail:"Lifeventure · BYOU, l'organisation ne distribue aucune vaisselle" },
     { id:"c34", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥄 Spork ou cuillère légère", detail:"BYOU également" },
+    { id:"c36", zone:"sac", crit:"reglementaire", phase:"veille", txt:"🔋 Batterie de rechange Swift RL", detail:"✅ Commandée le 19/08. Pierre préfère avoir deux fois la RL plutôt que dépendre de l'Aria." },
+    { id:"c37", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🔋 Piles AAA de rechange", detail:"Pour l'Aria 1R. ⚠️ Encore à acheter." },
+    { id:"c38", zone:"bagage", crit:"perso", phase:"sacs", txt:"🛏️ Linge de lit + 2 serviettes", detail:"🔴 NON INCLUS dans la location, découvert le 20/08. Soit emportés de Belgique, soit loués auprès de Lamy. Question à poser à Sylvain." },
+    { id:"c39", zone:"bagage", crit:"perso", phase:"veille", txt:"🧥 Veste retraitée au Nikwax", detail:"⚠️ À FAIRE le week-end du 22-23. Séchage complet avant le 26. La membrane est intacte, c'est le déperlant de surface qui est usé." },
     { id:"c35", zone:"bagage", crit:"perso", phase:"sacs", txt:"🧤 Moufles Salomon rembourrées", detail:"Réserve grand froid · restent en VALISE à Chamonix · décision le 27 au soir selon la météo réelle et le kit annoncé par l'orga" },
 
     { id:"a01", zone:"allegement", crit:"perso", phase:"veille", txt:"🧦 Chaussettes SIDAS SÈCHES", detail:"Sécher les pieds à la microfibre AVANT de les enfiler, sinon on perd la moitié du bénéfice." },

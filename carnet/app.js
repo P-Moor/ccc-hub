@@ -10,6 +10,8 @@ import { VOYAGE } from './voyage-data.js';
 import { METEO } from './meteo-data.js';
 import { CONFIANCE } from './confiance-data.js';
 import { PRIVE } from './prive-data.js';
+import { VERDICT_CHAUSSURES, TROUSSE, VESTE, LAMPES,
+         BALISE, MENUS, TRACES, PHYSIO } from './maj20-data.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -603,7 +605,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-27';
+const VERSION = 'ccc-v2-carnet-28';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1846,6 +1848,8 @@ function traceCoffre() {
     '<div class="cff-bloc">' +
       ligne('Statut', L.logement.statut) +
       ligne('Adresse', L.logement.adresseLogement) +
+      (L.logement.acces ? ligne('Boîte à clés', L.logement.acces.ou) +
+        ligne('CODE', '<b class="cff-code">' + L.logement.acces.code + '</b>') : '') +
       ligne('Remise des cles', L.logement.remiseCles) +
       ligne('Dates', L.logement.dates) +
       ligne('Montant', L.logement.montant) +
@@ -1857,8 +1861,26 @@ function traceCoffre() {
       ligne('Depart', L.logement.horaires.depart) +
       '<div class="cff-contact">' + L.logement.contact + '</div>' +
     '</div>' +
+    (L.logement.acces ? '<div class="cff-ok">' + L.logement.acces.consequence +
+      '<br>' + L.logement.depart.consequence + '</div>' : '') +
     L.logement.alertes.map(a =>
       '<div class="cff-al ' + a.niveau + '">' + a.txt + '</div>').join('') +
+    (L.logement.linge ? '<div class="cff-linge"><b>' + L.logement.linge.titre + '</b>' +
+      '<ul>' + L.logement.linge.options.map(o => '<li>' + o + '</li>').join('') + '</ul>' +
+      '<div class="cff-act">' + L.logement.linge.action + '</div></div>' : '') +
+    (L.logement.taxeDeSejour ? '<div class="cff-taxe"><b>Taxe de séjour · ' +
+      L.logement.taxeDeSejour.montant + '</b>' + L.logement.taxeDeSejour.probleme +
+      '<div class="cff-act">' + L.logement.taxeDeSejour.solution + '</div></div>' : '') +
+    (L.logement.contactAgence ? '<div class="fi-titre">Le contact</div><div class="cff-bloc">' +
+      ligne('Qui', L.logement.contactAgence.nom) +
+      ligne('Urgence', L.logement.contactAgence.telUrgence) +
+      ligne('Mail', L.logement.contactAgence.mail) + '</div>' : '') +
+    (L.logement.timingArrivee26 ? '<div class="fi-titre">L\'arrivée du 26</div>' +
+      L.logement.timingArrivee26.map(t => '<div class="cff-tm"><b>' + t.h + '</b>' +
+        t.quoi + '</div>').join('') +
+      '<div class="cff-bonus">' + L.logement.bonusTiming + '</div>' : '') +
+    (L.logement.resolues ? '<div class="fi-titre">Ce qui est refermé</div><ul class="cff-res">' +
+      L.logement.resolues.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '') +
     '<div class="cff-note">' + L.logement.procedure + '</div>' +
     '<div class="cff-note">' + L.logement.relanceEnvoyee + '</div>' +
 
@@ -2045,7 +2067,21 @@ function traceMeteo() {
       '<tr class="' + (x.critique ? 'crit' : '') + '"><td>' + x.lieu + '<small>' + x.alt + ' m · ' + x.heure + '</small></td>' +
       '<td>' + x.temp + '</td></tr>').join('') + '</table>' +
     '<div class="mt-c">' + METEO.conclusion + '</div>' +
-    '<div class="mt-p">' + METEO.aRegarderAussi + '</div>';
+    '<div class="mt-p">' + METEO.aRegarderAussi + '</div>' +
+
+    (METEO.au20Aout ? (function (m) {
+      return '<div class="fi-titre">Au 20 août</div>' +
+        '<div class="mt-20">' + m.constat + '</div>' +
+        '<div class="mt-nu">' + m.nuance + '</div>' +
+        '<table class="mt-h">' + m.historique.map(h =>
+          '<tr><td>' + h.annee + '</td><td>' + h.conditions + '</td></tr>').join('') + '</table>' +
+        '<div class="mt-ens">' + m.enseignement + '</div>' +
+        '<div class="mt-at">' + m.atout + '</div>' +
+        '<div class="mt-or">' + m.orage + '</div>' +
+        '<div class="mt-p">' + m.gel + '</div>' +
+        '<div class="mt-q">' + m.quandRegarder + '</div>' +
+        '<div class="mt-stop">' + m.consigne + '</div>';
+    })(METEO.au20Aout) : '');
 }
 
 /* ---- carb cycling ---- */
@@ -2065,6 +2101,178 @@ function traceCarb() {
     }).join('') + '</div>' +
     '<div class="cb-r">' + c.regleAbsolue + '</div>' +
     (c.plan.filter(x => x.note).map(x => '<div class="cb-n"><b>' + dateDe(x.date).getDate() + '</b>' + x.note + '</div>').join(''));
+}
+
+/* ==================== ce qui s'est ferme du 18 au 20 ==================== */
+
+/* Le verdict chaussures. Deux tests, dont un sous la pluie : c'est le second
+   qui compte, parce qu'il a ete fait en conditions degradees. */
+function traceVerdict() {
+  const h = document.getElementById('verdictHote');
+  if (!h) return;
+  const V = VERDICT_CHAUSSURES;
+  const test = (t, n) =>
+    '<div class="vd-t"><div class="vd-th"><b>Test ' + n + '</b>' +
+      '<span>' + dateDe(t.date).getDate() + ' ' + MOIS[dateDe(t.date).getMonth()] +
+      ' &#183; ' + kmFmt(t.km) + ' km &#183; ' + t.dplus + ' m D+</span></div>' +
+      '<div class="vd-c">' + (t.conditions || t.temp) + '</div>' +
+      '<p>' + t.resultat + '</p>' +
+      (t.detailCle ? '<div class="vd-cle">' + t.detailCle + '</div>' : '') +
+      '<small>' + t.chaussettes + '</small></div>';
+
+  h.innerHTML =
+    '<div class="vd-tete"><i>dossier fermé</i><b>' + V.decision + '</b></div>' +
+    test(V.test1, 1) + test(V.test2, 2) +
+    '<div class="vd-lend"><b>Le lendemain, ' + dateDe(V.lendemain.date).getDate() + '</b>' +
+      '<div>Bord externe : <b>' + V.lendemain.bordExterne + '</b></div>' +
+      '<div>Peau : ' + V.lendemain.peau + '</div></div>' +
+    '<div class="vd-profil">' + V.profilConfirme + '</div>' +
+    '<div class="vd-note">' + V.noteImportante + '</div>' +
+    '<div class="vd-red">' + V.redondanceChaussettes + '</div>';
+}
+
+/* La trousse. Deux lignes portent une action, elles ressortent. */
+function traceTrousse() {
+  const h = document.getElementById('trousseHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="tr-tete"><i>' + TROUSSE.statut + '</i><small>' + TROUSSE.rdv + '</small></div>' +
+    TROUSSE.items.map(i =>
+      '<div class="tr' + (i.cle ? ' cle' : '') + '"><b>' + i.nom + '</b>' +
+      '<span>' + i.statut + '</span>' +
+      (i.note ? '<p>' + i.note + '</p>' : '') +
+      (i.aFaire ? '<div class="tr-af">' + i.aFaire + '</div>' : '') + '</div>').join('') +
+    '<div class="fi-titre">Le suivi</div>' +
+    '<div class="tr-s">' +
+      '<div><span>Prise de sang</span>' + TROUSSE.suivi.priseDeSang + '</div>' +
+      '<div><span>Ongles</span>' + TROUSSE.suivi.ongles + '</div>' +
+      '<div><span>Pieds</span>' + TROUSSE.suivi.pieds + '</div>' +
+      '<div><span>La suite</span>' + TROUSSE.suivi.prochainesEtapes + '</div>' +
+    '</div>';
+}
+
+/* La veste et les lampes : deux dossiers materiel ouverts le 19. */
+function traceVesteLampes() {
+  const hv = document.getElementById('vesteHote');
+  if (hv) {
+    hv.innerHTML =
+      '<div class="ve-tete"><b>' + VESTE.modele + '</b><small>' + VESTE.membrane + '</small></div>' +
+      '<div class="ve-pb">' + VESTE.probleme + '</div>' +
+      '<div class="ve-diag"><b>Ce qui se passe</b>' + VESTE.diagnostic + '</div>' +
+      '<div class="ve-fc">' + VESTE.consequenceSecondaire + '</div>' +
+      '<div class="fi-titre">Le protocole</div>' +
+      '<div class="ve-p">' + VESTE.protocole.map(e =>
+        '<div class="ve-e"><b>' + e.n + '</b><div>' + e.txt +
+        (e.alerte ? '<em>' + e.alerte + '</em>' : '') + '</div></div>').join('') + '</div>' +
+      '<div class="ve-quand">' + VESTE.quand + '</div>' +
+      '<div class="ve-prod">' + VESTE.produit + '</div>';
+  }
+
+  const hl = document.getElementById('lampesHote');
+  if (hl) {
+    hl.innerHTML =
+      '<div class="lp"><i>principale</i><b>' + LAMPES.principale.modele + '</b>' +
+        '<small>' + LAMPES.principale.batterie + '</small>' +
+        '<div class="lp-al">' + LAMPES.principale.alerte + '</div>' +
+        '<p>' + LAMPES.principale.conseil + '</p></div>' +
+      '<div class="lp"><i>secours</i><b>' + LAMPES.secours.modele + '</b>' +
+        '<small>' + LAMPES.secours.alimentation + ' &#183; mode rouge ' + LAMPES.secours.modeRouge + '</small></div>' +
+      '<div class="fi-titre">Les rechanges</div>' +
+      LAMPES.rechange.map(r =>
+        '<div class="lp-r"><b>' + r.objet + '</b><span>' + r.statut + '</span>' +
+        (r.note ? '<p>' + r.note + '</p>' : '') + '</div>').join('') +
+      '<div class="lp-reg">' + LAMPES.reglementaire + '</div>' +
+      '<div class="lp-froid">' + LAMPES.froid + '</div>';
+  }
+}
+
+/* La balise. Le piege n'est pas de la perdre, c'est d'oublier de la rendre
+   le samedi, apres vingt heures de course. */
+function traceBalise() {
+  const h = document.getElementById('baliseHote');
+  if (!h) return;
+  const R = BALISE.restitution;
+  h.innerHTML =
+    '<div class="ba-al"><b>' + R.quandPierre + '</b>' + BALISE.alerte + '</div>' +
+    '<div class="ba-l"><span>Caution</span>' + BALISE.caution.montant + ' &#183; ' +
+      BALISE.caution.systeme + ' &#183; ' + BALISE.caution.statut + '</div>' +
+    '<div class="ba-l"><span>Retrait</span>' + BALISE.retrait + '</div>' +
+    '<div class="ba-l"><span>Limite</span>' + R.dateLimite + '</div>' +
+    '<div class="fi-titre">Où la rendre</div>' +
+    R.ou.map(o => '<div class="ba-ou' + (o.malin ? ' malin' : '') + '"><b>' + o.lieu + '</b>' +
+      (o.note ? '<small>' + o.note + '</small>' : '') + '</div>').join('') +
+    '<div class="ba-int">' + R.interdit + '</div>' +
+    '<div class="ba-s"><b>Si tu oublies</b>' + R.sanction + '. ' + R.secours + '</div>';
+}
+
+/* Les menus, de J-3 au jour J. Le piege est enonce en tete : ce n'est pas le
+   volume qui monte, c'est la proportion. */
+function traceMenus() {
+  const h = document.getElementById('menusHote');
+  if (!h) return;
+  const auj = minuit(maintenant()).getTime();
+  h.innerHTML =
+    '<ul class="mn-pr">' + MENUS.principe.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+    MENUS.jours.map(j => {
+      const d = dateDe(j.date);
+      const est = d.getTime() === auj;
+      return '<div class="mn-j' + (est ? ' auj' : '') + '">' +
+        '<div class="mn-jt"><b>' + j.label + '</b>' +
+          (j.sous ? '<span>' + j.sous + '</span>' : '') + '</div>' +
+        (j.alerte ? '<div class="mn-al">' + j.alerte + '</div>' : '') +
+        j.repas.map(r => '<div class="mn-r"><b>' + r.moment + '</b>' +
+          '<p>' + r.contenu + '</p>' +
+          (r.note ? '<small>' + r.note + '</small>' : '') + '</div>').join('') +
+        (j.interdits ? '<div class="mn-int"><b>Interdits</b>' +
+          j.interdits.map(i => '<span>' + i + '</span>').join('') + '</div>' : '') +
+        (j.hydratation ? '<div class="mn-hy">' + j.hydratation + '</div>' : '') +
+        '</div>';
+    }).join('') +
+    '<div class="fi-titre">Le sac du train</div>' +
+    '<div class="mn-sac"><b>' + MENUS.sacDuTrain.quand + '</b>' +
+      '<ul>' + MENUS.sacDuTrain.contenu.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<div class="mn-regle">' + MENUS.sacDuTrain.regle + '</div></div>' +
+    '<div class="fi-titre">Les courses</div>' +
+    '<div class="mn-c"><b>Depuis la Belgique</b><ul>' +
+      MENUS.courses.depuisLaBelgique.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' +
+    '<div class="mn-c"><b>À Chamonix le 27</b><ul>' +
+      MENUS.courses.aChamonixLe27.map(x => '<li>' + x + '</li>').join('') + '</ul></div>' +
+    '<div class="fi-titre">En voyage</div>' +
+    '<ul class="mn-pr">' + MENUS.reglesVoyage.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+}
+
+/* Les traces pour la montre. */
+function traceTraces() {
+  const h = document.getElementById('tracesHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="tc-pq">' + TRACES.pourquoi + '</div>' +
+    TRACES.fichiers.map(f =>
+      '<a class="tc-f' + (f.recommande ? ' reco' : '') + '" href="assets/' + f.nom +
+      '" download><b>' + f.points + ' points</b><div>' + f.quoi +
+      (f.recommande ? '<em>recommandé</em>' : '') + '</div><i>&#8681;</i></a>').join('') +
+    '<div class="tc-ch">' + TRACES.chaquePoint + '</div>' +
+    '<div class="fi-titre">Sur la Fenix</div>' +
+    '<ol class="tc-i">' + TRACES.instructions.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+}
+
+/* Physio de la semaine. Le readiness a 28 du jeudi ne veut pas dire fatigue :
+   il ne mesure que la duree. */
+function tracePhysio() {
+  const h = document.getElementById('physioHote');
+  if (!h) return;
+  h.innerHTML =
+    '<table class="py"><tr><th></th><th>sommeil</th><th>FC</th><th>VFC</th><th>BB</th><th>prêt</th></tr>' +
+    PHYSIO.jours.map(j =>
+      '<tr class="' + (j.bon ? 'bon' : (j.mauvais ? 'bof' : '')) + '">' +
+      '<td>' + j.j + '</td><td>' + j.sommeil + '</td><td>' + j.fc + '</td>' +
+      '<td>' + j.vfc + '</td><td>' + j.bb + '</td><td><b>' + j.readiness + '</b></td></tr>' +
+      (j.note ? '<tr class="py-n"><td colspan="6">' + j.note + '</td></tr>' : '')).join('') +
+    '</table>' +
+    '<div class="py-ch">' + PHYSIO.charge + '</div>' +
+    '<div class="py-l">' + PHYSIO.lecture + '</div>' +
+    '<div class="py-c"><b>Pourquoi</b>' + PHYSIO.causes + '</div>' +
+    '<ul class="py-f">' + PHYSIO.correctifs.map(x => '<li>' + x + '</li>').join('') + '</ul>';
 }
 
 /* ---- le dossier chaussettes ----
@@ -2583,11 +2791,13 @@ function traceInconnues() {
   document.getElementById('inconnuesHote').innerHTML = AFFUTAGE.inconnues.map(i => {
     const d = dateDe(i.resoudreLe);
     const ecart = Math.round((d - j0) / 86400000);
-    const val = prepa.inconnues[i.id];
+    // la reponse du 20/08 comble le champ quand Pierre n'a rien saisi lui-meme
+    const val = prepa.inconnues[i.id] || i.reponse || '';
     return '<div class="inc' + (val ? ' ok' : '') + '">' +
       '<div class="inc-h"><b>' + i.label + '</b>' +
       '<span class="pastille ' + (val ? 'ok' : (ecart <= 0 ? 'chaud' : 'tiede')) + '">' +
-        (val ? 'réglé' : (ecart === 0 ? "aujourd'hui" : (ecart < 0 ? 'en retard' : 'dans ' + ecart + ' j'))) +
+        (val ? (i.resoluLe ? 'réglé le ' + dateDe(i.resoluLe).getDate() : 'réglé')
+             : (ecart === 0 ? "aujourd'hui" : (ecart < 0 ? 'en retard' : 'dans ' + ecart + ' j'))) +
       '</span></div>' +
       '<small>Via ' + i.via + ' &#183; impacte ' + i.impacte.join(', ') + '</small>' +
       (val ? '<div class="inc-val"><b>' + val + '</b><button data-eff="' + i.id + '">modifier</button></div>'
@@ -2604,7 +2814,7 @@ function traceInconnues() {
   }));
   const m = AFFUTAGE.rdvMedecin, dm = dateDe(m.date);
   hote.insertAdjacentHTML('beforeend',
-    '<details class="rdv"><summary><b>Le RDV qui en referme deux</b>' +
+    '<details class="rdv"><summary><b>Le RDV du 20 — fait, tout est fermé</b>' +
       '<span>' + dm.getDate() + ' ' + MOIS[dm.getMonth()] + ' au ' + m.moment + ' &#183; ' + m.medecin + '</span></summary>' +
     m.sujets.map(x => '<div class="rdv-s' + (x.nouveau ? ' neuf' : '') + '"><b>' + x.n + '</b>' +
       '<div><b>' + x.titre + (x.nouveau ? ' <i>nouveau</i>' : '') + '</b><p>' + x.detail + '</p></div></div>').join('') +
@@ -2757,6 +2967,13 @@ function init() {
   traceVerifs();
   traceGants();
   traceChaussettes();
+  traceVerdict();
+  traceTrousse();
+  traceVesteLampes();
+  traceBalise();
+  traceMenus();
+  traceTraces();
+  tracePhysio();
   traceVoyage();
   traceCarb();
   traceMeteo();

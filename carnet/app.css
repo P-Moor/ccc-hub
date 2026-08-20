@@ -1998,6 +1998,217 @@ button.tl-ligne:active { background: var(--surface-2); }
 .ch-af { list-style: none; margin-top: 12px; }
 .ch-af li { padding: 5px 0; font-size: 14px; line-height: 1.42; color: var(--texte-doux); }
 
+/* ---- meteo, complement du 20 ---- */
+.mt-20 { font-size: 14.5px; line-height: 1.45; }
+.mt-nu { margin-top: 8px; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.mt-h { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.mt-h td { padding: 7px 0; border-top: 1px solid var(--bord); font-size: 13.5px; line-height: 1.4; vertical-align: top; }
+.mt-h tr:first-child td { border-top: 0; }
+.mt-h td:first-child { width: 52px; font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--texte-pale); }
+.mt-ens { margin-top: 10px; padding: 11px 13px; border-radius: var(--r-s); background: var(--surface-2); font-size: 14px; line-height: 1.45; }
+.mt-at { margin-top: 9px; padding: 10px 12px; border-radius: var(--r-s); background: color-mix(in srgb, var(--ok) 11%, transparent); border-left: 3px solid var(--ok); font-size: 14px; line-height: 1.45; }
+.mt-or { margin-top: 9px; padding: 10px 12px; border-radius: var(--r-s); background: color-mix(in srgb, var(--alerte) 11%, transparent); border-left: 3px solid var(--alerte); font-size: 14px; line-height: 1.45; }
+.mt-stop { margin-top: 9px; font-size: 14px; font-weight: 600; line-height: 1.45; color: var(--alerte); }
+
+/* ===================== la mise a jour du 20 ===================== */
+
+/* ---- verdict chaussures ---- */
+.vd-tete { margin-bottom: 12px; }
+.vd-tete i {
+  display: block; font-style: normal; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ok); margin-bottom: 4px;
+}
+.vd-tete b { font-family: var(--display); font-weight: 700; font-size: 19px; line-height: 1.2; }
+.vd-t { padding: 12px 13px; margin-bottom: 9px; border-radius: var(--r-s); background: var(--surface-2); }
+.vd-th { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: baseline; }
+.vd-th b { font-family: var(--display); font-weight: 700; font-size: 16px; }
+.vd-th span { font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.vd-c { margin-top: 4px; font-family: var(--mono); font-size: 11.5px; color: var(--accent-txt); }
+.vd-t p { margin-top: 6px; font-size: 14.5px; line-height: 1.42; }
+.vd-cle {
+  margin-top: 8px; padding: 9px 11px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-left: 3px solid var(--ok); font-size: 13.5px; line-height: 1.42;
+}
+.vd-t small { display: block; margin-top: 7px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
+.vd-lend { padding: 11px 13px; border-radius: var(--r-s); background: var(--voile); }
+.vd-lend > b { display: block; font-family: var(--display); font-size: 15px; margin-bottom: 4px; }
+.vd-lend div { font-size: 14px; line-height: 1.45; }
+.vd-profil { margin-top: 10px; font-size: 14.5px; line-height: 1.45; }
+.vd-note, .vd-red {
+  margin-top: 9px; padding: 10px 12px; border-radius: var(--r-s);
+  font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); background: var(--surface-2);
+}
+
+/* ---- trousse ---- */
+.tr-tete { margin-bottom: 10px; }
+.tr-tete i {
+  display: block; font-style: normal; font-family: var(--display); font-weight: 700;
+  font-size: 15px; color: var(--ok);
+}
+.tr-tete small { display: block; margin-top: 2px; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.tr { padding: 9px 0; border-top: 1px solid var(--bord); }
+.tr:first-of-type { border-top: 0; }
+.tr > b { font-size: 15.5px; font-weight: 600; }
+.tr > span {
+  margin-left: 8px; font-family: var(--mono); font-size: 11px;
+  color: var(--texte-pale); text-transform: uppercase; letter-spacing: .06em;
+}
+.tr.cle > span { color: var(--ok); }
+.tr p { margin-top: 4px; font-size: 13.5px; line-height: 1.42; color: var(--texte-doux); }
+.tr-af {
+  margin-top: 7px; padding: 9px 11px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 13.5px; line-height: 1.42;
+}
+.tr-s > div { display: flex; gap: 10px; padding: 6px 0; font-size: 13.5px; line-height: 1.42; }
+.tr-s span {
+  flex: 0 0 104px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--texte-pale); padding-top: 3px;
+}
+
+/* ---- veste ---- */
+.ve-tete b { font-family: var(--display); font-weight: 700; font-size: 18px; }
+.ve-tete small { display: block; margin-top: 2px; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.ve-pb {
+  margin-top: 10px; padding: 10px 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 14.5px; line-height: 1.45;
+}
+.ve-diag { margin-top: 10px; padding: 11px 13px; border-radius: var(--r-s); background: var(--surface-2); font-size: 14px; line-height: 1.45; }
+.ve-diag b { display: block; font-family: var(--display); font-size: 15px; margin-bottom: 3px; }
+.ve-fc { margin-top: 9px; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.ve-e { display: flex; gap: 11px; padding: 8px 0; border-top: 1px solid var(--bord); }
+.ve-p .ve-e:first-child { border-top: 0; }
+.ve-e > b {
+  flex: 0 0 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+  font-family: var(--display); font-size: 13px;
+}
+.ve-e > div { flex: 1; font-size: 14.5px; line-height: 1.42; }
+.ve-e em {
+  display: block; margin-top: 5px; font-style: normal; font-size: 13px;
+  color: var(--alerte); font-weight: 600; line-height: 1.4;
+}
+.ve-quand { margin-top: 11px; padding: 9px 13px; border-radius: var(--pill); background: var(--voile); font-family: var(--mono); font-size: 11.5px; color: var(--texte-doux); }
+.ve-prod { margin-top: 7px; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); line-height: 1.45; }
+
+/* ---- lampes ---- */
+.lp { padding: 11px 0; border-top: 1px solid var(--bord); }
+.lp:first-of-type { border-top: 0; }
+.lp i {
+  display: block; font-style: normal; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--texte-pale);
+}
+.lp b { display: block; margin-top: 2px; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.lp small { display: block; margin-top: 2px; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.lp-al {
+  margin-top: 8px; padding: 9px 11px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 13.5px; line-height: 1.42;
+}
+.lp p { margin-top: 7px; font-size: 13.5px; line-height: 1.42; color: var(--texte-doux); }
+.lp-r { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--bord); }
+.lp-r b { font-size: 14.5px; font-weight: 600; }
+.lp-r span { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--accent-txt); }
+.lp-r p { flex: 1 0 100%; margin-top: 2px; }
+.lp-reg { margin-top: 10px; padding: 9px 12px; border-radius: var(--r-s); background: color-mix(in srgb, var(--ok) 11%, transparent); font-size: 13.5px; }
+.lp-froid { margin-top: 8px; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+
+/* ---- balise ---- */
+.ba-al {
+  padding: 12px 14px; margin-bottom: 11px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 13%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 14px; line-height: 1.45;
+}
+.ba-al b { display: block; font-family: var(--display); font-size: 17px; margin-bottom: 4px; color: var(--alerte); }
+.ba-l { display: flex; gap: 10px; padding: 7px 0; border-top: 1px solid var(--bord); font-size: 14px; line-height: 1.42; }
+.ba-l:first-of-type { border-top: 0; }
+.ba-l span {
+  flex: 0 0 78px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--texte-pale); padding-top: 3px;
+}
+.ba-ou { padding: 10px 12px; margin-bottom: 7px; border-radius: var(--r-s); background: var(--surface-2); }
+.ba-ou.malin { border: 1px solid color-mix(in srgb, var(--ok) 55%, var(--bord)); }
+.ba-ou b { font-size: 14.5px; font-weight: 600; }
+.ba-ou small { display: block; margin-top: 4px; font-size: 13px; line-height: 1.4; color: var(--texte-doux); }
+.ba-ou.malin small { color: var(--ok); }
+.ba-int { margin-top: 9px; font-size: 14px; font-weight: 600; color: var(--alerte); line-height: 1.42; }
+.ba-s { margin-top: 10px; padding: 10px 12px; border-radius: var(--r-s); background: var(--voile); font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.ba-s b { display: block; font-family: var(--display); font-size: 14px; color: var(--texte); margin-bottom: 2px; }
+
+/* ---- menus ---- */
+.mn-pr { list-style: none; margin-bottom: 14px; }
+.mn-pr li { padding: 5px 0 5px 15px; position: relative; font-size: 14px; line-height: 1.45; color: var(--texte-doux); }
+.mn-pr li::before { content: ""; position: absolute; left: 0; top: 12px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.mn-j { padding: 13px 0; border-top: 1px solid var(--bord); }
+.mn-j.auj { border-left: 3px solid var(--accent); padding-left: 12px; margin-left: -12px; }
+.mn-jt b { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.mn-jt span { display: block; margin-top: 1px; font-family: var(--mono); font-size: 11px; color: var(--texte-pale); }
+.mn-al {
+  margin-top: 8px; padding: 9px 11px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--jour) 13%, transparent);
+  border-left: 3px solid var(--jour); font-size: 13.5px; line-height: 1.42;
+}
+.mn-r { margin-top: 9px; }
+.mn-r b { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-txt); }
+.mn-r p { margin-top: 2px; font-size: 14.5px; line-height: 1.42; }
+.mn-r small { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.4; color: var(--texte-pale); }
+.mn-int { margin-top: 10px; }
+.mn-int b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--alerte); margin-bottom: 5px; }
+.mn-int span {
+  display: inline-block; margin: 0 5px 5px 0; padding: 3px 9px; border-radius: var(--pill);
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  font-size: 12px; color: var(--texte-doux);
+}
+.mn-hy { margin-top: 8px; font-size: 13.5px; line-height: 1.42; color: var(--texte-doux); }
+.mn-sac, .mn-c { padding: 11px 13px; margin-bottom: 9px; border-radius: var(--r-s); background: var(--surface-2); }
+.mn-sac > b, .mn-c > b { display: block; font-family: var(--display); font-weight: 700; font-size: 15px; margin-bottom: 5px; }
+.mn-sac ul, .mn-c ul { list-style: none; }
+.mn-sac li, .mn-c li { padding: 3px 0; font-size: 14px; line-height: 1.4; color: var(--texte-doux); }
+.mn-regle { margin-top: 8px; font-size: 13.5px; font-weight: 600; color: var(--alerte); line-height: 1.42; }
+
+/* ---- traces GPX ---- */
+.tc-pq { font-size: 14.5px; line-height: 1.5; margin-bottom: 12px; }
+.tc-f {
+  display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit;
+  padding: 13px 14px; margin-bottom: 8px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord); min-height: var(--tap);
+}
+.tc-f.reco { border-color: color-mix(in srgb, var(--ok) 55%, var(--bord)); }
+.tc-f > b { flex: 0 0 auto; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.tc-f > div { flex: 1; font-size: 14px; }
+.tc-f em {
+  display: block; margin-top: 2px; font-style: normal; font-family: var(--mono);
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ok);
+}
+.tc-f > i { flex: none; font-style: normal; font-size: 19px; color: var(--accent-txt); }
+.tc-ch { margin-top: 4px; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.tc-i { padding-left: 19px; }
+.tc-i li { padding: 5px 0; font-size: 14px; line-height: 1.45; }
+
+/* ---- physio ---- */
+.py { width: 100%; border-collapse: collapse; }
+.py th {
+  padding: 0 0 6px; text-align: right; border-bottom: 1px solid var(--bord);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--texte-pale); font-weight: 400;
+}
+.py th:first-child, .py td:first-child { text-align: left; }
+.py td { padding: 7px 0; text-align: right; border-top: 1px solid var(--bord); font-size: 13px; font-variant-numeric: tabular-nums; }
+.py td:first-child { font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale); }
+.py td:nth-child(2) { font-family: var(--mono); font-size: 11px; }
+.py tr.bon td b { color: var(--ok); }
+.py tr.bof td b { color: var(--alerte); }
+.py-n td { border-top: 0; padding: 0 0 6px; text-align: left; font-size: 12px; color: var(--accent-txt); }
+.py-ch { margin-top: 10px; padding: 8px 13px; border-radius: var(--pill); background: var(--voile); font-family: var(--mono); font-size: 11.5px; color: var(--texte-doux); }
+.py-l { margin-top: 10px; font-size: 14px; line-height: 1.48; }
+.py-c { margin-top: 10px; padding: 10px 12px; border-radius: var(--r-s); background: var(--surface-2); font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.py-c b { display: block; font-family: var(--display); font-size: 14px; color: var(--texte); margin-bottom: 2px; }
+.py-f { list-style: none; margin-top: 10px; }
+.py-f li { padding: 4px 0 4px 15px; position: relative; font-size: 14px; line-height: 1.42; color: var(--texte-doux); }
+.py-f li::before { content: ""; position: absolute; left: 0; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--ok); }
+
 /* ===================== le coffre ===================== */
 
 .cf-vide { font-size: 14px; line-height: 1.45; color: var(--texte-pale); }
@@ -2076,6 +2287,29 @@ button.tl-ligne:active { background: var(--surface-2); }
 .cff-seg-h b { font-family: var(--display); font-weight: 700; font-size: 17px; }
 .cff-seg-h span { font-family: var(--mono); font-size: 12px; color: var(--texte-doux); }
 .cff-ref { margin-top: 3px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale); line-height: 1.45; }
+
+/* ---- logement resolu ---- */
+.cff-code { font-family: var(--mono); font-size: 17px; letter-spacing: .14em; color: var(--accent-txt); }
+.cff-ok {
+  margin-top: 9px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 11%, transparent);
+  border-left: 3px solid var(--ok); font-size: 14px; line-height: 1.5;
+}
+.cff-linge, .cff-taxe {
+  margin-top: 9px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 10%, transparent);
+  border-left: 3px solid var(--alerte); font-size: 14px; line-height: 1.45;
+}
+.cff-taxe { background: color-mix(in srgb, var(--jour) 12%, transparent); border-left-color: var(--jour); }
+.cff-linge b, .cff-taxe b { display: block; font-family: var(--display); font-size: 15px; margin-bottom: 4px; }
+.cff-linge ul { list-style: none; margin-top: 5px; }
+.cff-linge li { padding: 3px 0; font-size: 13.5px; line-height: 1.4; color: var(--texte-doux); }
+.cff-act { margin-top: 7px; font-size: 13.5px; font-weight: 600; line-height: 1.42; }
+.cff-tm { display: flex; gap: 12px; padding: 6px 0; font-size: 14px; line-height: 1.4; }
+.cff-tm b { flex: 0 0 58px; font-family: var(--mono); font-size: 12.5px; color: var(--accent-txt); }
+.cff-bonus { margin-top: 8px; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.cff-res { list-style: none; }
+.cff-res li { padding: 4px 0; font-size: 13.5px; line-height: 1.42; color: var(--texte-doux); }
 
 /* ---- les documents du coffre ---- */
 .dc-cat {

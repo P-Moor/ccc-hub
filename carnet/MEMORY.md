@@ -159,6 +159,33 @@ depot fermerait ce trou, et elle demande les mains de Pierre.
 
 ## JOURNAL DES SESSIONS
 
+### 20/08/2026 — Les trois inconnues sont fermees
+
+- **Chaussures : REVEAL VALIDEE.** Test #2 le 19 sous pluie battante, 13 km,
+  pieds trempes 1h20, zero brulure. Detail cle : le lacage a du etre RESSERRE,
+  le pied ne gonflait pas. Lendemain : bord externe a zero, peau intacte.
+  Nouveau module maj20-data.js, ecran « dossier ferme » dans Le sac.
+- **Colchicine : MAINTENUE le jour J**, avis medecin du 20. Antihistaminique
+  non sedatif prescrit ; ordonnance a retirer avant le 25. Trousse complete.
+- **Cafeine : 35 / 65 / 100 mg**, deja dans le plan.
+- Les trois inconnues affichent leur reponse et « regle le N » ; ce que Pierre
+  a saisi lui-meme dans l'app garde la priorite sur la reponse par defaut.
+- **Nouveaux dossiers** : la VESTE ne deperle plus (protocole Nikwax en 5
+  etapes, week-end du 22-23) ; LAMPES figees (Swift RL : 6 h de charge, la
+  faire le 27 en journee) ; BALISE a rendre le SAMEDI 29 au Centre Sportif
+  Richard Bozon, en recuperant le sac (caution 155 €).
+- **Logement RESOLU** par Sylvain Lazaille (Lamy) le 20 a 09h14 : boite a cles,
+  code et contact DANS LE COFFRE. Deux nouveautes : linge de lit NON INCLUS
+  (question posee), taxe de sejour 16 € par virement avant le 25.
+- **Menus J-3 a J-0** dans Nutrition, avec la nuit d'hotel du 25 (kitchenette).
+- **Deux GPX generes** dans assets/ depuis le GPX officiel : 13 waypoints
+  (ravitos + sommets, recommande) et 9. Chaque point porte sa consigne.
+  Positions verifiees : le plus long troncon tombe de 16,5 a 11,5 km.
+- **Physio 17-20** dans Aujourd'hui : le readiness a 28 du jeudi ne mesure que
+  la duree de sommeil, pas l'etat reel. ACWR 0,8, TSB +108.
+- Items c36 a c39 : batterie Swift commandee, piles AAA a acheter, linge de
+  lit, veste a retraiter. Meme regle : ids stables, coches intactes.
+
 ### 18/08/2026 — Correctif chaussettes
 
 - **Erreur trouvee** : la chaussette validee etait notee « BV Sport Trail Ultra 2

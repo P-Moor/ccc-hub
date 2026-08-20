@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="CCC 4330 carnet de course" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>CCC 2026 - ravitos et sommets</name>
+    <desc>Points de passage de la CCC 2026, dossard 4330. Chaque point porte sa consigne en description.</desc>
+  </metadata>
+  <wpt lat="45.823185" lon="7.019110">
+    <ele>2556.0</ele>
+    <name>Tete de la Tronche</name>
+    <cmt>km 9,5</cmt>
+    <desc>Sommet de la premiere montee. VAM 450-480 m/h, FC sous 145. Marcher, pas courir.</desc>
+    <sym>Summit</sym>
+    <type>Summit</type>
+  </wpt>
+  <wpt lat="45.809150" lon="6.978740">
+    <ele>1980.0</ele>
+    <name>Refuge Bertone</name>
+    <cmt>km 13,7</cmt>
+    <desc>Ravito complet. 3 a 5 min, ne pas s'asseoir. Remplir Boost + eau, 1 banane et du pain d'epices a emporter.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="45.871450" lon="7.053940">
+    <ele>1777.0</ele>
+    <name>Arnouvaz</name>
+    <cmt>km 26,5</cmt>
+    <desc>Ravito complet. ~9 min. Manger en marchant apres. Le Grand Col Ferret arrive.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="45.911040" lon="7.097720">
+    <ele>2529.0</ele>
+    <name>Grand Col Ferret</name>
+    <cmt>km 37,0</cmt>
+    <desc>Le toit de la course, 2 529 m vers 16h. Point le plus expose au vent et a l'orage.</desc>
+    <sym>Summit</sym>
+    <type>Summit</type>
+  </wpt>
+  <wpt lat="45.935190" lon="7.098440">
+    <ele>1602.0</ele>
+    <name>La Fouly</name>
+    <cmt>km 40,9</cmt>
+    <desc>Ravito complet. ~9 min. Veste a portee : le col est le toit de la course.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="46.022590" lon="7.120050">
+    <ele>1408.0</ele>
+    <name>Champex-Lac</name>
+    <cmt>km 54,6</cmt>
+    <desc>BASE VIE, ~18 min. Sac d'allegement, chaussettes seches, NOK, frontale sur la tete, cafe n1, repas assis. EMPORTER DU SALE : 16,5 km sans ravito ensuite.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="46.046590" lon="7.085780">
+    <ele>1378.0</ele>
+    <name>Plan de l'Au</name>
+    <cmt>km 59,4</cmt>
+    <desc>POINTAGE SEUL, pas de ravito. Frontale allumee, la nuit tombe vers 20h30.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="46.057480" lon="7.039530">
+    <ele>2044.0</ele>
+    <name>Bovine</name>
+    <cmt>km 66,0</cmt>
+    <desc>De nuit. Rythme regulier, personne ne va vite ici.</desc>
+    <sym>Summit</sym>
+    <type>Summit</type>
+  </wpt>
+  <wpt lat="46.054890" lon="6.997100">
+    <ele>1340.0</ele>
+    <name>Trient</name>
+    <cmt>km 71,2</cmt>
+    <desc>Ravito complet, ~15 min. VESTE AVANT DE S'ASSEOIR. Soupe chaude, cafe n2. Le point bas est prevu ici, c'est normal.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="46.030880" lon="6.930970">
+    <ele>1266.0</ele>
+    <name>Vallorcine</name>
+    <cmt>km 83,2</cmt>
+    <desc>Ravito complet, ~9 min. Cafe n3. Dernier vrai ravito avant la Tete aux Vents.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="45.982530" lon="6.916930">
+    <ele>1886.0</ele>
+    <name>Tete aux Vents</name>
+    <cmt>km 90,0</cmt>
+    <desc>LA plus dure, de nuit, vers 3h30. Apres elle, c'est fini.</desc>
+    <sym>Summit</sym>
+    <type>Summit</type>
+  </wpt>
+  <wpt lat="45.959530" lon="6.886410">
+    <ele>1852.0</ele>
+    <name>La Flegere</name>
+    <cmt>km 94,6</cmt>
+    <desc>Ravito. La plus dure est passee. Il reste une descente.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+  <wpt lat="45.923600" lon="6.869120">
+    <ele>1035.0</ele>
+    <name>Chamonix</name>
+    <cmt>km 101,5</cmt>
+    <desc>ARRIVEE.</desc>
+    <sym>Flag</sym>
+    <type>Flag</type>
+  </wpt>
+</gpx>
