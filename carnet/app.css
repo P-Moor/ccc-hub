@@ -2020,9 +2020,10 @@ button.tl-ligne:active { background: var(--surface-2); }
 }
 .mp { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .mp th {
-  padding: 0 0 6px; border-bottom: 1px solid var(--bord); text-align: right;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  padding: 0 0 6px 6px; border-bottom: 1px solid var(--bord); text-align: right;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em;
   text-transform: uppercase; color: var(--texte-pale); font-weight: 400;
+  white-space: nowrap;
 }
 .mp th:first-child { text-align: left; }
 .mp th small { display: block; font-size: 8.5px; opacity: .75; letter-spacing: .04em; }
@@ -2041,16 +2042,75 @@ button.tl-ligne:active { background: var(--surface-2); }
 .mp-v { font-family: var(--mono); font-size: 12px; color: var(--texte-doux); }
 .mp-v small { display: block; font-size: 9.5px; color: var(--texte-pale); }
 .mp-leg { margin-top: 9px; font-size: 12px; line-height: 1.45; color: var(--texte-pale); }
-.mp-cons {
-  margin-bottom: 7px; padding: 10px 12px; border-radius: var(--r-s);
-  font-size: 14px; line-height: 1.45;
-  background: color-mix(in srgb, var(--jour) 12%, transparent);
-  border-left: 3px solid var(--jour);
+/* Le coup d'oeil : trois chiffres avant le tableau, parce qu'a 3 h du matin
+   personne ne lit treize lignes pour savoir s'il va faire froid. */
+.mp-res {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 14px;
 }
+.mp-res > div {
+  padding: 10px 8px; border-radius: var(--r-s); text-align: center;
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.mp-res i {
+  display: block; font-style: normal; font-size: 9.5px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.mp-res b {
+  display: block; margin: 3px 0 1px; font-family: var(--display);
+  font-weight: 700; font-size: 24px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mp-res small {
+  display: block; font-size: 10.5px; line-height: 1.3; color: var(--texte-doux);
+}
+.mp-res > div:first-child b { color: var(--torrent); }
+.mp-res > div:nth-child(2) b { color: var(--jour); }
+
+/* Les conseils. Un titre, un lieu-heure, une phrase : c'est ce triptyque qui
+   fait la difference entre « il fera froid » et « a la Tete aux Vents, 3h24 ». */
+.mp-cons {
+  margin-bottom: 8px; padding: 11px 13px; border-radius: var(--r-s);
+  background: var(--surface-2); border-left: 3px solid var(--bord);
+}
+.mp-ct { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.mp-ct b { font-size: 14px; font-weight: 700; line-height: 1.25; }
+.mp-ct i {
+  font-style: normal; font-family: var(--mono); font-size: 10.5px;
+  color: var(--texte-pale); letter-spacing: .01em;
+}
+.mp-cons p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--texte-doux); }
+.mp-cons b { color: var(--texte); }
+.mp-cons.att {
+  background: color-mix(in srgb, var(--jour) 11%, transparent);
+  border-left-color: var(--jour);
+}
+.mp-cons.att .mp-ct b { color: var(--jour-fonce, var(--jour)); }
 .mp-cons.crit {
   background: color-mix(in srgb, var(--alerte) 12%, transparent);
-  border-left-color: var(--alerte); font-weight: 600;
+  border-left-color: var(--alerte);
 }
+.mp-cons.crit .mp-ct b { color: var(--alerte-txt, var(--alerte)); }
+
+/* Le fond du sujet, replie : l'analyse reste disponible mais ne passe plus
+   devant la prevision du jour. */
+.mp-fond { margin-top: 14px; border-top: 1px solid var(--bord); padding-top: 12px; }
+.mp-fond summary {
+  cursor: pointer; list-style: none; font-family: var(--display);
+  font-weight: 700; font-size: 14px; display: flex; gap: 8px;
+  align-items: baseline; flex-wrap: wrap;
+}
+.mp-fond summary::-webkit-details-marker { display: none; }
+.mp-fond summary::before {
+  content: "\25B8"; font-family: var(--mono); font-weight: 400;
+  color: var(--texte-pale); transition: transform .18s ease;
+}
+.mp-fond[open] summary::before { transform: rotate(90deg); }
+.mp-fond summary span {
+  font-family: var(--corps); font-weight: 400; font-size: 12px;
+  color: var(--texte-pale);
+}
+.mp-fc { margin-top: 12px; }
 .mp-src { margin-top: 10px; font-family: var(--mono); font-size: 10.5px; color: var(--texte-pale); }
 
 /* ---- meteo, complement du 20 ---- */

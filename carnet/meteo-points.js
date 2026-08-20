@@ -66,14 +66,24 @@ export const CODES_METEO = {
   99: { i: "⛈️", t: "ORAGE violent avec grêle" }
 };
 
-/** Ce que l'app doit dire selon la lecture, pas seulement les chiffres. */
+/** Les seuils, au meme endroit.
+ *  Ce fichier ne porte plus les phrases : elles sont dans l'app, parce
+ *  qu'elles dependent d'OU et de QUAND le seuil est franchi, pas seulement du
+ *  fait qu'il le soit. Ici on garde les NOMBRES, pour n'avoir qu'un endroit a
+ *  corriger si un avis change. */
 export const SEUILS = {
-  froid:      { valeur: 5,  txt: "Sous 5 °C ressentis : gants AVANT d'avoir froid, pas après." },
-  tresFroid:  { valeur: 0,  txt: "🥶 Sous 0 °C ressentis : les trois couches de gants, et la frontale contre le corps." },
-  chaud:      { valeur: 25, txt: "Au-dessus de 25 °C : eau sur la nuque et la casquette à chaque ravito." },
-  pluie:      { valeur: 50, txt: "Plus d'une chance sur deux de pluie : veste accessible sans ouvrir le sac." },
-  rafales:    { valeur: 50, txt: "Rafales au-delà de 50 km/h : veste au col, même s'il fait bon en montant." },
-  orage:      { txt: "⛈️ ORAGE annoncé. C'est le seul risque non gérable : il peut modifier le parcours ou différer le départ." }
+  froid:        5,    // °C ressentis : les gants sortent
+  tresFroid:    0,    // °C ressentis : les trois couches
+  gel:          2,    // °C reels : les barres durcissent, les batteries tombent
+  chaud:        25,   // °C reels : eau sur la nuque
+  pluie:        50,   // % : la veste devient accessible sans ouvrir le sac
+  pluieForte:   70,   // % : le sur-pantalon sort aussi
+  pluieFroide:  7,    // °C ressentis sous lesquels la pluie devient le sujet
+  rafales:      50,   // km/h : veste au col
+  rafalesFortes:80,   // km/h : capuche serree, on ne discute plus
+  sequence:     3,    // nombre de points sous `froid` qui fait sortir les moufles
+  amplitude:    12,   // °C d'ecart jour/nuit qui rend le sac de Champex decisif
+  orage:        95    // code WMO a partir duquel c'est un orage
 };
 
 export default METEO_POINTS;

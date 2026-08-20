@@ -606,7 +606,12 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-29';
+const VERSION = 'ccc-v2-carnet-30';
+
+/* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
+   quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
+   coffre perime alors que l'ancien fichier est parfaitement valide. */
+const COFFRE_ATTENDU = 'ccc-v2-carnet-29';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1821,9 +1826,9 @@ function traceCoffre() {
       } else {
         msg.className = 'cff-msg ko';
         msg.innerHTML = 'Phrase refusée.' +
-          (PRIVE.stamp && PRIVE.stamp !== VERSION
+          (PRIVE.stamp && PRIVE.stamp !== COFFRE_ATTENDU
             ? '<br><b>Et ton coffre est en retard</b> : il date de ' + PRIVE.stamp +
-              ', l\'app attend ' + VERSION + '. Ouvre Mes données, ' +
+              ', l\'app attend ' + COFFRE_ATTENDU + '. Ouvre Mes données, ' +
               '« Chercher une mise à jour », puis réessaie.'
             : '<br>Quatre mots, une espace entre chaque. Les majuscules ne comptent pas.');
         champ.value = '';
@@ -2058,35 +2063,6 @@ function traceJournal() {
     }));
 }
 
-/* ---- meteo ---- */
-function traceMeteo() {
-  const utile = dateDe(METEO.dateUtile);
-  const j = Math.round((utile - minuit(maintenant())) / 86400000);
-  return document.getElementById('meteoHote').innerHTML =
-    '<div class="mt-av">' + METEO.avertissement + '</div>' +
-    '<div class="mt-q">' + METEO.quandRegarder + (j > 0 ? ' <b>Dans ' + j + ' jours.</b>' : ' <b>C\'est maintenant.</b>') + '</div>' +
-    '<div class="fi-titre">Ce que la course traverse</div>' +
-    '<table class="mt-t">' + METEO.profilAltitude.map(x =>
-      '<tr class="' + (x.critique ? 'crit' : '') + '"><td>' + x.lieu + '<small>' + x.alt + ' m · ' + x.heure + '</small></td>' +
-      '<td>' + x.temp + '</td></tr>').join('') + '</table>' +
-    '<div class="mt-c">' + METEO.conclusion + '</div>' +
-    '<div class="mt-p">' + METEO.aRegarderAussi + '</div>' +
-
-    (METEO.au20Aout ? (function (m) {
-      return '<div class="fi-titre">Au 20 août</div>' +
-        '<div class="mt-20">' + m.constat + '</div>' +
-        '<div class="mt-nu">' + m.nuance + '</div>' +
-        '<table class="mt-h">' + m.historique.map(h =>
-          '<tr><td>' + h.annee + '</td><td>' + h.conditions + '</td></tr>').join('') + '</table>' +
-        '<div class="mt-ens">' + m.enseignement + '</div>' +
-        '<div class="mt-at">' + m.atout + '</div>' +
-        '<div class="mt-or">' + m.orage + '</div>' +
-        '<div class="mt-p">' + m.gel + '</div>' +
-        '<div class="mt-q">' + m.quandRegarder + '</div>' +
-        '<div class="mt-stop">' + m.consigne + '</div>';
-    })(METEO.au20Aout) : '');
-}
-
 /* ---- carb cycling ---- */
 const NIV = { 'LOW':'low', 'MEDIUM':'med', 'MEDIUM / HIGH':'medhigh', 'HIGH':'high', 'RECHARGE':'rech' };
 // abrege : « MEDI... » et « MEDI... » se ressemblaient trop sur neuf cases de 38 px
@@ -2216,42 +2192,201 @@ function litPoint(p, jalons) {
   };
 }
 
-/* Ce que la prevision impose, en clair. Les chiffres ne servent a rien si
-   personne ne dit ce qu'il faut en faire. */
-function consignesMeteo(points) {
-  const out = [];
-  const min = Math.min(...points.map(p => p.ressenti));
-  const max = Math.max(...points.map(p => p.temp));
-  const pluie = Math.max(...points.map(p => p.pluieProb || 0));
-  const raf = Math.max(...points.map(p => p.rafales || 0));
-  const orage = points.some(p => p.code >= 95);
+/* ==================== les conseils, tires des chiffres ====================
+   Un tableau de temperatures ne sert a rien si personne ne dit quoi en faire.
+   Ici chaque conseil est ANCRE sur un point nomme et une heure, et renvoie au
+   materiel que Pierre possede vraiment : les quatre paliers de gants, les deux
+   longs chauds, les chauffe-mains, les moufles restees en valise. */
 
-  if (orage) out.push({ n: 'crit', t: SEUILS.orage.txt });
-  if (min <= SEUILS.tresFroid.valeur) out.push({ n: 'crit', t: SEUILS.tresFroid.txt });
-  else if (min <= SEUILS.froid.valeur) out.push({ n: 'att', t: SEUILS.froid.txt });
-  if (max >= SEUILS.chaud.valeur) out.push({ n: 'att', t: SEUILS.chaud.txt });
-  if (pluie >= SEUILS.pluie.valeur) out.push({ n: 'att', t: SEUILS.pluie.txt });
-  if (raf >= SEUILS.rafales.valeur) out.push({ n: 'att', t: SEUILS.rafales.txt });
+const NUIT_DE = 21, NUIT_A = 7;   // heures pleines
+
+function heureDeNuit(hhmm) {
+  const h = parseInt(hhmm.slice(0, 2), 10);
+  return h >= NUIT_DE || h < NUIT_A;
+}
+
+function conseilsMeteo(P) {
+  if (!P.length) return [];
+  const out = [];
+  const par = k => P.slice().sort((a, b) => a[k] - b[k]);
+  const froidPt = par('ressenti')[0];
+  const chaudPt = par('temp')[P.length - 1];
+  const ventPt = par('rafales')[P.length - 1];
+  const pluiePt = par('pluieProb')[P.length - 1];
+
+  const sousCinq = P.filter(p => p.ressenti <= SEUILS.froid);
+  const sousZero = P.filter(p => p.ressenti <= SEUILS.tresFroid);
+  const gel = P.filter(p => p.temp <= SEUILS.gel);
+  const orages = P.filter(p => p.code >= SEUILS.orage);
+  const neige = P.filter(p => (p.code >= 71 && p.code <= 77) || p.code === 85 || p.code === 86);
+  const pluieFroid = P.filter(p => (p.pluieProb || 0) >= SEUILS.pluie && p.ressenti <= SEUILS.pluieFroide);
+  const ou = p => p.nom + ' &#183; ' + p.heure;
+
+  /* 1. l'orage : le seul risque qu'on ne gere pas, on le subit */
+  if (orages.length) {
+    out.push({ n: 'crit', titre: 'Orage annoncé',
+      ou: orages.map(ou).join(' &#183; '),
+      txt: 'C\'est le seul risque non gérable : il peut modifier le parcours ou différer le départ. ' +
+        'Rien à préparer, sinon écouter les consignes de l\'organisation et ne pas s\'entêter sur une crête.' });
+  }
+
+  /* 2. le point le plus froid, et le palier de gants qui va avec */
+  const paliers = (SAC.gants && SAC.gants.paliers) || [];
+  let palier = paliers[0];
+  if (froidPt.ressenti <= SEUILS.tresFroid) palier = paliers[3] || paliers[paliers.length - 1];
+  else if (froidPt.ressenti <= SEUILS.froid) palier = paliers[1];
+  if ((pluiePt.pluieProb || 0) >= SEUILS.pluie && froidPt.ressenti <= SEUILS.pluieFroide + 1) palier = paliers[2] || palier;
+
+  const nuitFroide = heureDeNuit(froidPt.heure);
+  out.push({ n: froidPt.ressenti <= SEUILS.froid ? 'att' : 'info', titre: 'Le point le plus froid',
+    ou: ou(froidPt) + ' &#183; ' + froidPt.alt + ' m',
+    txt: Math.round(froidPt.temp) + ' °C, ressenti ' + Math.round(froidPt.ressenti) + ' °C. ' +
+      (nuitFroide
+        ? 'C\'est de nuit, donc au moment où tu es le plus lent et le plus vidé : la chaleur produite baisse pile quand il en faudrait le plus. '
+        : '') +
+      (palier ? 'Palier de gants correspondant : <b>' + palier.config +
+        '</b> <i>(' + palier.conditions + ')</i>. ' : '') +
+      'La règle ne change pas : les gants AVANT d\'avoir froid, jamais quand tu as froid.' });
+
+  /* 3. combien de temps sous cinq degres : ca dimensionne l'equipement */
+  if (sousCinq.length >= 2) {
+    const de = sousCinq[0], a = sousCinq[sousCinq.length - 1];
+    out.push({ n: sousCinq.length >= SEUILS.sequence ? 'crit' : 'att',
+      titre: sousCinq.length + ' points sous ' + SEUILS.froid + ' °C ressentis',
+      ou: de.nom + ' &#183; ' + de.heure + '  →  ' + a.nom + ' &#183; ' + a.heure,
+      txt: 'Ce n\'est plus un coup de froid ponctuel, c\'est une séquence. ' +
+        (sousCinq.length >= SEUILS.sequence
+          ? '🧤 <b>Les moufles Salomon sortent de la valise</b> : c\'est exactement le cas prévu pour elles, à trancher le 27 au soir. '
+          : '') +
+        '🔥 Chauffe-mains à activer <b>20 min AVANT</b> d\'en avoir besoin, donc en t\'asseyant au ravito qui précède.' });
+  }
+  if (sousZero.length) {
+    out.push({ n: 'crit', titre: 'Sous zéro ressenti',
+      ou: sousZero.map(ou).join(' &#183; '),
+      txt: 'Les trois couches de gants, et la frontale contre le corps dès qu\'elle quitte la tête.' });
+  }
+
+  /* 4. le gel : ce qui casse a 2 degres, ce sont les barres et les batteries */
+  if (gel.length) {
+    out.push({ n: 'att', titre: 'Risque de gel',
+      ou: gel.map(ou).join(' &#183; '),
+      txt: '🧊 Une barre énergétique gèle à ces températures — c\'est arrivé en 2024 sur la TDS. ' +
+        'Gels et barres en <b>poche intérieure</b>, jamais dans le filet extérieur du sac. ' +
+        '🔋 Le froid tue les batteries : Swift RL allumée sur la tête, elle reste au chaud.' });
+  }
+
+  /* 5. la pluie, et son alliance avec le froid */
+  const pp = pluiePt.pluieProb || 0;
+  if (pp >= SEUILS.pluie) {
+    out.push({ n: pp >= SEUILS.pluieForte ? 'crit' : 'att', titre: 'Pluie probable, ' + pp + ' % au plus fort',
+      ou: ou(pluiePt),
+      txt: 'Veste accessible <b>sans ouvrir le sac</b>. ' +
+        '⚠️ Le traitement déperlant de la S/Lab est mort : le protocole Nikwax du week-end du 22-23 ' +
+        'n\'est plus une option, c\'est ce qui décide si tu es sec ou trempé de l\'intérieur. ' +
+        (pp >= SEUILS.pluieForte ? 'Sur-pantalon Scott aussi : à ce niveau de probabilité, il sort du sac.' : '') });
+  }
+  if (pluieFroid.length) {
+    out.push({ n: 'crit', titre: 'Pluie ET froid en même temps',
+      ou: pluieFroid.map(ou).join(' &#183; '),
+      txt: 'C\'est la combinaison qui fait les abandons, pas le froid seul. ' +
+        'Mouillé, tu perds ta chaleur quatre fois plus vite. ' +
+        '<b>Veste AVANT la montée</b>, pas au sommet : au col il est déjà trop tard, tu es trempé de sueur.' });
+  }
+
+  /* 6. le vent : c'est lui qui fait le ressenti, pas le thermometre */
+  const raf = ventPt.rafales || 0;
+  if (raf >= SEUILS.rafales) {
+    out.push({ n: raf >= SEUILS.rafalesFortes ? 'crit' : 'att', titre: 'Rafales à ' + Math.round(raf) + ' km/h',
+      ou: ou(ventPt) + ' &#183; ' + ventPt.alt + ' m',
+      txt: 'C\'est le vent qui creuse l\'écart entre la température et le ressenti. ' +
+        'Veste au col même s\'il fait bon en montant, et capuche. ' +
+        (ventPt.expose ? 'Ce point est le plus exposé de la course.' : '') });
+  }
+
+  /* 7. la neige, si le modele en met */
+  if (neige.length) {
+    const alt = Math.min(...neige.map(p => p.alt));
+    out.push({ n: 'crit', titre: 'Neige annoncée',
+      ou: neige.map(ou).join(' &#183; '),
+      txt: 'À partir de ' + alt + ' m. Adhérence dégradée sur les blocs, ' +
+        'et les mains mouillées deviennent le vrai sujet. Sur-gants Leki par-dessus tout le reste.' });
+  }
+
+  /* 8. la chaleur, si elle revient */
+  if (chaudPt.temp >= SEUILS.chaud) {
+    out.push({ n: 'att', titre: 'Chaleur, ' + Math.round(chaudPt.temp) + ' °C',
+      ou: ou(chaudPt),
+      txt: 'Flasque 2 en eau plate, sur la nuque et la casquette à chaque ravito. ' +
+        'Le kit canicule reste actif : sac à 2 L.' });
+  }
+
+  /* 9. l'amplitude : c'est elle qui justifie le sac de Champex */
+  const amp = Math.round(chaudPt.temp - froidPt.ressenti);
+  if (amp >= SEUILS.amplitude) {
+    out.push({ n: 'info', titre: amp + ' °C d\'amplitude sur la course',
+      ou: 'de ' + Math.round(chaudPt.temp) + ' °C à ' + Math.round(froidPt.ressenti) + ' °C ressentis',
+      txt: 'C\'est ce qui rend le sac de Champex décisif : tu y bascules d\'une tenue de jour à une tenue de nuit. ' +
+        'Le long chaud n°2 sec et les chaussettes sèches y prennent tout leur sens.' });
+  }
+
+  /* 10. quand rien ne se declenche, le dire aussi */
+  if (!out.some(c => c.n === 'crit' || c.n === 'att')) {
+    out.push({ n: 'info', titre: 'Rien d\'alarmant dans cette prévision',
+      txt: 'Pas de raison de sur-emporter. La liste réglementaire reste la liste réglementaire, ' +
+        'mais les moufles peuvent rester en valise.' });
+  }
+
   return out;
 }
 
 function traceMeteoPrevue() {
-  const h = document.getElementById('meteoPrevHote');
+  const h = document.getElementById('meteoHote');
   if (!h) return;
 
   const jours = Math.ceil((DEPART - maintenant()) / 86400000);
+  const jUtile = Math.round((dateDe(METEO.dateUtile) - minuit(maintenant())) / 86400000);
+
   const tete = '<div class="mp-tete">' +
-    '<div><b>Le 28, point par point</b>' +
+    '<div><b>La météo du 28</b>' +
     '<small>Chaque point à son altitude, à l\'heure de passage du scénario ' +
       scenarioActif().id + '</small></div>' +
     '<button class="mp-maj" id="mpMaj">' + (meteoEnCours ? '…' : 'Actualiser') + '</button></div>';
 
+  /* Le fond du sujet : ce qui reste vrai quelle que soit la prevision du jour.
+     Replie, parce que la prevision passe devant. */
+  const fond = (function () {
+    const m = METEO.au20Aout;
+    return '<details class="mp-fond"><summary>Le fond du sujet ' +
+      '<span>ce qui reste vrai quelle que soit la prévision</span></summary>' +
+      '<div class="mp-fc">' +
+        '<div class="mt-c">' + METEO.conclusion + '</div>' +
+        (m ? '<div class="fi-titre">Ce que disent les trois dernières éditions</div>' +
+          '<table class="mt-h">' + m.historique.map(x =>
+            '<tr><td>' + x.annee + '</td><td>' + x.conditions + '</td></tr>').join('') + '</table>' +
+          '<div class="mt-ens">' + m.enseignement + '</div>' +
+          '<div class="mt-at">' + m.atout + '</div>' +
+          '<div class="mt-or">' + m.orage + '</div>' +
+          '<div class="mt-p">' + m.gel + '</div>' +
+          '<div class="mt-stop">' + m.consigne + '</div>' : '') +
+      '</div></details>';
+  })();
+
+  /* Sans relevé : on retombe sur l'estimation de saison, en le disant. */
   if (!meteoPrevue || !meteoPrevue.points || !meteoPrevue.points.length) {
-    h.innerHTML = tete + '<div class="mp-vide">' +
+    h.innerHTML = tete +
+      '<div class="mp-vide">' +
       (meteoEnCours ? 'Relevé en cours…'
        : (navigator.onLine ? 'Pas encore de relevé. Touche Actualiser.'
           : 'Hors ligne, et aucun relevé en mémoire. La prévision arrivera au prochain réseau.')) +
-      '</div>';
+      '</div>' +
+      '<div class="fi-titre">En attendant, l\'ordre de grandeur de saison</div>' +
+      '<table class="mt-t">' + METEO.profilAltitude.map(x =>
+        '<tr class="' + (x.critique ? 'crit' : '') + '"><td>' + x.lieu +
+        '<small>' + x.alt + ' m · ' + x.heure + '</small></td>' +
+        '<td>' + x.temp + '</td></tr>').join('') + '</table>' +
+      '<div class="mp-leg">Ce ne sont pas des prévisions mais des normales. ' +
+        'Dès qu\'un relevé arrive, il les remplace.</div>' +
+      fond;
     brancheMeteo();
     return;
   }
@@ -2263,15 +2398,29 @@ function traceMeteoPrevue() {
                : (age < 1440 ? 'il y a ' + Math.round(age / 60) + ' h'
                              : 'il y a ' + Math.round(age / 1440) + ' j');
 
+  /* Le coup d'oeil : trois chiffres avant le tableau. */
+  const tri = k => P.slice().sort((a, b) => a[k] - b[k]);
+  const froidPt = tri('ressenti')[0];
+  const chaudPt = tri('temp')[P.length - 1];
+  const pluiePt = tri('pluieProb')[P.length - 1];
+  const resume = '<div class="mp-res">' +
+    '<div><i>le plus froid</i><b>' + Math.round(froidPt.ressenti) + '°</b>' +
+      '<small>' + froidPt.nom + ' · ' + froidPt.heure + '</small></div>' +
+    '<div><i>le plus chaud</i><b>' + Math.round(chaudPt.temp) + '°</b>' +
+      '<small>' + chaudPt.nom + ' · ' + chaudPt.heure + '</small></div>' +
+    '<div><i>pluie max</i><b>' + (pluiePt.pluieProb == null ? '·' : pluiePt.pluieProb + '%') + '</b>' +
+      '<small>' + pluiePt.nom + ' · ' + pluiePt.heure + '</small></div>' +
+    '</div>';
+
   const ligne = p => {
     const c = CODES_METEO[p.code] || { i: '·', t: '' };
-    const froid = p.ressenti <= 5, tresFroid = p.ressenti <= 0;
+    const froid = p.ressenti <= SEUILS.froid, tresFroid = p.ressenti <= SEUILS.tresFroid;
     return '<tr class="' + (tresFroid ? 'gel' : (froid ? 'froid' : '')) +
       (p.expose ? ' expose' : '') + '">' +
       '<td class="mp-n"><b>' + p.nom + '</b><small>' + p.alt + ' m &#183; ' +
         kmFmt(p.km) + ' km</small></td>' +
       '<td class="mp-h">' + p.heure + '</td>' +
-      '<td class="mp-c">' + c.i + '</td>' +
+      '<td class="mp-c" title="' + c.t + '">' + c.i + '</td>' +
       '<td class="mp-t"><b>' + Math.round(p.temp) + '°</b>' +
         '<small>ress. ' + Math.round(p.ressenti) + '°</small></td>' +
       '<td class="mp-p">' + (p.pluieProb == null ? '·' : p.pluieProb + '%') + '</td>' +
@@ -2279,20 +2428,26 @@ function traceMeteoPrevue() {
       '</tr>';
   };
 
-  const cons = consignesMeteo(P);
+  const cons = conseilsMeteo(P);
 
   h.innerHTML = tete +
     (jours > 7 ? '<div class="mp-loin">⚠️ À ' + jours + ' jours, une prévision ne vaut rien. ' +
-      'Elle est là pour l\'ordre de grandeur, pas pour décider. Le vrai relevé, c\'est le 25.</div>' : '') +
+      'Elle est là pour l\'ordre de grandeur, pas pour décider. ' +
+      (jUtile > 0 ? 'Le relevé qui compte, c\'est dans ' + jUtile + ' jours.' : '') + '</div>' : '') +
+    resume +
     '<table class="mp"><tr>' +
-      '<th>point</th><th>h</th><th></th><th>temp</th><th>pluie</th><th>vent<small>raf.</small></th></tr>' +
+      '<th>point</th><th>h</th><th></th><th>°C</th><th>pluie</th><th>vent<small>raf.</small></th></tr>' +
       P.map(ligne).join('') + '</table>' +
     '<div class="mp-leg">Le vent est en km/h, le petit chiffre est la rafale. ' +
-      'Les lignes bleutées sont sous 5 °C ressentis.</div>' +
+      'Les lignes bleutées sont sous ' + SEUILS.froid + ' °C ressentis.</div>' +
     (cons.length ? '<div class="fi-titre">Ce que ça impose</div>' +
-      cons.map(c => '<div class="mp-cons ' + c.n + '">' + c.t + '</div>').join('') : '') +
+      cons.map(c => '<div class="mp-cons ' + c.n + '">' +
+        '<div class="mp-ct"><b>' + c.titre + '</b>' +
+        (c.ou ? '<i>' + c.ou + '</i>' : '') + '</div>' +
+        '<p>' + c.txt + '</p></div>').join('') : '') +
     '<div class="mp-src">' + METEO_SOURCE.nom + ' &#183; relevé ' + ageTxt +
-      (navigator.onLine ? '' : ' &#183; hors ligne, dernier relevé connu') + '</div>';
+      (navigator.onLine ? '' : ' &#183; hors ligne, dernier relevé connu') + '</div>' +
+    fond;
 
   brancheMeteo();
 }
@@ -3175,7 +3330,6 @@ function init() {
   tracePhysio();
   traceVoyage();
   traceCarb();
-  traceMeteo();
   meteoPrevue = litMeteoCache();
   traceMeteoPrevue();
   chargeMeteo(false);
