@@ -12,6 +12,7 @@ import { CONFIANCE } from './confiance-data.js';
 import { PRIVE } from './prive-data.js';
 import { VERDICT_CHAUSSURES, TROUSSE, VESTE, LAMPES,
          BALISE, MENUS, TRACES, PHYSIO } from './maj20-data.js';
+import { METEO_POINTS, METEO_SOURCE, CODES_METEO, SEUILS } from './meteo-points.js';
 import { PROFIL, altAt } from './profil.js';
 
 /* ============================ persistance ============================ */
@@ -605,7 +606,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-28';
+const VERSION = 'ccc-v2-carnet-29';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -738,6 +739,8 @@ function majScenario() {
   document.getElementById('lecPlan').textContent = 'passage ' + s.id;
 
   document.getElementById('margeHote').innerHTML = traceMarge();
+  // les heures de passage changent avec le scenario : la meteo doit suivre
+  if (typeof traceMeteoPrevue === 'function') traceMeteoPrevue();
 
   litProfil(kmCourant);
   if (document.getElementById('ravitosHote')) traceRavitos();
@@ -2103,6 +2106,202 @@ function traceCarb() {
     (c.plan.filter(x => x.note).map(x => '<div class="cb-n"><b>' + dateDe(x.date).getDate() + '</b>' + x.note + '</div>').join(''));
 }
 
+/* ==================== la meteo, point par point ====================
+   Le carnet est statique et doit repondre hors ligne : c'est la regle depuis
+   le premier jour. Cette prevision est donc un BONUS EN LIGNE. On la va
+   chercher quand il y a du reseau, on la garde en cache, et hors ligne on
+   affiche la derniere connue avec sa date. Rien ne casse sans reseau.
+
+   Ce qui fait la valeur du truc : chaque point est interroge A SON ALTITUDE et
+   l'heure lue est celle du PASSAGE PREVU par le scenario actif. On ne lit pas
+   la meteo de Chamonix a midi, on lit celle du Grand Col Ferret a 16h a
+   2 529 m. Sept degres d'ecart, et ce n'est pas un detail a 2 500 m. */
+
+const CLE_METEO = 'ccc-v2-meteo-prevue';
+let meteoPrevue = null;      // { releve, jour, points: [...] }
+let meteoEnCours = false;
+
+function litMeteoCache() {
+  try { return JSON.parse(localStorage.getItem(CLE_METEO) || 'null'); } catch (e) { return null; }
+}
+function ecritMeteoCache(o) {
+  try { localStorage.setItem(CLE_METEO, JSON.stringify(o)); } catch (e) { /* mode prive */ }
+}
+
+/* On demande les 13 points en un seul appel : Open-Meteo accepte des listes. */
+function urlMeteo(jour) {
+  const p = METEO_POINTS;
+  const q = new URLSearchParams({
+    latitude:  p.map(x => x.lat).join(','),
+    longitude: p.map(x => x.lon).join(','),
+    elevation: p.map(x => x.alt).join(','),
+    hourly: METEO_SOURCE.champs,
+    timezone: 'Europe/Paris',
+    start_date: jour,
+    end_date: jourSuivant(jour)
+  });
+  return METEO_SOURCE.base + '?' + q.toString();
+}
+
+function jourSuivant(iso) {
+  const d = dateDe(iso);
+  d.setDate(d.getDate() + 1);
+  return isoLocal(d);
+}
+
+async function chargeMeteo(force) {
+  if (meteoEnCours) return;
+  const cache = litMeteoCache();
+
+  // une prevision de moins de trois heures suffit largement
+  if (!force && cache && (Date.now() - cache.releve) < 3 * 3600 * 1000) {
+    meteoPrevue = cache;
+    return;
+  }
+  if (!navigator.onLine) { meteoPrevue = cache; return; }
+
+  meteoEnCours = true;
+  traceMeteoPrevue();
+  try {
+    const jour = isoLocal(DEPART);
+    const rep = await fetch(urlMeteo(jour), { cache: 'no-store' });
+    if (!rep.ok) throw new Error(rep.status);
+    const brut = await rep.json();
+    const lieux = Array.isArray(brut) ? brut : [brut];
+
+    const points = METEO_POINTS.map((pt, i) => {
+      const l = lieux[i];
+      if (!l || !l.hourly) return null;
+      const h = l.hourly;
+      return {
+        nom: pt.nom, km: pt.km, alt: pt.alt, type: pt.type, expose: !!pt.expose,
+        t: h.time,
+        temp: h.temperature_2m,
+        ressenti: h.apparent_temperature,
+        pluieProb: h.precipitation_probability,
+        vent: h.wind_speed_10m,
+        rafales: h.wind_gusts_10m,
+        code: h.weather_code
+      };
+    }).filter(Boolean);
+
+    if (points.length) {
+      meteoPrevue = { releve: Date.now(), jour, points };
+      ecritMeteoCache(meteoPrevue);
+    }
+  } catch (e) {
+    meteoPrevue = cache;      // on garde ce qu'on avait
+  } finally {
+    meteoEnCours = false;
+    traceMeteoPrevue();
+  }
+}
+
+/* Lit un point a l'heure de passage du scenario ACTIF. C'est fait au rendu,
+   pas au relevé : basculer de A a B decale les heures sans rien redemander. */
+function litPoint(p, jalons) {
+  const quand = heureAu(p.km, jalons);
+  const cible = quand.getTime();
+  let k = 0, ecart = Infinity;
+  p.t.forEach((t, j) => {
+    const e = Math.abs(new Date(t).getTime() - cible);
+    if (e < ecart) { ecart = e; k = j; }
+  });
+  return {
+    nom: p.nom, km: p.km, alt: p.alt, type: p.type, expose: p.expose,
+    heure: hhmm(quand),
+    temp: p.temp[k], ressenti: p.ressenti[k],
+    pluieProb: p.pluieProb[k], vent: p.vent[k],
+    rafales: p.rafales[k], code: p.code[k]
+  };
+}
+
+/* Ce que la prevision impose, en clair. Les chiffres ne servent a rien si
+   personne ne dit ce qu'il faut en faire. */
+function consignesMeteo(points) {
+  const out = [];
+  const min = Math.min(...points.map(p => p.ressenti));
+  const max = Math.max(...points.map(p => p.temp));
+  const pluie = Math.max(...points.map(p => p.pluieProb || 0));
+  const raf = Math.max(...points.map(p => p.rafales || 0));
+  const orage = points.some(p => p.code >= 95);
+
+  if (orage) out.push({ n: 'crit', t: SEUILS.orage.txt });
+  if (min <= SEUILS.tresFroid.valeur) out.push({ n: 'crit', t: SEUILS.tresFroid.txt });
+  else if (min <= SEUILS.froid.valeur) out.push({ n: 'att', t: SEUILS.froid.txt });
+  if (max >= SEUILS.chaud.valeur) out.push({ n: 'att', t: SEUILS.chaud.txt });
+  if (pluie >= SEUILS.pluie.valeur) out.push({ n: 'att', t: SEUILS.pluie.txt });
+  if (raf >= SEUILS.rafales.valeur) out.push({ n: 'att', t: SEUILS.rafales.txt });
+  return out;
+}
+
+function traceMeteoPrevue() {
+  const h = document.getElementById('meteoPrevHote');
+  if (!h) return;
+
+  const jours = Math.ceil((DEPART - maintenant()) / 86400000);
+  const tete = '<div class="mp-tete">' +
+    '<div><b>Le 28, point par point</b>' +
+    '<small>Chaque point à son altitude, à l\'heure de passage du scénario ' +
+      scenarioActif().id + '</small></div>' +
+    '<button class="mp-maj" id="mpMaj">' + (meteoEnCours ? '…' : 'Actualiser') + '</button></div>';
+
+  if (!meteoPrevue || !meteoPrevue.points || !meteoPrevue.points.length) {
+    h.innerHTML = tete + '<div class="mp-vide">' +
+      (meteoEnCours ? 'Relevé en cours…'
+       : (navigator.onLine ? 'Pas encore de relevé. Touche Actualiser.'
+          : 'Hors ligne, et aucun relevé en mémoire. La prévision arrivera au prochain réseau.')) +
+      '</div>';
+    brancheMeteo();
+    return;
+  }
+
+  const jalons = jalonsHoraires(scenarioActif());
+  const P = meteoPrevue.points.map(p => litPoint(p, jalons));
+  const age = Math.round((Date.now() - meteoPrevue.releve) / 60000);
+  const ageTxt = age < 60 ? 'il y a ' + age + ' min'
+               : (age < 1440 ? 'il y a ' + Math.round(age / 60) + ' h'
+                             : 'il y a ' + Math.round(age / 1440) + ' j');
+
+  const ligne = p => {
+    const c = CODES_METEO[p.code] || { i: '·', t: '' };
+    const froid = p.ressenti <= 5, tresFroid = p.ressenti <= 0;
+    return '<tr class="' + (tresFroid ? 'gel' : (froid ? 'froid' : '')) +
+      (p.expose ? ' expose' : '') + '">' +
+      '<td class="mp-n"><b>' + p.nom + '</b><small>' + p.alt + ' m &#183; ' +
+        kmFmt(p.km) + ' km</small></td>' +
+      '<td class="mp-h">' + p.heure + '</td>' +
+      '<td class="mp-c">' + c.i + '</td>' +
+      '<td class="mp-t"><b>' + Math.round(p.temp) + '°</b>' +
+        '<small>ress. ' + Math.round(p.ressenti) + '°</small></td>' +
+      '<td class="mp-p">' + (p.pluieProb == null ? '·' : p.pluieProb + '%') + '</td>' +
+      '<td class="mp-v">' + Math.round(p.vent) + '<small>' + Math.round(p.rafales) + '</small></td>' +
+      '</tr>';
+  };
+
+  const cons = consignesMeteo(P);
+
+  h.innerHTML = tete +
+    (jours > 7 ? '<div class="mp-loin">⚠️ À ' + jours + ' jours, une prévision ne vaut rien. ' +
+      'Elle est là pour l\'ordre de grandeur, pas pour décider. Le vrai relevé, c\'est le 25.</div>' : '') +
+    '<table class="mp"><tr>' +
+      '<th>point</th><th>h</th><th></th><th>temp</th><th>pluie</th><th>vent<small>raf.</small></th></tr>' +
+      P.map(ligne).join('') + '</table>' +
+    '<div class="mp-leg">Le vent est en km/h, le petit chiffre est la rafale. ' +
+      'Les lignes bleutées sont sous 5 °C ressentis.</div>' +
+    (cons.length ? '<div class="fi-titre">Ce que ça impose</div>' +
+      cons.map(c => '<div class="mp-cons ' + c.n + '">' + c.t + '</div>').join('') : '') +
+    '<div class="mp-src">' + METEO_SOURCE.nom + ' &#183; relevé ' + ageTxt +
+      (navigator.onLine ? '' : ' &#183; hors ligne, dernier relevé connu') + '</div>';
+
+  brancheMeteo();
+}
+
+function brancheMeteo() {
+  const b = document.getElementById('mpMaj');
+  if (b) b.addEventListener('click', () => chargeMeteo(true));
+}
+
 /* ==================== ce qui s'est ferme du 18 au 20 ==================== */
 
 /* Le verdict chaussures. Deux tests, dont un sous la pluie : c'est le second
@@ -2977,6 +3176,9 @@ function init() {
   traceVoyage();
   traceCarb();
   traceMeteo();
+  meteoPrevue = litMeteoCache();
+  traceMeteoPrevue();
+  chargeMeteo(false);
   traceStock();
   traceJournal();
   traceCoffre();

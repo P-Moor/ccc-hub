@@ -159,6 +159,23 @@ depot fermerait ce trou, et elle demande les mains de Pierre.
 
 ## JOURNAL DES SESSIONS
 
+### 20/08/2026 — Meteo automatique, point par point
+
+- L'app va chercher la prevision du 28 sur **Open-Meteo** (gratuit, sans cle)
+  pour les **13 points du parcours**, chacun **A SON ALTITUDE**. C'est le
+  parametre `elevation` qui fait tout : sans lui on lirait la meteo du fond de
+  vallee. Au Grand Col Ferret, 2 529 m, l'ecart depasse 6 degres.
+- L'heure lue est celle du **passage prevu par le scenario actif**. La serie
+  horaire complete est gardee en cache, donc basculer de A a C decale les
+  heures sans redemander quoi que ce soit au reseau.
+- **Le carnet reste utilisable hors ligne** : la prevision est un bonus en
+  ligne. Cache dans `ccc-v2-meteo-prevue`, affiche avec son age, et hors ligne
+  on montre le dernier releve connu. Rien ne casse sans reseau.
+- L'app dit ce que la prevision IMPOSE, pas seulement les chiffres : gants
+  sous 5 degres ressentis, veste accessible au-dela de 50 % de pluie, veste au
+  col au-dela de 50 km/h de rafales, et l'orage en rouge.
+- Un bandeau rappelle qu'a plus de sept jours une prevision ne vaut rien.
+
 ### 20/08/2026 — Les trois inconnues sont fermees
 
 - **Chaussures : REVEAL VALIDEE.** Test #2 le 19 sous pluie battante, 13 km,
