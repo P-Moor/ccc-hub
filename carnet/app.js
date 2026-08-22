@@ -611,7 +611,7 @@ const VERSION = 'ccc-v2-carnet-30';
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
    coffre perime alors que l'ancien fichier est parfaitement valide. */
-const COFFRE_ATTENDU = 'ccc-v2-carnet-29';
+const COFFRE_ATTENDU = 'ccc-v2-carnet-30';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1672,8 +1672,8 @@ function ouvreDoc(id) {
         '</span></div>') +
     '<a class="dn-btn plein large" href="' + d.url + '" target="_blank" rel="noopener">' +
       (image ? 'Ouvrir en plein ecran' : 'Ouvrir le document') + '</a>' +
-    '<p class="dv-n">Ce fichier est dans le coffre, pas sur le reseau. ' +
-      'Il reste lisible en mode avion.</p>');
+    '<p class="dv-n">Ce fichier est dans le coffre, pas sur le réseau. ' +
+      'Il reste lisible sans aucune connexion.</p>');
 }
 
 /* ==================== ce que Pierre ajoute lui-meme ====================
