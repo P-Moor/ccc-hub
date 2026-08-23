@@ -5,13 +5,14 @@ import { RACE, SECTIONS, SCENARIOS, REGLES,
          PANIC, ALERTES, NAAK, NAAK_SOURCE, REPERES } from './data.js';
 import { AFFUTAGE } from './prepa-data.js';
 import { NUTRITION as NUT } from './nutrition-data.js';
-import { SAC } from './sac-data.js';
+import { SAC, KITS } from './sac-data.js';
 import { VOYAGE } from './voyage-data.js';
 import { METEO } from './meteo-data.js';
 import { CONFIANCE } from './confiance-data.js';
 import { PRIVE } from './prive-data.js';
 import { VERDICT_CHAUSSURES, TROUSSE, VESTE, LAMPES,
          BALISE, MENUS, TRACES, PHYSIO } from './maj20-data.js';
+import { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG } from './maj23-data.js';
 import { METEO_POINTS, METEO_SOURCE, CODES_METEO, SEUILS } from './meteo-points.js';
 import { PROFIL, altAt } from './profil.js';
 
@@ -606,12 +607,12 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-30';
+const VERSION = 'ccc-v2-carnet-31';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
    coffre perime alors que l'ancien fichier est parfaitement valide. */
-const COFFRE_ATTENDU = 'ccc-v2-carnet-30';
+const COFFRE_ATTENDU = 'ccc-v2-carnet-31';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -1852,6 +1853,37 @@ function traceCoffre() {
       '<small>En memoire seulement. Un rechargement le referme.</small></div>' +
       '<button class="cff-x" id="cffFerme">Refermer</button></div>' +
 
+    /* Les codes en premier. A Chamonix, les mains froides, devant une boite a
+       cles : c'est la seule chose qu'on cherche vraiment dans ce coffre. */
+    (L.codes ? '<div class="fi-titre">Les codes</div>' +
+      '<div class="cff-codes">' + L.codes.map(c =>
+        '<div class="cff-cd' + (c.cle ? ' cle' : '') + '"><b>' + c.code + '</b>' +
+        '<span>' + c.sert + '</span></div>').join('') + '</div>' : '') +
+
+    (L.linge && L.linge.statut ? '<div class="cff-ouvert">' +
+      '<div class="cff-ouvert-h"><i>&#128681;</i><b>' + L.linge.statut + '</b></div>' +
+      '<p>' + L.linge.probleme + '</p>' +
+      '<div class="cff-act">' + L.linge.action + '</div>' +
+      '<div class="cff-pb"><b>Plan B</b>' + L.linge.planB + '</div>' +
+      '<div class="cff-dl">' + L.linge.deadline + '</div></div>' : '') +
+
+    (L.hotelLiege ? '<div class="fi-titre">Hôtel &#183; mardi 25</div>' +
+      '<div class="cff-bloc">' +
+        ligne('Statut', L.hotelLiege.statut) +
+        ligne('Où', L.hotelLiege.nom + ' &#183; ' + L.hotelLiege.adresse) +
+        ligne('Tel', L.hotelLiege.tel) +
+        ligne('Reference', L.hotelLiege.reference) +
+        ligne('CODE', '<b class="cff-code">' + L.hotelLiege.codeConfidentiel + '</b>') +
+        ligne('Arrivee', L.hotelLiege.arrivee) +
+        ligne('Depart', L.hotelLiege.depart) +
+        ligne('Chambre', L.hotelLiege.chambre) +
+        ligne('Montant', L.hotelLiege.montant) +
+      '</div>' +
+      '<div class="cff-al attention">' + L.hotelLiege.petitDejeuner + '</div>' +
+      '<ul class="cff-af">' + L.hotelLiege.aFaire.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<div class="cff-note">' + L.hotelLiege.note + '</div>' +
+      '<div class="cff-bonus">' + L.hotelLiege.pourquoi + '</div>' : '') +
+
     '<div class="fi-titre">Logement</div>' +
     '<div class="cff-bloc">' +
       ligne('Statut', L.logement.statut) +
@@ -1901,12 +1933,26 @@ function traceCoffre() {
     '</div>' +
     '<div class="cff-note">' + L.caution.note + '</div>' +
 
+    (L.responsabiliteCivile ? '<div class="cff-rc"><b>Responsabilité civile</b>' +
+      '<p>' + L.responsabiliteCivile.statut + '</p>' +
+      '<div class="cff-act">' + L.responsabiliteCivile.action + '</div></div>' : '') +
+
+    (L.reglesSejour ? '<details class="cff-rg"><summary>Les règles du séjour' +
+      '<span>' + L.reglesSejour.source + '</span></summary>' +
+      '<div class="cff-rg-c"><b>Avant de partir</b><ul>' +
+        L.reglesSejour.avantDePartir.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<b>Interdits</b><ul>' +
+        L.reglesSejour.interdits.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<div class="cff-note">' + L.reglesSejour.enCasDeProbleme + '</div></div></details>' : '') +
+
     '<div class="fi-titre">Retour &#183; ' + L.retour.note + '</div>' +
     L.retour.segments.map(g =>
       '<div class="cff-seg"><div class="cff-seg-h"><b>' + g.de + ' &#8594; ' + g.vers + '</b>' +
       '<span>' + g.depart + ' &#8594; ' + g.arrivee + '</span></div>' +
       '<div class="cff-ref">' + g.ref + '</div>' +
+      (g.statut ? '<div class="cff-note">' + g.statut + '</div>' : '') +
       (g.bagages ? '<div class="cff-note">' + g.bagages + '</div>' : '') +
+      (g.outil ? '<div class="cff-outil">' + g.outil + '</div>' : '') +
       (g.alerte ? '<div class="cff-al attention">' + g.alerte + '</div>' : '') +
       '</div>').join('') +
     '<div class="cff-note">' + L.retour.marge + '</div>' +
@@ -1957,11 +2003,23 @@ function traceCoffre() {
         '<div class="cff-l"><span>' + c.qui + '</span><b>' + c.num + '</b></div>').join('') +
       '</div>' : '') +
 
-    '<div class="fi-titre">A regler</div>' +
-    '<div class="ck-liste carte-l">' + L.aRegler.map(x =>
-      '<button class="sk' + (x.crit ? ' sk-reglementaire' : ' sk-perso') +
-      (coche(x.id) ? ' ok' : '') + '" data-cff="' + x.id + '">' +
-      '<i class="ck-box"></i><span class="sk-t">' + x.txt + '</span></button>').join('') +
+    /* A regler. Les lignes deja retombees passent en bas, barrees : elles ne
+       doivent plus attirer l'oeil, mais les effacer ferait douter Pierre de
+       les avoir traitees. */
+    '<div class="fi-titre">À régler</div>' +
+    '<div class="ck-liste carte-l">' + L.aRegler.slice().sort((a, b) =>
+        (a.fait ? 1 : 0) - (b.fait ? 1 : 0)).map(x => {
+      const d = x.echeance ? dateDe(x.echeance) : null;
+      const j = d ? Math.round((d - minuit(maintenant())) / 86400000) : null;
+      return '<button class="sk' + (x.crit ? ' sk-reglementaire' : ' sk-perso') +
+        (x.fait ? ' sk-clos' : '') + (coche(x.id) ? ' ok' : '') +
+        '" data-cff="' + x.id + '">' +
+        '<i class="ck-box"></i><span class="sk-t">' + x.txt +
+        (x.detail ? '<small>' + x.detail + '</small>' : '') + '</span>' +
+        (d && !x.fait ? '<span class="sk-ech' + (j <= 1 ? ' chaud' : '') + '">' +
+          (j < 0 ? 'passé' : (j === 0 ? "auj." : (j === 1 ? 'demain' : 'J-' + j))) +
+          '</span>' : '') + '</button>';
+    }).join('') +
     '</div>';
 
   document.getElementById('cffFerme').addEventListener('click', () => {
@@ -2196,7 +2254,8 @@ function litPoint(p, jalons) {
    Un tableau de temperatures ne sert a rien si personne ne dit quoi en faire.
    Ici chaque conseil est ANCRE sur un point nomme et une heure, et renvoie au
    materiel que Pierre possede vraiment : les quatre paliers de gants, les deux
-   longs chauds, les chauffe-mains, les moufles restees en valise. */
+   longs chauds, les moufles restees en valise. Les chauffe-mains ont ete
+   ecartes le 23/08 : introuvables hors saison. */
 
 const NUIT_DE = 21, NUIT_A = 7;   // heures pleines
 
@@ -2258,7 +2317,8 @@ function conseilsMeteo(P) {
         (sousCinq.length >= SEUILS.sequence
           ? '🧤 <b>Les moufles Salomon sortent de la valise</b> : c\'est exactement le cas prévu pour elles, à trancher le 27 au soir. '
           : '') +
-        '🔥 Chauffe-mains à activer <b>20 min AVANT</b> d\'en avoir besoin, donc en t\'asseyant au ravito qui précède.' });
+        'Les chauffe-mains ont été écartés : il n\'y a plus de rattrapage possible une fois les doigts froids. ' +
+        '<b>Monter d\'un palier de gants AVANT la montée</b>, au ravito qui précède, pas au sommet.' });
   }
   if (sousZero.length) {
     out.push({ n: 'crit', titre: 'Sous zéro ressenti',
@@ -2530,7 +2590,8 @@ function traceVesteLampes() {
         '<div class="lp-al">' + LAMPES.principale.alerte + '</div>' +
         '<p>' + LAMPES.principale.conseil + '</p></div>' +
       '<div class="lp"><i>secours</i><b>' + LAMPES.secours.modele + '</b>' +
-        '<small>' + LAMPES.secours.alimentation + ' &#183; mode rouge ' + LAMPES.secours.modeRouge + '</small></div>' +
+        '<small>' + LAMPES.secours.prix + ' &#183; ' + LAMPES.secours.decision + '</small>' +
+        '<p>' + LAMPES.secours.pourquoi + '</p></div>' +
       '<div class="fi-titre">Les rechanges</div>' +
       LAMPES.rechange.map(r =>
         '<div class="lp-r"><b>' + r.objet + '</b><span>' + r.statut + '</span>' +
@@ -2610,6 +2671,99 @@ function traceTraces() {
     '<ol class="tc-i">' + TRACES.instructions.map(x => '<li>' + x + '</li>').join('') + '</ol>';
 }
 
+/* ==================== ce qui s'est ferme du 21 au 23 ==================== */
+
+/* Les sachets zip. Ce n'est pas du rangement : c'est ce qui remplace la
+   lecture quand la frontale, le froid et la fatigue l'ont rendue impossible. */
+function traceSachets() {
+  const h = document.getElementById('sachetsHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="sh-pr">' + KITS.principe + '</div>' +
+    '<div class="sh-g">' + KITS.pictos.map(p =>
+      '<div class="sh' + (p.note ? ' cle' : '') + '">' +
+        '<div class="sh-p">' + p.symbole + '</div>' +
+        '<div class="sh-c"><b>' + p.nom + '</b><p>' + p.contenu + '</p>' +
+        (p.note ? '<em>' + p.note + '</em>' : '') + '</div>' +
+      '</div>').join('') + '</div>' +
+    '<div class="sh-as">' + KITS.astuce + '</div>';
+}
+
+/* Ce qui a bouge depuis le plan. L'ancien reste affiche a cote du neuf :
+   dans cinq jours Pierre ne se souviendra plus de ce qu'il avait prevu, et il
+   doit pouvoir verifier qu'un ecart est une decision, pas un oubli. */
+function traceChangements() {
+  const h = document.getElementById('changeHote');
+  if (!h) return;
+  const C = CHANGEMENTS;
+  h.innerHTML =
+    C.lignes.map(l =>
+      '<div class="chg ' + l.sens + '">' +
+        '<div class="chg-o">' + l.objet + '</div>' +
+        '<div class="chg-d"><s>' + l.avant + '</s><b>' + l.apres + '</b></div>' +
+        (l.pourquoi ? '<p>' + l.pourquoi + '</p>' : '') +
+      '</div>').join('') +
+    (C.reserve ? '<div class="chg-res"><b>' + C.reserve.sujet + '</b>' +
+      '<p>' + C.reserve.quoi + '</p>' +
+      '<div class="chg-q">' + C.reserve.quand + '</div></div>' : '');
+}
+
+/* L'attention. Ce bloc explique pourquoi l'app est faite comme elle est
+   faite, et surtout ou se situe le vrai risque du 28. */
+function traceCognitif() {
+  const h = document.getElementById('cognitifHote');
+  if (!h) return;
+  const G = GESTION_COGNITIVE;
+  h.innerHTML =
+    '<div class="cg-c">' + G.constat + '</div>' +
+    '<div class="fi-titre">Pourquoi maintenant</div>' +
+    G.causes.map(c => '<div class="cg-l"><i>' + c.icone + '</i><p>' + c.txt + '</p></div>').join('') +
+    '<div class="cg-cc">' + G.conclusion + '</div>' +
+    '<div class="fi-titre">Ce que l\'app en fait</div>' +
+    G.implications.map(i => '<div class="cg-i"><i>' + i.icone + '</i><p>' + i.txt + '</p></div>').join('') +
+    '<div class="cg-r"><div class="cg-rh">' + G.risqueJourJ.quoi + '</div>' +
+      '<p>' + G.risqueJourJ.pourquoi + '</p>' +
+      '<em>' + G.risqueJourJ.precedent + '</em></div>';
+}
+
+/* La Fenix. Ecrire « mettre une alarme » ne servirait a rien : le piege est
+   qu'une alarme d'horloge NE SE REPETE PAS. D'ou les chemins mot pour mot. */
+function traceMontre() {
+  const h = document.getElementById('montreHote');
+  if (!h) return;
+  const j0 = minuit(maintenant());
+  h.innerHTML =
+    '<div class="mo-t">' + MONTRE.modele + '</div>' +
+    MONTRE.reglages.map(r => {
+      const d = r.echeance ? dateDe(r.echeance) : null;
+      const j = d ? Math.round((d - j0) / 86400000) : null;
+      return '<div class="mo' + (r.critique ? ' cle' : '') + '">' +
+        '<div class="mo-h"><b>' + r.n + '</b><span>' + r.titre + '</span>' +
+        (d ? '<i class="mo-e' + (j <= 1 ? ' chaud' : '') + '">' +
+          (j < 0 ? 'passé' : (j === 0 ? "aujourd'hui" : 'J-' + j)) + '</i>' : '') + '</div>' +
+        '<div class="mo-c">' + r.chemin + '</div>' +
+        (r.piege ? '<div class="mo-p">' + r.piege + '</div>' : '') +
+        (r.pourquoi ? '<p>' + r.pourquoi + '</p>' : '') +
+      '</div>';
+    }).join('');
+}
+
+/* La prise de sang. La conclusion d'abord : c'est elle qui change quelque
+   chose, pas la liste des valeurs. */
+function traceSang() {
+  const h = document.getElementById('sangHote');
+  if (!h) return;
+  const P = PRISE_DE_SANG;
+  const d = dateDe(P.date);
+  h.innerHTML =
+    '<div class="sg-cc"><b>' + P.conclusion.titre + '</b><p>' + P.conclusion.txt + '</p></div>' +
+    '<div class="sg-d">Prélèvement du ' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</div>' +
+    '<ul class="sg-ok">' + P.rassurant.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+    '<div class="fi-titre">À surveiller, après la course</div>' +
+    P.aSurveiller.map(x => '<div class="sg-s"><b>' + x.valeur + '</b><p>' + x.note + '</p></div>').join('') +
+    '<div class="sg-pr">' + P.aProgrammer + '</div>';
+}
+
 /* Physio de la semaine. Le readiness a 28 du jeudi ne veut pas dire fatigue :
    il ne mesure que la duree. */
 function tracePhysio() {
@@ -2638,35 +2792,29 @@ function traceChaussettes() {
   const C = SAC.chaussettes;
 
   const paires = n => n + (n > 1 ? ' paires' : ' paire');
-  const repart = (titre, r, cls) =>
-    '<div class="ch-r ' + cls + '"><b>' + titre + '</b>' +
-    Object.keys(r).map(k => '<div class="ch-rl"><span>' +
-      ({ auxPieds: 'aux pieds', sacDeCourse: 'sac de course', sacChampex: 'sac de Champex', valise: 'valise' }[k] || k) +
-      '</span>' + r[k] + '</div>').join('') + '</div>';
+  const NOMS = { auxPieds: 'aux pieds', sacDeCourse: 'sac de course',
+                 sacChampex: 'sac de Champex', valise: 'valise' };
 
   hote.innerHTML =
+    '<div class="ch-verdict"><i>' + C.statut + '</i><b>' + C.decision + '</b></div>' +
+
     '<div class="ch-duo">' +
-      '<div class="ch ok"><i>validée</i><b>' + C.validee.modele + '</b>' +
-        '<small>' + paires(C.validee.paires) + ' &#183; ' + C.validee.ref + '</small>' +
-        '<p>' + C.validee.preuve + '</p></div>' +
-      '<div class="ch att"><i>à valider le 22</i><b>' + C.candidate.modele + '</b>' +
-        '<small>' + paires(C.candidate.paires) + ' &#183; ' + C.candidate.ref + '</small>' +
-        '<p>' + C.candidate.hypothese + '</p></div>' +
+      '<div class="ch ok"><i>au départ</i><b>' + C.depart.modele + '</b>' +
+        '<small>' + C.depart.ref + '</small>' +
+        '<p>' + C.depart.preuve + '</p></div>' +
+      '<div class="ch sec"><i>secours</i><b>' + C.secours.modele + '</b>' +
+        '<small>' + paires(C.secours.paires) + ' &#183; ' + C.secours.ref + '</small>' +
+        '<p>' + C.secours.preuve + '</p></div>' +
     '</div>' +
-    '<div class="ch-risque"><b>Le risque de la double</b>' + C.candidate.risque + '</div>' +
 
-    '<div class="fi-titre">Le calendrier</div>' +
-    '<table class="ch-t">' + C.planning.map(x => {
-      const d = dateDe(x.date);
-      return '<tr><td>' + d.getDate() + ' ' + MOIS[d.getMonth()] + '</td>' +
-        '<td><b>' + x.modele + '</b><small>' + x.note + '</small></td></tr>';
-    }).join('') + '</table>' +
+    '<div class="fi-titre">Le jour J</div>' +
+    '<div class="ch-r oui">' + Object.keys(C.repartitionJourJ).map(k =>
+      '<div class="ch-rl"><span>' + (NOMS[k] || k) + '</span>' +
+      C.repartitionJourJ[k] + '</div>').join('') + '</div>' +
 
-    '<div class="fi-titre">Le jour J, selon le verdict</div>' +
-    repart('Si les Double passent', C.repartitionJourJ.siDoubleValidees, 'oui') +
-    repart('Si elles ne passent pas', C.repartitionJourJ.siDoubleRefusees, 'non') +
-
-    '<div class="fi-titre">En course</div>' +
+    /* Les deux signaux se ressemblent sous la fatigue. C'est la seule chose
+       qui reste a decider en course, donc elle passe en gros. */
+    '<div class="fi-titre">En course, le seul arbitrage qui reste</div>' +
     '<div class="ch-reg"><b>' + C.regleEnCourse.quand + '</b>' +
       '<small>' + C.regleEnCourse.ou + '</small></div>' +
     '<div class="ch-sig rouge">' + C.regleEnCourse.signalRouge + '</div>' +
@@ -2909,13 +3057,18 @@ function traceVerifs() {
   document.querySelectorAll('#verifsHote [data-vf2]').forEach(b =>
     b.addEventListener('click', () => { basculeCoche(b.dataset.vf2); traceVerifs(); majEtat(); }));
 
-  document.getElementById('attHote').innerHTML = SAC.enAttente.map(a => {
-    const d = dateDe(a.resoudreLe);
-    const ec = Math.round((d - minuit(maintenant())) / 86400000);
-    return '<div class="att"><i class="att-p"></i><div class="att-c">' + a.txt +
-      '<small>Via ' + a.via + '</small></div>' +
-      '<span class="att-q">' + (ec <= 0 ? 'à faire' : 'dans ' + ec + ' j') + '</span></div>';
-  }).join('');
+  document.getElementById('attHote').innerHTML = SAC.enAttente.length
+    ? SAC.enAttente.map(a => {
+        const d = dateDe(a.resoudreLe);
+        const ec = Math.round((d - minuit(maintenant())) / 86400000);
+        return '<div class="att"><i class="att-p"></i><div class="att-c">' + a.txt +
+          '<small>Via ' + a.via + '</small></div>' +
+          '<span class="att-q">' + (ec <= 0 ? 'à faire' : 'dans ' + ec + ' j') + '</span></div>';
+      }).join('')
+    : '<div class="att-vide"><i>&#10003;</i><div><b>Plus rien à trancher</b>' +
+      '<small>Chaussures, chaussettes, textile, gants, lampes, nutrition, veste, ' +
+      'matériel, médical : tous les dossiers sont fermés. Il ne reste que de ' +
+      'l\'exécution.</small></div></div>';
 }
 
 
@@ -2983,7 +3136,7 @@ function majEtat() {
   const pct = totalTk ? Math.round((faitsTk / totalTk) * 100) : 0;
 
   const mat = avancement(tousItems());
-  const trous = AFFUTAGE.inconnues.filter(i => !prepa.inconnues[i.id]).length;
+  const trous = AFFUTAGE.inconnues.filter(i => !prepa.inconnues[i.id] && !i.reponse).length;
   const jours = Math.max(0, Math.ceil((DEPART - now) / 86400000));
 
   const cls = p => p >= 90 ? 'ok' : (p >= 50 ? 'tiede' : '');
@@ -3328,6 +3481,11 @@ function init() {
   traceMenus();
   traceTraces();
   tracePhysio();
+  traceSachets();
+  traceChangements();
+  traceCognitif();
+  traceMontre();
+  traceSang();
   traceVoyage();
   traceCarb();
   meteoPrevue = litMeteoCache();

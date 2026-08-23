@@ -2784,3 +2784,256 @@ button.tl-ligne:active { background: var(--surface-2); }
 .dn-msg { margin-top: 9px; font-size: 14px; line-height: 1.4; min-height: 20px; }
 .dn-msg.oui { color: var(--ok); font-weight: 600; }
 .dn-msg.non { color: var(--alerte); font-weight: 600; }
+
+/* ==================== ce qui s'est ferme du 21 au 23 ==================== */
+
+/* --- les sachets zip : le picto porte l'information, pas le texte --- */
+.sh-pr { font-size: 14px; line-height: 1.5; color: var(--texte-doux); margin-bottom: 12px; }
+.sh-g { display: flex; flex-direction: column; gap: 8px; }
+.sh {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 11px 12px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.sh.cle { border-color: var(--alerte); background: color-mix(in srgb, var(--alerte) 8%, transparent); }
+.sh-p {
+  flex: 0 0 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; border-radius: var(--r-xs); background: var(--surface);
+  border: 1px solid var(--bord);
+}
+.sh-c { flex: 1; min-width: 0; }
+.sh-c b {
+  display: block; font-family: var(--display); font-weight: 700;
+  font-size: 13px; letter-spacing: .08em;
+}
+.sh-c p { margin: 3px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--texte-doux); }
+.sh-c em {
+  display: block; margin-top: 6px; font-style: normal; font-size: 12.5px;
+  line-height: 1.4; color: var(--alerte); font-weight: 600;
+}
+.sh-as {
+  margin-top: 11px; padding: 9px 11px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+  font-size: 13px; line-height: 1.45;
+}
+
+/* --- ce qui a change : l'ancien barre, le neuf en gras --- */
+.chg {
+  padding: 11px 12px; margin-bottom: 8px; border-radius: var(--r-s);
+  background: var(--surface-2); border-left: 3px solid var(--bord);
+}
+.chg.gain  { border-left-color: var(--ok); }
+.chg.perte { border-left-color: var(--alerte); }
+.chg-o { font-family: var(--display); font-weight: 700; font-size: 14px; }
+.chg-d { margin-top: 5px; display: flex; flex-direction: column; gap: 2px; }
+.chg-d s { font-size: 12.5px; color: var(--texte-pale); text-decoration-thickness: 1px; }
+.chg-d b { font-size: 14px; line-height: 1.35; }
+.chg p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: var(--texte-doux); }
+.chg-res {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 11%, transparent);
+  border-left: 3px solid var(--jour);
+}
+.chg-res b { font-size: 14px; font-weight: 700; }
+.chg-res p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--texte-doux); }
+.chg-q { margin-top: 7px; font-size: 13px; font-weight: 600; color: var(--jour-fonce); }
+
+/* --- l'attention --- */
+.cg-c { font-size: 14.5px; line-height: 1.5; }
+.cg-l, .cg-i { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+.cg-l i, .cg-i i { font-style: normal; font-size: 17px; flex: 0 0 22px; line-height: 1.4; }
+.cg-l p, .cg-i p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--texte-doux); }
+.cg-cc {
+  margin: 12px 0; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 11%, transparent);
+  border-left: 3px solid var(--ok); font-size: 14px; line-height: 1.5;
+}
+.cg-r {
+  margin-top: 14px; padding: 12px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte);
+}
+.cg-rh { font-family: var(--display); font-weight: 700; font-size: 15px; }
+.cg-r p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; }
+.cg-r em {
+  display: block; margin-top: 7px; font-style: normal; font-size: 12.5px;
+  line-height: 1.45; color: var(--texte-doux);
+}
+
+/* --- les reglages de la Fenix : le chemin est la donnee --- */
+.mo-t {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 11px;
+}
+.mo {
+  padding: 12px; margin-bottom: 9px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.mo.cle { border-color: var(--alerte); }
+.mo-h { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.mo-h > b {
+  flex: 0 0 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--sur-accent);
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+}
+.mo-h span { flex: 1; font-family: var(--display); font-weight: 700; font-size: 14.5px; }
+.mo-e {
+  font-style: normal; font-family: var(--mono); font-size: 10px;
+  padding: 3px 8px; border-radius: var(--pill);
+  background: var(--surface); border: 1px solid var(--bord); color: var(--texte-pale);
+}
+.mo-e.chaud { color: var(--alerte); border-color: var(--alerte); font-weight: 700; }
+.mo-c {
+  margin-top: 9px; padding: 9px 10px; border-radius: var(--r-xs);
+  background: var(--surface); border: 1px solid var(--bord);
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.55;
+  color: var(--texte-doux); overflow-x: auto;
+}
+.mo-p {
+  margin-top: 8px; font-size: 13px; line-height: 1.45;
+  color: var(--alerte); font-weight: 600;
+}
+.mo p { margin: 7px 0 0; font-size: 13px; line-height: 1.5; color: var(--texte-doux); }
+
+/* --- la prise de sang : la conclusion d'abord --- */
+.sg-cc {
+  padding: 12px 13px; border-radius: var(--r-s); margin-bottom: 11px;
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-left: 3px solid var(--ok);
+}
+.sg-cc b { font-family: var(--display); font-weight: 700; font-size: 16px; }
+.sg-cc p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; }
+.sg-d {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em;
+  color: var(--texte-pale); margin-bottom: 9px;
+}
+.sg-ok { margin: 0; padding: 0; list-style: none; }
+.sg-ok li {
+  font-size: 13.5px; line-height: 1.5; padding: 5px 0;
+  border-top: 1px solid var(--bord);
+}
+.sg-ok li:first-child { border-top: 0; }
+.sg-s {
+  padding: 10px 12px; margin-bottom: 7px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 10%, transparent);
+  border-left: 3px solid var(--jour);
+}
+.sg-s b { font-size: 13.5px; font-weight: 700; }
+.sg-s p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--texte-doux); }
+.sg-pr {
+  margin-top: 10px; padding: 10px 12px; border-radius: var(--r-s);
+  background: var(--surface-2); font-size: 13.5px; line-height: 1.5;
+}
+
+/* --- plus rien a trancher --- */
+.att-vide { display: flex; gap: 13px; align-items: flex-start; }
+.att-vide > i {
+  flex: 0 0 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ok); color: var(--sur-accent);
+  font-style: normal; font-size: 17px; font-weight: 700;
+}
+.att-vide b { display: block; font-family: var(--display); font-weight: 700; font-size: 16px; }
+.att-vide small {
+  display: block; margin-top: 4px; font-size: 13.5px;
+  line-height: 1.5; color: var(--texte-doux);
+}
+
+/* ==================== nouveaux blocs du coffre ==================== */
+
+/* Les codes en premier : c'est ce qu'on vient vraiment chercher ici. */
+.cff-codes { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.cff-cd {
+  display: flex; gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.cff-cd.cle { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.cff-cd b {
+  font-family: var(--mono); font-size: 19px; font-weight: 700;
+  letter-spacing: .08em; color: var(--accent-txt);
+}
+.cff-cd span { flex: 1; font-size: 12.5px; line-height: 1.4; color: var(--texte-doux); }
+
+.cff-ouvert {
+  padding: 12px 13px; margin-bottom: 14px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte);
+}
+.cff-ouvert-h { display: flex; gap: 9px; align-items: center; }
+.cff-ouvert-h i { font-style: normal; font-size: 16px; }
+.cff-ouvert-h b { font-family: var(--display); font-weight: 700; font-size: 14px; }
+.cff-ouvert p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; }
+.cff-act {
+  margin-top: 8px; font-size: 13.5px; line-height: 1.45;
+  font-weight: 600; color: var(--alerte);
+}
+.cff-pb {
+  margin-top: 8px; padding: 8px 10px; border-radius: var(--r-xs);
+  background: var(--surface); font-size: 13px; line-height: 1.45;
+}
+.cff-pb b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--texte-pale); }
+.cff-dl { margin-top: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-doux); }
+.cff-af { margin: 9px 0 0; padding-left: 18px; }
+.cff-af li { font-size: 13.5px; line-height: 1.5; margin-bottom: 4px; }
+
+.cff-rc {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+.cff-rc b { font-family: var(--display); font-weight: 700; font-size: 14px; }
+.cff-rc p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; }
+.cff-outil {
+  margin-top: 7px; padding: 8px 10px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-size: 13px; line-height: 1.45;
+}
+.cff-rg { margin-top: 12px; border-top: 1px solid var(--bord); padding-top: 11px; }
+.cff-rg summary {
+  cursor: pointer; list-style: none; font-family: var(--display);
+  font-weight: 700; font-size: 14px; display: flex; gap: 8px;
+  align-items: baseline; flex-wrap: wrap;
+}
+.cff-rg summary::-webkit-details-marker { display: none; }
+.cff-rg summary::before {
+  content: "\25B8"; font-family: var(--mono); font-weight: 400; color: var(--texte-pale);
+}
+.cff-rg[open] summary::before { content: "\25BE"; }
+.cff-rg summary span { font-family: var(--corps); font-weight: 400; font-size: 12px; color: var(--texte-pale); }
+.cff-rg-c { margin-top: 10px; }
+.cff-rg-c b {
+  display: block; margin-top: 9px; font-size: 11px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.cff-rg-c ul { margin: 5px 0 0; padding-left: 18px; }
+.cff-rg-c li { font-size: 13.5px; line-height: 1.5; }
+
+/* A regler : ce qui est retombe reste visible mais s'efface. */
+.sk-clos { opacity: .55; }
+.sk-clos .sk-t { text-decoration: line-through; text-decoration-thickness: 1px; }
+.sk-ech {
+  flex: 0 0 auto; align-self: center; margin-left: 8px;
+  font-family: var(--mono); font-size: 10px; padding: 3px 8px;
+  border-radius: var(--pill); border: 1px solid var(--bord); color: var(--texte-pale);
+}
+.sk-ech.chaud { color: var(--alerte); border-color: var(--alerte); font-weight: 700; }
+.sk-t small {
+  display: block; margin-top: 4px; font-size: 12px;
+  line-height: 1.45; color: var(--texte-pale); font-weight: 400;
+}
+
+/* --- le verdict chaussettes, une fois le dossier clos --- */
+.ch-verdict {
+  display: flex; gap: 11px; align-items: baseline; flex-wrap: wrap;
+  padding: 11px 13px; margin-bottom: 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-left: 3px solid var(--ok);
+}
+.ch-verdict i {
+  font-style: normal; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--texte-pale);
+}
+.ch-verdict b { font-family: var(--display); font-weight: 700; font-size: 16px; }
+.ch.sec { border-color: var(--bord); }
+.ch.sec i { color: var(--texte-pale); }

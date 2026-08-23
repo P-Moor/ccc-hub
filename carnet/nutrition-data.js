@@ -223,8 +223,8 @@ export const NUTRITION = {
       { id:"st6", nom:"Näak Purée Banane-Poire",    qte:2, glucides:27, cafeine:0 },
       { id:"st7", nom:"Näak Barre Peanut Butter",   qte:2, glucides:25, cafeine:0 },
       { id:"st8", nom:"Näak Barre Caramel Macchiato", qte:3, glucides:25, cafeine:65, note:"⚠️ CAFÉINÉE — ressemble à une barre normale, facile à confondre la nuit" },
-      { id:"st9", nom:"Baouw Gel Abricot-Thym",     qte:1, glucides:30, cafeine:0,   note:"2-en-1 diluable — peut aromatiser une flasque d'eau" },
-      { id:"st10", nom:"Baouw Purée Patate douce-Carotte-Poivre Timut", qte:1, glucides:25, cafeine:0, note:"🍠 SALÉ — le produit préféré de Pierre. Carte anti-écœurement de fin de course. Sac de Champex" }
+      { id:"st9", nom:"Baouw Gel Abricot-Thym",     qte:0, glucides:30, cafeine:0,   note:"❌ ÉCARTÉ le 23/08 — Pierre prend le salé aux ravitos.", ecarte:true },
+      { id:"st10", nom:"Baouw Purée Patate douce-Carotte-Poivre Timut", qte:0, glucides:25, cafeine:0, note:"❌ ÉCARTÉE le 23/08 — Pierre prend le salé aux ravitos. ⚠️ C'était la seule option salée pour Champex → Trient : à se reposer une fois en bouclant le sac de Champex.", ecarte:true }
     ]
   },
 
@@ -233,14 +233,14 @@ export const NUTRITION = {
     principe: "Tu portes le SUCRÉ (Näak) et tu comptes sur les ravitos de l'organisation pour le SALÉ. Tu ne tiendras pas 20 h uniquement au sucre.",
     trou: "⚠️ Champex → Trient : 16,5 km, 3h05, AUCUN ravito. L'écœurement du sucré arrive typiquement entre la 11ᵉ et la 14ᵉ heure, c'est-à-dire précisément dans cette section, de nuit.",
     action: "➜ EMPORTER DU SALÉ AU DÉPART DE CHAMPEX : pain, TUC, fromage dans un sachet. 50 g qui peuvent sauver trois heures.",
-    action2: "➜ La purée Baouw patate douce est là pour ça, pas « au cas où »."
+    action2: "⚠️ La purée Baouw a été écartée le 23/08. Ce trou de 3 h 05 reste donc entier : le sachet de salé emporté de Champex n'est plus une option de confort, c'est la SEULE réponse au problème."
   },
 
   repartition: {
     depart: { label:"Sac de départ · 11 h · zéro caféine",
-      contenu:["7 Ice Mint","2 Neutral","2 Salted Maple","2 purées Banane-Poire","1 barre Peanut Butter","1 gel Baouw Abricot-Thym"] },
+      contenu:["7 Ice Mint","2 Neutral","2 Salted Maple","2 purées Banane-Poire","1 barre Peanut Butter"] },
     champex: { label:"Sac de Champex · 9 h de nuit",
-      contenu:["3 Ultra Chocolat ☕","4 Peach Tea ☕","3 Caramel Macchiato ☕","2 Ice Mint","2 Neutral","1 barre Peanut Butter","1 purée Baouw patate douce","+ le salé pris sur place"] }
+      contenu:["3 Ultra Chocolat ☕","4 Peach Tea ☕","3 Caramel Macchiato ☕","2 Ice Mint","2 Neutral","1 barre Peanut Butter","🥖 LE SACHET DE SALÉ — pain, TUC, fromage","+ le salé pris sur place"] }
   },
 
   /* ====================================================================== */
@@ -267,7 +267,7 @@ export const NUTRITION = {
     },
     sacChampex: {
       label: "Champex → arrivée (~9h)",
-      contenu: ["8 gels dont les 5 CAFÉINÉS", "2 barres", "2 mini-ziplocks Boost", "Chaussettes sèches", "NOK recharge", "Couche chaude sèche", "Piles frontale", "Lingettes"]
+      contenu: ["8 gels dont les 5 CAFÉINÉS", "2 barres", "2 mini-ziplocks Boost", "Chaussettes sèches", "NOK recharge", "Couche chaude sèche", "Batterie Swift RL de rechange", "Lingettes"]
     },
     note: "La caféine vit dans le sac de Champex — elle ne sert qu'à la nuit."
   },
@@ -281,7 +281,7 @@ export const NUTRITION = {
       { id: "na4", txt: "Poudre : RIEN", detail: "Le gros sac Boost concombre suffit — et les ravitos servent la même gamme" }
     ],
     maison: [
-      { id: "nm1", txt: "4 mini-ziplocks de Boost concombre pré-pesés", detail: "3 cuillères = 1 flasque de 500 ml" },
+      { id: "nm1", txt: "4 mini-ziplocks de Boost concombre", detail: "3 cuillères = 1 flasque de 500 ml. 🔄 Décision du 23/08 : préparés SUR PLACE à Chamonix, pas à la maison — plus simple à transporter, et pas de poudre éventrée dans la valise. Emporter la boîte et la cuillère doseuse." },
       { id: "nm2", txt: "Gobelet ≥ 15 cl vérifié au mètre", detail: "🔴 obligatoire · beaucoup font 125 ml" },
       { id: "nm3", txt: "Petit-déj du 28 emporté de Belgique", detail: "Pain d'épices, miel dosettes, compotes gourdes" }
     ],

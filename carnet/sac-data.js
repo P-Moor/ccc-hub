@@ -5,10 +5,11 @@
  * Ici : une vraie checklist, cochable, hiérarchisée, séquencée dans le temps.
  *
  * Erreurs corrigées par rapport à la version precedente :
- *   Chaussettes SIDAS TRAIL PROTECT, validees le 15/08 sur 25,4 km. Ce sont
- *   bien les Sidas et non les Injinji, et non plus les BV Sport : la reference
- *   avait derive de conversation en conversation, corrigee par Pierre le 18/08
- *   au soir. BV Sport reste juste pour le HAUT (RTECH PRO), pas pour les pieds.
+ *   Chaussettes SIDAS. Ni Injinji, ni BV Sport : la reference avait derive de
+ *   conversation en conversation, corrigee par Pierre le 18/08 au soir. BV
+ *   Sport reste juste pour le HAUT (RTECH PRO), pas pour les pieds.
+ *   Verdict du 22/08 : ce sont les TRAIL DOUBLE qui partent aux pieds, les
+ *   TRAIL PROTECT deviennent le secours.
  *   L'Epitact n'est PAS valide (teste le 08/08 dans une chaussure disqualifiee,
  *   pire brulure du dossier) : optionnel conditionnel.
  *   Ajoutes : chaussures, montre, reserve alimentaire, balise GPS, epingles,
@@ -48,7 +49,7 @@ export const SAC = {
     { id:"s09", zone:"surmoi", crit:"reglementaire", phase:"veille", txt:"Balise GPS", detail:"Remise au retrait du dossard · caution Swikly, réf. dans le coffre" },
     { id:"s10", zone:"surmoi", crit:"perso", phase:"matin", txt:"Montre Garmin Fenix 8", detail:"Chargée 100 % · GPX CCC + ClimbPro · alarme nutrition 30 min · alerte FC" },
 
-    { id:"c01", zone:"sac", crit:"reglementaire", phase:"verif", txt:"2 lampes frontales en état de marche", detail:"Petzl Swift RL 1100 lm (principale) + Petzl Aria 1R RGB (secours) · mode rouge ✅ vérifié le 14/08" },
+    { id:"c01", zone:"sac", crit:"reglementaire", phase:"verif", txt:"2 lampes frontales en état de marche", detail:"2 × Petzl Swift RL 1100 lm · mode rouge ✅ vérifié le 14/08. Décision du 23/08 : la seconde est une Swift RL et non une Aria — mêmes réglages, batteries interchangeables." },
     { id:"c02", zone:"sac", crit:"reglementaire", phase:"achat", txt:"Piles / batteries de rechange pour CHAQUE lampe", detail:"🔴 Manquant au 16/08 — à acheter" },
     { id:"c03", zone:"sac", crit:"reglementaire", phase:"verif", txt:"Veste imperméable à capuche", detail:"S/Lab Ultra Jacket ✅ · coutures soudées · capuche intégrée" },
     { id:"c04", zone:"sac", crit:"reglementaire", phase:"verif", txt:"Seconde couche chaude manches longues ≥ 180 g", detail:"Ou sous-vêtement chaud ≥ 110 g + veste coupe-vent DWR · coton exclu" },
@@ -61,10 +62,10 @@ export const SAC = {
     { id:"c11", zone:"sac", crit:"reglementaire", phase:"matin", txt:"Réserve alimentaire", detail:"Distincte de la nutrition planifiée — garder 2 gels intouchés comme réserve" },
 
     { id:"c20", zone:"sac", crit:"perso", phase:"matin", txt:"👟 S/Lab Ultra Glide Reveal 44⅔", detail:"⏳ Confirmation finale au test du mercredi 19" },
-    { id:"c21", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL PROTECT",
-      detail:"✅ VALIDÉES — 25,4 km le 15/08 sans brûlure, avec Reveal + laçage heel-lock. Réf. CSORUTPROT20_BKWH. 2 paires en possession.", statut:"valide" },
-    { id:"c21b", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL DOUBLE — candidate",
-      detail:"⏳ À VALIDER le samedi 22. Réf. CSORUTDBLE24_BKTU. Même gamme, double épaisseur. L'hypothèse : plus d'amorti, donc moins de friction diffuse sous l'avant-pied et moins de chocs sur la proéminence du 5ᵉ méta. ⚠️ Le risque est l'inverse : l'épaisseur réduit le volume, et la compression latérale peut empirer sur un pied gonflé après 10 h. 12 km ne diront rien du km 60. 1 seule paire.", statut:"aValider" },
+    { id:"c21", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL PROTECT — secours",
+      detail:"✅ Validées le 15/08 sur 25,4 km. Réf. CSORUTPROT20_BKWH, 2 paires. Ce ne sont plus celles du départ : 1 paire part dans le sac de course, 1 paire dans le sac de Champex.", statut:"valide" },
+    { id:"c21b", zone:"sac", crit:"perso", phase:"matin", txt:"🧦 Chaussettes SIDAS TRAIL DOUBLE — AU DÉPART",
+      detail:"✅ VALIDÉES le 22/08 — 10,2 km · 155 m D+ · FC moy 154, max 179, conditions dures. Aucun serrement latéral, pied OK. Réf. CSORUTDBLE24_BKTU. Ce sont celles-là qui partent aux pieds.", statut:"valide" },
     { id:"c22", zone:"sac", crit:"perso", phase:"matin", txt:"🧴 NOK Akileïne appliqué avant le départ", detail:"Sur les zones de friction, pas sur la boule du 5ᵉ méta" },
     { id:"c23", zone:"sac", crit:"perso", phase:"sacs", txt:"🥢 Bâtons Leki Ultratrail TR + système Shark", detail:"Conformes CCC ✅ · dès le km 1" },
     { id:"c24", zone:"sac", crit:"perso", phase:"sacs", txt:"Carquois à bâtons" },
@@ -77,11 +78,13 @@ export const SAC = {
     { id:"c30b", zone:"sac", crit:"perso", phase:"matin", txt:"👕 T-shirt Asics noir", detail:"Plan B si le RTECH PRO frotte au test du 19" },
     { id:"c31", zone:"sac", crit:"confort", phase:"sacs", txt:"Epitact Epithelium Tact 05", detail:"⚠️ NON VALIDÉ — testé le 08/08 dans une chaussure disqualifiée, pire brûlure du dossier. Optionnel conditionnel : n'entre dans le sac que si le test du 19 le confirme. Retirable à Champex." },
 
-    { id:"c32", zone:"allegement", crit:"perso", phase:"veille", txt:"🔥 Chauffe-mains TerraTherm 12 h — 2 paires", detail:"Activer 20 min AVANT d'en avoir besoin, en s'asseyant à Champex · jamais à même la peau, entre les Asics et les Overglove · vérifier la date de péremption" },
+    { id:"c32", zone:"allegement", crit:"perso", phase:"veille", txt:"🔥 Chauffe-mains — ÉCARTÉS",
+      detail:"❌ Introuvables en magasin fin août, c'est hors saison. Le froid aux mains se traite avec les quatre paliers de gants, et les moufles Salomon si la prévision l'impose. Rien à acheter.", statut:"ecarte" },
     { id:"c33", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥣 Bol pliable silicone 400-500 ml", detail:"Lifeventure · BYOU, l'organisation ne distribue aucune vaisselle" },
     { id:"c34", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🥄 Spork ou cuillère légère", detail:"BYOU également" },
-    { id:"c36", zone:"sac", crit:"reglementaire", phase:"veille", txt:"🔋 Batterie de rechange Swift RL", detail:"✅ Commandée le 19/08. Pierre préfère avoir deux fois la RL plutôt que dépendre de l'Aria." },
-    { id:"c37", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🔋 Piles AAA de rechange", detail:"Pour l'Aria 1R. ⚠️ Encore à acheter." },
+    { id:"c36", zone:"sac", crit:"reglementaire", phase:"veille", txt:"🔋 Batterie de rechange Swift RL", detail:"✅ Commandée le 19/08. Elle va sur l'une comme sur l'autre : c'est tout l'intérêt d'avoir deux fois la même lampe." },
+    { id:"c37", zone:"sac", crit:"reglementaire", phase:"achat", txt:"🔋 Piles AAA de rechange — SANS OBJET",
+      detail:"❌ Plus nécessaire : l'Aria 1R est remplacée par une 2ᵉ Swift RL, qui n'a pas de piles. Rien à acheter.", statut:"ecarte" },
     { id:"c38", zone:"bagage", crit:"perso", phase:"sacs", txt:"🛏️ Linge de lit + 2 serviettes", detail:"🔴 NON INCLUS dans la location, découvert le 20/08. Soit emportés de Belgique, soit loués auprès de Lamy. Question à poser à Sylvain." },
     { id:"c39", zone:"bagage", crit:"perso", phase:"veille", txt:"🧥 Veste retraitée au Nikwax", detail:"⚠️ À FAIRE le week-end du 22-23. Séchage complet avant le 26. La membrane est intacte, c'est le déperlant de surface qui est usé." },
     { id:"c35", zone:"bagage", crit:"perso", phase:"sacs", txt:"🧤 Moufles Salomon rembourrées", detail:"Réserve grand froid · restent en VALISE à Chamonix · décision le 27 au soir selon la météo réelle et le kit annoncé par l'orga" },
@@ -132,42 +135,31 @@ export const SAC = {
      ses preuves, et celle qui pourrait faire mieux ou pire. La decision tombe
      le 27 au soir, pas avant. */
   chaussettes: {
-    validee: {
+    statut: "FERMÉ",
+    decision: "Sidas Trail DOUBLE au départ",
+    depart: {
+      modele: "Sidas Trail Double",
+      ref: "CSORUTDBLE24_BKTU",
+      preuve: "Test du 22/08 : 10,2 km · 155 m D+ · FC moy 154, max 179, conditions dures. Aucun serrement latéral, pied OK."
+    },
+    secours: {
       modele: "Sidas Trail Protect",
       ref: "CSORUTPROT20_BKWH",
       paires: 2,
       preuve: "25,4 km · 1 195 m D+ · jusqu'à 30,8 °C le 15/08 — brûlure quasi nulle"
     },
-    candidate: {
-      modele: "Sidas Trail Double",
-      ref: "CSORUTDBLE24_BKTU",
-      paires: 1,
-      testePrevu: "2026-08-22",
-      hypothese: "Plus d'amorti, donc moins de friction diffuse et moins de chocs sur la bosse du 5ᵉ méta",
-      risque: "L'épaisseur réduit le volume dans la chaussure : la compression latérale peut empirer quand le pied gonfle"
-    },
-    planning: [
-      { date: "2026-08-19", modele: "Trail Protect", note: "Test Reveal #2 — config validée, zéro variable neuve" },
-      { date: "2026-08-22", modele: "Trail Double",  note: "Dernière sortie avec D+, 12 à 14 km, sac chargé" },
-      { date: "2026-08-27", modele: "—",             note: "Décision de départ, le soir" }
-    ],
     repartitionJourJ: {
-      siDoubleValidees: {
-        auxPieds:    "Sidas Trail Double",
-        sacDeCourse: "1 paire Trail Protect en secours",
-        sacChampex:  "1 paire Trail Protect, sèches ou bascule complète"
-      },
-      siDoubleRefusees: {
-        auxPieds:    "Sidas Trail Protect",
-        sacChampex:  "1 paire Trail Protect sèches",
-        valise:      "Les Trail Double restent à Chamonix"
-      }
+      auxPieds:    "Sidas Trail DOUBLE",
+      sacDeCourse: "1 paire Sidas Trail PROTECT — secours",
+      sacChampex:  "1 paire Sidas Trail PROTECT — sèches, ou bascule complète"
     },
+    /* Le vrai sujet n'est plus quel modele, mais QUAND changer. Les deux
+       signaux se ressemblent sous la fatigue : l'un se traite, l'autre non. */
     regleEnCourse: {
       quand: "Si ça fait vraiment mal : changement au PROCHAIN RAVITO OÙ TU PEUX T'ASSEOIR",
       ou: "Arnouvaz · La Fouly · Champex · Trient · Vallorcine — en arrêt moyen ou grand, jamais sur un express de 3 à 5 min",
-      signalRouge: "🦴 Serrement ou compression sur le BORD EXTERNE : le volume s'est fermé, changer tout de suite",
-      signalOk: "🔥 Friction diffuse sous l'avant-pied : c'est précisément ce que les Double doivent traiter, on garde"
+      signalRouge: "🦴 Serrement ou compression sur le BORD EXTERNE : le volume s'est fermé. Changer tout de suite.",
+      signalOk: "🔥 Friction diffuse sous l'avant-pied : c'est exactement ce que les Double doivent traiter. On garde."
     },
     aFaire: [
       "🧼 Lessive des 3 paires avant le 26 — elles partent propres et sèches",
@@ -251,11 +243,35 @@ export const SAC = {
     }
   },
 
-  enAttente: [
-    { id:"att1", txt:"Colchicine le jour J + antihistaminique non sédatif", resoudreLe:"2026-08-17", via:"Appel médecin", impacte:["c28"] },
-    { id:"att2", txt:"Verdict chaussures Reveal", resoudreLe:"2026-08-19", via:"Test Reveal #2", impacte:["c20","c31","a07"] },
-    { id:"att3", txt:"Kit conditionnel annoncé par l'orga", resoudreLe:"2026-08-28", via:"Annonce avant le départ", impacte:["kits"] }
-  ]
+  /* Plus rien en attente au 23/08. Les trois dossiers qui restaient sont clos :
+     la colchicine le 20 chez le medecin, les chaussures le 19 au test #2, les
+     chaussettes le 22. Le kit conditionnel de l'orga n'est pas une decision de
+     Pierre mais une annonce a recevoir : il vit dans la veille du 27. */
+  enAttente: []
+};
+
+/* ==================== les kits, en sachets zip ====================
+   Ce n'est pas du rangement, c'est une prothese cognitive. A 3 h du matin, a
+   la frontale, on ne LIT pas une etiquette : on RECONNAIT une forme. D'ou les
+   pictogrammes au marqueur, gros, sur les DEUX faces du sachet. */
+
+export const KITS = {
+  principe: "Sachets zip transparents, pictogrammes au marqueur permanent, GROS et sur les deux faces. À 3 h du matin on ne lit pas, on reconnaît.",
+  pictos: [
+    { symbole: "💧", nom: "PLUIE",
+      contenu: "Veste imperméable S/Lab (sachet séparé) · Sur-pantalon Scott (sachet séparé)",
+      note: "⚠️ Séparés volontairement : sortir la veste sans défaire le kit froid." },
+    { symbole: "❄️", nom: "FROID",
+      contenu: "Seconde couche chaude ML ≥ 180 g (sachet séparé) · Collant long · Bonnet · Gants" },
+    { symbole: "➕", nom: "MÉDICAL",
+      contenu: "Allopurinol · Colchicine · Antihistaminique · Compeed curatif · Sels · NOK · Compresses · Bande élastique" },
+    { symbole: "☕", nom: "CAFÉINÉS",
+      contenu: "4 Peach Tea (100 mg) · 3 Ultra Chocolat (35 mg) · 3 Caramel Macchiato (65 mg)",
+      note: "🔴 SACHET DÉDIÉ OBLIGATOIRE — on ne lit pas une étiquette à la frontale." },
+    { symbole: "🍫", nom: "NUTRITION",
+      contenu: "Le reste des gels et des barres" }
+  ],
+  astuce: "Chasser l'air en roulant le sachet avant de fermer — le gain de volume est important."
 };
 
 export default SAC;

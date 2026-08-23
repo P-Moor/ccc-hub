@@ -62,7 +62,7 @@ export const AFFUTAGE = {
       date: "2026-08-19", j: "J-9", jour: "Mercredi", type: "cle", priorite: "critique",
       titre: "TEST REVEAL #2 — FAIT, REVEAL VALIDÉE",
       seance: { heure: "17:30", contenu: "12 km · ~300 m D+ · trail", distanceKm: 12, dplus: 300, fcMax: 145,
-                config: "S/Lab Ultra Glide Reveal 44⅔ · SIDAS TRAIL PROTECT · laçage heel-lock · bâtons dès la 1re montée · sac de course chargé · BV Sport RTECH PRO (haut) · les 3 couches de gants · NOK avant départ" },
+                config: "S/Lab Ultra Glide Reveal 44⅔ · SIDAS TRAIL DOUBLE · laçage heel-lock · bâtons dès la 1re montée · sac de course chargé · BV Sport RTECH PRO (haut) · les 3 couches de gants · NOK avant départ" },
       consignes: [
         "⛔ Aucune recherche de sensation. Pas de segment, pas de PR.",
         "⛔ Ne pas courir les montées — marcher, comme le 28.",

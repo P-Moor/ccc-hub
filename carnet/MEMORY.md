@@ -1,14 +1,15 @@
 # MÉMOIRE PROJET — CCC Race Companion
 
-Dernière mise à jour : 18/08/2026
+Dernière mise à jour : 23/08/2026
 
 ## ÉTAT ACTUEL
 
-- **Phase** : P3 livrée. Cycle de mises à jour de contenu en cours.
+- **Phase** : PILOTAGE. À J-5, plus aucune décision n'est ouverte — l'app ne
+  sert plus à préparer mais à exécuter.
 - **Écrans livrés** : Préparer (Aujourd'hui · Le sac · Vérifs · Nutrition · Voyage)
   et Courir (Tracé · Pacing · Ravitos · Jour J). Feuille de course imprimable
   recto-verso. Écran « Mes données » (export / import).
-- **Écrans en cours** : Journal · Pourquoi tu peux le faire.
+- **Écrans en cours** : aucun. Tous les blocs demandés sont livrés.
 - **Bugs connus** : aucun. Zéro erreur console, contraste AA sur les neuf vues
   dans les deux thèmes, cibles tactiles à 44 px, pas de débordement horizontal.
 - **Déployé** : https://p-moor.github.io/ccc-hub/carnet/
@@ -27,6 +28,14 @@ Dernière mise à jour : 18/08/2026
 | 17/08 | `logistique-data.js` fait foi sur les réservations | Chevauchement avec `voyage-data.js` |
 | 18/08 | Merge obligatoire du localStorage | Pierre a déjà saisi des données |
 | 18/08 | Aucune consigne de mode avion | Le règlement exige un téléphone allumé et joignable |
+| 20/08 | Prévision météo en ligne, pas hors ligne | Bonus réseau. Le carnet répond toujours sans réseau |
+| 22/08 | Une seule carte météo, l'API prime | Deux blocs se contredisaient sur les mêmes points |
+| 22/08 | L'estampille du coffre est découplée de la version de l'app | Sinon chaque livraison faisait croire à un coffre périmé |
+| 22/08 | La phrase de passe passe par STDIN, jamais en argument | Un argument est lisible dans la table des processus |
+| 23/08 | Chaussettes : Sidas Trail DOUBLE au départ | Test du 22, 10,2 km en conditions dures, aucun serrement |
+| 23/08 | Lampe de secours = 2ᵉ Swift RL | Mêmes réglages, batteries interchangeables : un seul geste à connaître |
+| 23/08 | Les chauffe-mains sont écartés | Introuvables hors saison. Le froid se traite aux paliers de gants |
+| 23/08 | Fibres réduites dès le mardi 25 | Plus progressif qu'une coupure la veille |
 
 ## SOURCES DE VÉRITÉ
 
@@ -37,7 +46,11 @@ Dernière mise à jour : 18/08/2026
 | Séances J-11 → J-0, médecin, carb cycling | `prepa-data.js` |
 | Nutrition course, stock, caféine, ravitos | `nutrition-data.js` |
 | Checklist matériel, gants, téléphone | `sac-data.js` |
-| Météo | `meteo-data.js` |
+| Météo, analyse de fond | `meteo-data.js` |
+| Météo, les 13 points et les seuils | `meteo-points.js` |
+| Dossiers fermés du 18 au 20 | `maj20-data.js` |
+| Dossiers fermés du 21 au 23, kits, Fenix, sang | `maj23-data.js` |
+| Sachets zip (`KITS`) | `sac-data.js` |
 | Confiance | `confiance-data.js` |
 | Pacing, sections, scénarios, profil | `data.js` + `profil.js` |
 
@@ -61,13 +74,22 @@ indépendante et n'est jamais touchée par une mise à jour.
 
 ## CE QUI RESTE OUVERT
 
-- Départ du logement à 7h le 30, deux heures avant la fenêtre — **non résolu**
-- Taxe de séjour incluse ou à payer sur place — non confirmé
-- Aucun numéro de téléphone du partenaire local
-- mg de caféine par gel Boost — étiquette à lire
-- Verdict chaussures Reveal — test du 19
-- Données personnelles dans un dépôt public — décision de Pierre attendue
-- Plan de l'Au : pointage seul, à confirmer sur le carnet de course officiel
+Au 23/08, **plus aucune décision produit n'est ouverte**. Tous les dossiers
+matériel, nutrition et médical sont fermés. Ne restent que des GESTES, tous
+dans le coffre sous `aRegler` avec leur échéance :
+
+- 🔴 **Linge** — appeler Lamy lundi 24 à 9h30. Draps et serviettes non inclus.
+  Décision lundi soir, le départ est mardi. C'est le dernier point ouvert.
+- 🔴 **Taxe de séjour 16 €** — virement + confirmation par mail, avant mardi 25.
+- 🔴 **Balise GPS** — à rendre le samedi 29 au Centre Bozon. 155 €. Départ le 30
+  à 7h30, donc aucun rattrapage. Alarme posée.
+- Télécharger le ticket Alpine Fleet hors ligne · prévenir l'hôtel de l'heure
+  d'arrivée · protéger les bâtons pour la soute.
+
+**Côté dépôt**, un point reste non refermé : les anciens SHA restent visibles
+dans l'API publique d'événements de GitHub pendant ~90 jours. Seul un
+delete + recreate du dépôt le ferme, et le jeton `gh` n'a pas `delete_repo` :
+c'est un geste que Pierre doit faire lui-même.
 
 ## LE COFFRE
 
@@ -98,7 +120,12 @@ cache. C'est la premiere chose a regarder.
 
 ## REGENERER LE COFFRE
 
-`python3 scratchpad/coffre.py "<phrase>" "<indice>"`. Le script lit
+`printf '%s\n' "<phrase>" | python3 scratchpad/coffre.py "<indice>"`.
+⚠️ **La phrase passe par STDIN, jamais en argument** (depuis le 22/08) : un
+argument de ligne de commande est lisible par tout processus de la machine et
+reste dans l'historique du shell. Sans stdin, le script demande la phrase sans
+l'afficher. `verif_coffre.py` relit ce qui a été publié et le déchiffre pour
+vérification. Le script lit
 `_logistique-clair.js` et tout `_docs/`, chiffre, et ecrit `prive-data.js` et
 `prive-docs.js`. Huit secondes. Il refuse une phrase de moins de quatre mots et
 tout nom de fichier contenant un numero.
@@ -297,3 +324,70 @@ la ligne Réserve du plan caféine écrasait sa colonne de gauche.
 **Vérifié** : zéro erreur console ; zéro échec AA et zéro cible sous 44 px sur
 les NEUF écrans, en jour et en nuit, plus les trois feuilles. Feuille de course
 et impression conservées (rayons ramenés à 8 px sur le papier, halo masqué).
+
+---
+
+## SESSION DU 22-23 AOÛT
+
+### La météo, fusionnée (v30)
+
+Deux cartes météo se contredisaient sur les mêmes points : la prévision
+Open-Meteo et un profil d'altitude figé à la main. Elles n'en font plus qu'une.
+
+- l'API passe devant, le profil statique devient un **repli hors ligne** et se
+  présente comme une normale de saison, pas comme une prévision
+- l'analyse de fond (historique 2023-2025, l'enseignement, l'orage, le gel)
+  descend dans un `<details>` : elle reste vraie, elle ne passe plus devant
+- résumé en trois chiffres avant le tableau — le plus froid, le plus chaud,
+  la pluie max, chacun avec son lieu et son heure
+- **moteur de conseils réécrit** : dix règles, chacune ancrée sur un point
+  nommé et une heure, branchées sur le matériel réel de Pierre
+- `SEUILS` ne porte plus que les nombres : un seul endroit à corriger
+
+### Le QR du créneau dossard
+
+La fiche `doc-dossard` existait sans pièce jointe. Le QR de confirmation
+(27/08, 12h-14h, Espace Michel Croz) y est maintenant. `coffre.py` lit la
+phrase sur stdin, et `gcm_dechiffre` permet de relire ce qui a été publié.
+Retiré du pied de la visionneuse : « il reste lisible en mode avion », qui
+violait la règle du 18/08.
+
+### La MAJ du 23 — l'app bascule en pilotage (v31)
+
+**Tous les dossiers sont fermés.** Le bloc « Non tranché » affiche désormais un
+état vide explicite plutôt qu'une carte blanche — une carte vide fait douter
+d'un bug, une phrase ferme la question.
+
+| Ce qui a changé | Où |
+|---|---|
+| Chaussettes : Trail DOUBLE au départ, Protect en secours | `sac-data.js`, `data.js`, `prepa-data.js`, `maj20-data.js` |
+| Lampe de secours : 2ᵉ Swift RL, plus d'Aria ni de piles AAA | `maj20-data.js`, `sac-data.js`, `data.js` |
+| Chauffe-mains écartés | `sac-data.js` + le moteur météo qui les citait |
+| Baouw écartés — le trou Champex→Trient n'est plus couvert | `nutrition-data.js` |
+| Veste traitée, ⚠️ séchage à l'air (l'étiquette interdit le sèche-linge) | `maj20-data.js` |
+| Fibres réduites dès le mardi 25 | `maj20-data.js` |
+| Physio 21-23, dont VFC 94 et 147 min de profond | `maj20-data.js` |
+
+**Nouveaux blocs** (`maj23-data.js` + `KITS` dans `sac-data.js`) :
+`CHANGEMENTS` (l'ancien barré à côté du neuf), `GESTION_COGNITIVE`,
+`MONTRE` (chemins de menu Fenix mot pour mot), `PRISE_DE_SANG`, `KITS`.
+
+**Coffre enrichi** : hôtel YUST Liège, bloc des 4 codes en tête, le linge en
+point ouvert, responsabilité civile, règles de séjour, Alpine Fleet au Parking
+l'Outa avec le bouton Track, `aRegler` avec échéances et lignes closes barrées.
+Le dossier logistique complet de Pierre y est aussi, comme document.
+
+### Deux pièges rencontrés, à ne pas refaire
+
+1. **Découper un tableau JS sur `s.index(']')` coupe au mauvais crochet** dès
+   qu'une entrée contient elle-même un tableau (`impacte:["c28"]`). Le fichier
+   reste syntaxiquement plausible et l'erreur ne sort qu'au chargement du
+   module. Toujours vérifier le fichier produit, pas seulement le remplacement.
+2. **Renommer une clé de données casse le rendu en silence.** `chaussettes.validee`
+   est devenu `chaussettes.depart` : `traceChaussettes` lisait toujours
+   `validee.modele` et faisait tomber tout `init()` après lui. Après chaque
+   renommage, grep le rendu pour les anciennes clés.
+
+**Vérifié** : zéro erreur console ; zéro échec AA et zéro cible sous 44 px sur
+les NEUF écrans, en jour comme en nuit ; aucun débordement horizontal ; le
+coffre se rouvre et le QR déchiffré est identique octet pour octet à la source.
