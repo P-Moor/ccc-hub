@@ -608,7 +608,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-32';
+const VERSION = 'ccc-v2-carnet-33';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un

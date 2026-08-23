@@ -3,11 +3,22 @@
 // plus large ; pour toute page sous /carnet/ c'est celui-ci qui gagne, le
 // navigateur retenant toujours la portee la plus specifique.
 //
-// Strategie : cache d'abord, revalidation en arriere-plan. Hors ligne tout
-// repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
-// servie au chargement suivant. Bumper CACHE a chaque deploiement.
+// Strategie, revue le 23/08 apres que Pierre a vu trois fois de suite une
+// version perimee :
+//
+//   Le code de l'app (html, js, css) va chercher le RESEAU D'ABORD, avec un
+//   delai de 1,5 s, et retombe sur le cache s'il n'a pas repondu. En ligne, la
+//   nouvelle version arrive donc des la PREMIERE ouverture. Hors ligne, le
+//   fetch echoue immediatement et le cache repond : le comportement du jour J
+//   ne change pas d'un pouce.
+//
+//   Tout le reste (images, gpx, prive-docs.js qui pese 2,6 Mo) reste en cache
+//   d'abord : ces fichiers ne changent qu'a un redeploiement, et les relire au
+//   reseau ne ferait que ralentir le demarrage.
+//
+// Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-32';
+const CACHE = 'ccc-v2-carnet-33';
 
 const NOYAU = [
   './',
@@ -44,8 +55,11 @@ self.addEventListener('install', e => {
     caches.open(CACHE)
       .then(c => c.addAll(NOYAU).then(() =>
         Promise.allSettled(EN_PLUS.map(u => c.add(u)))))
-      .then(() => self.skipWaiting())
   );
+  // PAS de skipWaiting() ici. Avec lui, le nouveau worker n'atteignait jamais
+  // l'etat `waiting`, et le bandeau « nouvelle version » de l'app ne pouvait
+  // pas se declencher de facon fiable : il ne trouvait jamais reg.waiting.
+  // C'est la page qui decide, via le message prendreLaMain.
 });
 
 self.addEventListener('activate', e => {
@@ -74,6 +88,46 @@ self.addEventListener('message', e => {
   if (e.data && e.data.action === 'prendreLaMain') self.skipWaiting();
 });
 
+/* Combien de temps on laisse au reseau avant de servir le cache. Assez pour
+   une 4G correcte, assez court pour ne pas faire attendre dans un fond de
+   vallee ou le signal existe mais ne repond pas. */
+const DELAI_RESEAU = 1500;
+
+/* Ce dont la fraicheur compte vraiment : le code. Pas les 2,6 Mo du coffre. */
+function fraicheurRequise(url, req) {
+  if (url.pathname.endsWith('prive-docs.js')) return false;
+  if (req.mode === 'navigate') return true;
+  return /\.(html|js|css|webmanifest)$/.test(url.pathname);
+}
+
+function reseauDabord(req, cache) {
+  return new Promise(resolve => {
+    let rendu = false;
+    const servirLeCache = () => {
+      if (rendu) return;
+      rendu = true;
+      cache.match(req).then(c => resolve(c ||
+        new Response('', { status: 504, statusText: 'hors ligne' })));
+    };
+    const minuteur = setTimeout(servirLeCache, DELAI_RESEAU);
+    /* `cache: 'reload'` court-circuite le cache HTTP DU NAVIGATEUR, qui est une
+       couche distincte de celle du service worker. Sans lui, on croit aller au
+       reseau et on recoit la meme vieille reponse : le bug exact qu'on essaie
+       de corriger, mais une couche plus bas. */
+    let requete;
+    try { requete = new Request(req, { cache: 'reload' }); } catch (err) { requete = req; }
+    fetch(requete).then(rep => {
+      clearTimeout(minuteur);
+      if (rep && rep.ok) {
+        cache.put(req, rep.clone());          // toujours, meme si le cache a deja repondu
+        if (!rendu) { rendu = true; resolve(rep); }
+      } else {
+        servirLeCache();
+      }
+    }).catch(servirLeCache);
+  });
+}
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -89,8 +143,9 @@ self.addEventListener('fetch', e => {
   if (!dansLeCarnet && !police) return;
 
   e.respondWith(
-    caches.open(CACHE).then(cache =>
-      cache.match(req).then(enCache => {
+    caches.open(CACHE).then(cache => {
+      if (dansLeCarnet && fraicheurRequise(url, req)) return reseauDabord(req, cache);
+      return cache.match(req).then(enCache => {
         if (enCache) {
           revalide(req, cache);
           return enCache;
@@ -101,7 +156,7 @@ self.addEventListener('fetch', e => {
           if (req.mode === 'navigate') return cache.match('index.html');
           return new Response('', { status: 504, statusText: 'hors ligne' });
         });
-      })
-    )
+      });
+    })
   );
 });
