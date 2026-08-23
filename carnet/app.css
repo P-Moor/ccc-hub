@@ -3037,3 +3037,101 @@ button.tl-ligne:active { background: var(--surface-2); }
 .ch-verdict b { font-family: var(--display); font-weight: 700; font-size: 16px; }
 .ch.sec { border-color: var(--bord); }
 .ch.sec i { color: var(--texte-pale); }
+
+/* ==================== la carte ====================
+   Tout est vectoriel : le trait reste net a tous les niveaux de zoom, et la
+   carte se dessine sans reseau. Le fond en relief est un bonus optionnel. */
+
+.ct-tete { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 11px; }
+.ct-tete > div:first-child { flex: 1; }
+.ct-tete b { display: block; font-family: var(--display); font-weight: 700; font-size: 18px; }
+.ct-tete small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--texte-pale); white-space: nowrap; }
+.ct-b { display: flex; gap: 7px; }
+.ct-b button {
+  min-height: var(--tap); padding: 0 13px; border-radius: var(--pill);
+  border: 1px solid var(--bord); background: var(--surface); color: var(--texte-doux);
+  font-family: var(--display); font-weight: 700; font-size: 12px;
+  letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+.ct-b button.on { background: var(--accent); color: var(--sur-accent); border-color: var(--accent); }
+
+.ct {
+  display: block; width: 100%; aspect-ratio: 1 / 1;
+  border-radius: var(--r-s); background: var(--surface-2);
+  border: 1px solid var(--bord);
+  touch-action: none;            /* les gestes sont a nous, pas au navigateur */
+  cursor: grab;
+}
+.ct:active { cursor: grabbing; }
+/* Le fond topographique est un CONTEXTE, pas le sujet : le sujet, c'est le
+   trait. En thème nuit on le désature et on l'assombrit, sinon l'ambre et
+   l'indigo se noient dans l'orange des pentes. */
+.ct-tuiles image { opacity: .92; }
+[data-theme="nuit"] .ct-tuiles image { opacity: .62; filter: saturate(.55) brightness(.8); }
+
+.ct-ombre { fill: none; stroke: var(--bg); stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
+.ct-l { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ct-l.jour { stroke: var(--jour); }
+.ct-l.nuit { stroke: var(--nuit-clair); }
+
+.ct-pt circle:first-child { fill: var(--surface); stroke: var(--bg); }
+.ct-pt.t-ravito circle:first-child { fill: var(--teal); }
+.ct-pt.t-sommet circle:first-child { fill: var(--alerte); }
+.ct-pt.t-base   circle:first-child { fill: var(--accent); }
+.ct-pt.t-depart circle:first-child,
+.ct-pt.t-arrivee circle:first-child { fill: var(--trace); }
+.ct-tap { fill: transparent; cursor: pointer; }   /* cible tactile confortable */
+
+.ct-cur circle:last-child { fill: var(--accent); }
+.ct-halo { fill: var(--accent); opacity: .28; }
+
+.ct-r {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; margin: 13px 0 4px; height: var(--tap);
+  background: transparent; cursor: pointer;
+}
+.ct-r::-webkit-slider-runnable-track {
+  height: 5px; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--jour) 0 var(--bascule, 60%),
+                              var(--nuit-clair) var(--bascule, 60%) 100%);
+}
+.ct-r::-moz-range-track {
+  height: 5px; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--jour) 0 var(--bascule, 60%),
+                              var(--nuit-clair) var(--bascule, 60%) 100%);
+}
+.ct-r::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 26px; height: 26px; margin-top: -10.5px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--surface); box-shadow: var(--ombre);
+}
+.ct-r::-moz-range-thumb {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--surface); box-shadow: var(--ombre);
+}
+
+.ct-info { min-height: 62px; }
+.ct-vide { font-size: 13px; line-height: 1.5; color: var(--texte-pale); padding: 6px 0; }
+.ct-h { display: flex; gap: 9px; align-items: baseline; }
+.ct-h b {
+  font-family: var(--display); font-weight: 700; font-size: 26px;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.ct-h i {
+  font-style: normal; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--texte-pale);
+}
+.ct-l2 { display: flex; gap: 14px; margin-top: 5px; flex-wrap: wrap; }
+.ct-l2 span { font-size: 13px; color: var(--texte-doux); }
+.ct-l2 span:first-child { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.ct-m {
+  margin-top: 8px; padding: 8px 11px; border-radius: var(--r-s);
+  background: var(--surface-2); display: flex; gap: 8px; align-items: baseline;
+  flex-wrap: wrap; font-size: 15px;
+}
+.ct-m b { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.ct-m span { font-size: 12.5px; color: var(--texte-doux); }
+.ct-attr, .ct-aide {
+  margin-top: 9px; font-size: 11.5px; line-height: 1.45; color: var(--texte-pale);
+}
+.ct-attr { font-family: var(--mono); font-size: 10px; }

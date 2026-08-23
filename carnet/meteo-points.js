@@ -8,20 +8,33 @@
  *
  * `km` sert à retrouver l'heure de passage prévue par interpolation sur le
  * scénario actif : la prévision est donc lue à la BONNE HEURE, au BON ENDROIT.
+ *
+ * ⚠️ Corrigé le 23/08. Les 13 points sont désormais posés SUR LA TRACE GPX,
+ * vérifiés un par un contre `trace.js`. Deux sommets étaient mal placés :
+ *   Grand Col Ferret  km 37,0 à 1 944 m  →  km 30,9 à 2 529 m
+ *     Le point tombait dans la descente vers La Fouly, six kilomètres après le
+ *     col. La météo du point le plus exposé de la course était lue 40 minutes
+ *     trop tard et 585 m trop bas, soit environ 4 °C d'écart.
+ *   Tête aux Vents    km 90,0 à 1 886 m  →  km 89,3 à 1 710 m
+ *     L'altitude déclarée ne correspondait à aucun point de la trace. Celle-ci
+ *     est le sommet réel de la montée depuis Vallorcine dans ce GPX.
+ *
+ * Toute modification ici périme automatiquement le cache de prévisions :
+ * app.js compare une signature `km:alt` avant de réutiliser un relevé.
  */
 
 export const METEO_POINTS = [
-  { nom: "Courmayeur",         km: 0,     lat: 45.789, lon: 6.969, alt: 1221, type: "depart" },
-  { nom: "Tête de la Tronche", km: 9.5,   lat: 45.823185, lon: 7.019110, alt: 2556, type: "sommet" },
+  { nom: "Courmayeur",         km: 0.0,     lat: 45.792840, lon: 6.971570, alt: 1221, type: "depart" },
+  { nom: "Tête de la Tronche", km: 9.3,   lat: 45.821750, lon: 7.019480, alt: 2556, type: "sommet" },
   { nom: "Refuge Bertone",     km: 13.7,  lat: 45.809150, lon: 6.978740, alt: 1980, type: "ravito" },
   { nom: "Arnouvaz",           km: 26.5,  lat: 45.871450, lon: 7.053940, alt: 1777, type: "ravito" },
-  { nom: "Grand Col Ferret",   km: 37.0,  lat: 45.911040, lon: 7.097720, alt: 2529, type: "sommet", expose: true },
+  { nom: "Grand Col Ferret",   km: 30.9,  lat: 45.887620, lon: 7.077690, alt: 2529, type: "sommet", expose: true },
   { nom: "La Fouly",           km: 40.9,  lat: 45.935190, lon: 7.098440, alt: 1602, type: "ravito" },
   { nom: "Champex-Lac",        km: 54.6,  lat: 46.022590, lon: 7.120050, alt: 1408, type: "base" },
-  { nom: "Bovine",             km: 66.0,  lat: 46.057480, lon: 7.039530, alt: 2044, type: "sommet" },
+  { nom: "Bovine",             km: 65.6,  lat: 46.057280, lon: 7.043760, alt: 2045, type: "sommet" },
   { nom: "Trient",             km: 71.2,  lat: 46.054890, lon: 6.997100, alt: 1340, type: "ravito" },
   { nom: "Vallorcine",         km: 83.2,  lat: 46.030880, lon: 6.930970, alt: 1266, type: "ravito" },
-  { nom: "Tête aux Vents",     km: 90.0,  lat: 45.982530, lon: 6.916930, alt: 1886, type: "sommet", expose: true },
+  { nom: "Tête aux Vents",     km: 89.3,  lat: 45.987650, lon: 6.917730, alt: 1710, type: "sommet", expose: true },
   { nom: "La Flégère",         km: 94.6,  lat: 45.959530, lon: 6.886410, alt: 1852, type: "ravito" },
   { nom: "Chamonix",           km: 101.5, lat: 45.923600, lon: 6.869120, alt: 1035, type: "arrivee" }
 ];

@@ -7,7 +7,7 @@
 // repond depuis le cache. En ligne, la version fraiche est recuperee en fond et
 // servie au chargement suivant. Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-31';
+const CACHE = 'ccc-v2-carnet-32';
 
 const NOYAU = [
   './',
@@ -16,6 +16,7 @@ const NOYAU = [
   'app.js',
   'data.js',
   'profil.js',
+  'trace.js',
   'prepa-data.js',
   'nutrition-data.js',
   'sac-data.js',

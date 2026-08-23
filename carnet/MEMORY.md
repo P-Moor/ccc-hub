@@ -1,6 +1,6 @@
 # MÉMOIRE PROJET — CCC Race Companion
 
-Dernière mise à jour : 23/08/2026
+Dernière mise à jour : 23/08/2026 (v32)
 
 ## ÉTAT ACTUEL
 
@@ -36,6 +36,8 @@ Dernière mise à jour : 23/08/2026
 | 23/08 | Lampe de secours = 2ᵉ Swift RL | Mêmes réglages, batteries interchangeables : un seul geste à connaître |
 | 23/08 | Les chauffe-mains sont écartés | Introuvables hors saison. Le froid se traite aux paliers de gants |
 | 23/08 | Fibres réduites dès le mardi 25 | Plus progressif qu'une coupure la veille |
+| 23/08 | Carte vectorielle depuis le GPX, pas d'iframe UTMB | La map de montblanc.utmb.world est un iframe track.utmb.world : réseau + cookies obligatoires |
+| 23/08 | Le fond topographique est optionnel et hors ligne par défaut | Même règle que la météo : bonus réseau, son absence ne casse rien |
 
 ## SOURCES DE VÉRITÉ
 
@@ -48,6 +50,7 @@ Dernière mise à jour : 23/08/2026
 | Checklist matériel, gants, téléphone | `sac-data.js` |
 | Météo, analyse de fond | `meteo-data.js` |
 | Météo, les 13 points et les seuils | `meteo-points.js` |
+| Trace GPS pour la carte | `trace.js` — généré, ne pas éditer |
 | Dossiers fermés du 18 au 20 | `maj20-data.js` |
 | Dossiers fermés du 21 au 23, kits, Fenix, sang | `maj23-data.js` |
 | Sachets zip (`KITS`) | `sac-data.js` |
@@ -391,3 +394,70 @@ Le dossier logistique complet de Pierre y est aussi, comme document.
 **Vérifié** : zéro erreur console ; zéro échec AA et zéro cible sous 44 px sur
 les NEUF écrans, en jour comme en nuit ; aucun débordement horizontal ; le
 coffre se rouvre et le QR déchiffré est identique octet pour octet à la source.
+
+---
+
+## LA CARTE, ET UNE ERREUR QU'ELLE A RÉVÉLÉE (23/08, v32)
+
+### Ce que la page UTMB contient vraiment
+
+`montblanc.utmb.world/races/ccc` n'héberge pas de carte : elle intègre deux
+`<iframe>` vers `track.utmb.world`, qui exigent réseau ET cookies. Rien à
+reprendre. En revanche son tableau officiel confirme les **neuf barrières du
+carnet, toutes exactes**, et que **Plan de l'Au (59,8 km, samedi 00:15) est bien
+un point de barrière** — question restée ouverte depuis le début.
+
+Écarts de kilométrage à connaître : l'officiel annonce 100,9 km / 6 015 m D+,
+le carnet 101,5 / 6 062. Les nôtres viennent du GPX, donc de ce que la montre
+affichera. On les garde.
+
+### La carte, dessinée depuis le GPX
+
+`trace.js` : 911 points, 32 Ko, produits par `scratchpad/gen_trace.py` depuis
+les 9 064 points du GPX officiel. Les distances sont **recalées par morceaux
+sur les 9 repères du carnet** (les 9 ancres tombent à 0 m d'écart), donc un
+kilomètre veut dire la même chose sur la carte, dans le profil, dans le pacing
+et dans la météo.
+
+La carte est un SVG pur : trace colorée jour/nuit selon le scénario actif, les
+13 points de passage, pincement et déplacement sur la viewBox, et un curseur
+qui donne **l'heure, le km, l'altitude et la météo du moment**. Le fond
+topographique OpenTopoMap est optionnel, chargé seulement si Pierre le demande
+et s'il y a du réseau.
+
+### 🔴 L'erreur que la carte a révélée
+
+En posant le curseur sur le Grand Col Ferret, l'altitude affichée était 1 943 m
+au lieu de 2 529. Vérification des 13 points contre la trace : **deux sommets
+étaient mal placés dans `meteo-points.js`.**
+
+| Point | Avant | Après |
+|---|---|---|
+| Grand Col Ferret | km 37,0 · 1 944 m réels | **km 30,9 · 2 529 m** |
+| Tête aux Vents | km 90,0 · 1 586 m réels | km 89,3 · 1 710 m |
+
+Le Grand Col Ferret était lu **six kilomètres après le col, dans la descente
+vers La Fouly** : la météo du point le plus exposé de la course arrivait 40 min
+trop tard et 585 m trop bas, soit environ 4 °C d'écart. C'est ce point qui
+déclenche le conseil « rafales » — il était calculé au mauvais endroit depuis
+la v29.
+
+⚠️ **Réserve à lever** : la Tête aux Vents réelle est vers 2 130 m, or ce GPX
+ne dépasse pas 1 864 m entre Vallorcine et La Flégère. Soit le GPX diffère du
+tracé final sur cette section, soit le point porte un autre nom. La valeur
+retenue est le sommet réel de la montée DANS CE GPX. À vérifier sur le carnet
+de course officiel au retrait du dossard.
+
+### Deux pièges techniques, notés pour la suite
+
+1. **Les coordonnées Mercator au zoom 18 valent 34 millions** — au-delà de
+   2^24, la limite de précision d'un float32. Le `<path>` s'affichait mais les
+   `<circle>` atterrissaient à 66 000 px de leur place. Correctif : une origine
+   locale soustraite au tracé, aux pastilles ET aux tuiles.
+2. **`setPointerCapture` doit venir APRÈS l'enregistrement du doigt.** Il peut
+   lever, et le second doigt n'était alors jamais compté : le pincement
+   retombait en simple déplacement, sans zoom.
+
+Le cache de prévisions porte maintenant une **signature `km:alt`** du jeu de
+points : déplacer un point périme automatiquement les relevés faits sur les
+anciennes coordonnées, sans que Pierre ait à le savoir.

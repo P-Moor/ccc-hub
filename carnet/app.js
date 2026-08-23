@@ -15,6 +15,7 @@ import { VERDICT_CHAUSSURES, TROUSSE, VESTE, LAMPES,
 import { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG } from './maj23-data.js';
 import { METEO_POINTS, METEO_SOURCE, CODES_METEO, SEUILS } from './meteo-points.js';
 import { PROFIL, altAt } from './profil.js';
+import { TRACE } from './trace.js';
 
 /* ============================ persistance ============================ */
 
@@ -607,7 +608,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-31';
+const VERSION = 'ccc-v2-carnet-32';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
@@ -745,6 +746,7 @@ function majScenario() {
   document.getElementById('lecPlan').textContent = 'passage ' + s.id;
 
   document.getElementById('margeHote').innerHTML = traceMarge();
+  traceCarte();   // le jour et la nuit se deplacent avec le scenario
   // les heures de passage changent avec le scenario : la meteo doit suivre
   if (typeof traceMeteoPrevue === 'function') traceMeteoPrevue();
 
@@ -2152,7 +2154,15 @@ function traceCarb() {
    2 529 m. Sept degres d'ecart, et ce n'est pas un detail a 2 500 m. */
 
 const CLE_METEO = 'ccc-v2-meteo-prevue';
-let meteoPrevue = null;      // { releve, jour, points: [...] }
+
+/* Signature du jeu de points. Le 23/08, deux sommets ont ete deplaces : le
+   Grand Col Ferret etait lu au km 37 a 1 944 m, donc deja dans la descente.
+   Un cache releve AVANT cette correction contient des previsions justes pour
+   les mauvaises coordonnees. Il doit se perimer tout seul, sans que Pierre
+   ait a le savoir. */
+const SIGNATURE_POINTS = METEO_POINTS.map(p => p.km + ':' + p.alt).join('|');
+
+let meteoPrevue = null;      // { releve, jour, signature, points: [...] }
 let meteoEnCours = false;
 
 function litMeteoCache() {
@@ -2187,12 +2197,15 @@ async function chargeMeteo(force) {
   if (meteoEnCours) return;
   const cache = litMeteoCache();
 
+  // un cache releve sur d'autres coordonnees ne vaut rien, meme frais
+  const bon = cache && cache.signature === SIGNATURE_POINTS;
+
   // une prevision de moins de trois heures suffit largement
-  if (!force && cache && (Date.now() - cache.releve) < 3 * 3600 * 1000) {
+  if (!force && bon && (Date.now() - cache.releve) < 3 * 3600 * 1000) {
     meteoPrevue = cache;
     return;
   }
-  if (!navigator.onLine) { meteoPrevue = cache; return; }
+  if (!navigator.onLine) { meteoPrevue = bon ? cache : null; return; }
 
   meteoEnCours = true;
   traceMeteoPrevue();
@@ -2220,11 +2233,11 @@ async function chargeMeteo(force) {
     }).filter(Boolean);
 
     if (points.length) {
-      meteoPrevue = { releve: Date.now(), jour, points };
+      meteoPrevue = { releve: Date.now(), jour, signature: SIGNATURE_POINTS, points };
       ecritMeteoCache(meteoPrevue);
     }
   } catch (e) {
-    meteoPrevue = cache;      // on garde ce qu'on avait
+    meteoPrevue = bon ? cache : null;   // on ne garde que ce qui est comparable
   } finally {
     meteoEnCours = false;
     traceMeteoPrevue();
@@ -2669,6 +2682,438 @@ function traceTraces() {
     '<div class="tc-ch">' + TRACES.chaquePoint + '</div>' +
     '<div class="fi-titre">Sur la Fenix</div>' +
     '<ol class="tc-i">' + TRACES.instructions.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+}
+
+/* ==================== la carte ====================
+   Dessinee depuis la trace GPX reelle, en SVG, sans aucune tuile : elle
+   s'affiche a plat de batterie et sans reseau, ce qui est exactement la
+   situation du 28 a 3 h du matin au-dessus de Vallorcine.
+
+   Le fond de carte en ligne est un BONUS, comme la meteo : coche par Pierre,
+   charge seulement s'il y a du reseau, et son absence ne casse rien.
+
+   Projection : Mercator spherique, en pixels-monde au zoom 18. Ce choix n'est
+   pas cosmetique — c'est ce qui permet de poser les tuiles a leur place exacte
+   sans une seule ligne de trigonometrie supplementaire, une tuile au zoom z
+   mesurant simplement ECHELLE / 2^z. */
+
+const Z_BASE = 18;
+const ECHELLE = 256 * Math.pow(2, Z_BASE);
+const CLE_CARTE = 'ccc-v2-carte';
+
+const vueCarte = { x: 0, y: 0, w: 0, k: 1 };   // viewBox courante
+let curseurKm = null;                          // null = pas de curseur pose
+let fondEnLigne = false;
+
+function mercBrut(lon, lat) {
+  const s = Math.sin(lat * Math.PI / 180);
+  return [
+    (lon + 180) / 360 * ECHELLE,
+    (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * ECHELLE
+  ];
+}
+
+/* Au zoom 18, le Mont-Blanc tombe autour de x = 34 800 000. C'est AU-DELA de
+   2^24, la limite ou un float32 cesse de representer les entiers exactement :
+   le moteur perd des elements en route, et les cercles atterrissent a des
+   milliers de pixels de leur place alors que le trace, lui, s'affiche.
+   On ramene donc l'origine au coin de la course. Comme la meme constante est
+   retiree au trace, aux pastilles ET aux tuiles, l'alignement est intact. */
+const ORIGINE = mercBrut(TRACE.bornes.lonMin, TRACE.bornes.latMax);
+
+function merc(lon, lat) {
+  const [x, y] = mercBrut(lon, lat);
+  return [x - ORIGINE[0], y - ORIGINE[1]];
+}
+
+/* Les points projetes une fois pour toutes : 911 sinus par rendu serait du
+   gaspillage sur un telephone. */
+let projete = null;
+function projection() {
+  if (projete) return projete;
+  projete = TRACE.points.map(p => {
+    const [x, y] = merc(p[0], p[1]);
+    return { x, y, km: p[2], alt: p[3] };
+  });
+  return projete;
+}
+
+function cadreTrace() {
+  const P = projection();
+  const xs = P.map(p => p.x), ys = P.map(p => p.y);
+  return { x0: Math.min(...xs), x1: Math.max(...xs),
+           y0: Math.min(...ys), y1: Math.max(...ys) };
+}
+
+function recadre() {
+  const c = cadreTrace();
+  const marge = Math.max(c.x1 - c.x0, c.y1 - c.y0) * 0.08;
+  vueCarte.x = c.x0 - marge;
+  vueCarte.y = c.y0 - marge;
+  vueCarte.w = (c.x1 - c.x0) + marge * 2;
+  vueCarte.h = (c.y1 - c.y0) + marge * 2;
+  // carre : le parcours est une boucle, aucune orientation ne merite d'etre
+  // privilegiee, et un cadre carre survit a toutes les largeurs d'ecran
+  const cote = Math.max(vueCarte.w, vueCarte.h);
+  vueCarte.x -= (cote - vueCarte.w) / 2;
+  vueCarte.y -= (cote - vueCarte.h) / 2;
+  vueCarte.w = vueCarte.h = cote;
+}
+
+/* Le km le plus proche d'un point ecran : sert au tap sur la trace. */
+function kmLePlusProche(x, y) {
+  const P = projection();
+  let best = 0, d2 = Infinity;
+  for (const p of P) {
+    const d = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+    if (d < d2) { d2 = d; best = p.km; }
+  }
+  return best;
+}
+
+function pointAuKm(km) {
+  const P = projection();
+  for (let i = 1; i < P.length; i++) {
+    if (km <= P[i].km) {
+      const a = P[i - 1], b = P[i];
+      const t = (km - a.km) / ((b.km - a.km) || 1);
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t,
+               alt: Math.round(a.alt + (b.alt - a.alt) * t) };
+    }
+  }
+  return P[P.length - 1];
+}
+
+/* La trace coupee en segments jour et nuit selon le scenario actif. C'est ce
+   qui transforme un trait en projection de course : on VOIT ou la nuit tombe. */
+function segmentsJourNuit(jalons) {
+  const P = projection();
+  const seg = [];
+  let cour = null;
+  for (const p of P) {
+    const h = heureAu(p.km, jalons).getHours();
+    const nuit = h >= NUIT_DE || h < NUIT_A;
+    if (!cour || cour.nuit !== nuit) {
+      if (cour) cour.pts.push(p);          // on rejoint, sinon un trou apparait
+      cour = { nuit, pts: [] };
+      seg.push(cour);
+    }
+    cour.pts.push(p);
+  }
+  return seg.filter(s => s.pts.length > 1);
+}
+
+/* Le kilometre ou la nuit tombe pour de bon, selon le scenario actif. */
+function kmDeLaNuit(jalons) {
+  for (let k = 0; k <= TRACE.kmTotal; k += 0.5) {
+    if (heureDeNuit(hhmm(heureAu(k, jalons)))) return k;
+  }
+  return TRACE.kmTotal;
+}
+
+const chemin = pts => pts.map((p, i) =>
+  (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join('');
+
+/* Les tuiles. On choisit le zoom qui donne des tuiles proches de 256 px reels,
+   puis on ne pose que celles qui touchent la vue. Une quinzaine, pas mille. */
+function tuiles() {
+  if (!fondEnLigne || !navigator.onLine) return '';
+  const z = Math.max(9, Math.min(14,
+    Math.round(Z_BASE - Math.log2(vueCarte.w / 256))));
+  const taille = ECHELLE / Math.pow(2, z);
+  const n = Math.pow(2, z);
+  const mx = vueCarte.x + ORIGINE[0], my = vueCarte.y + ORIGINE[1];
+  const i0 = Math.max(0, Math.floor(mx / taille));
+  const i1 = Math.min(n - 1, Math.floor((mx + vueCarte.w) / taille));
+  const j0 = Math.max(0, Math.floor(my / taille));
+  const j1 = Math.min(n - 1, Math.floor((my + vueCarte.h) / taille));
+  if ((i1 - i0 + 1) * (j1 - j0 + 1) > 40) return '';   // garde-fou
+  let out = '';
+  for (let i = i0; i <= i1; i++) {
+    for (let j = j0; j <= j1; j++) {
+      const u = 'https://' + 'abc'[(i + j) % 3] + '.tile.opentopomap.org/' +
+        z + '/' + i + '/' + j + '.png';
+      out += '<image href="' + u + '" x="' + (i * taille - ORIGINE[0]).toFixed(1) +
+        '" y="' + (j * taille - ORIGINE[1]).toFixed(1) +
+        '" width="' + taille.toFixed(1) + '" height="' + taille.toFixed(1) +
+        '" preserveAspectRatio="none"/>';
+    }
+  }
+  return '<g class="ct-tuiles">' + out + '</g>';
+}
+
+function traceCarte() {
+  const h = document.getElementById('carteHote');
+  if (!h) return;
+  if (!vueCarte.w) recadre();
+
+  const jalons = jalonsHoraires(scenarioActif());
+  const seg = segmentsJourNuit(jalons);
+  const vb = [vueCarte.x, vueCarte.y, vueCarte.w, vueCarte.h]
+    .map(v => v.toFixed(1)).join(' ');
+  const ep = vueCarte.w / 150;          // epaisseur constante a l'ecran
+
+  const bornes = METEO_POINTS.map(pt => {
+    const [x, y] = merc(pt.lon, pt.lat);
+    return { ...pt, x, y };
+  });
+
+  const cur = curseurKm == null ? null : pointAuKm(curseurKm);
+
+  h.innerHTML =
+    '<div class="ct-tete">' +
+      '<div><b>La carte</b><small>' + kmFmt(TRACE.kmTotal) + ' km levés au GPS</small></div>' +
+      '<div class="ct-b">' +
+        '<button id="ctFond" class="' + (fondEnLigne ? 'on' : '') + '">Relief</button>' +
+        '<button id="ctZoom">Tout voir</button>' +
+      '</div></div>' +
+
+    '<svg class="ct" id="ctSvg" viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet">' +
+      tuiles() +
+      // l'ombre portee donne le relief que la trace seule n'a pas
+      '<path d="' + chemin(projection()) + '" class="ct-ombre" ' +
+        'stroke-width="' + (ep * 2.4) + '"/>' +
+      seg.map(s => '<path d="' + chemin(s.pts) + '" class="ct-l ' +
+        (s.nuit ? 'nuit' : 'jour') + '" stroke-width="' + ep + '"/>').join('') +
+      bornes.map(b => '<g class="ct-pt t-' + b.type + '" data-km="' + b.km + '">' +
+        '<circle cx="' + b.x.toFixed(1) + '" cy="' + b.y.toFixed(1) +
+          '" r="' + (ep * 2.3).toFixed(1) + '" stroke-width="' + (ep * 0.9).toFixed(1) + '"/>' +
+        '<circle cx="' + b.x.toFixed(1) + '" cy="' + b.y.toFixed(1) +
+          '" r="' + (ep * 4.2).toFixed(1) + '" class="ct-tap"/>' +
+        '</g>').join('') +
+      (cur ? '<g class="ct-cur"><circle cx="' + cur.x.toFixed(1) + '" cy="' + cur.y.toFixed(1) +
+        '" r="' + (ep * 3.2).toFixed(1) + '" class="ct-halo"/>' +
+        '<circle cx="' + cur.x.toFixed(1) + '" cy="' + cur.y.toFixed(1) +
+        '" r="' + (ep * 1.6).toFixed(1) + '"/></g>' : '') +
+    '</svg>' +
+
+    '<input type="range" class="ct-r" id="ctRange" min="0" max="' + TRACE.kmTotal +
+      '" step="0.1" value="' + (curseurKm == null ? 0 : curseurKm) + '"' +
+      ' style="--bascule:' + (kmDeLaNuit(jalons) / TRACE.kmTotal * 100).toFixed(1) + '%">' +
+    '<div class="ct-info" id="ctInfo"></div>' +
+    (fondEnLigne ? '<div class="ct-attr">Fond © OpenTopoMap · données © OpenStreetMap</div>' : '') +
+    '<div class="ct-aide">Fais glisser le curseur : tu vois où tu seras, à quelle heure, ' +
+      'et le temps qu\'il y fera. Touche un point pour t\'y poser.</div>';
+
+  majInfoCarte();
+  brancheCarte();
+}
+
+/* Ce que le curseur raconte : l'endroit, l'heure, l'altitude, et la meteo du
+   point de passage le plus proche. C'est ca, la projection de course. */
+function majInfoCarte() {
+  const z = document.getElementById('ctInfo');
+  if (!z) return;
+  if (curseurKm == null) {
+    z.innerHTML = '<div class="ct-vide">Le trait ambre est le jour, l\'indigo est la nuit.</div>';
+    return;
+  }
+  const jalons = jalonsHoraires(scenarioActif());
+  const quand = heureAu(curseurKm, jalons);
+  const p = pointAuKm(curseurKm);
+
+  // le point de passage le plus proche donne le nom et, s'il y en a une, la meteo
+  let proche = METEO_POINTS[0], ec = Infinity;
+  METEO_POINTS.forEach(x => {
+    const d = Math.abs(x.km - curseurKm);
+    if (d < ec) { ec = d; proche = x; }
+  });
+
+  let meteo = '';
+  if (meteoPrevue && meteoPrevue.points && meteoPrevue.points.length) {
+    const brut = meteoPrevue.points.find(x => x.nom === proche.nom);
+    if (brut) {
+      const l = litPoint(brut, jalons);
+      const c = CODES_METEO[l.code] || { i: '·', t: '' };
+      meteo = '<div class="ct-m">' + c.i + ' <b>' + Math.round(l.temp) + '°</b>' +
+        '<span>ressenti ' + Math.round(l.ressenti) + '° · ' +
+        (l.pluieProb == null ? '' : l.pluieProb + '% pluie · ') +
+        'rafales ' + Math.round(l.rafales) + '</span></div>';
+    }
+  }
+
+  z.innerHTML =
+    '<div class="ct-h"><b>' + hhmm(quand) + '</b>' +
+      '<i>' + (quand.getDate() === 28 ? 'vendredi' : 'samedi') + '</i></div>' +
+    '<div class="ct-l2"><span>' + kmFmt(curseurKm) + ' km</span>' +
+      '<span>' + p.alt + ' m</span>' +
+      '<span>' + (ec < 1.2 ? proche.nom : 'vers ' + proche.nom) + '</span></div>' +
+    meteo;
+}
+
+function brancheCarte() {
+  const svg = document.getElementById('ctSvg');
+  const r = document.getElementById('ctRange');
+  if (r) r.addEventListener('input', () => {
+    curseurKm = +r.value;
+    const c = pointAuKm(curseurKm);
+    majMarqueur(c);
+    majInfoCarte();
+  });
+
+  const f = document.getElementById('ctFond');
+  if (f) f.addEventListener('click', () => {
+    fondEnLigne = !fondEnLigne;
+    store.set('carte', fondEnLigne);
+    traceCarte();
+  });
+  const z = document.getElementById('ctZoom');
+  if (z) z.addEventListener('click', () => { recadre(); traceCarte(); });
+
+  if (!svg) return;
+
+  // toucher un point de passage : on s'y pose
+  svg.querySelectorAll('[data-km]').forEach(g =>
+    g.addEventListener('click', () => {
+      curseurKm = +g.dataset.km;
+      const rr = document.getElementById('ctRange');
+      if (rr) rr.value = curseurKm;
+      majMarqueur(pointAuKm(curseurKm));
+      majInfoCarte();
+    }));
+
+  /* Deplacement et zoom. Un doigt fait glisser, deux doigts pincent. On agit
+     sur la viewBox et rien d'autre : aucune bibliotheque, et le trait reste
+     net a tous les niveaux puisque c'est du vectoriel.
+
+     La regle qui gouverne les deux gestes est la meme : le point du terrain
+     qui etait sous les doigts au depart doit rester sous les doigts. C'est ce
+     qui fait qu'un zoom ne "saute" pas. */
+
+  const CADRE = cadreTrace();
+  const LARGE_MAX = Math.max(CADRE.x1 - CADRE.x0, CADRE.y1 - CADRE.y0) * 1.4;
+  const LARGE_MIN = LARGE_MAX / 60;
+
+  const doigts = new Map();
+  let debut = null;
+
+  const boite = () => {
+    const b = svg.getBoundingClientRect();
+    const cote = Math.min(b.width, b.height);
+    return { gx: b.left + (b.width - cote) / 2, gy: b.top + (b.height - cote) / 2, cote };
+  };
+  const centre = () => {
+    const v = [...doigts.values()];
+    return { x: v.reduce((a, p) => a + p.cx, 0) / v.length,
+             y: v.reduce((a, p) => a + p.cy, 0) / v.length };
+  };
+  const ecart = () => {
+    const v = [...doigts.values()];
+    return v.length < 2 ? 0 : Math.hypot(v[0].cx - v[1].cx, v[0].cy - v[1].cy);
+  };
+
+  const prend = e => {
+    doigts.set(e.pointerId, { cx: e.clientX, cy: e.clientY });
+    const b = boite();
+    debut = { x: vueCarte.x, y: vueCarte.y, w: vueCarte.w,
+              c: centre(), e: ecart(), b, bouge: false };
+  };
+
+  svg.addEventListener('pointerdown', e => {
+    // On enregistre le doigt AVANT de tenter la capture : setPointerCapture
+    // peut lever (id inconnu, pointeur deja relache), et le second doigt
+    // n'etait alors jamais compte — le pincement retombait en simple
+    // deplacement, sans zoom.
+    prend(e);
+    try { svg.setPointerCapture(e.pointerId); } catch (err) { /* sans capture, ca marche quand meme */ }
+  });
+
+  svg.addEventListener('pointermove', e => {
+    if (!doigts.has(e.pointerId) || !debut) return;
+    e.preventDefault();
+    doigts.set(e.pointerId, { cx: e.clientX, cy: e.clientY });
+
+    const c = centre();
+    if (Math.hypot(c.x - debut.c.x, c.y - debut.c.y) > 4) debut.bouge = true;
+
+    // largeur : le pincement la divise, un seul doigt la laisse tranquille
+    let w = debut.w;
+    const ec = ecart();
+    if (doigts.size >= 2 && debut.e > 8 && ec > 8) {
+      w = Math.max(LARGE_MIN, Math.min(LARGE_MAX, debut.w * debut.e / ec));
+    }
+
+    // le terrain qui etait sous les doigts y reste
+    const { gx, gy, cote } = debut.b;
+    const monde = {
+      x: debut.x + (debut.c.x - gx) / cote * debut.w,
+      y: debut.y + (debut.c.y - gy) / cote * debut.w
+    };
+    vueCarte.x = monde.x - (c.x - gx) / cote * w;
+    vueCarte.y = monde.y - (c.y - gy) / cote * w;
+    vueCarte.w = vueCarte.h = w;
+    redessine();
+  }, { passive: false });
+
+  const lache = e => {
+    doigts.delete(e.pointerId);
+    if (!doigts.size) {
+      // un appui franc sans deplacement pose le curseur sur la trace
+      if (debut && !debut.bouge) {
+        const { gx, gy, cote } = debut.b;
+        const km = kmLePlusProche(
+          vueCarte.x + (debut.c.x - gx) / cote * vueCarte.w,
+          vueCarte.y + (debut.c.y - gy) / cote * vueCarte.w);
+        curseurKm = km;
+        const r2 = document.getElementById('ctRange');
+        if (r2) r2.value = km;
+        majMarqueur(pointAuKm(km));
+        majInfoCarte();
+      }
+      debut = null;
+      // Redessin complet une fois le doigt leve : les pastilles retrouvent leur
+      // taille d'ecran, et les tuiles se reposent au bon zoom. Jamais pendant
+      // le geste, ou le telephone ramerait.
+      clearTimeout(svg._tuiles);
+      svg._tuiles = setTimeout(traceCarte, 140);
+    } else {
+      prend(e);   // on repart proprement du geste restant
+    }
+  };
+  svg.addEventListener('pointerup', lache);
+  svg.addEventListener('pointercancel', lache);
+
+  // molette sur le Mac : meme regle, le point sous le curseur ne bouge pas
+  svg.addEventListener('wheel', e => {
+    e.preventDefault();
+    const b = boite();
+    const w = Math.max(LARGE_MIN, Math.min(LARGE_MAX,
+      vueCarte.w * (e.deltaY > 0 ? 1.12 : 1 / 1.12)));
+    const mx = vueCarte.x + (e.clientX - b.gx) / b.cote * vueCarte.w;
+    const my = vueCarte.y + (e.clientY - b.gy) / b.cote * vueCarte.w;
+    vueCarte.x = mx - (e.clientX - b.gx) / b.cote * w;
+    vueCarte.y = my - (e.clientY - b.gy) / b.cote * w;
+    vueCarte.w = vueCarte.h = w;
+    redessine();
+    clearTimeout(svg._tuiles);
+    svg._tuiles = setTimeout(traceCarte, 320);
+  }, { passive: false });
+}
+
+/* Bouger le marqueur sans tout redessiner : le slider en emet des dizaines par
+   seconde, et refaire 911 points a chaque fois ferait ramer le telephone. */
+function majMarqueur(c) {
+  const svg = document.getElementById('ctSvg');
+  if (!svg) return;
+  const ep = vueCarte.w / 150;
+  let g = svg.querySelector('.ct-cur');
+  if (!g) {
+    g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'ct-cur');
+    g.innerHTML = '<circle class="ct-halo"/><circle/>';
+    svg.appendChild(g);
+  }
+  const cs = g.querySelectorAll('circle');
+  cs[0].setAttribute('cx', c.x.toFixed(1)); cs[0].setAttribute('cy', c.y.toFixed(1));
+  cs[0].setAttribute('r', (ep * 3.2).toFixed(1));
+  cs[1].setAttribute('cx', c.x.toFixed(1)); cs[1].setAttribute('cy', c.y.toFixed(1));
+  cs[1].setAttribute('r', (ep * 1.6).toFixed(1));
+}
+
+function redessine() {
+  const svg = document.getElementById('ctSvg');
+  if (svg) svg.setAttribute('viewBox',
+    [vueCarte.x, vueCarte.y, vueCarte.w, vueCarte.h].map(v => v.toFixed(1)).join(' '));
 }
 
 /* ==================== ce qui s'est ferme du 21 au 23 ==================== */
@@ -3488,7 +3933,10 @@ function init() {
   traceSang();
   traceVoyage();
   traceCarb();
-  meteoPrevue = litMeteoCache();
+  fondEnLigne = !!store.get('carte', false);
+  traceCarte();
+  const cacheMeteo = litMeteoCache();
+  meteoPrevue = (cacheMeteo && cacheMeteo.signature === SIGNATURE_POINTS) ? cacheMeteo : null;
   traceMeteoPrevue();
   chargeMeteo(false);
   traceStock();
