@@ -92,23 +92,37 @@ export const GESTION_COGNITIVE = {
 
 export const MONTRE = {
   modele: "Garmin Fenix 8",
+  statut: "✅ CONFIGURÉE le 23/08",
   reglages: [
-    { n: 1, titre: "Alarme nutrition", critique: true,
-      chemin: "Maintenir MENU → Activités et applis → Trail → Paramètres → Alertes → Ajouter → Temps → RÉCURRENT → 30:00 → VIBRATION SEULE",
-      piege: "⚠️ Une alarme d'horloge classique ne se répète pas. Il FAUT une alerte d'activité, sinon elle ne sonne qu'une fois.",
-      pourquoi: "C'est le seul dispositif qui tient la nutrition quand l'attention part ailleurs." },
-    { n: 2, titre: "Alerte fréquence cardiaque",
-      chemin: "Même menu → Alertes → Ajouter → Fréquence cardiaque → Haute → 145",
-      pourquoi: "Le garde-fou des trois premières heures, quand on part toujours trop vite." },
-    { n: 3, titre: "Écran « prochain objectif »",
-      chemin: "Trail → Paramètres → Écrans de données → Ajouter → 3 champs : Distance au point suivant · ETA au point suivant · Heure du jour",
-      pourquoi: "🎯 Un écran, une question. Trois champs, pas plus : au-delà, on ne lit plus, on regarde." },
-    { n: 4, titre: "Trace GPX et waypoints", echeance: "2026-08-25",
-      chemin: "Garmin Connect → Entraînement → Parcours → Importer CCC_2026_RAVITOS_SOMMETS.gpx → vérifier les 13 points → Envoyer à la montre",
-      pourquoi: "Les 13 points sont ceux de la météo et du plan de course. Même repères partout." },
-    { n: 5, titre: "Charge", critique: true, echeance: "2026-08-27",
-      chemin: "Swift RL branchée le 27 DANS LA JOURNÉE · montre à 100 % le 27 au soir",
-      piege: "🔴 La Swift RL demande SIX HEURES de charge complète. Lancée le soir, elle n'est pas prête au matin." }
+    { n: 1, titre: "Alerte Temps 30:00", fait: true, critique: true,
+      chemin: "Trail → Paramètres → Alertes → Ajouter → Temps → Récurrent",
+      valeur: "30:00 · vibration seule",
+      pourquoi: "🔴 LE dispositif critique du 28 : manger ET boire. Une alarme d'horloge ne se répète pas, il faut une alerte d'activité." },
+    { n: 2, titre: "Alerte fréquence cardiaque", fait: true,
+      chemin: "Trail → Paramètres → Alertes → Fréquence cardiaque",
+      valeur: "145 bpm · Haute",
+      pourquoi: "Le plafond des 15 premiers kilomètres, quand on part toujours trop vite." },
+    { n: 3, titre: "Ascension automatique", fait: true,
+      chemin: "Trail → Paramètres → Ascension automatique → État",
+      valeur: "DÉSACTIVÉ",
+      pourquoi: "Elle faisait basculer l'écran toute seule — source d'agacement identifiée, et d'agacement on n'a pas besoin au km 70." },
+    { n: 4, titre: "ClimbPro", fait: true,
+      chemin: "Trail → Paramètres → ClimbPro",
+      valeur: "État = Lors de la navigation · Champ = Vitesse verticale",
+      pourquoi: "Le profil des montées reste disponible, mais on va le chercher : il ne s'impose plus." }
+  ],
+  /* Ce qui reste, et pourquoi ca compte. Le 2 est une consequence directe du
+     reglage 3 : en coupant l'ascension automatique, on a perdu l'ecran qui
+     portait la vitesse verticale. */
+  resteAFaire: [
+    { txt: "🏷️ Désactiver les ALERTES DE SEGMENT", critique: true,
+      pourquoi: "Elles ont contribué à la dérive jusqu'à FC 179 le 22/08 : on court après un chrono qui n'a rien à faire là." },
+    { txt: "📊 Ajouter VITESSE VERTICALE à un écran de données actif",
+      pourquoi: "Elle a disparu en désactivant l'ascension automatique. Sans elle, plus de contrôle de la VAM dans les montées." },
+    { txt: "🗺️ Importer le GPX officiel dans Garmin Connect et vérifier les 15 points",
+      pourquoi: "assets/ccc_100km_universal.gpx — le même que celui de la carte de l'app." },
+    { txt: "🔌 Charger la Swift RL le 27 DANS LA JOURNÉE", critique: true,
+      pourquoi: "Six heures de charge complète. Lancée le soir, elle n'est pas prête au matin." }
   ]
 };
 
@@ -143,4 +157,71 @@ export const PRISE_DE_SANG = {
   aProgrammer: "🆕 Imagerie des mains PRESCRITE. RDV à prendre APRÈS le 28, idéalement autour du 4-5/09 pour grouper avec le chirurgien et l'IRM du pied."
 };
 
-export default { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG };
+
+/* ==================== la recharge, revue le 24 ====================
+   Constat du 24 : 200 g de riz, 135 g de poulet et un bol de soupe d'un coup
+   donnent une sensation de lourdeur, alors que la QUANTITE est correcte. Ce
+   n'est donc pas un probleme de volume total mais de repartition. */
+
+export const RECHARGE = {
+  regle: "🔴 FRACTIONNER PLUTÔT QU'AUGMENTER. Même quantité de glucides, répartie sur 5 prises.",
+  pourquoi: "Un gros repas donne une sensation de lourdeur sans mieux remplir les réserves. Et Pierre a un enjeu de confort digestif au départ.",
+  schema: [
+    { moment: "Petit-déj", contenu: "Porridge ou pain + miel · banane" },
+    { moment: "~10h30",    contenu: "Pain d'épices · compote" },
+    { moment: "Midi",      contenu: "FÉCULENT EN BASE + protéine maigre" },
+    { moment: "~16h",      contenu: "Banane · barre · pain" },
+    { moment: "Soir",      contenu: "Riz ou pâtes + poulet ou dinde" }
+  ],
+  aArreter: [
+    { quoi: "🍲 La SOUPE", quand: "à partir du 25",
+      pourquoi: "Beaucoup de volume, très peu de glucides. Elle prend la place des féculents." },
+    { quoi: "🥚 Les ŒUFS", quand: "à partir du 27",
+      pourquoi: "Gras, vidange gastrique lente." },
+    { quoi: "🌶️ L'épicé, sriracha comprise", quand: "à partir du 27" }
+  ],
+  proteine: "Poulet ou dinde uniquement, du 24 au 28."
+};
+
+/* ==================== ce que l'app ne fera pas ====================
+   Pierre requalifie regulierement en « craquage » des prises alimentaires
+   normales et adaptees. Une app qui compterait les calories transformerait une
+   inquietude legitime en obsession, cinq jours avant un 100 km. Ce bloc existe
+   pour que ce soit ecrit noir sur blanc, et tenu. */
+
+export const VIGILANCE_NUTRITION = {
+  constat: "Pierre requalifie régulièrement en « craquage » des prises alimentaires normales et adaptées : Coca de récupération, skyr post-effort, Aquarius, pain d'épices, cookies maison.",
+  frequence: "Au moins 5 fois entre le 15 et le 24 août.",
+  inquietude: "Arriver ballonné au départ. C'est une inquiétude légitime, mais mal ciblée.",
+  fait: {
+    titre: "🔴 La recharge glucidique FIXE DE L'EAU",
+    txt: "Environ 3 g d'eau par gramme de glycogène stocké. La sensation de rétention est le SIGNE QUE ÇA MARCHE, pas un problème à corriger."
+  },
+  cequiRendLeger: "La descente progressive en fibres du 25 au 28. PAS la restriction. Un coureur qui restreint a faim le 27, mange trop au dîner de J-1, et arrive ballonné le 28 — exactement ce qu'il voulait éviter.",
+  consigne: "⛔ Cette app n'affichera JAMAIS de compteur, de pesée ni de bilan de repas. Elle affiche le PLAN, pas une note."
+};
+
+export const PHYSIO_24 = {
+  date: "2026-08-24",
+  titre: "🔥 Le meilleur profil du dossier, au moment d'entrer dans la semaine de course",
+  lignes: [
+    { l: "Sommeil", v: "6h48 · score 83 GOOD", n: "20 min d'éveil seulement — première nuit non fragmentée depuis 4 jours", bon: true },
+    { l: "Profond", v: "53 min", n: "Faible. C'est ce qui explique la sensation groggy au réveil." },
+    { l: "FC de repos", v: "41", bon: true },
+    { l: "VFC", v: "88 ms · BALANCED", n: "baseline 63", bon: true },
+    { l: "Body Battery", v: "93", bon: true },
+    { l: "Readiness", v: "75 · HIGH", bon: true },
+    { l: "Stress nocturne", v: "9", bon: true },
+    { l: "SpO₂", v: "99 %", bon: true }
+  ],
+  charge: "ACWR 0,7 · TSB +203 · MAINTAINING — le point culminant de l'affûtage.",
+  symptomes: {
+    quoi: "🤒 Gorge sèche qui gratte depuis le 23, nez qui coule légèrement depuis le 24, par 9-10 °C après une période de canicule.",
+    analyse: "Probablement une rhinite vasomotrice — une réaction mécanique au froid — plus l'irritation qui suit un sommeil profond bouche ouverte.",
+    preuve: "AUCUN signe infectieux dans les données : FC de repos au plus bas à 41, VFC excellente à 88, stress nocturne à 9. Une infection ferait exactement l'inverse.",
+    surveillance: "➡️ Le signal qui changerait tout : FC de repos +5 bpm, VFC effondrée, fatigue inhabituelle. À regarder chaque matin, sans plus."
+  }
+};
+
+export default { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG,
+                 RECHARGE, VIGILANCE_NUTRITION, PHYSIO_24 };

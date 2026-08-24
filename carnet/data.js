@@ -4,38 +4,38 @@
 export const RACE = {
   nom: "CCC by UTMB 2026", dossard: 4330, vague: 2,
   depart: "2026-08-28T09:15:00+02:00",
-  distanceKm: 101.5, dplus: 6062,
+  distanceKm: 100.9, dplus: 6050,
   barriereFinale: "2026-08-29T12:00:00+02:00",
-  nuit: { tombeVers: "20:30", kmEstime: 57.5, lever: "06:45" }
+  nuit: { tombeVers: "20:30", kmEstime: 59.8, lever: "06:45" }
 };
 
 // sections[i] = du point i-1 (ou depart) vers .nom
 export const SECTIONS = [
-  { nom:"Refuge Bertone", km:13.7, cumKm:13.7, dplus:1456, dminus:669, sommet:"Tête de la Tronche 2556 m",
+  { nom:"Refuge Bertone", km:13.6, cumKm:13.6, dplus:1436, dminus:676, sommet:"Tête de la Tronche 2543 m",
     consigne:"Marche + bâtons dès le km 1 · VAM 450-480 m/h · FC < 145", arret:"express", arretMin:4,
     ravito:"complet", assist:false },
-  { nom:"Arnouvaz", km:12.8, cumKm:26.5, dplus:441, dminus:663, sommet:"balcon 2062 m",
+  { nom:"Arnouvaz", km:12.7, cumKm:26.3, dplus:469, dminus:673, sommet:"Refuge Bonatti 2027 m",
     consigne:"Ça roule · manger en marchant", arret:"moyen", arretMin:9,
     ravito:"complet", assist:false },
-  { nom:"La Fouly", km:14.4, cumKm:40.9, dplus:863, dminus:1037, sommet:"Grand Col Ferret 2529 m",
+  { nom:"La Fouly", km:14.4, cumKm:40.7, dplus:865, dminus:1037, sommet:"Grand Col Ferret 2527 m",
     consigne:"Toit de la course · vent possible · veste à portée", arret:"moyen", arretMin:9,
     ravito:"complet", assist:false },
-  { nom:"Champex-Lac", km:13.7, cumKm:54.6, dplus:520, dminus:720, sommet:"",
+  { nom:"Champex-Lac", km:14.2, cumKm:54.9, dplus:599, dminus:731, sommet:"",
     consigne:"Vallée roulante · relance douce, ne pas courir vite", arret:"grand", arretMin:18, ravito:"base", assist:true,
     todo:["Sac d'allègement","Chaussettes sèches","NOK","Frontale sur la tête","☕ Café n°1","Repas assis"] },
-  { nom:"Plan de l'Au", km:4.8, cumKm:59.4, dplus:122, dminus:147, sommet:"",
+  { nom:"Plan de l'Au", km:4.9, cumKm:59.8, dplus:74, dminus:208, sommet:"",
     consigne:"Frontale allumée · ~20:30 la nuit tombe", arret:"express", arretMin:4,
     ravito:"controle", assist:false },
-  { nom:"Trient", km:11.7, cumKm:71.2, dplus:778, dminus:817, sommet:"Bovine 2044 m",
+  { nom:"Trient", km:11.7, cumKm:71.5, dplus:770, dminus:807, sommet:"La Giète 1885 m",
     consigne:"De nuit · rythme régulier · personne ne va vite ici", arret:"grand", arretMin:15, ravito:"complet", assist:false,
     todo:["Soupe chaude","VESTE avant de s'asseoir","☕ Café n°2","Point bas prévu, normal"] },
-  { nom:"Vallorcine", km:12.0, cumKm:83.2, dplus:829, dminus:907, sommet:"Catogne 2070 m",
+  { nom:"Vallorcine", km:11.0, cumKm:82.5, dplus:807, dminus:853, sommet:"Les Tseppes 1936 m",
     consigne:"Un pas après l'autre · le mantra sert ici", arret:"moyen", arretMin:9, ravito:"complet", assist:true,
     todo:["☕ Café n°3","Dernier vrai ravito"] },
-  { nom:"La Flégère", km:11.4, cumKm:94.6, dplus:969, dminus:376, sommet:"Tête aux Vents 1886 m",
+  { nom:"La Flégère", km:11.2, cumKm:93.7, dplus:966, dminus:342, sommet:"",
     consigne:"LA plus dure · 2h45 · blocs, de nuit · ELLE EST PRÉVUE. Après elle, c'est fini.",
     arret:"express", arretMin:4, laPlusDure:true, ravito:"eau", assist:false },
-  { nom:"Chamonix", km:6.8, cumKm:101.5, dplus:14, dminus:845, sommet:"",
+  { nom:"Chamonix", km:7.2, cumKm:100.9, dplus:21, dminus:866, sommet:"",
     consigne:"Descente finale · rien à gérer, juste descendre", arret:"arrivee", arretMin:0,
     ravito:"arrivee", assist:false }
 ];
@@ -180,19 +180,22 @@ export const SAC = [
 
 // Points de passage sans ravitaillement, repris du plan de course du Hub.
 // Ils comptent autant que les postes : ce sont les reperes entre deux ravitos.
+/* Les sommets nommes, entre les postes. Refaits le 24/08 sur le GPX officiel :
+   les kilometrages etaient faux de 1 a 2 km, et deux sommets portaient un nom
+   qui n'est pas le leur. « Bovine » est en realite LA GIETE, « Catogne » est
+   LES TSEPPES. Ce n'est pas un detail de nomenclature : c'est ce qui est ecrit
+   sur les panneaux et ce que disent les benevoles. */
 export const REPERES = [
-  { km:9.3,  nom:"Tête de la Tronche", alt:2556, t:"sommet",
-    r:"Point haut de la première montée. 1 300 m de D+ d'entrée, sans transition." },
-  { km:19.2, nom:"Refuge Bonatti", alt:2025, t:"eau",
-    r:"Point d'eau. Sentier balcon en surplomb du val Ferret." },
-  { km:30.5, nom:"Grand Col Ferret", alt:2537, t:"col",
-    r:"Toit de la course, frontière Italie / Suisse. Aucun ravitaillement, vent possible." },
-  { km:65.1, nom:"Bovine", alt:2044, t:"sommet",
-    r:"Casse le rythme après Champex. De nuit." },
-  { km:77.0, nom:"Catogne", alt:2070, t:"sommet",
-    r:"Entre Trient et Vallorcine. Un pas après l'autre." },
-  { km:93.7, nom:"Tête aux Vents", alt:1886, t:"sommet",
-    r:"Le dernier vrai point haut. Après, c'est fini." }
+  { km:9.4,  nom:"Tête de la Tronche", alt:2543, t:"sommet",
+    r:"Point haut de la première montée. +1 418 m sur 9,4 km, sans transition. VAM 450-480." },
+  { km:21.2, nom:"Refuge Bonatti", alt:2027, t:"eau",
+    r:"Point d'eau. Sentier balcon roulant en surplomb du val Ferret — c'est là qu'on mange en marchant." },
+  { km:30.9, nom:"Grand Col Ferret", alt:2527, t:"col",
+    r:"Toit de la course, frontière Italie / Suisse. +762 m sur 4,5 km. Aucun ravitaillement, vent probable : veste à portée AVANT la montée." },
+  { km:66.3, nom:"La Giète", alt:1885, t:"sommet",
+    r:"Le sommet après Champex — son vrai nom, longtemps appelé Bovine par erreur. +731 m sur 6,5 km, de nuit." },
+  { km:75.2, nom:"Les Tseppes", alt:1936, t:"sommet",
+    r:"🔴 +647 m sur 3,8 km, soit 17 % de pente moyenne : LA PLUS RAIDE DE LA COURSE, et elle tombe vers 23 h. Un pas après l'autre, bâtons courts." }
 ];
 
 // Catalogue Näak, valeurs relevees sur naak.com le 2026-08-16.

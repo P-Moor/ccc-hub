@@ -1,6 +1,6 @@
 # MÉMOIRE PROJET — CCC Race Companion
 
-Dernière mise à jour : 23/08/2026 (v32)
+Dernière mise à jour : 24/08/2026 (v34)
 
 ## ÉTAT ACTUEL
 
@@ -38,6 +38,9 @@ Dernière mise à jour : 23/08/2026 (v32)
 | 23/08 | Fibres réduites dès le mardi 25 | Plus progressif qu'une coupure la veille |
 | 23/08 | Carte vectorielle depuis le GPX, pas d'iframe UTMB | La map de montblanc.utmb.world est un iframe track.utmb.world : réseau + cookies obligatoires |
 | 23/08 | Le fond topographique est optionnel et hors ligne par défaut | Même règle que la météo : bonus réseau, son absence ne casse rien |
+| 24/08 | Le GPX OFFICIEL UTMB fait foi — 100,9 km / 6 050 m | Il porte les 15 points et leurs distances : plus rien à recaler |
+| 24/08 | Réseau d'abord pour le code, cache d'abord pour le reste | Pierre a vu trois fois une version périmée |
+| 24/08 | ⛔ Jamais de comptage ni de bilan de repas dans l'app | Elle affiche le PLAN, pas une note. Voir `VIGILANCE_NUTRITION` |
 
 ## SOURCES DE VÉRITÉ
 
@@ -51,6 +54,8 @@ Dernière mise à jour : 23/08/2026 (v32)
 | Météo, analyse de fond | `meteo-data.js` |
 | Météo, les 13 points et les seuils | `meteo-points.js` |
 | Trace GPS pour la carte | `trace.js` — généré, ne pas éditer |
+| **Le parcours : 15 points officiels** | `parcours-data.js` — fait foi depuis le 24/08 |
+| Les 4 cartes plastifiées | `cartes-data.js` |
 | Dossiers fermés du 18 au 20 | `maj20-data.js` |
 | Dossiers fermés du 21 au 23, kits, Fenix, sang | `maj23-data.js` |
 | Sachets zip (`KITS`) | `sac-data.js` |
@@ -461,3 +466,74 @@ de course officiel au retrait du dossard.
 Le cache de prévisions porte maintenant une **signature `km:alt`** du jeu de
 points : déplacer un point périme automatiquement les relevés faits sur les
 anciennes coordonnées, sans que Pierre ait à le savoir.
+
+---
+
+## LE GPX OFFICIEL REMPLACE TOUT (24/08, v34)
+
+L'UTMB a publié `ccc_100km_universal.gpx` avec les **15 points intégrés** et
+les distances encodées dans le fichier. Il remplace le GPX tiers dont je me
+servais. **Conséquence : plus aucun recalage.** Avant, on rapprochait un tracé
+étranger des repères du carnet ; maintenant le tracé EST la référence et le
+carnet s'y aligne.
+
+`scratchpad/gen_officiel.py` produit `trace.js` et `profil.js` depuis ce seul
+fichier, et remplace `gen_trace.py` et `gen_profil.py`.
+
+**100,9 km / 6 050 m D+** (et non 101,5 / 6 062). Le D+ par segment est calculé
+sur le tracé avec un seuil de 2,5 m qui filtre le bruit altimétrique ; il
+retombe à un ou deux mètres près sur ce qu'annonce l'UTMB pour chaque montée.
+
+### Trois sommets ont retrouvé leur nom
+
+| Avant | Maintenant | Pourquoi ça compte |
+|---|---|---|
+| — | **Refuge Bonatti** 21,2 km | Balcon roulant : c'est là qu'on mange en marchant |
+| « Bovine » 65,1 km | **La Giète** 66,3 km · 1 885 m | C'est le nom sur les panneaux |
+| « Catogne » 77,0 km | **Les Tseppes** 75,2 km · 1 936 m | +647 m sur 3,8 km = **17 %**, la plus raide, vers 23 h |
+
+« Tête aux Vents » disparaît : le point était à 93,7 km, c'est-à-dire La
+Flégère, qui est un ravito. La réserve notée le 23/08 est donc levée.
+
+**Colonne « km restant »** partout où un point s'affiche — vue Ravitos et
+curseur de la carte. À 3 h du matin, une soustraction mentale est une
+soustraction ratée.
+
+## LE SERVICE WORKER, ENFIN (24/08, v33)
+
+Pierre a vu **trois fois de suite** une version périmée. Deux bugs :
+
+1. `skipWaiting()` était appelé dans `install`. Le nouveau worker n'atteignait
+   donc jamais l'état `waiting`, et le bandeau « nouvelle version », qui
+   cherche `reg.waiting`, ne pouvait pas se déclencher.
+2. Cache d'abord pour tout. Le code va maintenant chercher le **réseau
+   d'abord**, 1,5 s de délai, cache en secours.
+
+⚠️ **Le piège qui a fait échouer le premier correctif** : le `fetch` du worker
+recevait le cache HTTP DU NAVIGATEUR, une couche distincte de celle du SW. Il
+faut `new Request(req, { cache: 'reload' })`. Sans ça on croit aller au réseau
+et on reçoit la même vieille réponse.
+
+Vérifié : témoin posé dans `app.js` → visible en UN rechargement ; serveur
+d'aperçu **arrêté** → l'app se charge entièrement depuis le cache.
+
+## CE QUI EST ARRIVÉ LE 24
+
+- ⌚ **Fenix configurée** : alerte 30:00, FC 145, ascension auto coupée,
+  ClimbPro manuel. Restent 4 gestes, cochables, dont désactiver les **alertes
+  de segment** (elles ont contribué à la dérive à FC 179 le 22/08).
+- 🎫 **Les 4 cartes plastifiées** sont consultables et imprimables.
+- 🍽️ **Fractionner plutôt qu'augmenter** : même quantité de glucides sur
+  5 prises. La soupe s'arrête le 25, les œufs et l'épicé le 27.
+- 🔴 **`VIGILANCE_NUTRITION`** : Pierre requalifie en « craquage » des prises
+  normales, au moins 5 fois depuis le 15/08. La recharge FIXE DE L'EAU, environ
+  3 g par gramme de glycogène — la rétention est le signe que ça marche.
+  **L'app n'affichera jamais de compteur ni de bilan de repas.**
+- 💳 Taxe de séjour **payée** le 24. 🛏️ Linge **en attente** : Sylvain consulte
+  la blanchisserie mais prévient que c'est la semaine UTMB. Plan B dans la
+  valise, décision lundi soir.
+- 🛒 Courses de Chamonix le 27 au matin dans le coffre. Seule exception : le
+  petit-déj du 28 vient de Belgique, sachet marqué « 28/08 ».
+- 📊 Physio du 24 : **meilleur profil du dossier** — FC 41, VFC 88, BB 93,
+  readiness 75 HIGH, stress nocturne 9. Gorge et nez : rhinite vasomotrice, pas
+  d'infection. Le signal à surveiller serait FC +5 et VFC effondrée.

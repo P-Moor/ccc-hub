@@ -12,10 +12,13 @@ import { CONFIANCE } from './confiance-data.js';
 import { PRIVE } from './prive-data.js';
 import { VERDICT_CHAUSSURES, TROUSSE, VESTE, LAMPES,
          BALISE, MENUS, TRACES, PHYSIO } from './maj20-data.js';
-import { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG } from './maj23-data.js';
+import { CHANGEMENTS, GESTION_COGNITIVE, MONTRE, PRISE_DE_SANG,
+         RECHARGE, VIGILANCE_NUTRITION, PHYSIO_24 } from './maj23-data.js';
+import { CARTES } from './cartes-data.js';
 import { METEO_POINTS, METEO_SOURCE, CODES_METEO, SEUILS } from './meteo-points.js';
 import { PROFIL, altAt } from './profil.js';
 import { TRACE } from './trace.js';
+import { PARCOURS, kmRestant } from './parcours-data.js';
 
 /* ============================ persistance ============================ */
 
@@ -608,12 +611,12 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-33';
+const VERSION = 'ccc-v2-carnet-34';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
    coffre perime alors que l'ancien fichier est parfaitement valide. */
-const COFFRE_ATTENDU = 'ccc-v2-carnet-31';
+const COFFRE_ATTENDU = 'ccc-v2-carnet-33';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -2684,6 +2687,75 @@ function traceTraces() {
     '<ol class="tc-i">' + TRACES.instructions.map(x => '<li>' + x + '</li>').join('') + '</ol>';
 }
 
+/* ==================== la recharge, et ce qu'on n'affichera pas ====================
+   Le bloc de vigilance n'est pas decoratif. Il dit noir sur blanc ce que
+   l'app refuse de faire, pour que ca reste vrai dans six mois. */
+
+function traceRecharge() {
+  const h = document.getElementById('rechargeHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="rc-regle">' + RECHARGE.regle + '</div>' +
+    '<p class="rc-pq">' + RECHARGE.pourquoi + '</p>' +
+    '<div class="rc-g">' + RECHARGE.schema.map(x =>
+      '<div class="rc"><b>' + x.moment + '</b><span>' + x.contenu + '</span></div>').join('') + '</div>' +
+    '<div class="fi-titre">Ce qui s\'arrête, et quand</div>' +
+    RECHARGE.aArreter.map(x =>
+      '<div class="rc-st"><div class="rc-sth"><b>' + x.quoi + '</b>' +
+      '<i>' + x.quand + '</i></div>' +
+      (x.pourquoi ? '<p>' + x.pourquoi + '</p>' : '') + '</div>').join('') +
+    '<div class="rc-pr">' + RECHARGE.proteine + '</div>';
+}
+
+function traceVigilance() {
+  const h = document.getElementById('vigilanceHote');
+  if (!h) return;
+  const V = VIGILANCE_NUTRITION;
+  h.innerHTML =
+    '<div class="vg-c">' + V.constat + '<small>' + V.frequence + '</small></div>' +
+    '<div class="vg-i"><b>L\'inquiétude</b>' + V.inquietude + '</div>' +
+    '<div class="vg-f"><b>' + V.fait.titre + '</b><p>' + V.fait.txt + '</p></div>' +
+    '<div class="vg-l">' + V.cequiRendLeger + '</div>' +
+    '<div class="vg-cs">' + V.consigne + '</div>';
+}
+
+/* La physio du jour. Une seule chose compte ici : distinguer un symptome
+   mecanique d'un debut d'infection, a quatre jours du depart. */
+function tracePhysio24() {
+  const h = document.getElementById('physio24Hote');
+  if (!h) return;
+  const P = PHYSIO_24, S = P.symptomes;
+  h.innerHTML =
+    '<div class="p24-t">' + P.titre + '</div>' +
+    '<div class="p24-g">' + P.lignes.map(l =>
+      '<div class="p24' + (l.bon ? ' bon' : '') + '"><i>' + l.l + '</i><b>' + l.v + '</b>' +
+      (l.n ? '<small>' + l.n + '</small>' : '') + '</div>').join('') + '</div>' +
+    '<div class="p24-ch">' + P.charge + '</div>' +
+    '<div class="p24-sy"><div class="p24-syh">' + S.quoi + '</div>' +
+      '<p>' + S.analyse + '</p>' +
+      '<div class="p24-pv">' + S.preuve + '</div>' +
+      '<div class="p24-sv">' + S.surveillance + '</div></div>';
+}
+
+/* Les quatre cartes plastifiees. L'app ne les remplace pas : elle permet de
+   les relire, et de les reimprimer si l'une se perd. */
+function traceCartes() {
+  const h = document.getElementById('cartesHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="cx-n">' + CARTES.note + '</div>' +
+    CARTES.liste.map(c =>
+      '<div class="cx"><div class="cx-h"><b>' + c.n + '</b>' +
+        '<div><span>' + c.titre + '</span><i>' + c.ou + '</i></div></div>' +
+        '<div class="cx-f"><div><em>recto</em>' + c.recto + '</div>' +
+          '<div><em>verso</em>' + c.verso + '</div></div>' +
+        '<p>' + c.pourquoi + '</p></div>').join('') +
+    '<div class="cx-r">' + CARTES.rappel + '</div>' +
+    '<button class="dn-btn plein large" id="cxImp">Imprimer les cartes</button>';
+  const b = document.getElementById('cxImp');
+  if (b) b.addEventListener('click', () => window.print());
+}
+
 /* ==================== la carte ====================
    Dessinee depuis la trace GPX reelle, en SVG, sans aucune tuile : elle
    s'affiche a plat de batterie et sans reseau, ce qui est exactement la
@@ -2936,6 +3008,7 @@ function majInfoCarte() {
     '<div class="ct-h"><b>' + hhmm(quand) + '</b>' +
       '<i>' + (quand.getDate() === 28 ? 'vendredi' : 'samedi') + '</i></div>' +
     '<div class="ct-l2"><span>' + kmFmt(curseurKm) + ' km</span>' +
+      '<span class="ct-reste">reste ' + kmFmt(kmRestant(curseurKm)) + ' km</span>' +
       '<span>' + p.alt + ' m</span>' +
       '<span>' + (ec < 1.2 ? proche.nom : 'vers ' + proche.nom) + '</span></div>' +
     meteo;
@@ -3176,21 +3249,32 @@ function traceCognitif() {
 function traceMontre() {
   const h = document.getElementById('montreHote');
   if (!h) return;
-  const j0 = minuit(maintenant());
+  const reste = MONTRE.resteAFaire || [];
   h.innerHTML =
-    '<div class="mo-t">' + MONTRE.modele + '</div>' +
-    MONTRE.reglages.map(r => {
-      const d = r.echeance ? dateDe(r.echeance) : null;
-      const j = d ? Math.round((d - j0) / 86400000) : null;
-      return '<div class="mo' + (r.critique ? ' cle' : '') + '">' +
-        '<div class="mo-h"><b>' + r.n + '</b><span>' + r.titre + '</span>' +
-        (d ? '<i class="mo-e' + (j <= 1 ? ' chaud' : '') + '">' +
-          (j < 0 ? 'passé' : (j === 0 ? "aujourd'hui" : 'J-' + j)) + '</i>' : '') + '</div>' +
+    '<div class="mo-tete"><i>' + MONTRE.statut + '</i><b>' + MONTRE.modele + '</b></div>' +
+
+    MONTRE.reglages.map(r =>
+      '<div class="mo' + (r.critique ? ' cle' : '') + (r.fait ? ' fait' : '') + '">' +
+        '<div class="mo-h"><b>' + (r.fait ? '&#10003;' : r.n) + '</b>' +
+          '<span>' + r.titre + '</span>' +
+          (r.valeur ? '<i class="mo-v">' + r.valeur + '</i>' : '') + '</div>' +
         '<div class="mo-c">' + r.chemin + '</div>' +
-        (r.piege ? '<div class="mo-p">' + r.piege + '</div>' : '') +
         (r.pourquoi ? '<p>' + r.pourquoi + '</p>' : '') +
-      '</div>';
-    }).join('');
+      '</div>').join('') +
+
+    /* Le reste-a-faire est coche par Pierre et survit aux mises a jour : il
+       passe par le meme stockage que toutes les autres cases de l'app. */
+    (reste.length ? '<div class="fi-titre">Ce qu\'il reste à faire</div>' +
+      '<div class="ck-liste carte-l">' + reste.map((x, i) => {
+        const id = 'mo' + i;
+        return '<button class="sk' + (x.critique ? ' sk-reglementaire' : ' sk-perso') +
+          (coche(id) ? ' ok' : '') + '" data-mo="' + id + '">' +
+          '<i class="ck-box"></i><span class="sk-t">' + x.txt +
+          (x.pourquoi ? '<small>' + x.pourquoi + '</small>' : '') + '</span></button>';
+      }).join('') + '</div>' : '');
+
+  h.querySelectorAll('[data-mo]').forEach(b =>
+    b.addEventListener('click', () => { basculeCoche(b.dataset.mo); traceMontre(); }));
 }
 
 /* La prise de sang. La conclusion d'abord : c'est elle qui change quelque
@@ -3849,14 +3933,16 @@ function traceRavitos() {
 
   return document.getElementById('ravitosHote').innerHTML = tout.map(x => {
     if (!x.poste) {
-      return '<div class="rv rv-rep"><div class="rv-km">' + kmFmt(x.km) + '</div>' +
+      return '<div class="rv rv-rep"><div class="rv-km">' + kmFmt(x.km) +
+        '<small>reste ' + kmFmt(kmRestant(x.km)) + '</small></div>' +
         '<div class="rv-c"><b>' + x.nom + '</b>' +
         '<span class="rv-t">' + x.r.t + ' &#183; ' + x.alt + ' m</span>' +
         '<p>' + x.r.r + '</p></div></div>';
     }
     const s = x.s, a = plan.rows[x.i], rl = RAVITO_LBL[s.ravito] || RAVITO_LBL.complet;
     return '<div class="rv rv-poste' + (s.arret === 'grand' ? ' grand' : '') + '">' +
-      '<div class="rv-km">' + kmFmt(x.km) + '</div>' +
+      '<div class="rv-km">' + kmFmt(x.km) +
+        '<small>reste ' + kmFmt(kmRestant(x.km)) + '</small></div>' +
       '<div class="rv-c">' +
         '<div class="rv-h"><b>' + court(s.nom) + '</b><i>' + (a.horloge || a.max) + '</i></div>' +
         '<div class="rv-tags"><span class="pastille ' + rl.c + '">' + rl.l + '</span>' +
@@ -3931,6 +4017,10 @@ function init() {
   traceCognitif();
   traceMontre();
   traceSang();
+  traceRecharge();
+  traceVigilance();
+  tracePhysio24();
+  traceCartes();
   traceVoyage();
   traceCarb();
   fondEnLigne = !!store.get('carte', false);

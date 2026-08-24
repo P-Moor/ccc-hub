@@ -18,7 +18,7 @@
 //
 // Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-33';
+const CACHE = 'ccc-v2-carnet-34';
 
 const NOYAU = [
   './',
@@ -28,6 +28,8 @@ const NOYAU = [
   'data.js',
   'profil.js',
   'trace.js',
+  'cartes-data.js',
+  'parcours-data.js',
   'prepa-data.js',
   'nutrition-data.js',
   'sac-data.js',

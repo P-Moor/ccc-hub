@@ -1,42 +1,38 @@
 /**
- * meteo-points.js — les 13 points où la météo compte vraiment
+ * meteo-points.js — les 15 points ou la meteo compte
  * ---------------------------------------------------------------------------
- * Coordonnées tirées du GPX officiel, les mêmes que celles des fichiers de
- * `assets/`. L'ALTITUDE est la donnée décisive : Open-Meteo recale son modèle
- * dessus, et sans elle on lirait la météo de la vallée. Au Grand Col Ferret,
- * l'écart entre 2 529 m et le fond de vallée dépasse 6 °C.
+ * Depuis le 24/08 ces points sont ceux du GPX OFFICIEL UTMB, copies tels quels
+ * depuis parcours-data.js. Plus aucune coordonnee n'est saisie a la main :
+ * c'est ce qui avait produit l'erreur du Grand Col Ferret, lu six kilometres
+ * apres le col pendant trois versions.
  *
- * `km` sert à retrouver l'heure de passage prévue par interpolation sur le
- * scénario actif : la prévision est donc lue à la BONNE HEURE, au BON ENDROIT.
+ * L'ALTITUDE est la donnee decisive : Open-Meteo recale son modele dessus, et
+ * sans elle on lirait la meteo de la vallee. Au Grand Col Ferret, l'ecart
+ * entre 2 527 m et le fond de vallee depasse 6 °C.
  *
- * ⚠️ Corrigé le 23/08. Les 13 points sont désormais posés SUR LA TRACE GPX,
- * vérifiés un par un contre `trace.js`. Deux sommets étaient mal placés :
- *   Grand Col Ferret  km 37,0 à 1 944 m  →  km 30,9 à 2 529 m
- *     Le point tombait dans la descente vers La Fouly, six kilomètres après le
- *     col. La météo du point le plus exposé de la course était lue 40 minutes
- *     trop tard et 585 m trop bas, soit environ 4 °C d'écart.
- *   Tête aux Vents    km 90,0 à 1 886 m  →  km 89,3 à 1 710 m
- *     L'altitude déclarée ne correspondait à aucun point de la trace. Celle-ci
- *     est le sommet réel de la montée depuis Vallorcine dans ce GPX.
+ * `km` sert a retrouver l'heure de passage par interpolation sur le scenario
+ * actif : la prevision est donc lue a la BONNE HEURE, au BON ENDROIT.
  *
- * Toute modification ici périme automatiquement le cache de prévisions :
- * app.js compare une signature `km:alt` avant de réutiliser un relevé.
+ * Toute modification ici perime automatiquement le cache de previsions :
+ * app.js compare une signature `km:alt` avant de reutiliser un releve.
  */
 
 export const METEO_POINTS = [
-  { nom: "Courmayeur",         km: 0.0,     lat: 45.792840, lon: 6.971570, alt: 1221, type: "depart" },
-  { nom: "Tête de la Tronche", km: 9.3,   lat: 45.821750, lon: 7.019480, alt: 2556, type: "sommet" },
-  { nom: "Refuge Bertone",     km: 13.7,  lat: 45.809150, lon: 6.978740, alt: 1980, type: "ravito" },
-  { nom: "Arnouvaz",           km: 26.5,  lat: 45.871450, lon: 7.053940, alt: 1777, type: "ravito" },
-  { nom: "Grand Col Ferret",   km: 30.9,  lat: 45.887620, lon: 7.077690, alt: 2529, type: "sommet", expose: true },
-  { nom: "La Fouly",           km: 40.9,  lat: 45.935190, lon: 7.098440, alt: 1602, type: "ravito" },
-  { nom: "Champex-Lac",        km: 54.6,  lat: 46.022590, lon: 7.120050, alt: 1408, type: "base" },
-  { nom: "Bovine",             km: 65.6,  lat: 46.057280, lon: 7.043760, alt: 2045, type: "sommet" },
-  { nom: "Trient",             km: 71.2,  lat: 46.054890, lon: 6.997100, alt: 1340, type: "ravito" },
-  { nom: "Vallorcine",         km: 83.2,  lat: 46.030880, lon: 6.930970, alt: 1266, type: "ravito" },
-  { nom: "Tête aux Vents",     km: 89.3,  lat: 45.987650, lon: 6.917730, alt: 1710, type: "sommet", expose: true },
-  { nom: "La Flégère",         km: 94.6,  lat: 45.959530, lon: 6.886410, alt: 1852, type: "ravito" },
-  { nom: "Chamonix",           km: 101.5, lat: 45.923600, lon: 6.869120, alt: 1035, type: "arrivee" }
+  { nom: "Courmayeur",           km: 0.0,    lat: 45.79284, lon: 6.97157, alt: 1221, type: "depart" },
+  { nom: "Tête de la Tronche",   km: 9.4,    lat: 45.82285, lon: 7.01944, alt: 2543, type: "sommet", expose: true },
+  { nom: "Refuge Bertone",       km: 13.6,   lat: 45.80922, lon: 6.97865, alt: 1982, type: "ravito" },
+  { nom: "Refuge Bonatti",       km: 21.2,   lat: 45.84678, lon: 7.03331, alt: 2027, type: "sommet" },
+  { nom: "Arnouvaz",             km: 26.3,   lat: 45.87133, lon: 7.05394, alt: 1777, type: "ravito" },
+  { nom: "Grand Col Ferret",     km: 30.9,   lat: 45.88899, lon: 7.07790, alt: 2527, type: "sommet", expose: true },
+  { nom: "La Fouly",             km: 40.7,   lat: 45.93566, lon: 7.09845, alt: 1604, type: "ravito" },
+  { nom: "Champex-Lac",          km: 54.9,   lat: 46.02559, lon: 7.12246, alt: 1472, type: "base" },
+  { nom: "Plan de l'Au",         km: 59.8,   lat: 46.04983, lon: 7.07972, alt: 1340, type: "pointage" },
+  { nom: "La Giète",             km: 66.3,   lat: 46.05500, lon: 7.03364, alt: 1885, type: "sommet" },
+  { nom: "Trient",               km: 71.5,   lat: 46.05547, lon: 6.99494, alt: 1304, type: "ravito" },
+  { nom: "Les Tseppes",          km: 75.2,   lat: 46.04747, lon: 6.97971, alt: 1936, type: "sommet", expose: true },
+  { nom: "Vallorcine",           km: 82.5,   lat: 46.03242, lon: 6.93236, alt: 1260, type: "ravito" },
+  { nom: "La Flégère",           km: 93.7,   lat: 45.96089, lon: 6.88719, alt: 1882, type: "ravito", expose: true },
+  { nom: "Chamonix",             km: 100.9,  lat: 45.92360, lon: 6.86912, alt: 1035, type: "arrivee" },
 ];
 
 /** Source : gratuite, sans clé, et elle accepte l'altitude par point. */

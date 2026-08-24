@@ -3135,3 +3135,154 @@ button.tl-ligne:active { background: var(--surface-2); }
   margin-top: 9px; font-size: 11.5px; line-height: 1.45; color: var(--texte-pale);
 }
 .ct-attr { font-family: var(--mono); font-size: 10px; }
+
+/* --- la montre, une fois configuree --- */
+.mo-tete { display: flex; gap: 11px; align-items: baseline; flex-wrap: wrap; margin-bottom: 12px; }
+.mo-tete i {
+  font-style: normal; font-family: var(--display); font-weight: 700; font-size: 13px;
+  padding: 4px 10px; border-radius: var(--pill);
+  background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok);
+}
+.mo-tete b { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--texte-pale); }
+.mo.fait { opacity: .9; }
+.mo.fait .mo-h > b { background: var(--ok); }
+.mo-v {
+  font-style: normal; font-family: var(--mono); font-size: 10.5px;
+  padding: 3px 8px; border-radius: var(--pill);
+  background: var(--surface); border: 1px solid var(--bord); color: var(--texte-doux);
+}
+
+/* ==================== la mise a jour du 24 ==================== */
+
+/* --- la recharge : fractionner --- */
+.rc-regle {
+  padding: 12px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 12%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 15px; font-weight: 600; line-height: 1.45;
+}
+.rc-pq { margin: 9px 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--texte-doux); }
+.rc-g { display: flex; flex-direction: column; gap: 6px; }
+.rc {
+  display: flex; gap: 12px; align-items: baseline;
+  padding: 9px 11px; border-radius: var(--r-s); background: var(--surface-2);
+}
+.rc b { flex: 0 0 84px; font-family: var(--mono); font-size: 11.5px; color: var(--texte-pale); }
+.rc span { flex: 1; font-size: 13.5px; line-height: 1.45; }
+.rc-st {
+  padding: 10px 12px; margin-bottom: 7px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 10%, transparent);
+  border-left: 3px solid var(--jour);
+}
+.rc-sth { display: flex; gap: 9px; align-items: baseline; flex-wrap: wrap; }
+.rc-sth b { font-size: 14px; font-weight: 700; }
+.rc-sth i {
+  font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--jour-fonce);
+}
+.rc-st p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--texte-doux); }
+.rc-pr {
+  margin-top: 10px; padding: 9px 11px; border-radius: var(--r-s);
+  background: var(--surface-2); font-size: 13.5px; line-height: 1.45;
+}
+
+/* --- ce que l'app ne fera pas --- */
+.vg-c { font-size: 14px; line-height: 1.5; }
+.vg-c small {
+  display: block; margin-top: 5px; font-family: var(--mono);
+  font-size: 11px; color: var(--texte-pale);
+}
+.vg-i {
+  margin-top: 11px; padding: 10px 12px; border-radius: var(--r-s);
+  background: var(--surface-2); font-size: 13.5px; line-height: 1.5;
+}
+.vg-i b { display: block; font-size: 11px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 3px; }
+.vg-f {
+  margin-top: 11px; padding: 12px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-left: 3px solid var(--ok);
+}
+.vg-f b { font-family: var(--display); font-weight: 700; font-size: 15px; }
+.vg-f p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; }
+.vg-l { margin-top: 11px; font-size: 13.5px; line-height: 1.55; color: var(--texte-doux); }
+.vg-cs {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  border-left: 3px solid var(--alerte);
+  font-size: 13.5px; line-height: 1.5; font-weight: 600;
+}
+
+/* --- la physio du matin --- */
+.p24-t { font-family: var(--display); font-weight: 700; font-size: 15px; line-height: 1.35; margin-bottom: 12px; }
+.p24-g { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.p24 {
+  padding: 9px 11px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.p24.bon { border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.p24 i {
+  display: block; font-style: normal; font-size: 9.5px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--texte-pale);
+}
+.p24 b {
+  display: block; margin-top: 2px; font-family: var(--display);
+  font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums;
+}
+.p24 small { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.4; color: var(--texte-doux); }
+.p24-ch {
+  margin-top: 10px; padding: 9px 11px; border-radius: var(--r-s);
+  background: var(--surface-2); font-family: var(--mono);
+  font-size: 11.5px; line-height: 1.45; color: var(--texte-doux);
+}
+.p24-sy {
+  margin-top: 12px; padding: 12px 13px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 10%, transparent);
+  border-left: 3px solid var(--jour);
+}
+.p24-syh { font-size: 14px; font-weight: 600; line-height: 1.45; }
+.p24-sy p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--texte-doux); }
+.p24-pv {
+  margin-top: 8px; padding: 8px 10px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  font-size: 13px; line-height: 1.45;
+}
+.p24-sv { margin-top: 8px; font-size: 13px; line-height: 1.45; font-weight: 600; }
+
+/* --- les cartes plastifiees --- */
+.cx-n { font-size: 13px; line-height: 1.5; color: var(--texte-doux); margin-bottom: 12px; }
+.cx {
+  padding: 12px; margin-bottom: 9px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--bord);
+}
+.cx-h { display: flex; gap: 11px; align-items: center; }
+.cx-h > b {
+  flex: 0 0 30px; height: 30px; border-radius: var(--r-xs);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--sur-accent);
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+}
+.cx-h span { display: block; font-family: var(--display); font-weight: 700; font-size: 15px; }
+.cx-h i { display: block; font-style: normal; font-size: 11.5px; color: var(--texte-pale); }
+.cx-f { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
+.cx-f > div {
+  padding: 8px 10px; border-radius: var(--r-xs); background: var(--surface);
+  font-size: 12.5px; line-height: 1.4;
+}
+.cx-f em {
+  display: block; font-style: normal; font-size: 9.5px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 3px;
+}
+.cx p { margin: 9px 0 0; font-size: 13px; line-height: 1.5; color: var(--texte-doux); }
+.cx-r {
+  margin: 12px 0; padding: 10px 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  font-size: 13px; line-height: 1.45;
+}
+
+/* --- km restant, partout ou un point est affiche --- */
+.rv-km small {
+  display: block; margin-top: 2px; font-family: var(--mono);
+  font-size: 9.5px; letter-spacing: .02em; color: var(--texte-pale); font-weight: 400;
+}
+.ct-reste { font-family: var(--mono); font-variant-numeric: tabular-nums; }
