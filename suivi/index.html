@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CCC 2026 — Plan de course · Pierre Moor 4330</title>
 <meta name="description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15. Tableau de marche, barrières horaires et carte du parcours.">
-<meta name="theme-color" content="#0D0A22">
+<meta name="theme-color" content="#00121D">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="CCC 2026 — Plan de course · Pierre Moor #4330">
@@ -17,190 +17,188 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+      href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 /* ==========================================================================
-   Roadbook, pas page d'ambiance. Meme langue visuelle que le carnet de Pierre
-   — fond indigo, texture topographique, Barlow Condensed — mais reduit a ce
-   qu'un tiers a besoin de lire : ou il devrait etre, et ce que ca vaut.
-   Densite assumee, chiffres a chasse fixe, aucun emoji decoratif.
+   Charte UTMB Mont-Blanc : fond #00121D, bleu profond #000D44, gris #9da7af,
+   et le VERT CCC #79b935 — celui que l'UTMB inscrit lui-meme dans le GPX
+   officiel de la course. Police Oxanium, celle de leur plateforme de suivi.
+   Roadbook, pas page d'ambiance : densite assumee, chiffres a chasse fixe.
    ========================================================================== */
 :root {
-  --bg:        #0D0A22;
-  --surface:   #17153B;
-  --surface-2: #1E1B4B;
-  --bord:      #322E63;
-  --texte:     #F6F7FC;
-  --doux:      #AAB0CC;
-  --pale:      #949CBE;
-  --accent:    #D8B4FE;
-  --accent-txt:#E2C9FF;
-  --montee:    #FBC96B;
-  --descente:  #7BA7F5;
-  --roulant:   #7DE8C6;
-  --barriere:  #F98080;
-  --nuit:      #A8B2E8;
-  --display: "Barlow Condensed", "Avenir Next Condensed", -apple-system, sans-serif;
-  --corps:   "Barlow", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bg:        #00121D;
+  --surface:   #041D2B;
+  --surface-2: #000D44;
+  --bord:      #163346;
+  --texte:     #FFFFFF;
+  --doux:      #C3CCD3;
+  --pale:      #9DA7AF;
+  --ccc:       #79B935;
+  --ccc-clair: #9BD65C;
+  --barriere:  #FF7A66;
+  --montee:    #F0A93B;
+  --descente:  #5BA9E6;
+  --roulant:   #79B935;
+  --display: "Oxanium", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --corps:   -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono:    ui-monospace, "SF Mono", Menlo, monospace;
-  --r: 14px; --tap: 44px;
-  --topo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%23A78BFA' stroke-opacity='0.14'%3E%3Cpath stroke-width='1.6' d='M-30 34C30 6 96 62 150 40S240 8 300 30'/%3E%3Cpath stroke-width='0.8' d='M-30 62C34 32 98 90 152 68S242 36 300 58'/%3E%3Cpath stroke-width='0.8' d='M-30 92C38 60 100 118 154 96S244 66 300 88'/%3E%3Cpath stroke-width='0.8' d='M-30 124C42 90 104 148 156 126S246 98 300 120'/%3E%3Cpath stroke-width='0.8' d='M-30 158C46 122 108 178 158 158S248 132 300 154'/%3E%3Cpath stroke-width='1.6' d='M-30 194C50 156 112 210 160 192S250 168 300 190'/%3E%3Cpath stroke-width='0.8' d='M-30 228C54 192 116 242 162 226S252 204 300 226'/%3E%3C/g%3E%3C/svg%3E");
+  --r: 12px; --tap: 46px;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--texte);
   font-family: var(--corps); font-size: 15.5px; line-height: 1.5;
-  font-variant-numeric: tabular-nums; padding-bottom: 40px;
+  font-variant-numeric: tabular-nums; padding-bottom: 44px;
 }
-body::before {
-  content: ""; position: fixed; inset: 0; background-image: var(--topo);
-  opacity: .45; pointer-events: none; z-index: 0;
-}
-.enveloppe { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+.enveloppe { max-width: 700px; margin: 0 auto; }
 main { padding: 0 15px; }
-h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1.1; }
 
 /* -------------------------------------------------------------- en-tete */
-.tete { padding: 22px 15px 14px; border-bottom: 1px solid var(--bord); }
-.tete .l2 { margin-top: 5px; font-size: 14px; color: var(--doux); }
+.tete {
+  padding: 22px 15px 18px;
+  background: linear-gradient(150deg, var(--surface-2), var(--bg) 72%);
+  border-bottom: 3px solid var(--ccc);
+}
+.tete .course {
+  display: inline-block; padding: 4px 11px; border-radius: 4px;
+  background: var(--ccc); color: #06210A;
+  font-family: var(--display); font-weight: 800; font-size: 13px;
+  letter-spacing: .16em;
+}
+.tete h1 {
+  margin: 11px 0 0; font-family: var(--display); font-weight: 800;
+  font-size: 25px; line-height: 1.15; letter-spacing: .01em;
+}
+.tete .l2 { margin-top: 6px; font-size: 14.5px; color: var(--doux); }
 .tete .l3 {
-  margin-top: 3px; font-family: var(--mono); font-size: 11px;
-  color: var(--pale); line-height: 1.6;
+  margin-top: 5px; font-family: var(--mono); font-size: 11px;
+  color: var(--pale); line-height: 1.65;
 }
 .tete .lien {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 13px;
-  min-height: var(--tap); padding: 0 16px; border-radius: 999px;
-  border: 1px solid var(--accent); background: transparent; color: var(--accent-txt);
-  text-decoration: none; font-family: var(--display); font-weight: 700;
-  font-size: 13.5px; letter-spacing: .07em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin-top: 15px; min-height: var(--tap); padding: 0 18px; border-radius: 6px;
+  background: var(--ccc); color: #06210A; text-decoration: none;
+  font-family: var(--display); font-weight: 800; font-size: 14.5px;
+  letter-spacing: .09em; text-transform: uppercase;
 }
 .tete .lien span {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  width: 8px; height: 8px; border-radius: 50%; background: #06210A;
+  animation: bat 2.4s infinite;
 }
 
 /* --------------------------------------------------------------- bandeau */
 .bandeau {
-  padding: 11px 15px; border-bottom: 1px solid var(--bord);
-  background: var(--surface); font-family: var(--mono); font-size: 12px;
-  color: var(--doux); letter-spacing: .02em;
+  padding: 12px 15px; background: var(--surface-2);
+  font-family: var(--mono); font-size: 12px; color: var(--doux);
+  border-bottom: 1px solid var(--bord);
 }
-.bandeau b { color: var(--texte); font-weight: 600; }
+.bandeau b { color: var(--ccc-clair); font-weight: 700; }
 
-/* --------------------------------------------------------------- onglets */
+/* --------------------------------------------------------------- onglets
+   Ils doivent se voir : quelqu'un qui decouvre la page ne devine pas qu'un
+   soulignement de 2 px est un onglet. Pastille pleine, vert CCC, en relief. */
 .onglets {
-  position: sticky; top: 0; z-index: 30; display: flex;
-  background: var(--bg); border-bottom: 1px solid var(--bord);
+  position: sticky; top: 0; z-index: 30;
+  display: flex; gap: 7px; padding: 10px 15px;
+  background: rgba(0,18,29,.95);
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bord);
 }
 .onglets button {
-  flex: 1; min-height: var(--tap); padding: 0 4px; border: 0; background: none;
-  color: var(--pale); font-family: var(--display); font-weight: 700;
-  font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase;
-  cursor: pointer; border-bottom: 2px solid transparent;
+  flex: 1; min-height: var(--tap); padding: 0 6px; border-radius: 7px;
+  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
+  font-family: var(--display); font-weight: 700; font-size: 13.5px;
+  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
 }
-.onglets button[aria-selected="true"] { color: var(--accent-txt); border-bottom-color: var(--accent); }
+.onglets button[aria-selected="true"] {
+  background: var(--ccc); border-color: var(--ccc); color: #06210A;
+  font-weight: 800;
+}
 .vue { display: none; padding-top: 18px; }
 .vue.on { display: block; }
 
 /* ---------------------------------------------------------------- blocs */
-.bloc {
-  background: var(--surface); border: 1px solid var(--bord);
-  border-radius: var(--r); padding: 17px;
-}
+.bloc { background: var(--surface); border: 1px solid var(--bord);
+        border-radius: var(--r); padding: 17px; }
 .bloc + .bloc { margin-top: 11px; }
-.lbl {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--pale);
-}
-.gros {
-  font-family: var(--display); font-weight: 700; font-size: 30px;
-  line-height: 1.1; margin-top: 4px;
-}
-.gros.acc { color: var(--accent-txt); }
-.sous { margin-top: 4px; font-family: var(--mono); font-size: 12px; color: var(--doux); }
+.lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+       text-transform: uppercase; color: var(--pale); }
+.gros { font-family: var(--display); font-weight: 800; font-size: 29px;
+        line-height: 1.1; margin-top: 5px; color: var(--ccc-clair); }
+.sous { margin-top: 5px; font-family: var(--mono); font-size: 12px; color: var(--doux); }
 
-.jauge { height: 6px; border-radius: 999px; background: var(--surface-2);
+.jauge { height: 8px; border-radius: 999px; background: var(--surface-2);
          margin: 15px 0 6px; overflow: hidden; }
-.jauge i { display: block; height: 100%; background: var(--accent); transition: width .5s ease; }
+.jauge i { display: block; height: 100%; background: var(--ccc); transition: width .5s ease; }
 .jauge-l { display: flex; justify-content: space-between;
            font-family: var(--mono); font-size: 10px; color: var(--pale); }
 
-.suite { margin-top: 4px; }
-.suite div {
-  display: flex; align-items: baseline; gap: 10px; padding: 9px 0;
-  border-top: 1px solid var(--bord);
-}
+.suite div { display: flex; align-items: baseline; gap: 10px; padding: 10px 0;
+             border-top: 1px solid var(--bord); }
+.suite div:first-child { border-top: 0; }
 .suite b { flex: 1; font-family: var(--display); font-weight: 700; font-size: 16px; }
 .suite .k { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
-.suite .h { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--accent-txt); }
-.fin { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0;
+.suite .h { font-family: var(--display); font-weight: 800; font-size: 17px; color: var(--ccc-clair); }
+.fin { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0;
        border-top: 1px solid var(--bord); font-size: 14px; }
-.fin .h { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.fin:first-child { border-top: 0; }
+.fin .h { font-family: var(--display); font-weight: 800; font-size: 17px; }
 .fin .h.lim { color: var(--barriere); }
-.avert { margin-top: 13px; font-size: 12px; line-height: 1.45; color: var(--pale); }
+.avert { margin-top: 13px; font-size: 12.5px; line-height: 1.45; color: var(--pale); }
 
 /* --------------------------------------------------------------- titres */
 .titre {
   display: flex; align-items: center; gap: 11px; margin: 26px 0 11px;
-  font-family: var(--display); font-weight: 700; font-size: 12.5px;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--pale);
+  font-family: var(--display); font-weight: 800; font-size: 13px;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ccc);
 }
 .titre::after { content: ""; flex: 1; height: 1px; background: var(--bord); }
 .vue > .titre:first-child { margin-top: 0; }
 
 /* ---------------------------------------------------------------- carte */
-#carte {
-  height: 400px; border-radius: var(--r); overflow: hidden;
-  border: 1px solid var(--bord); background: var(--surface); z-index: 0;
-}
+#carte { height: 400px; border-radius: var(--r); overflow: hidden;
+         border: 1px solid var(--bord); background: var(--surface); z-index: 0; }
 .leaflet-container { background: var(--surface) !important; }
-.carte-vide {
-  height: 160px; border-radius: var(--r); border: 1px solid var(--bord);
-  background: var(--surface); display: flex; align-items: center;
-  justify-content: center; text-align: center; padding: 22px;
-  color: var(--pale); font-size: 13px; line-height: 1.5;
-}
-.sous-carte {
-  display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
-  margin-top: 10px; font-size: 11.5px; color: var(--doux);
-}
+.carte-vide { height: 160px; border-radius: var(--r); border: 1px solid var(--bord);
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 22px; color: var(--pale); font-size: 13px; line-height: 1.5; }
+.sous-carte { display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
+              margin-top: 10px; font-size: 11.5px; color: var(--doux); }
 .sous-carte span { display: flex; align-items: center; gap: 6px; }
-.sous-carte em { font-style: normal; width: 14px; height: 3px; border-radius: 2px; background: var(--accent); }
+.sous-carte em { font-style: normal; width: 14px; height: 3px; border-radius: 2px; background: var(--ccc); }
 .sous-carte em.reste { background: repeating-linear-gradient(90deg, var(--pale) 0 2px, transparent 2px 6px); }
 .sous-carte em.pos { width: 10px; height: 10px; border-radius: 50%; background: var(--montee); }
 .sous-carte button {
-  margin-left: auto; min-height: 38px; padding: 0 13px; border-radius: 999px;
-  border: 1px solid var(--bord); background: var(--surface); color: var(--doux);
-  font-family: var(--display); font-weight: 700; font-size: 11px;
-  letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  margin-left: auto; min-height: 40px; padding: 0 14px; border-radius: 6px;
+  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
+  font-family: var(--display); font-weight: 700; font-size: 11.5px;
+  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
 }
-.pulse {
-  width: 17px; height: 17px; border-radius: 50%;
-  background: var(--montee); border: 3px solid var(--bg); animation: bat 2.2s infinite;
-}
+.pulse { width: 17px; height: 17px; border-radius: 50%;
+         background: var(--montee); border: 3px solid var(--bg); animation: bat 2.2s infinite; }
 @keyframes bat {
-  0% { box-shadow: 0 0 0 0 rgba(251,201,107,.5); }
-  70% { box-shadow: 0 0 0 16px rgba(251,201,107,0); }
-  100% { box-shadow: 0 0 0 0 rgba(251,201,107,0); }
+  0% { box-shadow: 0 0 0 0 rgba(240,169,59,.55); }
+  70% { box-shadow: 0 0 0 16px rgba(240,169,59,0); }
+  100% { box-shadow: 0 0 0 0 rgba(240,169,59,0); }
 }
-@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .pulse, .tete .lien span { animation: none; } }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: #17153B; color: #F6F7FC; border: 1px solid #322E63;
+  background: #041D2B; color: #fff; border: 1px solid #163346;
 }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--corps); font-size: 13px; }
-.leaflet-popup-content b { font-family: var(--display); font-size: 17px; display: block; }
-.leaflet-popup-content .pk { font-family: var(--mono); font-size: 11px; color: #B4BBD6; margin-top: 3px; }
-.leaflet-popup-content .ph { color: #E2C9FF; font-weight: 600; margin-top: 6px; }
-.leaflet-popup-content .pb { color: #F98080; font-family: var(--mono); font-size: 11px; margin-top: 2px; }
-.leaflet-container a.leaflet-popup-close-button { color: #B4BBD6; }
+.leaflet-popup-content b { font-family: var(--display); font-weight: 800; font-size: 16px; display: block; }
+.leaflet-popup-content .pk { font-family: var(--mono); font-size: 11px; color: #C3CCD3; margin-top: 4px; }
+.leaflet-popup-content .ph { color: #9BD65C; font-weight: 700; margin-top: 6px; }
+.leaflet-popup-content .pb { color: #FF7A66; font-family: var(--mono); font-size: 11px; margin-top: 2px; }
+.leaflet-container a.leaflet-popup-close-button { color: #C3CCD3; }
 .leaflet-control-attribution {
-  background: rgba(13,10,34,.92) !important; color: #B4BBD6 !important; font-size: 9.5px !important;
+  background: rgba(0,18,29,.92) !important; color: #C3CCD3 !important; font-size: 9.5px !important;
 }
-.leaflet-control-attribution a { color: #CDBCF5 !important; }
-.leaflet-bar a { background: #17153B; color: #F6F7FC; border-bottom-color: #322E63; }
-.leaflet-bar a:hover { background: #1E1B4B; color: #fff; }
+.leaflet-control-attribution a { color: #9BD65C !important; }
+.leaflet-bar a { background: #041D2B; color: #fff; border-bottom-color: #163346; }
+.leaflet-bar a:hover { background: #000D44; color: #fff; }
 
 /* --------------------------------------------------------------- profil */
 .profil { background: var(--surface); border: 1px solid var(--bord);
@@ -210,29 +208,30 @@ h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 26px; 
 /* -------------------------------------------------------------- tableaux */
 .defile { overflow-x: auto; -webkit-overflow-scrolling: touch;
           border: 1px solid var(--bord); border-radius: var(--r); }
+.defile-n { margin-top: 8px; font-family: var(--mono); font-size: 10px;
+            color: var(--pale); letter-spacing: .04em; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-th {
-  font-family: var(--mono); font-size: 9px; letter-spacing: .05em;
-  text-transform: uppercase; color: var(--pale); font-weight: 400;
-  text-align: right; padding: 10px 8px; background: var(--surface-2);
-  position: sticky; top: 0;
-}
+th { font-family: var(--mono); font-size: 9px; letter-spacing: .05em;
+     text-transform: uppercase; color: var(--pale); font-weight: 400;
+     text-align: right; padding: 10px 8px; background: var(--surface-2);
+     position: sticky; top: 0; }
 th:first-child, td:first-child { text-align: left; }
 td { padding: 9px 8px; text-align: right; border-top: 1px solid var(--bord); font-size: 13px; }
-tbody tr:nth-child(odd) { background: rgba(255,255,255,.016); }
-.pt-n { font-family: var(--display); font-weight: 700; font-size: 15.5px; white-space: nowrap; }
-tr.rav .pt-n { color: var(--texte); }
-tr:not(.rav) .pt-n { color: var(--doux); font-weight: 600; }
-.c-h { font-family: var(--display); font-weight: 700; font-size: 15.5px; color: var(--accent-txt); }
-tr:not(.rav) .c-h { color: var(--doux); font-weight: 600; }
+tbody tr:nth-child(odd) { background: rgba(255,255,255,.02); }
+.pt-n { font-family: var(--display); font-weight: 700; font-size: 15px; }
+tr:not(.rav) .pt-n { color: var(--pale); font-weight: 600; }
+.c-h { font-family: var(--display); font-weight: 800; font-size: 15.5px; color: var(--ccc-clair); }
+tr:not(.rav) .c-h { color: var(--pale); font-weight: 600; }
 .c-b { color: var(--barriere); font-family: var(--mono); font-size: 12px; }
-.c-m { font-family: var(--mono); font-size: 12px; color: var(--roulant); }
-.c-k, .c-d { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
-tr.passe td { opacity: .4; }
-tr.ici td { background: color-mix(in srgb, var(--montee) 13%, transparent); }
+.c-m { font-family: var(--mono); font-size: 12px; color: var(--ccc); }
+.c-k { font-family: var(--mono); font-size: 11.5px; color: var(--doux); }
+.c-d { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
+.c-e { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.c-e.up { color: var(--montee); }
+.c-e.dn { color: var(--descente); }
+tr.passe td { opacity: .38; }
+tr.ici td { background: rgba(240,169,59,.14); }
 tr.ici .pt-n::after { content: " ●"; color: var(--montee); font-size: 11px; }
-
-/* les sections : une barre de 3 px sur le bord, pas de fond colore */
 tr.s-montee   td:first-child { box-shadow: inset 3px 0 0 var(--montee); }
 tr.s-descente td:first-child { box-shadow: inset 3px 0 0 var(--descente); }
 tr.s-roulant  td:first-child { box-shadow: inset 3px 0 0 var(--roulant); }
@@ -240,44 +239,31 @@ tr.s-roulant  td:first-child { box-shadow: inset 3px 0 0 var(--roulant); }
           text-transform: uppercase; color: var(--pale); }
 
 /* ---------------------------------------------------------- explications */
-details.leg { margin-top: 10px; border-top: 1px solid var(--bord); padding-top: 10px; }
+details.leg { margin-top: 11px; }
 details.leg summary {
-  cursor: pointer; list-style: none; font-family: var(--display); font-weight: 700;
-  font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--pale); min-height: 30px; display: flex; align-items: center; gap: 8px;
+  cursor: pointer; list-style: none; min-height: 42px; display: flex;
+  align-items: center; gap: 9px; padding: 0 14px; border-radius: 6px;
+  border: 1.5px solid var(--bord); background: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 13px;
+  letter-spacing: .05em; color: var(--doux);
 }
 details.leg summary::-webkit-details-marker { display: none; }
-details.leg summary::before { content: "+"; font-family: var(--mono); }
+details.leg summary::before { content: "+"; font-family: var(--mono); color: var(--ccc); font-size: 15px; }
 details.leg[open] summary::before { content: "–"; }
-.leg dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; }
+.leg dl { margin: 12px 2px 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; }
 .leg dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em;
-          text-transform: uppercase; color: var(--accent-txt); white-space: nowrap; }
+          text-transform: uppercase; color: var(--ccc-clair); white-space: nowrap; }
 .leg dd { margin: 0; font-size: 13px; line-height: 1.45; color: var(--doux); }
 
-/* ----------------------------------------------------------------- infos */
-.glossaire dl { margin: 0; }
-.glossaire dt {
-  font-family: var(--display); font-weight: 700; font-size: 15.5px;
-  margin-top: 14px; color: var(--texte);
-}
-.glossaire dt:first-child { margin-top: 0; }
-.glossaire dd { margin: 3px 0 0; font-size: 14px; line-height: 1.5; color: var(--doux); }
-.notes dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; }
-.notes dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
-            text-transform: uppercase; color: var(--pale); white-space: nowrap; }
-.notes dd { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--doux); }
-
 /* ------------------------------------------------------------------ pied */
-.pied {
-  margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--bord);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  font-family: var(--mono); font-size: 10px; color: var(--pale); line-height: 1.6;
-}
+.pied { margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--bord);
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        font-family: var(--mono); font-size: 10px; color: var(--pale); line-height: 1.6; }
 .pied button {
-  margin-left: auto; min-height: 38px; padding: 0 15px; border-radius: 999px;
-  border: 1px solid var(--bord); background: var(--surface); color: var(--doux);
-  font-family: var(--display); font-weight: 700; font-size: 11px;
-  letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  margin-left: auto; min-height: 40px; padding: 0 16px; border-radius: 6px;
+  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
+  font-family: var(--display); font-weight: 700; font-size: 11.5px;
+  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
 }
 </style>
 </head>
@@ -285,12 +271,13 @@ details.leg[open] summary::before { content: "–"; }
 <div class="enveloppe">
 
 <header class="tete">
-  <h1>CCC 2026 · Pierre Moor · 4330</h1>
+  <span class="course">CCC 2026</span>
+  <h1>Pierre Moor · dossard 4330</h1>
   <div class="l2">Courmayeur → Chamonix</div>
   <div class="l3">100,9 km · 6 050 m de montée · départ vendredi 28 août, 09:15<br>
     Objectif ~20 h 15 · heure limite samedi 12:00</div>
   <a class="lien" id="lienTracker" href="#" target="_blank" rel="noopener">
-    <span></span>Tracker officiel UTMB</a>
+    <span></span>Position réelle · tracker UTMB</a>
 </header>
 
 <div class="bandeau" id="bandeau">—</div>
@@ -299,7 +286,6 @@ details.leg[open] summary::before { content: "–"; }
   <button role="tab" data-v="maintenant" aria-selected="true">Maintenant</button>
   <button role="tab" data-v="parcours"   aria-selected="false">Parcours</button>
   <button role="tab" data-v="horaires"   aria-selected="false">Horaires</button>
-  <button role="tab" data-v="infos"      aria-selected="false">Infos</button>
 </nav>
 
 <main>
@@ -308,7 +294,7 @@ details.leg[open] summary::before { content: "–"; }
   <section class="vue on" id="v-maintenant">
     <div class="bloc">
       <div class="lbl">Selon le plan, devrait être</div>
-      <div class="gros acc" id="ouLieu">—</div>
+      <div class="gros" id="ouLieu">—</div>
       <div class="sous" id="ouKm"></div>
       <div class="jauge"><i id="jauge" style="width:0%"></i></div>
       <div class="jauge-l"><span>COURMAYEUR</span><span id="pct">0 %</span><span>CHAMONIX</span></div>
@@ -322,7 +308,7 @@ details.leg[open] summary::before { content: "–"; }
     <div class="titre">Arrivée</div>
     <div class="bloc">
       <div class="fin"><span>Prévue à Chamonix</span><span class="h">05:30</span></div>
-      <div class="fin"><span>Heure limite</span><span class="h lim">12:00</span></div>
+      <div class="fin"><span>Heure limite de la course</span><span class="h lim">12:00</span></div>
     </div>
   </section>
 
@@ -336,8 +322,8 @@ details.leg[open] summary::before { content: "–"; }
       <span><em class="pos"></em>position estimée</span>
       <button id="recentrer">Recentrer</button>
     </div>
-    <p class="avert">Le point orange est calculé d'après le plan. Ce n'est pas une position GPS
-      réelle : celle-ci est sur le tracker officiel.</p>
+    <p class="avert">Le point orange est calculé d'après le plan. Ce n'est pas une position
+      GPS réelle : celle-ci est sur le tracker officiel, en haut de page.</p>
 
     <div class="titre">Profil</div>
     <div class="profil" id="profilHote"></div>
@@ -345,17 +331,18 @@ details.leg[open] summary::before { content: "–"; }
     <div class="titre">Les 14 sections</div>
     <div class="defile">
       <table>
-        <thead><tr><th>section</th><th>dist</th><th>D+</th><th>D−</th>
+        <thead><tr><th>section</th><th>dist</th><th>montée</th><th>descente</th>
           <th>pente</th><th>durée</th><th>type</th></tr></thead>
         <tbody id="sections"></tbody>
       </table>
     </div>
+    <p class="defile-n">← faites glisser le tableau pour voir toutes les colonnes</p>
     <details class="leg"><summary>Que veulent dire ces colonnes ?</summary>
       <dl>
         <dt>Dist</dt><dd>Longueur de la section, en kilomètres.</dd>
-        <dt>D+</dt><dd>Mètres de montée sur la section.</dd>
-        <dt>D−</dt><dd>Mètres de descente sur la section.</dd>
-        <dt>Pente</dt><dd>Pente moyenne. Positive en montée, négative en descente.</dd>
+        <dt>Montée</dt><dd>Mètres à monter sur cette section seulement.</dd>
+        <dt>Descente</dt><dd>Mètres à descendre sur cette section seulement.</dd>
+        <dt>Pente</dt><dd>Pente moyenne. Positive quand ça monte, négative quand ça descend.</dd>
         <dt>Durée</dt><dd>Temps prévu pour parcourir la section.</dd>
         <dt>Type</dt><dd>Montée, descente, ou roulant quand le terrain est peu incliné.</dd>
       </dl>
@@ -368,75 +355,30 @@ details.leg[open] summary::before { content: "–"; }
     <div class="defile">
       <table>
         <thead><tr><th>point</th><th>km</th><th>reste</th><th>alt</th>
-          <th>D+ cum</th><th>D− cum</th><th>prévu</th><th>barrière</th><th>marge</th></tr></thead>
+          <th>montée<br>étape</th><th>descente<br>étape</th>
+          <th>montée<br>cumul</th><th>prévu</th><th>heure<br>limite</th><th>marge</th></tr></thead>
         <tbody id="marche"></tbody>
       </table>
     </div>
+    <p class="defile-n">← faites glisser le tableau pour voir toutes les colonnes</p>
     <details class="leg"><summary>Que veulent dire ces colonnes ?</summary>
       <dl>
         <dt>Km</dt><dd>Distance parcourue depuis le départ.</dd>
         <dt>Reste</dt><dd>Distance restant à parcourir jusqu'à l'arrivée.</dd>
-        <dt>Alt</dt><dd>Altitude du point, en mètres.</dd>
-        <dt>D+ cum</dt><dd>Total de montée accumulée depuis le départ.</dd>
-        <dt>D− cum</dt><dd>Total de descente accumulée depuis le départ.</dd>
-        <dt>Prévu</dt><dd>Heure de passage estimée dans le plan.</dd>
-        <dt>Barrière</dt><dd>Heure limite. Après cette heure, la course est terminée.</dd>
-        <dt>Marge</dt><dd>Temps d'avance sur la barrière si le plan est tenu.</dd>
+        <dt>Alt</dt><dd>Altitude du point, en mètres au-dessus de la mer.</dd>
+        <dt>Montée étape</dt><dd>Mètres montés depuis le point précédent seulement.</dd>
+        <dt>Descente étape</dt><dd>Mètres descendus depuis le point précédent seulement.</dd>
+        <dt>Montée cumul</dt><dd>Total de montée accumulée depuis le départ.</dd>
+        <dt>Prévu</dt><dd>Heure de passage estimée dans le plan. Le tilde signifie une estimation
+          sur un sommet, sans pointage officiel.</dd>
+        <dt>Heure limite</dt><dd>Passé cette heure, un coureur est arrêté et sa course
+          est terminée. C'est ce qu'on appelle une barrière horaire.</dd>
+        <dt>Marge</dt><dd>Temps d'avance sur cette heure limite, si le plan est tenu.</dd>
       </dl>
     </details>
-    <p class="avert">Les points en clair sont les ravitaillements et contrôles officiels.
-      Les points grisés sont des sommets, sans arrêt ni heure limite.</p>
-  </section>
-
-  <!-- ================================================= INFOS -->
-  <section class="vue" id="v-infos">
-    <div class="titre">Notes de course</div>
-    <div class="bloc notes">
-      <dl>
-        <dt>Format</dt><dd>Course en semi-autonomie. Matériel obligatoire contrôlé.
-          Ravitaillements liquides et solides aux points indiqués.</dd>
-        <dt>Barrières</dt><dd>Horaire limite à chaque point de contrôle.
-          Dépassement : fin de course.</dd>
-        <dt>Nuit</dt><dd>Le jour tombe vers 20:30, à Champex, km 55, et se lève vers 06:30.
-          Environ dix heures de course de nuit.</dd>
-        <dt>Stratégie</dt><dd>Montées en marche rapide, portions roulantes et descentes
-          en course. Fréquence cardiaque plafonnée sur la première moitié.</dd>
-        <dt>Vagues</dt><dd>Départ échelonné en plusieurs groupes. Pierre part en vague 2,
-          à 09:15.</dd>
-      </dl>
-    </div>
-
-    <div class="titre">Vocabulaire</div>
-    <div class="bloc glossaire">
-      <dl>
-        <dt>Ravitaillement</dt>
-        <dd>Point où les organisateurs fournissent eau et nourriture.
-          Le coureur peut s'y arrêter quelques minutes.</dd>
-        <dt>Barrière horaire</dt>
-        <dd>Heure limite de passage à un point de contrôle.
-          Un coureur qui arrive après est arrêté.</dd>
-        <dt>D+ et D−</dt>
-        <dd>Dénivelé positif, la montée, et négatif, la descente, en mètres cumulés.</dd>
-        <dt>Sac d'allègement</dt>
-        <dd>Sac déposé avant le départ et retrouvé à mi-parcours, à Champex, km 55.
-          Il contient des affaires sèches.</dd>
-        <dt>Semi-autonomie</dt>
-        <dd>Le coureur porte lui-même son eau, sa nourriture et son matériel de
-          sécurité entre les ravitaillements.</dd>
-        <dt>Vague</dt>
-        <dd>Le départ est échelonné en plusieurs groupes, pour éviter les bouchons
-          sur les sentiers.</dd>
-      </dl>
-    </div>
-
-    <div class="titre">Position réelle</div>
-    <div class="bloc">
-      <p style="margin:0;font-size:14px;line-height:1.55;color:var(--doux)">
-        Cette page ne connaît pas la position réelle de Pierre : elle affiche uniquement
-        son plan. La position mesurée par l'organisation est sur le tracker officiel.</p>
-      <a class="lien" id="lienTracker2" href="#" target="_blank" rel="noopener"
-         style="margin-top:14px"><span></span>Tracker officiel UTMB</a>
-    </div>
+    <p class="avert">Les lignes en clair sont les ravitaillements et les points de contrôle
+      officiels : c'est là que Pierre est pointé. Les lignes grisées sont des sommets,
+      sans arrêt ni heure limite.</p>
   </section>
 
   <footer class="pied">
@@ -464,30 +406,33 @@ var DEPART = new Date("2026-08-28T09:15:00+02:00");
 var FIN    = new Date("2026-08-29T12:00:00+02:00");
 var KM_NUIT = 54.9;
 
-/* D+ et D- cumules : calcules sur le trace officiel, segment par segment,
-   bruit altimetrique filtre. `r` marque les ravitaillements et controles. */
+/* dp/dm : denivele DE L'ETAPE, depuis le point precedent.
+   dpc/dmc : cumul depuis le depart. Les deux, parce que « +647 m sur cette
+   montee » et « +4 865 m dans les jambes » ne disent pas la meme chose.
+   Calcules sur le trace officiel ; ils tombent au metre pres sur les valeurs
+   publiees par LiveTrail pour la CCC 2026. */
 var POINTS = [
-  { nom:"Courmayeur",         km:0.0,   alt:1221, dpc:0,    dmc:0,    h:"09:15", t:"depart", r:1 },
-  { nom:"Tête de la Tronche", km:9.4,   alt:2543, dpc:1418, dmc:95,   h:"12:05", t:"sommet" },
-  { nom:"Refuge Bertone",     km:13.6,  alt:1982, dpc:1436, dmc:676,  h:"12:37", b:"13:45", t:"ravito", r:1 },
-  { nom:"Refuge Bonatti",     km:21.2,  alt:2027, dpc:1759, dmc:953,  h:"13:30", t:"sommet" },
-  { nom:"Arnouvaz",           km:26.3,  alt:1777, dpc:1908, dmc:1349, h:"14:28", b:"16:30", t:"ravito", r:1 },
-  { nom:"Grand Col Ferret",   km:30.9,  alt:2527, dpc:2669, dmc:1358, h:"16:00", t:"sommet" },
-  { nom:"La Fouly",           km:40.7,  alt:1604, dpc:2773, dmc:2386, h:"17:06", b:"20:15", t:"ravito", r:1 },
-  { nom:"Champex-Lac",        km:54.9,  alt:1472, dpc:3372, dmc:3117, h:"19:24", b:"23:15", t:"base", r:1 },
-  { nom:"Plan de l'Au",       km:59.8,  alt:1340, dpc:3446, dmc:3325, h:"20:24", b:"00:15", t:"pointage", r:1 },
-  { nom:"La Giète",           km:66.3,  alt:1885, dpc:4177, dmc:3509, h:"21:55", t:"sommet" },
-  { nom:"Trient",             km:71.5,  alt:1304, dpc:4218, dmc:4132, h:"22:51", b:"04:00", t:"ravito", r:1 },
-  { nom:"Les Tseppes",        km:75.2,  alt:1936, dpc:4865, dmc:4148, h:"00:15", t:"sommet" },
-  { nom:"Vallorcine",         km:82.5,  alt:1260, dpc:5026, dmc:4985, h:"01:40", b:"07:15", t:"ravito", r:1 },
-  { nom:"La Flégère",         km:93.7,  alt:1882, dpc:5992, dmc:5327, h:"04:35", b:"10:45", t:"ravito", r:1 },
-  { nom:"Chamonix",           km:100.9, alt:1035, dpc:6013, dmc:6193, h:"05:30", b:"12:00", t:"arrivee", r:1 }
+  { nom:"Courmayeur",         km:0.0,   alt:1221, dp:0,    dm:0,    dpc:0,    dmc:0,    h:"09:15", t:"depart", r:1 },
+  { nom:"Tête de la Tronche", km:9.4,   alt:2543, dp:1418, dm:95,   dpc:1418, dmc:95,   h:"12:05", t:"sommet" },
+  { nom:"Refuge Bertone",     km:13.6,  alt:1982, dp:18,   dm:581,  dpc:1436, dmc:676,  h:"12:37", b:"13:45", t:"ravito", r:1 },
+  { nom:"Refuge Bonatti",     km:21.2,  alt:2027, dp:323,  dm:277,  dpc:1759, dmc:953,  h:"13:30", t:"sommet" },
+  { nom:"Arnouvaz",           km:26.3,  alt:1777, dp:149,  dm:396,  dpc:1908, dmc:1349, h:"14:28", b:"16:30", t:"ravito", r:1 },
+  { nom:"Grand Col Ferret",   km:30.9,  alt:2527, dp:761,  dm:9,    dpc:2669, dmc:1358, h:"16:00", t:"sommet" },
+  { nom:"La Fouly",           km:40.7,  alt:1604, dp:104,  dm:1028, dpc:2773, dmc:2386, h:"17:06", b:"20:15", t:"ravito", r:1 },
+  { nom:"Champex-Lac",        km:54.9,  alt:1472, dp:599,  dm:731,  dpc:3372, dmc:3117, h:"19:24", b:"23:15", t:"base", r:1 },
+  { nom:"Plan de l'Au",       km:59.8,  alt:1340, dp:74,   dm:208,  dpc:3446, dmc:3325, h:"20:24", b:"00:15", t:"pointage", r:1 },
+  { nom:"La Giète",           km:66.3,  alt:1885, dp:731,  dm:184,  dpc:4177, dmc:3509, h:"21:55", t:"sommet" },
+  { nom:"Trient",             km:71.5,  alt:1304, dp:41,   dm:623,  dpc:4218, dmc:4132, h:"22:51", b:"04:00", t:"ravito", r:1 },
+  { nom:"Les Tseppes",        km:75.2,  alt:1936, dp:647,  dm:16,   dpc:4865, dmc:4148, h:"00:15", t:"sommet" },
+  { nom:"Vallorcine",         km:82.5,  alt:1260, dp:161,  dm:837,  dpc:5026, dmc:4985, h:"01:40", b:"07:15", t:"ravito", r:1 },
+  { nom:"La Flégère",         km:93.7,  alt:1882, dp:966,  dm:342,  dpc:5992, dmc:5327, h:"04:35", b:"10:45", t:"ravito", r:1 },
+  { nom:"Chamonix",           km:100.9, alt:1035, dp:21,   dm:866,  dpc:6013, dmc:6193, h:"05:30", b:"12:00", t:"arrivee", r:1 }
 ];
 
 var SECTIONS = [
-  { de:"Courmayeur", a:"Tête de la Tronche", km:9.4, dp:1418, dm:95,  pente:14.1,  duree:"2 h 50", t:"montee" },
+  { de:"Courmayeur", a:"Tête de la Tronche", km:9.4, dp:1418, dm:95, pente:14.1, duree:"2 h 50", t:"montee" },
   { de:"Tête de la Tronche", a:"Refuge Bertone", km:4.2, dp:18, dm:581, pente:-13.4, duree:"32 min", t:"descente" },
-  { de:"Refuge Bertone", a:"Refuge Bonatti", km:7.5, dp:323, dm:277, pente:0.6,  duree:"53 min", t:"roulant" },
+  { de:"Refuge Bertone", a:"Refuge Bonatti", km:7.5, dp:323, dm:277, pente:0.6, duree:"53 min", t:"roulant" },
   { de:"Refuge Bonatti", a:"Arnouvaz", km:5.2, dp:149, dm:396, pente:-4.8, duree:"58 min", t:"descente" },
   { de:"Arnouvaz", a:"Grand Col Ferret", km:4.5, dp:761, dm:9, pente:16.7, duree:"1 h 32", t:"montee" },
   { de:"Grand Col Ferret", a:"La Fouly", km:9.9, dp:104, dm:1028, pente:-9.3, duree:"1 h 06", t:"descente" },
@@ -538,7 +483,6 @@ function ou(now) {
   return { km: DISTANCE, i: POINTS.length - 1, fini: true };
 }
 
-/* ------------------------------------------------------------- bandeau */
 function majBandeau(now) {
   var b = document.getElementById('bandeau');
   if (now < DEPART) {
@@ -554,7 +498,6 @@ function majBandeau(now) {
   }
 }
 
-/* ---------------------------------------------------------- maintenant */
 function majMaintenant(now) {
   var p = ou(now);
   var lieu = document.getElementById('ouLieu'), k = document.getElementById('ouKm');
@@ -575,14 +518,12 @@ function majMaintenant(now) {
   var suite = POINTS.filter(function (x) { return x.date > now; }).slice(0, 3);
   document.getElementById('suite').innerHTML = suite.length
     ? suite.map(function (x) {
-        return '<div><b>' + x.nom + '</b>' +
-          '<span class="k">km ' + km1(x.km) + '</span>' +
+        return '<div><b>' + x.nom + '</b><span class="k">km ' + km1(x.km) + '</span>' +
           '<span class="h">' + (x.r ? '' : '~') + hh(x.date) + '</span></div>';
       }).join('')
     : '<div><b>Course terminée</b></div>';
 }
 
-/* ------------------------------------------------------------ tableaux */
 function majMarche(now) {
   var p = ou(now);
   document.getElementById('marche').innerHTML = POINTS.map(function (x, i) {
@@ -593,8 +534,9 @@ function majMarche(now) {
       '<td class="c-k">' + km1(x.km) + '</td>' +
       '<td class="c-k">' + km1(DISTANCE - x.km) + '</td>' +
       '<td class="c-k">' + mil(x.alt) + '</td>' +
+      '<td class="c-e up">' + (x.dp ? '+' + mil(x.dp) : '—') + '</td>' +
+      '<td class="c-e dn">' + (x.dm ? '−' + mil(x.dm) : '—') + '</td>' +
       '<td class="c-d">+' + mil(x.dpc) + '</td>' +
-      '<td class="c-d">−' + mil(x.dmc) + '</td>' +
       '<td class="c-h">' + (x.r ? '' : '~') + hh(x.date) + '</td>' +
       '<td class="c-b">' + (x.bdate ? hh(x.bdate) : '—') + '</td>' +
       '<td class="c-m">' + (x.marge || '—') + '</td></tr>';
@@ -607,15 +549,14 @@ function majSections() {
     return '<tr class="s-' + s.t + '">' +
       '<td class="pt-n" style="font-size:13.5px">' + s.de + ' → ' + s.a + '</td>' +
       '<td class="c-k">' + km1(s.km) + '</td>' +
-      '<td class="c-d">+' + mil(s.dp) + '</td>' +
-      '<td class="c-d">−' + mil(s.dm) + '</td>' +
+      '<td class="c-e up">+' + mil(s.dp) + '</td>' +
+      '<td class="c-e dn">−' + mil(s.dm) + '</td>' +
       '<td class="c-k">' + s.pente.toFixed(1).replace('.', ',') + ' %</td>' +
       '<td class="c-k">' + s.duree + '</td>' +
       '<td class="s-type">' + lbl + '</td></tr>';
   }).join('');
 }
 
-/* --------------------------------------------------------------- profil */
 function majProfil(now) {
   if (!TRACE) return;
   var L = 660, H = 190, mb = 22, mt = 12;
@@ -632,24 +573,24 @@ function majProfil(now) {
     '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" ' +
       'aria-label="Profil altimétrique, de 1 035 à 2 543 mètres">' +
     '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#D8B4FE" stop-opacity=".38"/>' +
-      '<stop offset="100%" stop-color="#D8B4FE" stop-opacity=".04"/></linearGradient></defs>' +
+      '<stop offset="0%" stop-color="#79B935" stop-opacity=".45"/>' +
+      '<stop offset="100%" stop-color="#79B935" stop-opacity=".04"/></linearGradient></defs>' +
     '<rect x="' + X(KM_NUIT) + '" y="0" width="' + (L - X(KM_NUIT)) + '" height="' + (H - mb) +
-      '" fill="#A8B2E8" opacity=".1"/>' +
-    '<text x="' + (X(KM_NUIT) + 6) + '" y="15" fill="#A8B2E8" font-size="9" ' +
+      '" fill="#000D44" opacity=".55"/>' +
+    '<text x="' + (X(KM_NUIT) + 6) + '" y="15" fill="#9DA7AF" font-size="9" ' +
       'font-family="ui-monospace,monospace" letter-spacing="1">NUIT</text>' +
     '<path d="' + d + 'L' + L + ' ' + (H - mb) + 'L0 ' + (H - mb) + 'Z" fill="url(#g)"/>' +
-    '<path d="' + d + '" fill="none" stroke="#D8B4FE" stroke-width="1.8" stroke-linejoin="round"/>' +
+    '<path d="' + d + '" fill="none" stroke="#79B935" stroke-width="1.9" stroke-linejoin="round"/>' +
     POINTS.map(function (x) {
-      return '<circle cx="' + X(x.km) + '" cy="' + Y(x.alt) + '" r="' + (x.r ? 3 : 2.2) +
-        '" fill="' + (x.r ? '#7DE8C6' : '#FBC96B') + '"/>';
+      return '<circle cx="' + X(x.km) + '" cy="' + Y(x.alt) + '" r="' + (x.r ? 3.2 : 2.2) +
+        '" fill="' + (x.r ? '#9BD65C' : '#F0A93B') + '"/>';
     }).join('') +
     (p.avant || p.fini ? '' :
       '<line x1="' + cx + '" y1="' + mt + '" x2="' + cx + '" y2="' + (H - mb) +
-        '" stroke="#FBC96B" stroke-width="1.6"/>') +
-    '<text x="2" y="' + (H - 6) + '" fill="#949CBE" font-size="9" ' +
+        '" stroke="#F0A93B" stroke-width="1.8"/>') +
+    '<text x="2" y="' + (H - 6) + '" fill="#9DA7AF" font-size="9" ' +
       'font-family="ui-monospace,monospace">0 km</text>' +
-    '<text x="' + (L - 2) + '" y="' + (H - 6) + '" fill="#949CBE" font-size="9" ' +
+    '<text x="' + (L - 2) + '" y="' + (H - 6) + '" fill="#9DA7AF" font-size="9" ' +
       'font-family="ui-monospace,monospace" text-anchor="end">100,9 km</text>' +
     '</svg>';
 }
@@ -666,19 +607,20 @@ function bati(data) {
   document.getElementById('attrib').textContent =
     '© OpenStreetMap contributors, SRTM · © OpenTopoMap (CC-BY-SA)';
 
-  L.polyline(pts, { color: '#0D0A22', weight: 6, opacity: .45 }).addTo(carte);
-  L.polyline(pts, { color: '#F6F7FC', weight: 2.5, opacity: .8,
+  L.polyline(pts, { color: '#00121D', weight: 6, opacity: .5 }).addTo(carte);
+  L.polyline(pts, { color: '#FFFFFF', weight: 2.5, opacity: .8,
                     dashArray: '2 7', lineCap: 'round' }).addTo(carte);
-  fait = L.polyline([], { color: '#D8B4FE', weight: 5, opacity: .95 }).addTo(carte);
+  fait = L.polyline([], { color: '#79B935', weight: 5, opacity: .98 }).addTo(carte);
 
   data.wpt.forEach(function (w) {
     var p = POINTS.filter(function (q) { return Math.abs(q.km - w[3]) < 0.6; })[0] || {};
     L.circleMarker([w[1], w[2]], {
-      radius: p.r ? 6.5 : 5, color: '#0D0A22', weight: 2,
-      fillColor: p.r ? '#7DE8C6' : '#FBC96B', fillOpacity: 1
+      radius: p.r ? 6.5 : 5, color: '#00121D', weight: 2,
+      fillColor: p.r ? '#9BD65C' : '#F0A93B', fillOpacity: 1
     }).addTo(carte).bindPopup(
       '<b>' + (p.nom || w[0]) + '</b>' +
       '<div class="pk">km ' + km1(w[3]) + ' · ' + mil(w[4]) + ' m</div>' +
+      (p.dp ? '<div class="pk">étape : +' + mil(p.dp) + ' m / −' + mil(p.dm) + ' m</div>' : '') +
       (p.date ? '<div class="ph">passage prévu ' + hh(p.date) + '</div>' : '') +
       (p.bdate ? '<div class="pb">heure limite ' + hh(p.bdate) + '</div>' : ''));
   });
@@ -735,7 +677,7 @@ function majCarte(now) {
 }
 
 /* --------------------------------------------------------------- onglets */
-var VUES = ['maintenant', 'parcours', 'horaires', 'infos'];
+var VUES = ['maintenant', 'parcours', 'horaires'];
 function montre(v) {
   if (VUES.indexOf(v) < 0) v = 'maintenant';
   VUES.forEach(function (x) {
@@ -745,21 +687,18 @@ function montre(v) {
     b.setAttribute('aria-selected', b.dataset.v === v ? 'true' : 'false');
   });
   try { sessionStorage.setItem('ccc-suivi-vue', v); } catch (e) {}
-  // la carte doit se remesurer : masquee, elle avait une hauteur nulle
   if (v === 'parcours' && window.recadrer) setTimeout(window.recadrer, 40);
 }
 document.querySelectorAll('.onglets button').forEach(function (b) {
   b.addEventListener('click', function () { montre(b.dataset.v); window.scrollTo(0, 0); });
 });
 
-/* ---------------------------------------------------------------- boucle */
 function tout() {
   var now = new Date();
   majBandeau(now); majMaintenant(now); majMarche(now); majProfil(now); majCarte(now);
 }
 
 document.getElementById('lienTracker').href = TRACKER;
-document.getElementById('lienTracker2').href = TRACKER;
 document.getElementById('partage').addEventListener('click', function () {
   var url = location.href.split('#')[0], b = this;
   (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject())
