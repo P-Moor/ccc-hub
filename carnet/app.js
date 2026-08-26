@@ -636,12 +636,12 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-35';
+const VERSION = 'ccc-v2-carnet-36';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
    coffre perime alors que l'ancien fichier est parfaitement valide. */
-const COFFRE_ATTENDU = 'ccc-v2-carnet-33';
+const COFFRE_ATTENDU = 'ccc-v2-carnet-36';
 
 function ouvreDonnees() {
   const c = compteEtat();
@@ -2762,6 +2762,119 @@ function tracePhysio24() {
       '<div class="p24-sv">' + S.surveillance + '</div></div>';
 }
 
+/* Les quatre cartes plastifiees, en entier. L'app porte le MEME contenu que
+   le papier : si une carte se detrempe ou se perd, rien n'est perdu. Chaque
+   carte a un recto et un verso, comme la vraie. */
+
+const carteRecto = {
+  pacing: r =>
+    '<div class="ka-def"><table class="ka-p"><tr><th>point</th><th>km</th><th>reste</th>' +
+      '<th>cible</th><th>barr.</th><th>marge</th></tr>' +
+    r.lignes.map(l => '<tr class="' + (l.fort ? 'fort ' : '') +
+      (l.alerte ? 'al ' : '') + (l.haut ? 'haut ' : '') + (l.dur ? 'dur' : '') + '">' +
+      '<td class="ka-n">' + l.p + '</td><td>' + l.km + '</td>' +
+      '<td class="ka-r">' + l.r + '</td><td class="ka-c">' + l.c + '</td>' +
+      '<td class="ka-b">' + l.b + '</td><td class="ka-m">' + l.m + '</td></tr>').join('') +
+    '</table></div>' +
+    r.alertes.map(a => '<div class="ka-al">' + a + '</div>').join(''),
+
+  plans: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    '<table class="ka-b2">' + r.planB.map(x =>
+      '<tr class="' + (x.fort ? 'fort' : '') + '"><td>' + x.p + '</td>' +
+      '<td class="ka-c">' + x.h + '</td><td class="ka-m">' + x.m + '</td></tr>').join('') + '</table>' +
+    '<div class="ka-t rouge">' + r.survieTitre + '</div>' +
+    '<div class="ka-sv">' + r.survie.map(x =>
+      '<div><i>' + x.p + '</i><b>' + x.h + '</b></div>').join('') + '</div>' +
+    '<div class="ka-cle"><b>' + r.cle.titre + '</b>' +
+      '<div class="ka-ch">' + r.cle.chiffre + '</div>' +
+      '<p>' + r.cle.txt + '</p></div>',
+
+  protocole: r =>
+    '<div class="ka-t">' + r.titre + '<small>' + r.sousTitre + '</small></div>' +
+    r.etapes.map(e => '<div class="ka-e' + (e.cle ? ' cle' : '') + '">' +
+      '<b>' + e.n + '</b><div>' + e.txt +
+      (e.alerte ? '<em>' + e.alerte + '</em>' : '') + '</div></div>').join(''),
+
+  trient: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    r.etapes.map(e => '<div class="ka-e' + (e.cle ? ' cle' : '') + '">' +
+      '<b>' + e.n + '</b><div>' + e.txt + '</div></div>').join('') +
+    '<div class="ka-mt">' + r.mental + '</div>' +
+    '<div class="ka-t">' + r.cafeineTitre + '</div>' +
+    '<table class="ka-caf">' + r.cafeine.map(c =>
+      '<tr><td>' + c.n + '</td><td>' + c.ou +
+      (c.note ? '<small>' + c.note + '</small>' : '') + '</td>' +
+      '<td>' + c.quoi + '</td><td class="ka-mg">' + c.mg + '</td></tr>').join('') + '</table>' +
+    r.cafeineRegles.map(x => '<div class="ka-al">' + x + '</div>').join('') +
+    '<div class="ka-t">' + r.modesTitre + '</div>' +
+    r.modes.map(m => '<div class="ka-md' + (m.fort ? ' fort' : '') + '">' +
+      '<b>' + m.m + '</b><span>' + m.ou + '</span></div>').join('') +
+    '<div class="ka-mn">' + r.modesNote + '</div>',
+
+  regles: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    r.regles.map(x => '<div class="ka-rg' + (x.cle ? ' cle' : '') + '">' +
+      '<b>' + x.n + '</b><div><span>' + x.t + '</span><small>' + x.s + '</small></div></div>').join('') +
+    '<div class="ka-cle"><b>' + r.marge.titre + '</b>' +
+      '<p>' + r.marge.txt + '</p>' +
+      '<div class="ka-dv">' + r.marge.devise + '</div></div>',
+
+  arbre: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    r.branches.map(b => '<div class="ka-br ' + b.c + '">' +
+      '<b>' + b.t + '</b><div class="ka-ac">' + b.a + '</div>' +
+      '<p>' + b.d + '</p></div>').join('') +
+    '<div class="ka-sg">' + r.signal + '</div>' +
+    '<div class="ka-t">' + r.chaussettes.titre + '</div>' +
+    '<div class="ka-ck"><b>' + r.chaussettes.depart + '</b>' +
+      '<div class="ka-ok">' + r.chaussettes.garde + '</div>' +
+      '<div class="ka-no">' + r.chaussettes.change + '</div>' +
+      '<small>' + r.chaussettes.ou + '</small></div>' +
+    '<div class="ka-an"><b>' + r.analgesie.titre + '</b><p>' + r.analgesie.txt + '</p></div>',
+
+  contacts: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    '<div class="ka-ec"><b>' + r.aEcrire.quoi + '</b>' +
+      '<div class="ka-vide"></div><small>' + r.aEcrire.txt + '</small></div>' +
+    '<div class="ka-pv">' + r.prive + '</div>' +
+    '<div class="ka-al">' + r.codeNote + '</div>',
+
+  arrivee: r =>
+    '<div class="ka-t">' + r.titre + '</div>' +
+    '<ul class="ka-ar">' + r.liste.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+    '<div class="ka-bl"><b>' + r.balise.txt + '</b>' +
+      '<div>' + r.balise.ou + ' &#183; <em>' + r.balise.enjeu + '</em></div>' +
+      '<p>' + r.balise.note + '</p></div>'
+};
+
+const faceCarte = f => (carteRecto[f.type] || (() => ''))(f);
+
+function traceCartes() {
+  const h = document.getElementById('cartesHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="cx-n">' + CARTES.note + '</div>' +
+    CARTES.liste.map(c =>
+      '<details class="cx" data-cx="' + c.n + '">' +
+        '<summary><b>' + c.n + '</b>' +
+          '<div><span>' + c.titre + '</span><i>' + c.ou + '</i>' +
+          '<em>' + c.sous + '</em></div></summary>' +
+        '<p class="cx-pq">' + c.pourquoi + '</p>' +
+        '<div class="cx-face"><div class="cx-lb">recto</div>' + faceCarte(c.recto) + '</div>' +
+        '<div class="cx-face"><div class="cx-lb">verso</div>' + faceCarte(c.verso) + '</div>' +
+      '</details>').join('') +
+    '<div class="cx-r">' + CARTES.rappel + '</div>' +
+    '<button class="dn-btn plein large" id="cxImp">Imprimer les 4 cartes</button>';
+
+  const b = document.getElementById('cxImp');
+  if (b) b.addEventListener('click', () => {
+    // a l'impression, tout doit etre deplie : un <details> ferme ne s'imprime pas
+    h.querySelectorAll('details').forEach(d => d.open = true);
+    setTimeout(() => window.print(), 60);
+  });
+}
+
 /* Le profil officiel UTMB. Il porte les pictogrammes de services par poste —
    repas chaud, assistance, sac de delestage — que notre profil vectoriel n'a
    pas. Il pese 370 Ko et se charge normalement : `loading="lazy"` ne se
@@ -2782,25 +2895,6 @@ function traceProfilOfficiel() {
     '<div class="po-a">Fais glisser vers la droite pour parcourir les 100 km. ' +
       'Touche l\'image pour l\'ouvrir en grand.</div>' +
     '<div class="po-s">' + PARCOURS.pointeLaSortie + '</div>';
-}
-
-/* Les quatre cartes plastifiees. L'app ne les remplace pas : elle permet de
-   les relire, et de les reimprimer si l'une se perd. */
-function traceCartes() {
-  const h = document.getElementById('cartesHote');
-  if (!h) return;
-  h.innerHTML =
-    '<div class="cx-n">' + CARTES.note + '</div>' +
-    CARTES.liste.map(c =>
-      '<div class="cx"><div class="cx-h"><b>' + c.n + '</b>' +
-        '<div><span>' + c.titre + '</span><i>' + c.ou + '</i></div></div>' +
-        '<div class="cx-f"><div><em>recto</em>' + c.recto + '</div>' +
-          '<div><em>verso</em>' + c.verso + '</div></div>' +
-        '<p>' + c.pourquoi + '</p></div>').join('') +
-    '<div class="cx-r">' + CARTES.rappel + '</div>' +
-    '<button class="dn-btn plein large" id="cxImp">Imprimer les cartes</button>';
-  const b = document.getElementById('cxImp');
-  if (b) b.addEventListener('click', () => window.print());
 }
 
 /* ==================== la carte ====================

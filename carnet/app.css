@@ -3307,3 +3307,187 @@ button.tl-ligne:active { background: var(--surface-2); }
   background: color-mix(in srgb, var(--jour) 11%, transparent);
   font-size: 13px; line-height: 1.5;
 }
+
+/* ==================== les cartes, en entier ====================
+   Le meme contenu que le papier. On garde chaque carte repliee par defaut :
+   quatre cartes deployees, c'est un mur de texte. */
+
+.cx { padding: 0; background: var(--surface-2); border: 1px solid var(--bord); }
+.cx > summary {
+  cursor: pointer; list-style: none; display: flex; gap: 11px;
+  align-items: center; padding: 12px; min-height: var(--tap);
+}
+.cx > summary::-webkit-details-marker { display: none; }
+.cx > summary > b {
+  flex: 0 0 30px; height: 30px; border-radius: var(--r-xs);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--sur-accent);
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+}
+.cx > summary span { display: block; font-family: var(--display); font-weight: 700; font-size: 15px; }
+.cx > summary i { display: block; font-style: normal; font-size: 11.5px; color: var(--texte-pale); }
+.cx > summary em {
+  display: block; font-style: normal; font-size: 12.5px;
+  color: var(--texte-doux); margin-top: 2px;
+}
+.cx-pq { margin: 0 12px 10px; font-size: 12.5px; line-height: 1.5; color: var(--texte-pale); }
+.cx-face { margin: 0 12px 12px; padding: 12px; border-radius: var(--r-s); background: var(--surface); }
+.cx-lb {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--texte-pale); margin-bottom: 9px;
+}
+
+.ka-t {
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+  margin: 14px 0 9px; line-height: 1.3;
+}
+.ka-t:first-of-type { margin-top: 0; }
+.ka-t small { display: block; font-family: var(--corps); font-weight: 400; font-size: 12.5px; color: var(--texte-pale); }
+.ka-t.rouge { color: var(--alerte); }
+
+/* La table de pacing porte six colonnes : elle ne tient pas dans 375 px sans
+   casser les noms de points en morceaux. Elle defile donc horizontalement,
+   comme le profil officiel. */
+.ka-def { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.ka-p { min-width: 340px; }
+.ka-p td, .ka-p th { white-space: nowrap; }
+.ka-p, .ka-b2, .ka-caf { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.ka-p th {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--texte-pale); font-weight: 400;
+  text-align: right; padding-bottom: 5px; border-bottom: 1px solid var(--bord);
+}
+.ka-p th:first-child { text-align: left; }
+.ka-p td { padding: 5px 0 5px 4px; text-align: right; font-size: 11.5px; border-top: 1px solid var(--bord); }
+.ka-p .ka-n { text-align: left; padding-left: 0; font-size: 12px; }
+.ka-p tr.fort td { font-weight: 700; }
+.ka-p tr.fort .ka-c, .ka-p tr.fort .ka-m { color: var(--accent-txt); }
+.ka-p tr.al td { background: color-mix(in srgb, var(--jour) 12%, transparent); }
+.ka-p tr.haut td { background: color-mix(in srgb, var(--torrent) 10%, transparent); }
+.ka-p tr.dur td { background: color-mix(in srgb, var(--alerte) 10%, transparent); }
+.ka-b { color: var(--alerte); }
+.ka-r { color: var(--texte-pale); font-family: var(--mono); font-size: 10.5px; }
+
+.ka-al {
+  margin-top: 8px; padding: 8px 10px; border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+  font-size: 12.5px; line-height: 1.4; font-weight: 600;
+}
+
+.ka-b2 td { padding: 5px 0; font-size: 12.5px; border-top: 1px solid var(--bord); text-align: right; }
+.ka-b2 td:first-child { text-align: left; }
+.ka-b2 tr.fort td { font-weight: 700; color: var(--accent-txt); }
+.ka-sv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ka-sv > div {
+  padding: 7px 6px; border-radius: var(--r-xs); text-align: center;
+  background: color-mix(in srgb, var(--alerte) 11%, transparent);
+}
+.ka-sv i { display: block; font-style: normal; font-size: 10px; color: var(--texte-pale); }
+.ka-sv b { display: block; font-family: var(--mono); font-size: 13px; font-weight: 700; }
+
+.ka-cle {
+  margin-top: 12px; padding: 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-left: 3px solid var(--ok); text-align: center;
+}
+.ka-cle b { font-family: var(--display); font-weight: 700; font-size: 14px; }
+.ka-ch { font-family: var(--display); font-weight: 700; font-size: 24px; margin: 5px 0; }
+.ka-cle p { margin: 0; font-size: 13px; line-height: 1.45; }
+.ka-dv { margin-top: 7px; font-size: 13px; font-weight: 700; line-height: 1.4; }
+
+/* les protocoles numerotes */
+.ka-e { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--bord); }
+.ka-e:first-of-type { border-top: 0; }
+.ka-e > b {
+  flex: 0 0 21px; height: 21px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); color: var(--texte-doux);
+  font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+}
+.ka-e.cle > b { background: var(--alerte); color: var(--sur-accent); }
+.ka-e > div { flex: 1; font-size: 13px; line-height: 1.4; }
+.ka-e.cle > div { font-weight: 700; }
+.ka-e em {
+  display: block; margin-top: 4px; font-style: normal; font-size: 12px;
+  color: var(--alerte); font-weight: 700;
+}
+.ka-mt {
+  margin-top: 10px; padding: 10px; border-radius: var(--r-s); text-align: center;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-size: 13px; font-weight: 700; line-height: 1.4;
+}
+
+.ka-caf td { padding: 5px 0 5px 5px; font-size: 12.5px; border-top: 1px solid var(--bord); }
+.ka-caf td:first-child { color: var(--texte-pale); font-family: var(--mono); padding-left: 0; }
+.ka-caf small { display: block; font-size: 10.5px; color: var(--texte-pale); }
+.ka-mg { text-align: right; font-family: var(--mono); font-weight: 700; }
+
+.ka-md { display: flex; gap: 10px; padding: 7px 0; border-top: 1px solid var(--bord); }
+.ka-md b { flex: 0 0 108px; font-family: var(--mono); font-size: 11px; }
+.ka-md span { flex: 1; font-size: 12.5px; line-height: 1.4; color: var(--texte-doux); }
+.ka-md.fort b, .ka-md.fort span { font-weight: 700; color: var(--texte); }
+.ka-mn { margin-top: 8px; font-size: 12.5px; font-weight: 600; }
+
+/* les regles */
+.ka-rg { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--bord); }
+.ka-rg:first-of-type { border-top: 0; }
+.ka-rg > b {
+  flex: 0 0 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--sur-accent);
+  font-family: var(--display); font-size: 12px; font-weight: 700;
+}
+.ka-rg.cle > b { background: var(--alerte); color: var(--sur-accent); }
+.ka-rg span { display: block; font-size: 13.5px; font-weight: 700; line-height: 1.35; }
+.ka-rg small { display: block; margin-top: 3px; font-size: 12.5px; color: var(--texte-doux); }
+
+/* l'arbre de decision */
+.ka-br { padding: 10px 12px; margin-bottom: 8px; border-radius: var(--r-s); border-left: 3px solid var(--bord); }
+.ka-br.vert   { background: color-mix(in srgb, var(--ok) 11%, transparent);     border-left-color: var(--ok); }
+.ka-br.orange { background: color-mix(in srgb, var(--jour) 11%, transparent);   border-left-color: var(--jour); }
+.ka-br.rouge  { background: color-mix(in srgb, var(--alerte) 11%, transparent); border-left-color: var(--alerte); }
+.ka-br b { font-size: 13.5px; font-weight: 700; line-height: 1.35; }
+.ka-ac { margin-top: 5px; font-size: 14px; font-weight: 700; }
+.ka-br p { margin: 4px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--texte-doux); }
+.ka-sg {
+  margin-top: 10px; padding: 10px; border-radius: var(--r-s); text-align: center;
+  background: var(--surface-2); font-size: 13px; font-weight: 700; line-height: 1.4;
+}
+.ka-ck { padding: 11px 12px; border-radius: var(--r-s); background: var(--surface-2); }
+.ka-ck b { font-size: 13.5px; }
+.ka-ok { margin-top: 7px; font-size: 13px; font-weight: 600; color: var(--ok); }
+.ka-no { margin-top: 4px; font-size: 13px; font-weight: 600; color: var(--alerte); }
+.ka-ck small { display: block; margin-top: 6px; font-size: 12px; line-height: 1.4; color: var(--texte-pale); }
+.ka-an {
+  margin-top: 10px; padding: 11px 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 11%, transparent);
+}
+.ka-an b { font-size: 13.5px; font-weight: 700; }
+.ka-an p { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; }
+
+/* contacts et arrivee */
+.ka-ec { padding: 11px 12px; border-radius: var(--r-s); background: var(--surface-2); }
+.ka-ec b { font-size: 13.5px; }
+.ka-vide { height: 30px; border-bottom: 2px dashed var(--bord); margin: 8px 0 5px; }
+.ka-ec small { font-size: 11.5px; color: var(--texte-pale); }
+.ka-pv {
+  margin-top: 9px; padding: 10px 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  font-size: 12.5px; line-height: 1.45;
+}
+.ka-ar { margin: 0; padding-left: 19px; }
+.ka-ar li { font-size: 13px; line-height: 1.5; padding: 3px 0; }
+.ka-bl {
+  margin-top: 10px; padding: 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--alerte) 12%, transparent);
+  border-left: 3px solid var(--alerte);
+}
+.ka-bl b { font-family: var(--display); font-weight: 700; font-size: 14px; line-height: 1.3; }
+.ka-bl > div { margin-top: 5px; font-size: 13px; }
+.ka-bl em { font-style: normal; font-weight: 700; color: var(--alerte); }
+.ka-bl p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.45; }
+
+@media print {
+  .cx > summary { break-after: avoid; }
+  .cx-face { break-inside: avoid; page-break-inside: avoid; }
+}
