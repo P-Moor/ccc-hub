@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CCC 2026 — Plan de course · Pierre Moor 4330</title>
-<meta name="description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15. Tableau de marche, barrières horaires et carte du parcours.">
-<meta name="theme-color" content="#00121D">
+<meta name="description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15. Tableau de marche, barrières horaires, carte du parcours.">
+<meta name="theme-color" content="#0A0B0D">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="CCC 2026 — Plan de course · Pierre Moor #4330">
@@ -14,273 +14,288 @@
 <meta property="og:url" content="https://p-moor.github.io/ccc-hub/suivi/">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 /* ==========================================================================
-   Charte UTMB Mont-Blanc : fond #00121D, bleu profond #000D44, gris #9da7af,
-   et le VERT CCC #79b935 — celui que l'UTMB inscrit lui-meme dans le GPX
-   officiel de la course. Police Oxanium, celle de leur plateforme de suivi.
-   Roadbook, pas page d'ambiance : densite assumee, chiffres a chasse fixe.
+   Tableau de bord. Fond quasi noir, cartes a peine plus claires, un seul
+   accent — le vert #79B935 que l'UTMB inscrit dans le GPX officiel de la CCC.
+   Les chiffres sont gros et les libelles minuscules : on lit une valeur, pas
+   une phrase. Aucune decoration.
    ========================================================================== */
 :root {
-  --bg:        #00121D;
-  --surface:   #041D2B;
-  --surface-2: #000D44;
-  --bord:      #163346;
-  --texte:     #FFFFFF;
-  --doux:      #C3CCD3;
-  --pale:      #9DA7AF;
-  --ccc:       #79B935;
-  --ccc-clair: #9BD65C;
-  --barriere:  #FF7A66;
-  --montee:    #F0A93B;
-  --descente:  #5BA9E6;
-  --roulant:   #79B935;
-  --display: "Oxanium", -apple-system, "Segoe UI", Roboto, sans-serif;
-  --corps:   -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono:    ui-monospace, "SF Mono", Menlo, monospace;
-  --r: 12px; --tap: 46px;
+  --bg:      #0A0B0D;
+  --carte:   #131519;
+  --carte-2: #17191E;
+  --bord:    #23262C;
+  --bord-f:  #2E323A;
+  --texte:   #E9EBEE;
+  --doux:    #B6BCC5;
+  --pale:    #969CA6;   /* remonte le 26/08 : #71767F tombait a 3,9 sur ce fond */
+  --acc:     #79B935;
+  --acc-c:   #9BD65C;
+  --acc-f:   rgba(121,185,53,.14);
+  --montee:  #E8A33C;
+  --descente:#4E9FE0;
+  --limite:  #F0685A;
+  --sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --r: 12px; --tap: 44px;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--texte);
-  font-family: var(--corps); font-size: 15.5px; line-height: 1.5;
-  font-variant-numeric: tabular-nums; padding-bottom: 44px;
+  font-family: var(--sys); font-size: 15px; line-height: 1.5;
+  font-variant-numeric: tabular-nums; letter-spacing: -.005em;
+  padding-bottom: 40px;
 }
-.enveloppe { max-width: 700px; margin: 0 auto; }
-main { padding: 0 15px; }
+.env { max-width: 720px; margin: 0 auto; }
+main { padding: 0 14px; }
 
 /* -------------------------------------------------------------- en-tete */
-.tete {
-  padding: 22px 15px 18px;
-  background: linear-gradient(150deg, var(--surface-2), var(--bg) 72%);
-  border-bottom: 3px solid var(--ccc);
+.tete { padding: 20px 14px 16px; }
+.tete .ligne { display: flex; align-items: center; gap: 9px; }
+.tete .tag {
+  padding: 3px 8px; border-radius: 5px; background: var(--acc-f);
+  color: var(--acc-c); font-size: 11px; font-weight: 700; letter-spacing: .08em;
 }
-.tete .course {
-  display: inline-block; padding: 4px 11px; border-radius: 4px;
-  background: var(--ccc); color: #06210A;
-  font-family: var(--display); font-weight: 800; font-size: 13px;
-  letter-spacing: .16em;
-}
-.tete h1 {
-  margin: 11px 0 0; font-family: var(--display); font-weight: 800;
-  font-size: 25px; line-height: 1.15; letter-spacing: .01em;
-}
-.tete .l2 { margin-top: 6px; font-size: 14.5px; color: var(--doux); }
-.tete .l3 {
-  margin-top: 5px; font-family: var(--mono); font-size: 11px;
+.tete h1 { margin: 0; font-size: 19px; font-weight: 650; letter-spacing: -.01em; }
+.tete .meta {
+  margin-top: 7px; font-family: var(--mono); font-size: 11.5px;
   color: var(--pale); line-height: 1.65;
 }
-.tete .lien {
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  margin-top: 15px; min-height: var(--tap); padding: 0 18px; border-radius: 6px;
-  background: var(--ccc); color: #06210A; text-decoration: none;
-  font-family: var(--display); font-weight: 800; font-size: 14.5px;
-  letter-spacing: .09em; text-transform: uppercase;
+.tete .actions { display: flex; gap: 8px; margin-top: 14px; }
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--tap); padding: 0 16px; border-radius: 9px;
+  border: 1px solid var(--bord-f); background: var(--carte); color: var(--texte);
+  font-family: inherit; font-size: 13.5px; font-weight: 600;
+  text-decoration: none; cursor: pointer; white-space: nowrap;
 }
-.tete .lien span {
-  width: 8px; height: 8px; border-radius: 50%; background: #06210A;
-  animation: bat 2.4s infinite;
-}
+.btn.plein { flex: 1; background: var(--acc); border-color: var(--acc); color: #08210A; font-weight: 700; }
+.btn.plein i { width: 7px; height: 7px; border-radius: 50%; background: #08210A;
+               font-style: normal; animation: bat 2.4s infinite; }
 
-/* --------------------------------------------------------------- bandeau */
-.bandeau {
-  padding: 12px 15px; background: var(--surface-2);
+/* --------------------------------------------------------------- statut */
+.statut {
+  margin: 0 14px; padding: 11px 14px; border-radius: var(--r);
+  background: var(--carte); border: 1px solid var(--bord);
   font-family: var(--mono); font-size: 12px; color: var(--doux);
-  border-bottom: 1px solid var(--bord);
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
 }
-.bandeau b { color: var(--ccc-clair); font-weight: 700; }
+.statut .pt { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); flex: none; }
+.statut b { color: var(--texte); font-weight: 600; }
 
-/* --------------------------------------------------------------- onglets
-   Ils doivent se voir : quelqu'un qui decouvre la page ne devine pas qu'un
-   soulignement de 2 px est un onglet. Pastille pleine, vert CCC, en relief. */
+/* -------------------------------------------------------------- onglets */
 .onglets {
-  position: sticky; top: 0; z-index: 30;
-  display: flex; gap: 7px; padding: 10px 15px;
-  background: rgba(0,18,29,.95);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--bord);
+  position: sticky; top: 0; z-index: 30; display: flex; gap: 6px;
+  padding: 12px 14px; background: rgba(10,11,13,.94);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
 }
 .onglets button {
-  flex: 1; min-height: var(--tap); padding: 0 6px; border-radius: 7px;
-  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
-  font-family: var(--display); font-weight: 700; font-size: 13.5px;
-  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
+  flex: 1; min-height: 42px; border-radius: 9px;
+  border: 1px solid var(--bord); background: var(--carte); color: var(--doux);
+  font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
 }
 .onglets button[aria-selected="true"] {
-  background: var(--ccc); border-color: var(--ccc); color: #06210A;
-  font-weight: 800;
+  background: var(--acc); border-color: var(--acc); color: #08210A; font-weight: 700;
 }
-.vue { display: none; padding-top: 18px; }
-.vue.on { display: block; }
+.vue { display: none; } .vue.on { display: block; }
 
-/* ---------------------------------------------------------------- blocs */
-.bloc { background: var(--surface); border: 1px solid var(--bord);
-        border-radius: var(--r); padding: 17px; }
-.bloc + .bloc { margin-top: 11px; }
-.lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-       text-transform: uppercase; color: var(--pale); }
-.gros { font-family: var(--display); font-weight: 800; font-size: 29px;
-        line-height: 1.1; margin-top: 5px; color: var(--ccc-clair); }
-.sous { margin-top: 5px; font-family: var(--mono); font-size: 12px; color: var(--doux); }
+/* --------------------------------------------------------------- tuiles */
+.tuiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+@media (min-width: 560px) { .tuiles { grid-template-columns: repeat(4, 1fr); } }
+.tuile {
+  padding: 14px; border-radius: var(--r);
+  background: var(--carte); border: 1px solid var(--bord);
+}
+.tuile .v { font-size: 26px; font-weight: 650; line-height: 1.05; letter-spacing: -.02em; }
+.tuile .v small { font-size: 13px; font-weight: 500; color: var(--pale); margin-left: 2px; }
+.tuile .l {
+  margin-top: 6px; display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--pale);
+}
+.tuile .l i { width: 5px; height: 5px; border-radius: 50%; background: var(--acc); flex: none; }
+.tuile.att .l i { background: var(--montee); }
+.tuile.lim .l i { background: var(--limite); }
 
-.jauge { height: 8px; border-radius: 999px; background: var(--surface-2);
-         margin: 15px 0 6px; overflow: hidden; }
-.jauge i { display: block; height: 100%; background: var(--ccc); transition: width .5s ease; }
-.jauge-l { display: flex; justify-content: space-between;
-           font-family: var(--mono); font-size: 10px; color: var(--pale); }
+/* ------------------------------------------------------------ cartes bar */
+.duo { display: grid; grid-template-columns: 1fr; gap: 9px; margin-top: 9px; }
+@media (min-width: 560px) { .duo { grid-template-columns: 1fr 1fr; } }
+.jaugec {
+  padding: 15px; border-radius: var(--r);
+  background: var(--carte); border: 1px solid var(--bord);
+}
+.jaugec .h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.jaugec .t { font-size: 14px; font-weight: 600; }
+.jaugec .p { font-size: 15px; font-weight: 650; color: var(--acc-c); }
+.jaugec .s { margin-top: 2px; font-size: 11.5px; color: var(--pale); }
+.barre { height: 6px; border-radius: 99px; background: var(--carte-2); margin: 13px 0 0;
+         overflow: hidden; border: 1px solid var(--bord); }
+.barre i { display: block; height: 100%; background: var(--acc); transition: width .5s ease; }
+.jaugec .f { margin-top: 9px; display: flex; justify-content: space-between;
+             font-family: var(--mono); font-size: 10.5px; color: var(--pale); }
 
-.suite div { display: flex; align-items: baseline; gap: 10px; padding: 10px 0;
-             border-top: 1px solid var(--bord); }
-.suite div:first-child { border-top: 0; }
-.suite b { flex: 1; font-family: var(--display); font-weight: 700; font-size: 16px; }
-.suite .k { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
-.suite .h { font-family: var(--display); font-weight: 800; font-size: 17px; color: var(--ccc-clair); }
-.fin { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0;
-       border-top: 1px solid var(--bord); font-size: 14px; }
-.fin:first-child { border-top: 0; }
-.fin .h { font-family: var(--display); font-weight: 800; font-size: 17px; }
-.fin .h.lim { color: var(--barriere); }
-.avert { margin-top: 13px; font-size: 12.5px; line-height: 1.45; color: var(--pale); }
+/* --------------------------------------------------------------- section */
+.bloc { padding: 15px; border-radius: var(--r); background: var(--carte);
+        border: 1px solid var(--bord); }
+.bloc + .bloc { margin-top: 9px; }
+.encours { display: flex; align-items: center; gap: 12px; }
+.encours .pastille {
+  width: 40px; height: 40px; border-radius: 10px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 700;
+}
+.encours.montee   .pastille { background: rgba(232,163,60,.16); color: var(--montee); }
+.encours.descente .pastille { background: rgba(78,159,224,.16); color: var(--descente); }
+.encours.roulant  .pastille { background: var(--acc-f); color: var(--acc-c); }
+.encours .n { font-size: 15px; font-weight: 600; line-height: 1.25; }
+.encours .d { margin-top: 3px; font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
+
+/* ----------------------------------------------------------------- liste */
+.rang { display: flex; align-items: center; gap: 11px; padding: 11px 0;
+        border-top: 1px solid var(--bord); }
+.rang:first-child { border-top: 0; padding-top: 2px; }
+.rang .n { flex: 1; font-size: 14.5px; font-weight: 600; }
+.rang .k { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
+.rang .h { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--acc-c); }
+.rang .h.lim { color: var(--limite); }
+.rang .h.gris { color: var(--pale); font-weight: 500; }
+
+/* --------------------------------------------------------- bande sections
+   L'equivalent du graphe de contributions : quatorze cases, une par section,
+   larges au prorata de la distance. On voit la forme de la course d'un oeil. */
+.bande { display: flex; gap: 2px; height: 34px; margin-top: 3px; }
+.bande span { border-radius: 3px; position: relative; cursor: default; }
+.bande span.montee   { background: rgba(232,163,60,.85); }
+.bande span.descente { background: rgba(78,159,224,.75); }
+.bande span.roulant  { background: rgba(121,185,53,.75); }
+.bande span.passe    { opacity: .28; }
+.bande-l { display: flex; gap: 14px; margin-top: 9px; flex-wrap: wrap;
+           font-size: 11.5px; color: var(--pale); }
+.bande-l span { display: flex; align-items: center; gap: 6px; }
+.bande-l em { font-style: normal; width: 11px; height: 4px; border-radius: 2px; }
+.bande-l em.m { background: rgba(232,163,60,.85); }
+.bande-l em.d { background: rgba(78,159,224,.75); }
+.bande-l em.r { background: rgba(121,185,53,.75); }
 
 /* --------------------------------------------------------------- titres */
 .titre {
-  display: flex; align-items: center; gap: 11px; margin: 26px 0 11px;
-  font-family: var(--display); font-weight: 800; font-size: 13px;
-  letter-spacing: .13em; text-transform: uppercase; color: var(--ccc);
+  display: flex; align-items: center; gap: 8px; margin: 24px 0 10px;
+  font-size: 12px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--pale);
 }
-.titre::after { content: ""; flex: 1; height: 1px; background: var(--bord); }
-.vue > .titre:first-child { margin-top: 0; }
+.titre span { margin-left: auto; text-transform: none; letter-spacing: 0;
+              font-weight: 400; font-family: var(--mono); font-size: 10.5px; }
+.vue > .titre:first-child { margin-top: 18px; }
 
 /* ---------------------------------------------------------------- carte */
-#carte { height: 400px; border-radius: var(--r); overflow: hidden;
-         border: 1px solid var(--bord); background: var(--surface); z-index: 0; }
-.leaflet-container { background: var(--surface) !important; }
-.carte-vide { height: 160px; border-radius: var(--r); border: 1px solid var(--bord);
-  background: var(--surface); display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 22px; color: var(--pale); font-size: 13px; line-height: 1.5; }
-.sous-carte { display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
-              margin-top: 10px; font-size: 11.5px; color: var(--doux); }
-.sous-carte span { display: flex; align-items: center; gap: 6px; }
-.sous-carte em { font-style: normal; width: 14px; height: 3px; border-radius: 2px; background: var(--ccc); }
-.sous-carte em.reste { background: repeating-linear-gradient(90deg, var(--pale) 0 2px, transparent 2px 6px); }
-.sous-carte em.pos { width: 10px; height: 10px; border-radius: 50%; background: var(--montee); }
-.sous-carte button {
-  margin-left: auto; min-height: 40px; padding: 0 14px; border-radius: 6px;
-  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
-  font-family: var(--display); font-weight: 700; font-size: 11.5px;
-  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
-}
-.pulse { width: 17px; height: 17px; border-radius: 50%;
-         background: var(--montee); border: 3px solid var(--bg); animation: bat 2.2s infinite; }
+#carte { height: 380px; border-radius: var(--r); overflow: hidden;
+         border: 1px solid var(--bord); background: var(--carte); z-index: 0; }
+.leaflet-container { background: var(--carte) !important; }
+.carte-vide { height: 150px; border-radius: var(--r); border: 1px solid var(--bord);
+  background: var(--carte); display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 20px; color: var(--pale); font-size: 13px; }
+.souscarte { display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
+             margin-top: 10px; font-size: 11.5px; color: var(--pale); }
+.souscarte span { display: flex; align-items: center; gap: 6px; }
+.souscarte em { font-style: normal; width: 13px; height: 3px; border-radius: 2px; background: var(--acc); }
+.souscarte em.reste { background: repeating-linear-gradient(90deg, var(--pale) 0 2px, transparent 2px 6px); }
+.souscarte em.pos { width: 9px; height: 9px; border-radius: 50%; background: var(--montee); }
+.souscarte button { margin-left: auto; min-height: 36px; padding: 0 13px; border-radius: 8px;
+  border: 1px solid var(--bord); background: var(--carte); color: var(--doux);
+  font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pulse { width: 16px; height: 16px; border-radius: 50%; background: var(--montee);
+         border: 3px solid var(--bg); animation: bat 2.2s infinite; }
 @keyframes bat {
-  0% { box-shadow: 0 0 0 0 rgba(240,169,59,.55); }
-  70% { box-shadow: 0 0 0 16px rgba(240,169,59,0); }
-  100% { box-shadow: 0 0 0 0 rgba(240,169,59,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(232,163,60,.5); }
+  70%  { box-shadow: 0 0 0 15px rgba(232,163,60,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,163,60,0); }
 }
-@media (prefers-reduced-motion: reduce) { .pulse, .tete .lien span { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .pulse, .btn.plein i { animation: none; } }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: #041D2B; color: #fff; border: 1px solid #163346;
+  background: #17191E; color: #E9EBEE; border: 1px solid #2E323A; border-radius: 10px;
 }
-.leaflet-popup-content { margin: 12px 14px; font-family: var(--corps); font-size: 13px; }
-.leaflet-popup-content b { font-family: var(--display); font-weight: 800; font-size: 16px; display: block; }
-.leaflet-popup-content .pk { font-family: var(--mono); font-size: 11px; color: #C3CCD3; margin-top: 4px; }
-.leaflet-popup-content .ph { color: #9BD65C; font-weight: 700; margin-top: 6px; }
-.leaflet-popup-content .pb { color: #FF7A66; font-family: var(--mono); font-size: 11px; margin-top: 2px; }
-.leaflet-container a.leaflet-popup-close-button { color: #C3CCD3; }
-.leaflet-control-attribution {
-  background: rgba(0,18,29,.92) !important; color: #C3CCD3 !important; font-size: 9.5px !important;
-}
+.leaflet-popup-content { margin: 12px 14px; font-family: var(--sys); font-size: 13px; }
+.leaflet-popup-content b { font-size: 15px; font-weight: 650; display: block; }
+.leaflet-popup-content .pk { font-family: var(--mono); font-size: 11px; color: #A2A8B2; margin-top: 4px; }
+.leaflet-popup-content .ph { color: #9BD65C; font-weight: 600; margin-top: 6px; font-family: var(--mono); }
+.leaflet-popup-content .pb { color: #F0685A; font-family: var(--mono); font-size: 11px; margin-top: 2px; }
+.leaflet-container a.leaflet-popup-close-button { color: #A2A8B2; }
+.leaflet-control-attribution { background: rgba(10,11,13,.9) !important;
+  color: #A2A8B2 !important; font-size: 9.5px !important; }
 .leaflet-control-attribution a { color: #9BD65C !important; }
-.leaflet-bar a { background: #041D2B; color: #fff; border-bottom-color: #163346; }
-.leaflet-bar a:hover { background: #000D44; color: #fff; }
+.leaflet-bar a { background: #17191E; color: #E9EBEE; border-bottom-color: #2E323A; }
+.leaflet-bar a:hover { background: #23262C; }
 
 /* --------------------------------------------------------------- profil */
-.profil { background: var(--surface); border: 1px solid var(--bord);
-          border-radius: var(--r); padding: 14px 12px 10px; }
+.profil { background: var(--carte); border: 1px solid var(--bord);
+          border-radius: var(--r); padding: 12px 10px 8px; }
 .profil svg { display: block; width: 100%; height: auto; }
 
 /* -------------------------------------------------------------- tableaux */
 .defile { overflow-x: auto; -webkit-overflow-scrolling: touch;
-          border: 1px solid var(--bord); border-radius: var(--r); }
-.defile-n { margin-top: 8px; font-family: var(--mono); font-size: 10px;
-            color: var(--pale); letter-spacing: .04em; }
+          border: 1px solid var(--bord); border-radius: var(--r); background: var(--carte); }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-th { font-family: var(--mono); font-size: 9px; letter-spacing: .05em;
-     text-transform: uppercase; color: var(--pale); font-weight: 400;
-     text-align: right; padding: 10px 8px; background: var(--surface-2);
-     position: sticky; top: 0; }
+th { font-size: 10px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+     color: var(--pale); text-align: right; padding: 11px 9px;
+     background: var(--carte-2); position: sticky; top: 0; }
 th:first-child, td:first-child { text-align: left; }
-td { padding: 9px 8px; text-align: right; border-top: 1px solid var(--bord); font-size: 13px; }
-tbody tr:nth-child(odd) { background: rgba(255,255,255,.02); }
-.pt-n { font-family: var(--display); font-weight: 700; font-size: 15px; }
-tr:not(.rav) .pt-n { color: var(--pale); font-weight: 600; }
-.c-h { font-family: var(--display); font-weight: 800; font-size: 15.5px; color: var(--ccc-clair); }
-tr:not(.rav) .c-h { color: var(--pale); font-weight: 600; }
-.c-b { color: var(--barriere); font-family: var(--mono); font-size: 12px; }
-.c-m { font-family: var(--mono); font-size: 12px; color: var(--ccc); }
+td { padding: 10px 9px; text-align: right; border-top: 1px solid var(--bord); font-size: 13px; }
+.pt-n { font-size: 14px; font-weight: 600; }
+tr:not(.rav) .pt-n { color: var(--pale); font-weight: 500; }
+.c-h { font-family: var(--mono); font-size: 13.5px; font-weight: 600; color: var(--acc-c); }
+tr:not(.rav) .c-h { color: var(--pale); font-weight: 400; }
+.c-b { font-family: var(--mono); font-size: 12px; color: var(--limite); }
+.c-m { font-family: var(--mono); font-size: 12px; color: var(--acc); }
 .c-k { font-family: var(--mono); font-size: 11.5px; color: var(--doux); }
 .c-d { font-family: var(--mono); font-size: 11.5px; color: var(--pale); }
-.c-e { font-family: var(--mono); font-size: 12px; font-weight: 600; }
-.c-e.up { color: var(--montee); }
-.c-e.dn { color: var(--descente); }
-tr.passe td { opacity: .38; }
-tr.ici td { background: rgba(240,169,59,.14); }
-tr.ici .pt-n::after { content: " ●"; color: var(--montee); font-size: 11px; }
-tr.s-montee   td:first-child { box-shadow: inset 3px 0 0 var(--montee); }
+.c-e { font-family: var(--mono); font-size: 12px; }
+.c-e.up { color: var(--montee); } .c-e.dn { color: var(--descente); }
+tr.passe td { opacity: .35; }
+tr.ici td { background: rgba(232,163,60,.1); }
+tr.ici .pt-n::after { content: " ●"; color: var(--montee); font-size: 10px; }
+tr.s-montee td:first-child { box-shadow: inset 3px 0 0 var(--montee); }
 tr.s-descente td:first-child { box-shadow: inset 3px 0 0 var(--descente); }
-tr.s-roulant  td:first-child { box-shadow: inset 3px 0 0 var(--roulant); }
-.s-type { font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
-          text-transform: uppercase; color: var(--pale); }
+tr.s-roulant td:first-child { box-shadow: inset 3px 0 0 var(--acc); }
+.s-type { font-size: 11px; color: var(--pale); }
 
-/* ---------------------------------------------------------- explications */
-details.leg { margin-top: 11px; }
+/* --------------------------------------------------------------- legende */
+details.leg { margin-top: 9px; }
 details.leg summary {
-  cursor: pointer; list-style: none; min-height: 42px; display: flex;
-  align-items: center; gap: 9px; padding: 0 14px; border-radius: 6px;
-  border: 1.5px solid var(--bord); background: var(--surface);
-  font-family: var(--display); font-weight: 700; font-size: 13px;
-  letter-spacing: .05em; color: var(--doux);
+  cursor: pointer; list-style: none; min-height: 40px; display: flex;
+  align-items: center; gap: 8px; padding: 0 13px; border-radius: 9px;
+  border: 1px solid var(--bord); background: var(--carte);
+  font-size: 12.5px; font-weight: 600; color: var(--doux);
 }
 details.leg summary::-webkit-details-marker { display: none; }
-details.leg summary::before { content: "+"; font-family: var(--mono); color: var(--ccc); font-size: 15px; }
+details.leg summary::before { content: "+"; font-family: var(--mono); color: var(--acc); }
 details.leg[open] summary::before { content: "–"; }
-.leg dl { margin: 12px 2px 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; }
-.leg dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em;
-          text-transform: uppercase; color: var(--ccc-clair); white-space: nowrap; }
-.leg dd { margin: 0; font-size: 13px; line-height: 1.45; color: var(--doux); }
+.leg dl { margin: 11px 3px 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 13px; }
+.leg dt { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+          color: var(--acc-c); white-space: nowrap; }
+.leg dd { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--doux); }
+.note { margin-top: 10px; font-size: 12px; line-height: 1.45; color: var(--pale); }
 
 /* ------------------------------------------------------------------ pied */
-.pied { margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--bord);
-        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-        font-family: var(--mono); font-size: 10px; color: var(--pale); line-height: 1.6; }
-.pied button {
-  margin-left: auto; min-height: 40px; padding: 0 16px; border-radius: 6px;
-  border: 1.5px solid var(--bord); background: var(--surface); color: var(--doux);
-  font-family: var(--display); font-weight: 700; font-size: 11.5px;
-  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
-}
+.pied { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--bord);
+        font-family: var(--mono); font-size: 10px; color: var(--pale); line-height: 1.7; }
 </style>
 </head>
 <body>
-<div class="enveloppe">
+<div class="env">
 
 <header class="tete">
-  <span class="course">CCC 2026</span>
-  <h1>Pierre Moor · dossard 4330</h1>
-  <div class="l2">Courmayeur → Chamonix</div>
-  <div class="l3">100,9 km · 6 050 m de montée · départ vendredi 28 août, 09:15<br>
-    Objectif ~20 h 15 · heure limite samedi 12:00</div>
-  <a class="lien" id="lienTracker" href="#" target="_blank" rel="noopener">
-    <span></span>Position réelle · tracker UTMB</a>
+  <div class="ligne"><span class="tag">CCC 2026</span><h1>Pierre Moor · 4330</h1></div>
+  <div class="meta">Courmayeur → Chamonix · 100,9 km · 6 050 m D+<br>
+    Départ vendredi 28 août 09:15 · objectif ~20 h 15 · heure limite samedi 12:00</div>
+  <div class="actions">
+    <a class="btn plein" id="lienTracker" href="#" target="_blank" rel="noopener"><i></i>Tracker UTMB</a>
+    <button class="btn" id="partage">Copier le lien</button>
+  </div>
 </header>
 
-<div class="bandeau" id="bandeau">—</div>
+<div class="statut" id="statut"><span class="pt"></span><span>—</span></div>
 
 <nav class="onglets" role="tablist">
   <button role="tab" data-v="maintenant" aria-selected="true">Maintenant</button>
@@ -290,45 +305,63 @@ details.leg[open] summary::before { content: "–"; }
 
 <main>
 
-  <!-- ============================================ MAINTENANT -->
+  <!-- ========================================== MAINTENANT -->
   <section class="vue on" id="v-maintenant">
-    <div class="bloc">
-      <div class="lbl">Selon le plan, devrait être</div>
-      <div class="gros" id="ouLieu">—</div>
-      <div class="sous" id="ouKm"></div>
-      <div class="jauge"><i id="jauge" style="width:0%"></i></div>
-      <div class="jauge-l"><span>COURMAYEUR</span><span id="pct">0 %</span><span>CHAMONIX</span></div>
-      <p class="avert">Ces horaires sont un plan établi à l'avance, pas une prédiction.
-        Un écart d'une à deux heures est normal.</p>
+    <div class="tuiles" id="tuiles"></div>
+
+    <div class="duo">
+      <div class="jaugec">
+        <div class="h"><span class="t">Distance</span><span class="p" id="pDist">0 %</span></div>
+        <div class="s" id="sDist">—</div>
+        <div class="barre"><i id="bDist" style="width:0%"></i></div>
+        <div class="f"><span>0 km</span><span>100,9 km</span></div>
+      </div>
+      <div class="jaugec">
+        <div class="h"><span class="t">Dénivelé</span><span class="p" id="pDen">0 %</span></div>
+        <div class="s" id="sDen">—</div>
+        <div class="barre"><i id="bDen" style="width:0%"></i></div>
+        <div class="f"><span>0 m</span><span>6 050 m</span></div>
+      </div>
     </div>
+
+    <div class="titre">Section en cours</div>
+    <div class="bloc" id="sectionEnCours"></div>
 
     <div class="titre">Prochains points</div>
-    <div class="bloc"><div class="suite" id="suite"></div></div>
+    <div class="bloc" id="suite"></div>
 
-    <div class="titre">Arrivée</div>
+    <div class="titre">Le parcours en 14 sections</div>
     <div class="bloc">
-      <div class="fin"><span>Prévue à Chamonix</span><span class="h">05:30</span></div>
-      <div class="fin"><span>Heure limite de la course</span><span class="h lim">12:00</span></div>
+      <div class="bande" id="bande"></div>
+      <div class="bande-l">
+        <span><em class="m"></em>montée</span>
+        <span><em class="d"></em>descente</span>
+        <span><em class="r"></em>roulant</span>
+      </div>
+      <p class="note">Chaque case est une section, large à proportion de sa distance.
+        Les cases atténuées sont théoriquement franchies.</p>
     </div>
+
+    <p class="note">Ces horaires sont un plan établi à l'avance, pas une prédiction.
+      Un écart d'une à deux heures est normal. La position réelle est sur le tracker UTMB.</p>
   </section>
 
-  <!-- ============================================== PARCOURS -->
+  <!-- ============================================ PARCOURS -->
   <section class="vue" id="v-parcours">
     <div class="titre">Carte</div>
     <div id="carte"></div>
-    <div class="sous-carte">
-      <span><em></em>parcouru</span>
-      <span><em class="reste"></em>restant</span>
+    <div class="souscarte">
+      <span><em></em>parcouru</span><span><em class="reste"></em>restant</span>
       <span><em class="pos"></em>position estimée</span>
       <button id="recentrer">Recentrer</button>
     </div>
-    <p class="avert">Le point orange est calculé d'après le plan. Ce n'est pas une position
-      GPS réelle : celle-ci est sur le tracker officiel, en haut de page.</p>
+    <p class="note">Le point orange est calculé d'après le plan. Ce n'est pas une position GPS
+      réelle : celle-ci est sur le tracker officiel, en haut de page.</p>
 
     <div class="titre">Profil</div>
     <div class="profil" id="profilHote"></div>
 
-    <div class="titre">Les 14 sections</div>
+    <div class="titre">Sections <span>faites glisser →</span></div>
     <div class="defile">
       <table>
         <thead><tr><th>section</th><th>dist</th><th>montée</th><th>descente</th>
@@ -336,56 +369,48 @@ details.leg[open] summary::before { content: "–"; }
         <tbody id="sections"></tbody>
       </table>
     </div>
-    <p class="defile-n">← faites glisser le tableau pour voir toutes les colonnes</p>
     <details class="leg"><summary>Que veulent dire ces colonnes ?</summary>
       <dl>
         <dt>Dist</dt><dd>Longueur de la section, en kilomètres.</dd>
         <dt>Montée</dt><dd>Mètres à monter sur cette section seulement.</dd>
         <dt>Descente</dt><dd>Mètres à descendre sur cette section seulement.</dd>
-        <dt>Pente</dt><dd>Pente moyenne. Positive quand ça monte, négative quand ça descend.</dd>
-        <dt>Durée</dt><dd>Temps prévu pour parcourir la section.</dd>
-        <dt>Type</dt><dd>Montée, descente, ou roulant quand le terrain est peu incliné.</dd>
+        <dt>Pente</dt><dd>Pente moyenne. Positive quand ça monte.</dd>
+        <dt>Durée</dt><dd>Temps prévu pour la parcourir.</dd>
       </dl>
     </details>
   </section>
 
-  <!-- ============================================== HORAIRES -->
+  <!-- ============================================ HORAIRES -->
   <section class="vue" id="v-horaires">
-    <div class="titre">Tableau de marche</div>
+    <div class="titre">Tableau de marche <span>faites glisser →</span></div>
     <div class="defile">
       <table>
         <thead><tr><th>point</th><th>km</th><th>reste</th><th>alt</th>
-          <th>montée<br>étape</th><th>descente<br>étape</th>
-          <th>montée<br>cumul</th><th>prévu</th><th>heure<br>limite</th><th>marge</th></tr></thead>
+          <th>montée<br>étape</th><th>descente<br>étape</th><th>montée<br>cumul</th>
+          <th>prévu</th><th>heure<br>limite</th><th>marge</th></tr></thead>
         <tbody id="marche"></tbody>
       </table>
     </div>
-    <p class="defile-n">← faites glisser le tableau pour voir toutes les colonnes</p>
     <details class="leg"><summary>Que veulent dire ces colonnes ?</summary>
       <dl>
         <dt>Km</dt><dd>Distance parcourue depuis le départ.</dd>
-        <dt>Reste</dt><dd>Distance restant à parcourir jusqu'à l'arrivée.</dd>
-        <dt>Alt</dt><dd>Altitude du point, en mètres au-dessus de la mer.</dd>
+        <dt>Reste</dt><dd>Distance restant jusqu'à l'arrivée.</dd>
+        <dt>Alt</dt><dd>Altitude du point, en mètres.</dd>
         <dt>Montée étape</dt><dd>Mètres montés depuis le point précédent seulement.</dd>
         <dt>Descente étape</dt><dd>Mètres descendus depuis le point précédent seulement.</dd>
-        <dt>Montée cumul</dt><dd>Total de montée accumulée depuis le départ.</dd>
-        <dt>Prévu</dt><dd>Heure de passage estimée dans le plan. Le tilde signifie une estimation
-          sur un sommet, sans pointage officiel.</dd>
-        <dt>Heure limite</dt><dd>Passé cette heure, un coureur est arrêté et sa course
-          est terminée. C'est ce qu'on appelle une barrière horaire.</dd>
-        <dt>Marge</dt><dd>Temps d'avance sur cette heure limite, si le plan est tenu.</dd>
+        <dt>Montée cumul</dt><dd>Total de montée depuis le départ.</dd>
+        <dt>Prévu</dt><dd>Heure de passage estimée. Le tilde marque un sommet sans pointage.</dd>
+        <dt>Heure limite</dt><dd>Passé cette heure un coureur est arrêté : c'est une barrière horaire.</dd>
+        <dt>Marge</dt><dd>Avance sur cette heure limite si le plan est tenu.</dd>
       </dl>
     </details>
-    <p class="avert">Les lignes en clair sont les ravitaillements et les points de contrôle
-      officiels : c'est là que Pierre est pointé. Les lignes grisées sont des sommets,
-      sans arrêt ni heure limite.</p>
+    <p class="note">Les lignes en clair sont les ravitaillements et points de contrôle, là où
+      Pierre est pointé. Les lignes grisées sont des sommets, sans arrêt ni heure limite.</p>
   </section>
 
   <footer class="pied">
-    <span>Plan établi d'après le tracé officiel UTMB 2026.<br>
-      Horaires prévisionnels, écarts normaux.<br>
-      <span id="attrib"></span></span>
-    <button id="partage">Copier le lien</button>
+    Plan établi d'après le tracé officiel UTMB 2026. Horaires prévisionnels, écarts normaux.<br>
+    <span id="attrib"></span>
   </footer>
 </main>
 </div>
@@ -401,16 +426,13 @@ details.leg[open] summary::before { content: "–"; }
 /* ⚠️ A confirmer au retrait du dossard le 27. Seule ligne a changer. */
 var TRACKER = "https://live.utmb.world";
 
-var DISTANCE = 100.9;
+var DISTANCE = 100.9, DPLUS = 6050;
 var DEPART = new Date("2026-08-28T09:15:00+02:00");
 var FIN    = new Date("2026-08-29T12:00:00+02:00");
 var KM_NUIT = 54.9;
 
-/* dp/dm : denivele DE L'ETAPE, depuis le point precedent.
-   dpc/dmc : cumul depuis le depart. Les deux, parce que « +647 m sur cette
-   montee » et « +4 865 m dans les jambes » ne disent pas la meme chose.
-   Calcules sur le trace officiel ; ils tombent au metre pres sur les valeurs
-   publiees par LiveTrail pour la CCC 2026. */
+/* dp/dm : denivele DE L'ETAPE. dpc/dmc : cumul depuis le depart. Calcules sur
+   le trace officiel ; ils tombent au metre pres sur ce que publie LiveTrail. */
 var POINTS = [
   { nom:"Courmayeur",         km:0.0,   alt:1221, dp:0,    dm:0,    dpc:0,    dmc:0,    h:"09:15", t:"depart", r:1 },
   { nom:"Tête de la Tronche", km:9.4,   alt:2543, dp:1418, dm:95,   dpc:1418, dmc:95,   h:"12:05", t:"sommet" },
@@ -450,7 +472,7 @@ var SECTIONS = [
    qu'une heure est anterieure a la precedente. */
 (function () {
   var prec = null;
-  POINTS.forEach(function (p) {
+  POINTS.forEach(function (p, i) {
     var hm = p.h.split(':'), d = new Date(DEPART);
     d.setHours(+hm[0], +hm[1], 0, 0);
     if (prec && d < prec) d.setDate(d.getDate() + 1);
@@ -463,13 +485,15 @@ var SECTIONS = [
       var m = Math.round((e - p.date) / 60000);
       p.marge = Math.floor(m / 60) + ' h ' + (m % 60 < 10 ? '0' : '') + (m % 60);
     }
+    if (i) SECTIONS[i - 1].kmFin = p.km;
   });
 })();
 
 function dd(n) { return (n < 10 ? '0' : '') + n; }
 function hh(d) { return dd(d.getHours()) + ':' + dd(d.getMinutes()); }
 function km1(k) { return k.toFixed(1).replace('.', ','); }
-function mil(n) { return n.toLocaleString('fr-FR').replace(/ | /g, ' '); }
+function mil(n) { return Math.round(n).toLocaleString('fr-FR').replace(/ | /g, ' '); }
+function hm(min) { return Math.floor(min / 60) + ' h ' + dd(min % 60); }
 
 function ou(now) {
   if (now <= POINTS[0].date) return { km: 0, i: 0, avant: true };
@@ -477,58 +501,141 @@ function ou(now) {
     if (now <= POINTS[i].date) {
       var a = POINTS[i - 1], b = POINTS[i];
       var t = (now - a.date) / ((b.date - a.date) || 1);
-      return { km: a.km + (b.km - a.km) * t, i: i, prochain: b };
+      return { km: a.km + (b.km - a.km) * t, i: i, prochain: b, precedent: a, frac: t };
     }
   }
   return { km: DISTANCE, i: POINTS.length - 1, fini: true };
 }
 
-function majBandeau(now) {
-  var b = document.getElementById('bandeau');
+/* D+ theoriquement avale : interpole sur le cumul, pas sur la distance —
+   les 1 418 m de la premiere montee ne se repartissent pas lineairement. */
+function dplusAu(p) {
+  if (p.avant) return 0;
+  if (p.fini) return POINTS[POINTS.length - 1].dpc;
+  var a = p.precedent, b = p.prochain;
+  return a.dpc + (b.dpc - a.dpc) * p.frac;
+}
+
+/* La prochaine barriere, et le temps qui reste avant elle. C'est le chiffre
+   que personne ne pense a demander et qui dit tout : de la marge ou pas. */
+function prochaineBarriere(now, km) {
+  /* La prochaine barriere est celle du prochain point NON FRANCHI, pas la
+     prochaine dans le temps. A 23h05 au km 72, la barriere de Champex
+     (23:15) est encore a venir sur l'horloge alors que le point est 17 km
+     derriere : afficher « 10 min avant Champex » serait un contresens, et
+     un contresens alarmant. */
+  for (var i = 0; i < POINTS.length; i++) {
+    if (POINTS[i].bdate && POINTS[i].km > km && POINTS[i].bdate > now) return POINTS[i];
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------- statut */
+function majStatut(now) {
+  var s = document.getElementById('statut');
   if (now < DEPART) {
-    var s = Math.floor((DEPART - now) / 1000);
-    var j = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-    b.innerHTML = 'Départ dans <b>' + (j ? j + ' j ' : '') + h + ' h ' + dd(m) + ' min</b>';
+    var t = Math.floor((DEPART - now) / 1000);
+    var j = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60);
+    s.innerHTML = '<span class="pt"></span><span>Départ dans <b>' +
+      (j ? j + ' j ' : '') + h + ' h ' + dd(m) + ' min</b> · vendredi 09:15</span>';
   } else if (now < FIN) {
-    var p = ou(now), e = Math.floor((now - DEPART) / 60000);
-    b.innerHTML = '<b>EN COURSE</b> · ' + Math.floor(e / 60) + ' h ' + dd(e % 60) +
-      ' · position théorique km <b>' + km1(p.km) + '</b>';
+    var e = Math.floor((now - DEPART) / 60000), p = ou(now);
+    s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
+      ' · position théorique km <b>' + km1(p.km) + '</b></span>';
   } else {
-    b.innerHTML = '<b>Course terminée</b>';
+    s.innerHTML = '<span class="pt"></span><span><b>Course terminée</b></span>';
   }
 }
 
+/* ---------------------------------------------------------- maintenant */
 function majMaintenant(now) {
-  var p = ou(now);
-  var lieu = document.getElementById('ouLieu'), k = document.getElementById('ouKm');
-  if (p.avant) {
-    lieu.textContent = 'Courmayeur';
-    k.textContent = 'départ vendredi 09:15';
-  } else if (p.fini) {
-    lieu.textContent = 'Chamonix';
-    k.textContent = '100,9 km parcourus';
-  } else {
-    lieu.textContent = p.prochain.nom;
-    k.textContent = 'km ' + km1(p.km) + ' sur 100,9 · reste ' + km1(DISTANCE - p.km) + ' km';
-  }
-  var pct = Math.round(p.km / DISTANCE * 100);
-  document.getElementById('jauge').style.width = pct + '%';
-  document.getElementById('pct').textContent = pct + ' %';
+  var p = ou(now), dpAvale = dplusAu(p), bar = prochaineBarriere(now, p.km);
+  var enCourse = !p.avant && !p.fini;
+  var ecoule = enCourse ? Math.floor((now - DEPART) / 60000) : 0;
 
-  var suite = POINTS.filter(function (x) { return x.date > now; }).slice(0, 3);
+  /* Quatre chiffres, pas cinq. En course, « restants » se lit deja dans la
+     barre de distance : la place va au temps qui reste avant la prochaine
+     barriere, qui est le seul chiffre disant s'il y a du mou ou pas. */
+  var tuiles;
+  if (enCourse) {
+    tuiles = [
+      { v: hm(ecoule), u: '', l: 'En course' },
+      { v: km1(p.km), u: 'km', l: 'Parcourus' },
+      { v: mil(DPLUS - dpAvale), u: 'm', l: 'Montée restante', c: 'att' }
+    ];
+    tuiles.push(bar
+      ? { v: hm(Math.round((bar.bdate - now) / 60000)), u: '', l: 'Avant ' + bar.nom, c: 'lim' }
+      : { v: km1(DISTANCE - p.km), u: 'km', l: 'Restants' });
+  } else if (p.avant) {
+    tuiles = [
+      { v: km1(p.km), u: 'km', l: 'Parcourus' },
+      { v: km1(DISTANCE - p.km), u: 'km', l: 'Restants' },
+      { v: mil(DPLUS - dpAvale), u: 'm', l: 'Montée restante', c: 'att' }
+    ];
+    tuiles.unshift({ v: '20 h 15', u: '', l: 'Objectif' });
+    tuiles[3] = { v: '26 h 30', u: '', l: 'Temps maximum', c: 'lim' };
+  } else {
+    tuiles = [
+      { v: '20 h 15', u: '', l: 'Objectif' },
+      { v: '100,9', u: 'km', l: 'Parcourus' },
+      { v: '6 050', u: 'm', l: 'Montée totale', c: 'att' },
+      { v: '—', u: '', l: 'Terminé' }
+    ];
+  }
+  document.getElementById('tuiles').innerHTML = tuiles.slice(0, 4).map(function (t) {
+    return '<div class="tuile ' + (t.c || '') + '"><div class="v">' + t.v +
+      (t.u ? '<small>' + t.u + '</small>' : '') + '</div>' +
+      '<div class="l"><i></i>' + t.l + '</div></div>';
+  }).join('');
+
+  var pd = Math.round(p.km / DISTANCE * 100);
+  document.getElementById('pDist').textContent = pd + ' %';
+  document.getElementById('bDist').style.width = pd + '%';
+  document.getElementById('sDist').textContent = p.avant ? 'Avant le départ'
+    : (p.fini ? 'Arrivé' : 'vers ' + p.prochain.nom);
+
+  var pe = Math.round(dpAvale / DPLUS * 100);
+  document.getElementById('pDen').textContent = pe + ' %';
+  document.getElementById('bDen').style.width = pe + '%';
+  document.getElementById('sDen').textContent = mil(dpAvale) + ' m sur 6 050 m';
+
+  // section en cours
+  var sec = SECTIONS[Math.max(0, p.i - 1)];
+  var lbl = { montee: 'Montée', descente: 'Descente', roulant: 'Roulant' }[sec.t];
+  var ic  = { montee: '↗', descente: '↘', roulant: '→' }[sec.t];
+  document.getElementById('sectionEnCours').innerHTML =
+    '<div class="encours ' + sec.t + '"><div class="pastille">' + ic + '</div><div>' +
+      '<div class="n">' + sec.de + ' → ' + sec.a + '</div>' +
+      '<div class="d">' + lbl + ' · ' + km1(sec.km) + ' km · +' + mil(sec.dp) +
+        ' m / −' + mil(sec.dm) + ' m · ' + sec.pente.toFixed(1).replace('.', ',') +
+        ' % · ' + sec.duree + '</div>' +
+    '</div></div>';
+
+  // prochains points
+  var suite = POINTS.filter(function (x) { return x.date > now; }).slice(0, 4);
   document.getElementById('suite').innerHTML = suite.length
     ? suite.map(function (x) {
-        return '<div><b>' + x.nom + '</b><span class="k">km ' + km1(x.km) + '</span>' +
-          '<span class="h">' + (x.r ? '' : '~') + hh(x.date) + '</span></div>';
+        return '<div class="rang"><span class="n">' + x.nom + '</span>' +
+          '<span class="k">km ' + km1(x.km) + '</span>' +
+          '<span class="h' + (x.r ? '' : ' gris') + '">' + (x.r ? '' : '~') + hh(x.date) + '</span>' +
+          (x.bdate ? '<span class="h lim">' + hh(x.bdate) + '</span>' : '<span class="k">—</span>') +
+          '</div>';
       }).join('')
-    : '<div><b>Course terminée</b></div>';
-}
+    : '<div class="rang"><span class="n">Course terminée</span></div>';
 
+  // la bande des 14 sections
+  document.getElementById('bande').innerHTML = SECTIONS.map(function (s) {
+    return '<span class="' + s.t + (p.km >= s.kmFin ? ' passe' : '') +
+      '" style="flex:' + s.km + '" title="' + s.de + ' → ' + s.a + ' · ' + lblType(s.t) + '"></span>';
+  }).join('');
+}
+function lblType(t) { return { montee: 'Montée', descente: 'Descente', roulant: 'Roulant' }[t]; }
+
+/* ------------------------------------------------------------ tableaux */
 function majMarche(now) {
   var p = ou(now);
   document.getElementById('marche').innerHTML = POINTS.map(function (x, i) {
-    var passe = now > x.date;
-    var ici = !passe && !p.avant && !p.fini && i === p.i;
+    var passe = now > x.date, ici = !passe && !p.avant && !p.fini && i === p.i;
     return '<tr class="' + (x.r ? 'rav ' : '') + (passe ? 'passe ' : '') + (ici ? 'ici' : '') + '">' +
       '<td class="pt-n">' + x.nom + '</td>' +
       '<td class="c-k">' + km1(x.km) + '</td>' +
@@ -545,21 +652,21 @@ function majMarche(now) {
 
 function majSections() {
   document.getElementById('sections').innerHTML = SECTIONS.map(function (s) {
-    var lbl = { montee: 'Montée', descente: 'Descente', roulant: 'Roulant' }[s.t];
     return '<tr class="s-' + s.t + '">' +
-      '<td class="pt-n" style="font-size:13.5px">' + s.de + ' → ' + s.a + '</td>' +
+      '<td class="pt-n" style="font-size:13px">' + s.de + ' → ' + s.a + '</td>' +
       '<td class="c-k">' + km1(s.km) + '</td>' +
       '<td class="c-e up">+' + mil(s.dp) + '</td>' +
       '<td class="c-e dn">−' + mil(s.dm) + '</td>' +
       '<td class="c-k">' + s.pente.toFixed(1).replace('.', ',') + ' %</td>' +
       '<td class="c-k">' + s.duree + '</td>' +
-      '<td class="s-type">' + lbl + '</td></tr>';
+      '<td class="s-type">' + lblType(s.t) + '</td></tr>';
   }).join('');
 }
 
+/* --------------------------------------------------------------- profil */
 function majProfil(now) {
   if (!TRACE) return;
-  var L = 660, H = 190, mb = 22, mt = 12;
+  var L = 680, H = 180, mb = 20, mt = 10;
   var alts = TRACE.map(function (t) { return t[3]; });
   var lo = Math.min.apply(null, alts) - 70, hi = Math.max.apply(null, alts) + 70;
   var X = function (k) { return k / DISTANCE * L; };
@@ -568,31 +675,27 @@ function majProfil(now) {
     return (i ? 'L' : 'M') + X(t[2]).toFixed(1) + ' ' + Y(t[3]).toFixed(1);
   }).join('');
   var p = ou(now), cx = X(p.km);
-
   document.getElementById('profilHote').innerHTML =
-    '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" ' +
-      'aria-label="Profil altimétrique, de 1 035 à 2 543 mètres">' +
+    '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" aria-label="Profil altimétrique">' +
     '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#79B935" stop-opacity=".45"/>' +
-      '<stop offset="100%" stop-color="#79B935" stop-opacity=".04"/></linearGradient></defs>' +
+      '<stop offset="0%" stop-color="#79B935" stop-opacity=".4"/>' +
+      '<stop offset="100%" stop-color="#79B935" stop-opacity=".03"/></linearGradient></defs>' +
     '<rect x="' + X(KM_NUIT) + '" y="0" width="' + (L - X(KM_NUIT)) + '" height="' + (H - mb) +
-      '" fill="#000D44" opacity=".55"/>' +
-    '<text x="' + (X(KM_NUIT) + 6) + '" y="15" fill="#9DA7AF" font-size="9" ' +
+      '" fill="#4E9FE0" opacity=".07"/>' +
+    '<text x="' + (X(KM_NUIT) + 6) + '" y="14" fill="#969CA6" font-size="9" ' +
       'font-family="ui-monospace,monospace" letter-spacing="1">NUIT</text>' +
     '<path d="' + d + 'L' + L + ' ' + (H - mb) + 'L0 ' + (H - mb) + 'Z" fill="url(#g)"/>' +
-    '<path d="' + d + '" fill="none" stroke="#79B935" stroke-width="1.9" stroke-linejoin="round"/>' +
+    '<path d="' + d + '" fill="none" stroke="#79B935" stroke-width="1.7" stroke-linejoin="round"/>' +
     POINTS.map(function (x) {
-      return '<circle cx="' + X(x.km) + '" cy="' + Y(x.alt) + '" r="' + (x.r ? 3.2 : 2.2) +
-        '" fill="' + (x.r ? '#9BD65C' : '#F0A93B') + '"/>';
+      return '<circle cx="' + X(x.km) + '" cy="' + Y(x.alt) + '" r="' + (x.r ? 3 : 2) +
+        '" fill="' + (x.r ? '#9BD65C' : '#E8A33C') + '"/>';
     }).join('') +
-    (p.avant || p.fini ? '' :
-      '<line x1="' + cx + '" y1="' + mt + '" x2="' + cx + '" y2="' + (H - mb) +
-        '" stroke="#F0A93B" stroke-width="1.8"/>') +
-    '<text x="2" y="' + (H - 6) + '" fill="#9DA7AF" font-size="9" ' +
+    (p.avant || p.fini ? '' : '<line x1="' + cx + '" y1="' + mt + '" x2="' + cx +
+      '" y2="' + (H - mb) + '" stroke="#E8A33C" stroke-width="1.6"/>') +
+    '<text x="2" y="' + (H - 5) + '" fill="#969CA6" font-size="9" ' +
       'font-family="ui-monospace,monospace">0 km</text>' +
-    '<text x="' + (L - 2) + '" y="' + (H - 6) + '" fill="#9DA7AF" font-size="9" ' +
-      'font-family="ui-monospace,monospace" text-anchor="end">100,9 km</text>' +
-    '</svg>';
+    '<text x="' + (L - 2) + '" y="' + (H - 5) + '" fill="#969CA6" font-size="9" ' +
+      'font-family="ui-monospace,monospace" text-anchor="end">100,9 km</text></svg>';
 }
 
 /* ---------------------------------------------------------------- carte */
@@ -607,21 +710,21 @@ function bati(data) {
   document.getElementById('attrib').textContent =
     '© OpenStreetMap contributors, SRTM · © OpenTopoMap (CC-BY-SA)';
 
-  L.polyline(pts, { color: '#00121D', weight: 6, opacity: .5 }).addTo(carte);
-  L.polyline(pts, { color: '#FFFFFF', weight: 2.5, opacity: .8,
+  L.polyline(pts, { color: '#0A0B0D', weight: 6, opacity: .5 }).addTo(carte);
+  L.polyline(pts, { color: '#E9EBEE', weight: 2.4, opacity: .8,
                     dashArray: '2 7', lineCap: 'round' }).addTo(carte);
   fait = L.polyline([], { color: '#79B935', weight: 5, opacity: .98 }).addTo(carte);
 
   data.wpt.forEach(function (w) {
     var p = POINTS.filter(function (q) { return Math.abs(q.km - w[3]) < 0.6; })[0] || {};
     L.circleMarker([w[1], w[2]], {
-      radius: p.r ? 6.5 : 5, color: '#00121D', weight: 2,
-      fillColor: p.r ? '#9BD65C' : '#F0A93B', fillOpacity: 1
+      radius: p.r ? 6 : 4.5, color: '#0A0B0D', weight: 2,
+      fillColor: p.r ? '#9BD65C' : '#E8A33C', fillOpacity: 1
     }).addTo(carte).bindPopup(
       '<b>' + (p.nom || w[0]) + '</b>' +
       '<div class="pk">km ' + km1(w[3]) + ' · ' + mil(w[4]) + ' m</div>' +
       (p.dp ? '<div class="pk">étape : +' + mil(p.dp) + ' m / −' + mil(p.dm) + ' m</div>' : '') +
-      (p.date ? '<div class="ph">passage prévu ' + hh(p.date) + '</div>' : '') +
+      (p.date ? '<div class="ph">prévu ' + hh(p.date) + '</div>' : '') +
       (p.bdate ? '<div class="pb">heure limite ' + hh(p.bdate) + '</div>' : ''));
   });
 
@@ -629,10 +732,7 @@ function bati(data) {
      de la mise en page — ou pendant que l'onglet est masque — il mesure une
      boite vide et se cale n'importe ou. */
   var bornes = L.polyline(pts).getBounds();
-  window.recadrer = function () {
-    carte.invalidateSize();
-    carte.fitBounds(bornes, { padding: [18, 18] });
-  };
+  window.recadrer = function () { carte.invalidateSize(); carte.fitBounds(bornes, { padding: [18, 18] }); };
   recadrer(); requestAnimationFrame(recadrer); setTimeout(recadrer, 350);
   window.addEventListener('resize', function () {
     clearTimeout(window._rc); window._rc = setTimeout(recadrer, 200);
@@ -643,7 +743,7 @@ function bati(data) {
 
 function vide() {
   var c = document.getElementById('carte');
-  if (c) c.outerHTML = '<div class="carte-vide">La carte n\'a pas pu se charger.<br>' +
+  if (c) c.outerHTML = '<div class="carte-vide">La carte n\'a pas pu se charger. ' +
     'Le tableau de marche reste complet.</div>';
 }
 
@@ -664,12 +764,11 @@ function majCarte(now) {
   if (p.avant) return;
   var f = TRACE.filter(function (t) { return t[2] <= p.km; })
                .map(function (t) { return [t[0], t[1]]; });
-  var ll = lonlat(p.km);
-  f.push(ll);
+  var ll = lonlat(p.km); f.push(ll);
   fait.setLatLngs(f);
   if (!marq) {
     marq = L.marker(ll, { icon: L.divIcon({ className: '',
-      html: '<div class="pulse"></div>', iconSize: [17, 17], iconAnchor: [8.5, 8.5] }) })
+      html: '<div class="pulse"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }) })
       .addTo(carte).bindPopup('<b>Position estimée</b>' +
         '<div class="pk" style="margin-top:5px">Calculée d\'après le plan. ' +
         'Ce n\'est pas une position GPS réelle.</div>');
@@ -680,9 +779,7 @@ function majCarte(now) {
 var VUES = ['maintenant', 'parcours', 'horaires'];
 function montre(v) {
   if (VUES.indexOf(v) < 0) v = 'maintenant';
-  VUES.forEach(function (x) {
-    document.getElementById('v-' + x).classList.toggle('on', x === v);
-  });
+  VUES.forEach(function (x) { document.getElementById('v-' + x).classList.toggle('on', x === v); });
   document.querySelectorAll('.onglets button').forEach(function (b) {
     b.setAttribute('aria-selected', b.dataset.v === v ? 'true' : 'false');
   });
@@ -695,7 +792,7 @@ document.querySelectorAll('.onglets button').forEach(function (b) {
 
 function tout() {
   var now = new Date();
-  majBandeau(now); majMaintenant(now); majMarche(now); majProfil(now); majCarte(now);
+  majStatut(now); majMaintenant(now); majMarche(now); majProfil(now); majCarte(now);
 }
 
 document.getElementById('lienTracker').href = TRACKER;
@@ -710,7 +807,7 @@ majSections();
 try { montre(sessionStorage.getItem('ccc-suivi-vue') || 'maintenant'); } catch (e) { montre('maintenant'); }
 tout();
 setInterval(tout, 60000);
-setInterval(function () { majBandeau(new Date()); }, 1000);
+setInterval(function () { majStatut(new Date()); }, 1000);
 
 fetch('ccc_trace.json')
   .then(function (r) { return r.json(); })
