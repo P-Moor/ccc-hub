@@ -315,6 +315,7 @@ const PARTIES = {
     ['profil', 'Tracé', '<path d="M2 18l6-9 4 5 3-4 7 8z"/>'],
     ['deroule', 'Pacing', '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8"/><path d="M11 6h9"/><path d="M11 18h9"/>'],
     ['ravitos', 'Ravitos', '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/>'],
+    ['cartes', 'Cartes', '<rect x="3" y="6" width="13" height="9" rx="2"/><rect x="8" y="9" width="13" height="9" rx="2"/>'],
     ['course', 'Jour J', '<path d="M6 4l13 8-13 8z"/>']
   ]
 };
@@ -636,7 +637,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-36';
+const VERSION = 'ccc-v2-carnet-37';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
@@ -812,7 +813,8 @@ function traceTimeline() {
       '<div class="tl-rail"><i class="' + dot + '"></i></div>' +
       '<div class="tl-poste"><div class="tl-h">' + heureDe(plan, i) + '</div>' +
       '<div class="tl-nom">' + court(s.nom) + '<small>km ' + kmFmt(s.cumKm) +
-      (s.arretMin ? ' &#183; ' + s.arretMin + ' min sur place' : '') + '</small></div>' +
+      ' &#183; reste ' + kmFmt(kmRestant(s.cumKm)) +
+      (s.arretMin ? ' &#183; ' + s.arretMin + ' min' : '') + '</small></div>' +
       (marge ? '<span class="pastille ' + classeMarge(marge) + '">' + marge + '</span>' : '') +
       '<span class="tl-chev">&#8250;</span></div></button>';
   });

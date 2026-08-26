@@ -18,7 +18,7 @@
 //
 // Bumper CACHE a chaque deploiement.
 
-const CACHE = 'ccc-v2-carnet-36';
+const CACHE = 'ccc-v2-carnet-37';
 
 const NOYAU = [
   './',
