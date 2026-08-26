@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CCC 100K">
+  <!-- Pave lime de la charte du Hub. A 32 px seul « CCC » se lit encore,
+       « 100K » devient une texture : c'est voulu, il n'est la que pour les
+       grandes tailles, ecran d'accueil et onglet retina. -->
+  <rect width="64" height="64" rx="14" fill="#a3e635"/>
+  <text x="32" y="31" text-anchor="middle"
+        font-family="Syne, Helvetica, Arial, sans-serif" font-weight="800"
+        font-size="25" letter-spacing="-1.6" fill="#0f1a02">CCC</text>
+  <rect x="12" y="39" width="40" height="15" rx="4" fill="#0f1a02"/>
+  <text x="32" y="50.5" text-anchor="middle"
+        font-family="Syne, Helvetica, Arial, sans-serif" font-weight="800"
+        font-size="11" letter-spacing="-.4" fill="#a3e635">100K</text>
+</svg>

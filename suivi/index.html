@@ -7,6 +7,10 @@
 <meta name="description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15. Tableau de marche, barrières horaires, carte du parcours.">
 <meta name="theme-color" content="#0f0f10">
 
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
 <meta property="og:type" content="website">
 <meta property="og:title" content="CCC 2026 — Plan de course · Pierre Moor #4330">
 <meta property="og:description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15">
@@ -34,6 +38,21 @@
   --f-body:'Space Grotesk',system-ui,sans-serif;
   --f-mono:'DM Mono',ui-monospace,monospace;
   --r:10px; --tap:44px;
+  /* Les deux detentes du carnet : la premiere pour les glissements, la
+     seconde avec un leger depassement pour ce qui apparait. */
+  --sortie:cubic-bezier(.22,.61,.36,1);
+  --ressort:cubic-bezier(.2,.9,.28,1.06);
+}
+
+/* Le verre. Le flou ne se voit que la ou du contenu passe DERRIERE : la barre
+   d'onglets et le bandeau, qui sont colles en haut. Ailleurs, ce qui donne la
+   matiere c'est la translucidite plus un filet de lumiere sur l'arete haute —
+   exactement ce que fait Apple, et ca ne coute rien au telephone. */
+.verre {
+  background:rgba(22,23,26,.72);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  backdrop-filter:saturate(180%) blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.35);
 }
 * { box-sizing:border-box; }
 html { -webkit-text-size-adjust:100%; }
@@ -57,6 +76,7 @@ main { padding:0 14px; }
 .tete .meta { margin-top:8px; font-family:var(--f-mono); font-size:11px; color:var(--muted); line-height:1.7; }
 .tete .act { display:flex; gap:8px; margin-top:14px; }
 .btn {
+  transition:transform .18s var(--ressort), border-color .28s var(--sortie);
   display:flex; align-items:center; justify-content:center; gap:8px;
   min-height:var(--tap); padding:0 16px; border-radius:8px;
   border:1px solid var(--border2); background:var(--surface2); color:var(--text);
@@ -64,12 +84,16 @@ main { padding:0 14px; }
   text-decoration:none; cursor:pointer; white-space:nowrap;
 }
 .btn.plein { flex:1; background:var(--accent); border-color:var(--accent); color:#0f1a02; font-weight:700; }
+.btn:active { transform:scale(.97); }
 .btn.plein i { width:7px; height:7px; border-radius:50%; background:#0f1a02; font-style:normal; animation:bat 2.4s infinite; }
 
 /* --------------------------------------------------------------- statut */
 .statut {
   margin:0 14px; padding:11px 13px; border-radius:var(--r);
-  background:var(--surface); border:1px solid var(--border);
+  background:rgba(22,23,26,.72); border:1px solid var(--border);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  backdrop-filter:saturate(180%) blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   font-family:var(--f-mono); font-size:11.5px; color:var(--muted);
   display:flex; align-items:center; gap:9px; flex-wrap:wrap;
 }
@@ -79,23 +103,44 @@ main { padding:0 14px; }
 /* -------------------------------------------------------------- onglets */
 .onglets {
   position:sticky; top:0; z-index:30; display:flex; gap:6px;
-  padding:12px 14px; background:rgba(15,15,16,.95);
-  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  padding:12px 14px; background:rgba(15,15,16,.72);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  backdrop-filter:saturate(180%) blur(18px);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.04);
 }
 .onglets button {
   flex:1; min-height:42px; border-radius:8px;
   border:1px solid var(--border); background:var(--surface2); color:var(--muted);
   font-family:var(--f-body); font-size:13.5px; font-weight:500; cursor:pointer;
 }
+.onglets button {
+  transition:background .28s var(--sortie), color .28s var(--sortie),
+             border-color .28s var(--sortie), transform .18s var(--ressort);
+}
+.onglets button:active { transform:scale(.97); }
 .onglets button[aria-selected="true"] {
   background:var(--accent); border-color:var(--accent); color:#0f1a02; font-weight:700;
 }
-.vue { display:none; } .vue.on { display:block; }
+
+/* Le changement d'onglet : le contenu monte et se revele. La detente a
+   depassement leger donne la sensation d'un panneau qui se pose. */
+.vue { display:none; }
+.vue.on { display:block; animation:entre .34s var(--ressort) both; }
+@keyframes entre {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .vue.on { animation:none; }
+  .onglets button:active { transform:none; }
+}
 
 /* --------------------------------------------------------------- tuiles */
 .tuiles { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
 @media (min-width:560px) { .tuiles { grid-template-columns:repeat(4,1fr); } }
-.tuile { padding:14px; border-radius:var(--r); background:var(--surface); border:1px solid var(--border); }
+.tuile { padding:14px; border-radius:var(--r); background:rgba(22,23,26,.72);
+         border:1px solid var(--border); box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+         transition:border-color .3s var(--sortie); }
 .tuile .v { font-family:var(--f-display); font-weight:800; font-size:1.7rem; line-height:1;
             letter-spacing:-.04em; white-space:nowrap; }
 .tuile .v small { font-family:var(--f-mono); font-size:12px; font-weight:400; color:var(--muted); margin-left:3px; }
@@ -108,18 +153,21 @@ main { padding:0 14px; }
 /* ---------------------------------------------------------------- jauges */
 .duo { display:grid; grid-template-columns:1fr; gap:8px; margin-top:8px; }
 @media (min-width:560px) { .duo { grid-template-columns:1fr 1fr; } }
-.jaugec { padding:15px; border-radius:var(--r); background:var(--surface); border:1px solid var(--border); }
+.jaugec { padding:15px; border-radius:var(--r); background:rgba(22,23,26,.72);
+          border:1px solid var(--border); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
 .jaugec .h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
 .jaugec .t { font-family:var(--f-display); font-weight:700; font-size:.95rem; letter-spacing:-.02em; }
 .jaugec .p { font-family:var(--f-mono); font-size:14px; font-weight:500; color:var(--accent); }
 .jaugec .s { margin-top:3px; font-family:var(--f-mono); font-size:11px; color:var(--muted); }
 .barre { height:6px; border-radius:99px; background:var(--surface3); margin-top:13px; overflow:hidden; }
-.barre i { display:block; height:100%; background:var(--accent); transition:width .5s ease; }
+.barre i { display:block; height:100%; background:var(--accent);
+           transition:width .7s var(--sortie); }
 .jaugec .f { margin-top:8px; display:flex; justify-content:space-between;
              font-family:var(--f-mono); font-size:10px; color:var(--muted); }
 
 /* ---------------------------------------------------------------- blocs */
-.bloc { padding:15px; border-radius:var(--r); background:var(--surface); border:1px solid var(--border); }
+.bloc { padding:15px; border-radius:var(--r); background:rgba(22,23,26,.72);
+        border:1px solid var(--border); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
 .encours { display:flex; align-items:center; gap:12px; }
 .encours .p {
   width:38px; height:38px; border-radius:9px; flex:none;
@@ -142,7 +190,7 @@ main { padding:0 14px; }
 
 /* ------------------------------------------------------- bande sections */
 .bande { display:flex; gap:2px; height:32px; }
-.bande span { border-radius:3px; }
+.bande span { border-radius:3px; transition:opacity .5s var(--sortie); }
 .bande span.montee   { background:var(--orange); }
 .bande span.descente { background:var(--blue); }
 .bande span.roulant  { background:var(--accent); }
@@ -624,36 +672,76 @@ function majSections() {
 
 function majProfil(now) {
   if (!TRACE) return;
-  var L = 680, H = 180, mb = 20, mt = 10;
+  var L = 680, H = 190, mb = 26, mt = 20;
   var alts = TRACE.map(function (t) { return t[3]; });
   var lo = Math.min.apply(null, alts) - 70, hi = Math.max.apply(null, alts) + 70;
   var X = function (k) { return k / DISTANCE * L; };
   var Y = function (a) { return mt + (hi - a) / (hi - lo) * (H - mt - mb); };
+
   var d = TRACE.map(function (t, i) {
     return (i ? 'L' : 'M') + X(t[2]).toFixed(1) + ' ' + Y(t[3]).toFixed(1);
   }).join('');
+  var aire = d + 'L' + L + ' ' + (H - mb) + 'L0 ' + (H - mb) + 'Z';
+  var xn = X(KM_NUIT);
   var p = ou(now), cx = X(p.km);
+
+  /* La bascule jour/nuit se lit sur l'AIRE, pas sur un aplat pose par-dessus :
+     la meme aire est dessinee deux fois, chacune clippee de son cote, avec son
+     propre degrade, et le trait suit. C'est la technique du carnet — la seule
+     qui rende la transition franche sans masquer le relief. */
   document.getElementById('profilHote').innerHTML =
-    '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" aria-label="Profil altimétrique">' +
-    '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#a3e635" stop-opacity=".34"/>' +
-      '<stop offset="100%" stop-color="#a3e635" stop-opacity=".03"/></linearGradient></defs>' +
-    '<rect x="' + X(KM_NUIT) + '" y="0" width="' + (L - X(KM_NUIT)) + '" height="' + (H - mb) +
-      '" fill="#5ba3e8" opacity=".07"/>' +
-    '<text x="' + (X(KM_NUIT) + 6) + '" y="14" fill="#868992" font-size="9" ' +
-      'font-family="DM Mono,monospace" letter-spacing="1">NUIT</text>' +
-    '<path d="' + d + 'L' + L + ' ' + (H - mb) + 'L0 ' + (H - mb) + 'Z" fill="url(#g)"/>' +
-    '<path d="' + d + '" fill="none" stroke="#a3e635" stroke-width="1.7" stroke-linejoin="round"/>' +
+    '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" ' +
+      'aria-label="Profil altimetrique, jour puis nuit a partir de Champex">' +
+    '<defs>' +
+      '<linearGradient id="gj" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#a3e635" stop-opacity=".42"/>' +
+        '<stop offset="100%" stop-color="#a3e635" stop-opacity=".05"/></linearGradient>' +
+      '<linearGradient id="gn" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#5ba3e8" stop-opacity=".5"/>' +
+        '<stop offset="100%" stop-color="#5ba3e8" stop-opacity=".07"/></linearGradient>' +
+      '<clipPath id="cj"><rect x="0" y="0" width="' + xn.toFixed(1) + '" height="' + H + '"/></clipPath>' +
+      '<clipPath id="cn"><rect x="' + xn.toFixed(1) + '" y="0" width="' + (L - xn).toFixed(1) +
+        '" height="' + H + '"/></clipPath>' +
+    '</defs>' +
+    '<path d="' + aire + '" fill="url(#gj)" clip-path="url(#cj)"/>' +
+    '<path d="' + aire + '" fill="url(#gn)" clip-path="url(#cn)"/>' +
+    '<path d="' + d + '" fill="none" stroke="#a3e635" stroke-width="1.8" ' +
+      'stroke-linejoin="round" clip-path="url(#cj)"/>' +
+    '<path d="' + d + '" fill="none" stroke="#5ba3e8" stroke-width="1.8" ' +
+      'stroke-linejoin="round" clip-path="url(#cn)"/>' +
+    '<line x1="' + xn.toFixed(1) + '" y1="' + (mt - 8) + '" x2="' + xn.toFixed(1) +
+      '" y2="' + (H - mb) + '" stroke="#5ba3e8" stroke-width=".9" ' +
+      'stroke-dasharray="2 2.5" opacity=".75"/>' +
+    '<text x="' + (xn + 5).toFixed(1) + '" y="' + (mt - 10) + '" fill="#5ba3e8" ' +
+      'font-size="9.5" font-family="DM Mono,monospace">nuit ~20:30</text>' +
     POINTS.map(function (x) {
       return '<circle cx="' + X(x.km) + '" cy="' + Y(x.alt) + '" r="' + (x.r ? 3 : 2) +
-        '" fill="' + (x.r ? '#a3e635' : '#e8a020') + '"/>';
+        '" fill="' + (x.km < KM_NUIT ? '#a3e635' : '#5ba3e8') + '"/>';
     }).join('') +
-    (p.avant || p.fini ? '' : '<line x1="' + cx + '" y1="' + mt + '" x2="' + cx +
-      '" y2="' + (H - mb) + '" stroke="#e8a020" stroke-width="1.6"/>') +
-    '<text x="2" y="' + (H - 5) + '" fill="#868992" font-size="9" ' +
+    (p.avant || p.fini ? '' :
+      '<line x1="' + cx + '" y1="' + (mt - 4) + '" x2="' + cx + '" y2="' + (H - mb) +
+        '" stroke="#e8a020" stroke-width="1.6"/>' +
+      '<circle cx="' + cx + '" cy="' + Y(altAu(p.km)) + '" r="4" fill="#e8a020" ' +
+        'stroke="#0f0f10" stroke-width="1.6"/>') +
+    '<text x="2" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
       'font-family="DM Mono,monospace">0 km</text>' +
-    '<text x="' + (L - 2) + '" y="' + (H - 5) + '" fill="#868992" font-size="9" ' +
-      'font-family="DM Mono,monospace" text-anchor="end">100,9 km</text></svg>';
+    '<text x="' + xn.toFixed(1) + '" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
+      'font-family="DM Mono,monospace" text-anchor="middle">Champex 54,9</text>' +
+    '<text x="' + (L - 2) + '" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
+      'font-family="DM Mono,monospace" text-anchor="end">100,9 km</text>' +
+    '</svg>';
+}
+
+/* Altitude interpolee, pour poser la bille du curseur sur le trait. */
+function altAu(km) {
+  for (var i = 1; i < TRACE.length; i++) {
+    if (km <= TRACE[i][2]) {
+      var a = TRACE[i - 1], b = TRACE[i];
+      var t = (km - a[2]) / ((b[2] - a[2]) || 1);
+      return a[3] + (b[3] - a[3]) * t;
+    }
+  }
+  return TRACE[TRACE.length - 1][3];
 }
 
 /* ---------------------------------------------------------------- carte */
