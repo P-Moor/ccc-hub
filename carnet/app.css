@@ -3286,3 +3286,24 @@ button.tl-ligne:active { background: var(--surface-2); }
   font-size: 9.5px; letter-spacing: .02em; color: var(--texte-pale); font-weight: 400;
 }
 .ct-reste { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* --- le profil officiel UTMB --- */
+.po-n { font-size: 13px; line-height: 1.5; color: var(--texte-doux); margin-bottom: 11px; }
+/* Le PNG officiel fait 3369 x 2382, mais son contenu tient dans le tiers
+   superieur : le reste est du blanc. On rogne donc a la hauteur utile, et on
+   le laisse defiler horizontalement — a 309 px de large, un graphique de
+   3 369 px est illisible, alors qu'a 920 px il se lit tres bien au doigt. */
+.po-cadre {
+  overflow-x: auto; overflow-y: hidden;
+  border-radius: var(--r-s); background: #fff;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.po-i { display: block; width: 920px; height: 290px; overflow: hidden; }
+.po-i img { display: block; width: 920px; height: auto; }
+.po-a { margin-top: 8px; font-size: 12px; line-height: 1.45; color: var(--texte-pale); }
+.po-s {
+  margin-top: 10px; padding: 10px 12px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--jour) 11%, transparent);
+  font-size: 13px; line-height: 1.5;
+}

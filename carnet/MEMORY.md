@@ -1,6 +1,6 @@
 # MÉMOIRE PROJET — CCC Race Companion
 
-Dernière mise à jour : 24/08/2026 (v34)
+Dernière mise à jour : 24/08/2026 (v35)
 
 ## ÉTAT ACTUEL
 
@@ -537,3 +537,48 @@ d'aperçu **arrêté** → l'app se charge entièrement depuis le cache.
 - 📊 Physio du 24 : **meilleur profil du dossier** — FC 41, VFC 88, BB 93,
   readiness 75 HIGH, stress nocturne 9. Gorge et nez : rhinite vasomotrice, pas
   d'infection. Le signal à surveiller serait FC +5 et VFC effondrée.
+
+---
+
+## 🔴 LA RÈGLE N°1 ÉTAIT VIOLÉE (24/08, v35)
+
+En revérifiant la Definition of Done, découverte d'un bug qui durait depuis la
+création du coffre : **les coches du coffre s'effaçaient à chaque
+rechargement**, en silence.
+
+`archiveOrphelins()` déplace vers `orphelins` tout identifiant coché absent de
+`idsConnusCheck()`. Or cette fonction énumère `sac-data`, `nutrition-data`,
+`voyage-data`... mais **pas le coffre**, et pour une bonne raison : le coffre
+est chiffré, on ne peut pas lire ses identifiants sans la phrase de passe. Les
+`lg*` étaient donc archivés à chaque ouverture. Idem pour les `mo*` de la
+montre, ajoutés le 24.
+
+Concrètement : « 🛰️ RENDRE LA BALISE GPS — 155 € » se décochait tout seul.
+
+**Correctif** : `PREFIXES_RESERVES` — les identifiants dont la source n'est pas
+énumérable au chargement sont reconnus par motif (`^lg\d+$`, `^mo\d+$`) et
+jamais archivés. Et une **réparation** ramène dans l'état actif tout ce que les
+versions précédentes avaient archivé à tort : rien n'avait été perdu, seulement
+déplacé.
+
+Vérifié : `lg5`, `mo0` et `c21` survivent à deux rechargements successifs, et
+la liste des orphelins est vide.
+
+⚠️ **À retenir** : toute nouvelle liste cochable dont les identifiants ne
+viennent pas d'un module importé par `idsConnusCheck()` doit ajouter son motif
+à `PREFIXES_RESERVES`. Sinon Pierre coche dans le vide.
+
+## Le profil officiel, affiché (v35)
+
+`assets/ccc_100km_profil.png` était déployé mais n'était affiché nulle part.
+Il est maintenant dans l'onglet Tracé, et il vaut le détour : il porte les
+**barrières en rouge**, le D+ par segment et les **pictogrammes de services**
+par poste, que notre profil vectoriel n'a pas.
+
+Deux pièges au passage : `loading="lazy"` ne se déclenche jamais dans une vue
+masquée au moment du parsing (retiré) ; et les deux tiers inférieurs du PNG
+sont du blanc, donc l'image est rognée à sa hauteur utile et défile
+horizontalement à 920 px — à 309 px, un graphique de 3 369 px est illisible.
+
+Ses valeurs imprimées ont servi à corriger quatre D+ de segment calculés :
+Bonatti 323, Arnouvaz 149, La Giète 731, Vallorcine 161.

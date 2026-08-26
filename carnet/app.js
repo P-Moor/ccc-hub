@@ -60,14 +60,39 @@ const CLES_ETAT = [
 
 // Archive les identifiants qui n'existent plus dans les donnees, au lieu de
 // les jeter. Si un fichier de donnees part en vrille, l'etat est recuperable.
+/* Certaines listes cochables ne sont PAS enumerables au chargement : celle du
+   coffre vit dans un fichier chiffre qu'on ne peut pas lire sans la phrase de
+   passe. Leurs identifiants sont donc RESERVES par prefixe, sinon l'archivage
+   des orphelins les effacerait a chaque ouverture de l'app.
+
+   C'est exactement ce qui se passait jusqu'au 24/08 : les coches du coffre —
+   dont « rendre la balise GPS, 155 € » — se decochaient toutes seules a chaque
+   rechargement, en silence. */
+const PREFIXES_RESERVES = [
+  /^lg\d+$/,     // « A regler » du coffre, chiffre donc illisible d'ici
+  /^mo\d+$/      // le reste-a-faire de la montre
+];
+const idReserve = id => PREFIXES_RESERVES.some(r => r.test(id));
+
 function archiveOrphelins(idsConnus) {
   const etat = store.get('check', {}) || {};
   const orph = store.get('orphelins', {}) || {};
   let n = 0;
   Object.keys(etat).forEach(id => {
-    if (!idsConnus.has(id)) { orph[id] = etat[id]; delete etat[id]; n++; }
+    if (!idsConnus.has(id) && !idReserve(id)) {
+      orph[id] = etat[id]; delete etat[id]; n++;
+    }
   });
-  if (n) { store.set('check', etat); store.set('orphelins', orph); }
+
+  /* Reparation : tout ce qui a ete archive a tort par les versions
+     precedentes revient dans l'etat actif. Sans ca, Pierre repartirait de zero
+     sur des cases qu'il avait deja cochees. */
+  let rendus = 0;
+  Object.keys(orph).forEach(id => {
+    if (idReserve(id)) { etat[id] = orph[id]; delete orph[id]; rendus++; }
+  });
+
+  if (n || rendus) { store.set('check', etat); store.set('orphelins', orph); }
   return n;
 }
 
@@ -611,7 +636,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-34';
+const VERSION = 'ccc-v2-carnet-35';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
@@ -2737,6 +2762,28 @@ function tracePhysio24() {
       '<div class="p24-sv">' + S.surveillance + '</div></div>';
 }
 
+/* Le profil officiel UTMB. Il porte les pictogrammes de services par poste —
+   repas chaud, assistance, sac de delestage — que notre profil vectoriel n'a
+   pas. Il pese 370 Ko et se charge normalement : `loading="lazy"` ne se
+   declenchait pas, la vue Trace etant masquee au moment ou le navigateur
+   analyse la page. Le service worker le met en cache, donc il reste
+   consultable hors ligne. */
+function traceProfilOfficiel() {
+  const h = document.getElementById('profilOffHote');
+  if (!h) return;
+  h.innerHTML =
+    '<div class="po-n">Le profil publié par l\'UTMB, avec les pictogrammes de ' +
+      'services à chaque poste. ' + PARCOURS.distanceOfficielle + ' km &#183; ' +
+      PARCOURS.dplusOfficiel + ' m D+.</div>' +
+    '<div class="po-cadre"><a class="po-i" href="assets/ccc_100km_profil.png" ' +
+      'target="_blank" rel="noopener">' +
+      '<img src="assets/ccc_100km_profil.png" alt="Profil officiel de la CCC 2026" ' +
+      'decoding="async"></a></div>' +
+    '<div class="po-a">Fais glisser vers la droite pour parcourir les 100 km. ' +
+      'Touche l\'image pour l\'ouvrir en grand.</div>' +
+    '<div class="po-s">' + PARCOURS.pointeLaSortie + '</div>';
+}
+
 /* Les quatre cartes plastifiees. L'app ne les remplace pas : elle permet de
    les relire, et de les reimprimer si l'une se perd. */
 function traceCartes() {
@@ -4021,6 +4068,7 @@ function init() {
   traceVigilance();
   tracePhysio24();
   traceCartes();
+  traceProfilOfficiel();
   traceVoyage();
   traceCarb();
   fondEnLigne = !!store.get('carte', false);

@@ -43,11 +43,11 @@ export const PARCOURS = {
       cible: "12:37", barriere: "13:45", marge: "1h08", mode: "express" },
 
     { nom: "Refuge Bonatti", km: 21.2, alt: 2027, type: "sommet",
-      lat: 45.84678, lon: 7.03331, segKm: 7.5, dplus: 321, dminus: 277,
+      lat: 45.84678, lon: 7.03331, segKm: 7.5, dplus: 323, dminus: 277,
       note: "🆕 Balcon roulant — manger en marchant" },
 
     { nom: "Arnouvaz", km: 26.3, alt: 1777, type: "ravito",
-      lat: 45.87133, lon: 7.05394, segKm: 5.2, dplus: 148, dminus: 396,
+      lat: 45.87133, lon: 7.05394, segKm: 5.2, dplus: 149, dminus: 396,
       cible: "14:28", barriere: "16:30", marge: "2h01", mode: "moyen" },
 
     { nom: "Grand Col Ferret", km: 30.9, alt: 2527, type: "sommet",
@@ -69,7 +69,7 @@ export const PARCOURS = {
       alerte: "⚠️ POINTAGE SEUL — PAS DE RAVITO" },
 
     { nom: "La Giète", km: 66.3, alt: 1885, type: "sommet",
-      lat: 46.05500, lon: 7.03364, segKm: 6.5, dplus: 729, dminus: 184,
+      lat: 46.05500, lon: 7.03364, segKm: 6.5, dplus: 731, dminus: 184,
       note: "🆕 Le vrai nom du sommet après Bovine · +731 m sur 6,5 km · de nuit" },
 
     { nom: "Trient", km: 71.5, alt: 1304, type: "ravito",
@@ -81,7 +81,7 @@ export const PARCOURS = {
       note: "🆕 +647 m sur 3,8 km = 17 % — LA PENTE LA PLUS RAIDE DE LA COURSE, à 23 h" },
 
     { nom: "Vallorcine", km: 82.5, alt: 1260, type: "ravito",
-      lat: 46.03242, lon: 6.93236, segKm: 7.3, dplus: 160, dminus: 837,
+      lat: 46.03242, lon: 6.93236, segKm: 7.3, dplus: 161, dminus: 837,
       cible: "01:40", barriere: "07:15", marge: "5h34", mode: "moyen",
       sortie: true },
 
