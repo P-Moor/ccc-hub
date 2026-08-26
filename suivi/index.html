@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivre Pierre sur la CCC — 101 km dans le Mont-Blanc</title>
+<meta name="description" content="Vendredi 28 août, 9h15. De Courmayeur à Chamonix, 101 km et 6 050 m de montée. Où devrait-il être en ce moment ?">
+<meta name="theme-color" content="#0f2a1d" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Suivre Pierre sur la CCC — 101 km dans le Mont-Blanc">
+<meta property="og:description" content="Vendredi 28 août, 9h15. De Courmayeur à Chamonix.">
+<meta property="og:image" content="https://p-moor.github.io/ccc-hub/carnet/assets/ccc_100km_profil.png">
+<meta property="og:url" content="https://p-moor.github.io/ccc-hub/suivi/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ==========================================================================
+   Une page qu'on partage, pas un tableau de bord. L'elegance vient de
+   l'espace et de la hierarchie : gros titres, beaucoup d'air, une seule
+   couleur d'accent. Le vert pour le jour, le bleu nuit pour la nuit — et
+   c'est la seule chose que la palette a besoin de raconter.
+   ========================================================================== */
+:root {
+  --vert:      #16a34a;
+  --vert-fonce:#0f7a37;
+  --nuit:      #1e3a8a;
+  --nuit-clair:#4661c4;
+  --fond:      #f7f6f2;
+  --carte:     #ffffff;
+  --texte:     #1c2620;
+  --doux:      #55635b;
+  --pale:      #78857d;
+  --bord:      #e2e0d8;
+  --ombre:     0 1px 2px rgba(28,38,32,.05), 0 10px 26px -14px rgba(28,38,32,.22);
+  --r:         18px;
+  --r-s:       12px;
+  --max:       620px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vert:      #34d17a;
+    --vert-fonce:#25a75f;
+    --nuit:      #6d86e8;
+    --nuit-clair:#93a6f0;
+    --fond:      #0f1512;
+    --carte:     #18201b;
+    --texte:     #eef3ef;
+    --doux:      #a8b5ad;
+    --pale:      #8b988f;
+    --bord:      #2a352e;
+    --ombre:     0 1px 2px rgba(0,0,0,.5), 0 12px 30px -16px rgba(0,0,0,.8);
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--fond); color: var(--texte);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.55; font-size: 16px;
+  padding: 0 0 44px;
+}
+main { max-width: var(--max); margin: 0 auto; padding: 0 18px; }
+h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 800; letter-spacing: -.01em; }
+p { margin: 0; }
+
+/* ---------------------------------------------------------------- en-tete */
+.tete {
+  background: linear-gradient(170deg, var(--vert-fonce), #0b3a24 62%, #0a2a3d);
+  color: #fff; padding: 40px 18px 34px; text-align: center;
+}
+.tete .nom {
+  font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  opacity: .8; margin-bottom: 10px;
+}
+.tete h1 { font-size: clamp(28px, 8vw, 40px); }
+.tete .sous { margin-top: 8px; font-size: 15px; opacity: .88; }
+.tete .chiffres {
+  margin-top: 4px; font-size: 13.5px; opacity: .7;
+  font-variant-numeric: tabular-nums;
+}
+
+.suivre {
+  display: block; margin: 26px auto 0; max-width: 380px;
+  padding: 17px 22px; border-radius: 999px;
+  background: #fff; color: #0b3a24; text-decoration: none;
+  font-weight: 800; font-size: 16px; letter-spacing: .01em;
+  box-shadow: 0 8px 26px -10px rgba(0,0,0,.5);
+}
+.suivre small { display: block; font-weight: 600; font-size: 11.5px; opacity: .62; margin-top: 3px; }
+
+.etat {
+  margin-top: 24px; font-variant-numeric: tabular-nums;
+}
+.etat .lbl { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .72; }
+.etat .val { font-size: clamp(26px, 8vw, 34px); font-weight: 800; margin-top: 4px; }
+
+/* ------------------------------------------------------------ bloc central */
+.bloc {
+  background: var(--carte); border-radius: var(--r); box-shadow: var(--ombre);
+  padding: 22px; margin-top: -26px; position: relative;
+}
+.bloc .kicker {
+  font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--pale); text-align: center;
+}
+.bloc .lieu {
+  text-align: center; font-size: clamp(26px, 7.5vw, 34px); font-weight: 800;
+  margin-top: 8px; color: var(--vert); line-height: 1.1;
+}
+.bloc .km {
+  text-align: center; font-size: 14.5px; color: var(--doux); margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.jauge {
+  height: 12px; border-radius: 999px; background: var(--bord);
+  margin: 18px 0 8px; overflow: hidden;
+}
+.jauge i { display: block; height: 100%; background: var(--vert); border-radius: 999px;
+           transition: width .6s ease; }
+.jauge-l {
+  display: flex; justify-content: space-between; font-size: 12px;
+  color: var(--pale); font-variant-numeric: tabular-nums;
+}
+.prochain {
+  margin-top: 16px; padding: 13px 15px; border-radius: var(--r-s);
+  background: color-mix(in srgb, var(--vert) 10%, transparent);
+  font-size: 14.5px; text-align: center;
+}
+.prochain b { color: var(--vert); }
+.prudence {
+  margin-top: 14px; font-size: 12.5px; line-height: 1.5; color: var(--pale);
+  text-align: center; font-style: italic;
+}
+
+/* ----------------------------------------------------------------- titres */
+h2.t {
+  margin: 40px 0 4px; font-size: 21px;
+}
+.t-sous { font-size: 14px; color: var(--doux); margin-bottom: 16px; }
+
+/* ------------------------------------------------------------------ carte */
+#carte {
+  height: 380px; border-radius: var(--r); overflow: hidden;
+  box-shadow: var(--ombre); background: var(--carte);
+  z-index: 0;
+}
+.carte-vide {
+  height: 380px; border-radius: var(--r); background: var(--carte);
+  box-shadow: var(--ombre); display: flex; align-items: center;
+  justify-content: center; text-align: center; padding: 26px;
+  color: var(--pale); font-size: 14px; line-height: 1.5;
+}
+.carte-b {
+  display: flex; gap: 9px; margin-top: 11px; flex-wrap: wrap;
+}
+.carte-b button {
+  flex: 1; min-width: 140px; min-height: 46px; padding: 0 16px;
+  border-radius: 999px; border: 1px solid var(--bord);
+  background: var(--carte); color: var(--texte);
+  font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
+}
+.legende {
+  margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 16px;
+  font-size: 12.5px; color: var(--doux);
+}
+.legende span { display: flex; align-items: center; gap: 7px; }
+.legende i { width: 15px; height: 4px; border-radius: 2px; background: var(--vert); }
+.legende i.reste { background: repeating-linear-gradient(90deg, var(--doux) 0 2px, transparent 2px 6px); }
+.legende i.pos { width: 12px; height: 12px; border-radius: 50%; background: #e0245e; }
+
+/* le marqueur « position theorique » : il PULSE et il est semi-transparent,
+   pour qu'on ne le confonde jamais avec une vraie position GPS */
+.pulse {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(224,36,94,.85); border: 3px solid #fff;
+  box-shadow: 0 0 0 rgba(224,36,94,.6); animation: bat 2.2s infinite;
+}
+@keyframes bat {
+  0%   { box-shadow: 0 0 0 0 rgba(224,36,94,.55); }
+  70%  { box-shadow: 0 0 0 20px rgba(224,36,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(224,36,94,0); }
+}
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.leaflet-popup-content { margin: 13px 15px; font-size: 14px; line-height: 1.5; }
+.leaflet-popup-content b { display: block; font-size: 15.5px; margin-bottom: 3px; }
+.leaflet-popup-content .pk { color: var(--doux); font-size: 12.5px; }
+.leaflet-popup-content .ph { color: #16a34a; font-weight: 700; margin-top: 5px; }
+.leaflet-popup-content .pd { margin-top: 7px; color: #444; }
+.attrib { margin-top: 9px; font-size: 11px; color: var(--pale); }
+
+/* ----------------------------------------------------------------- profil */
+.profil {
+  background: var(--carte); border-radius: var(--r); box-shadow: var(--ombre);
+  padding: 16px 14px 12px;
+}
+.profil svg { display: block; width: 100%; height: auto; }
+.pf-nom { font-size: 9px; fill: var(--pale); font-weight: 700; }
+.pf-l   { font-size: 10px; fill: var(--doux); }
+
+/* --------------------------------------------------------------- timeline */
+.tl { position: relative; padding-left: 30px; }
+.tl::before {
+  content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px;
+  width: 2px; background: var(--bord);
+}
+.pt { position: relative; padding: 0 0 24px; }
+.pt::before {
+  content: ""; position: absolute; left: -30px; top: 5px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--carte); border: 3px solid var(--bord);
+}
+.pt.passe::before { background: var(--vert); border-color: var(--vert); }
+.pt.ici::before   { background: #e0245e; border-color: #e0245e;
+                    box-shadow: 0 0 0 5px rgba(224,36,94,.18); }
+.pt.passe { opacity: .55; }
+.pt .h {
+  font-variant-numeric: tabular-nums; font-weight: 800; font-size: 15px;
+  color: var(--vert);
+}
+.pt.nuitpt .h { color: var(--nuit); }
+.pt .n { font-weight: 800; font-size: 16.5px; margin-top: 1px; }
+.pt .k { font-size: 12.5px; color: var(--pale); font-variant-numeric: tabular-nums; }
+.pt .d { font-size: 14px; color: var(--doux); margin-top: 5px; }
+.pt .tag {
+  display: inline-block; margin-top: 7px; padding: 3px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 700;
+  background: color-mix(in srgb, var(--nuit) 14%, transparent); color: var(--nuit);
+}
+.pt.ici .n::after {
+  content: " ← il devrait être vers ici"; font-size: 12px; font-weight: 600;
+  color: #e0245e; letter-spacing: 0;
+}
+
+/* -------------------------------------------------------------- pedagogie */
+.grille { display: grid; gap: 11px; }
+.fiche {
+  background: var(--carte); border-radius: var(--r-s); box-shadow: var(--ombre);
+  padding: 17px 18px;
+}
+.fiche b { display: block; font-size: 16px; margin-bottom: 5px; }
+.fiche p { font-size: 14.5px; color: var(--doux); line-height: 1.55; }
+
+.encourager {
+  background: linear-gradient(160deg, var(--nuit), #16225c);
+  color: #fff; border-radius: var(--r); padding: 24px 20px;
+}
+.encourager h2 { font-size: 20px; margin-bottom: 14px; }
+.encourager p { font-size: 14.5px; opacity: .92; margin-bottom: 13px; }
+.encourager .dur {
+  margin-top: 4px; padding: 14px 16px; border-radius: var(--r-s);
+  background: rgba(255,255,255,.1); font-size: 14px;
+}
+.encourager .dur b { display: block; margin-bottom: 6px; }
+.encourager .dur li { margin-bottom: 4px; }
+.encourager ul { margin: 0; padding-left: 19px; }
+
+/* En mode sombre le vert s'eclaircit pour rester lisible sur fond noir ;
+   du coup un texte blanc dessus ne passe plus. La couleur du texte suit donc
+   la luminosite du fond, pas l'inverse. */
+.partage {
+  width: 100%; min-height: 52px; margin-top: 30px; border-radius: 999px;
+  border: 0; background: var(--vert); color: #fff;
+  font-family: inherit; font-size: 15.5px; font-weight: 800; cursor: pointer;
+}
+@media (prefers-color-scheme: dark) { .partage { color: #0b2416; } }
+
+/* L'attribution de Leaflet arrive avec ses propres couleurs, calculees pour
+   un fond clair. On la reprend pour qu'elle reste lisible la nuit. */
+.leaflet-control-attribution {
+  background: #fff !important; color: #2b3a33 !important;
+}
+.leaflet-control-attribution a { color: #0a5c29 !important; }
+.pied {
+  margin-top: 34px; text-align: center; font-size: 14.5px;
+  color: var(--doux); line-height: 1.65;
+}
+.pied .merci { margin-top: 12px; font-size: 17px; font-weight: 800; color: var(--texte); }
+</style>
+</head>
+<body>
+
+<header class="tete">
+  <div class="nom">Pierre Moor · dossard 4330</div>
+  <h1>CCC by UTMB</h1>
+  <div class="sous">Courmayeur → Chamonix</div>
+  <div class="chiffres">101 km · 6 050 m de montée · vendredi 28 août</div>
+
+  <a class="suivre" id="lienTracker" href="#" target="_blank" rel="noopener">
+    🔴 Suivre en direct sur le tracker UTMB
+    <small>sa position réelle, mise à jour par l'organisation</small>
+  </a>
+
+  <div class="etat">
+    <div class="lbl" id="etatLbl">Départ dans</div>
+    <div class="val" id="etatVal">—</div>
+  </div>
+</header>
+
+<main>
+
+  <section class="bloc" id="blocOu">
+    <div class="kicker">Maintenant, il devrait être</div>
+    <div class="lieu" id="ouLieu">—</div>
+    <div class="km" id="ouKm"></div>
+    <div class="jauge"><i id="jauge" style="width:0%"></i></div>
+    <div class="jauge-l"><span>Courmayeur</span><span id="pct">0 %</span><span>Chamonix</span></div>
+    <div class="prochain" id="prochain"></div>
+    <p class="prudence">Ces horaires sont un plan, pas une prédiction.
+      Un écart d'une heure ou deux est absolument normal et ne veut rien dire de grave.</p>
+  </section>
+
+  <h2 class="t">Le parcours</h2>
+  <p class="t-sous">Le tracker officiel montre un point qui bouge. Cette carte montre où ce point devrait être.</p>
+  <div id="carte"></div>
+  <div class="carte-b">
+    <button id="recentrer">Recentrer sur le parcours</button>
+  </div>
+  <div class="legende">
+    <span><i></i> déjà parcouru <em style="font-style:normal;color:var(--pale)">(en théorie)</em></span>
+    <span><i class="reste"></i> ce qu'il reste</span>
+    <span><i class="pos"></i> position estimée, pas réelle</span>
+  </div>
+  <p class="attrib" id="attrib"></p>
+
+  <h2 class="t">Le profil</h2>
+  <p class="t-sous">Chaque bosse est une montagne. La zone bleue, c'est la nuit.</p>
+  <div class="profil" id="profilHote"></div>
+
+  <h2 class="t">Les 15 points</h2>
+  <p class="t-sous">Du départ à l'arrivée, avec l'heure prévue.</p>
+  <div class="tl" id="timeline"></div>
+
+  <h2 class="t">Comprendre ce qu'il fait</h2>
+  <p class="t-sous">Six choses qui rendent cette course particulière.</p>
+  <div class="grille">
+    <div class="fiche"><b>⛰️ 6 050 mètres de montée</b>
+      <p>C'est deux fois la hauteur du Mont Blanc depuis Chamonix. En marchant.</p></div>
+    <div class="fiche"><b>🌙 Il va courir toute la nuit</b>
+      <p>La nuit tombe vers 20h30, à Champex. Il courra dix heures dans le noir,
+         à la frontale, par 0 à 5 °C en altitude.</p></div>
+    <div class="fiche"><b>🍫 Il mange toutes les 30 minutes</b>
+      <p>Une alarme vibre sur sa montre. Vingt-neuf gels et barres emportés.
+         Sans ça, on s'effondre vers la douzième heure.</p></div>
+    <div class="fiche"><b>🥾 Il marche toutes les montées</b>
+      <p>Personne ne court 6 000 m de dénivelé. Marcher vite en montée,
+         courir sur le plat et en descente.</p></div>
+    <div class="fiche"><b>⏱️ Les barrières horaires</b>
+      <p>À chaque ravitaillement il y a une heure limite. Trop tard, la course
+         est terminée. Pierre a prévu une marge confortable.</p></div>
+    <div class="fiche"><b>🎒 Le sac de Champex</b>
+      <p>À mi-course, il retrouve un sac avec des affaires sèches.
+         C'est son seul vrai arrêt.</p></div>
+  </div>
+
+  <h2 class="t">Si vous voulez l'encourager</h2>
+  <div class="encourager">
+    <p>📱 Il aura son téléphone, mais il ne le regardera quasiment pas pendant la course.</p>
+    <p>💬 Vos messages, il les lira aux ravitaillements ou après l'arrivée.
+       Ils comptent énormément, surtout entre minuit et 4 h du matin.</p>
+    <div class="dur"><b>⏰ Les moments où ça sera dur</b>
+      <ul>
+        <li>Vers 22 h à Trient, quand la nuit s'installe</li>
+        <li>Vers 3 h du matin, dans la dernière grosse montée</li>
+      </ul>
+    </div>
+  </div>
+
+  <button class="partage" id="partage">Partager cette page</button>
+
+  <div class="pied">
+    Pierre court la CCC pour la première fois.<br>
+    22 mois de course à pied. 6 mois de préparation.
+    <div class="merci">Merci d'être là 💚</div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script>
+/* ==========================================================================
+   Tout est calcule cote client. Aucun backend, aucune position reelle : la
+   page ne SAIT PAS ou est Pierre. Elle dit ou il DEVRAIT etre selon son plan,
+   et elle le dit prudemment — c'est la difference entre rassurer et mentir.
+   ========================================================================== */
+
+/* ⚠️ URL a confirmer au retrait du dossard le 27. C'est la seule chose a
+   changer dans ce fichier. */
+var TRACKER = "https://live.utmb.world";
+
+var COURSE = {
+  depart: "2026-08-28T09:15:00+02:00",
+  fin:    "2026-08-29T12:00:00+02:00",
+  distance: 100.9,
+  points: [
+    { nom:"Courmayeur", km:0.0, h:"09:15", type:"depart",
+      desc:"Le départ, en Italie" },
+    { nom:"Tête de la Tronche", km:9.4, h:"12:05", type:"sommet",
+      desc:"Sommet de la première montée — 1 400 m gravis d'un coup" },
+    { nom:"Refuge Bertone", km:13.6, h:"12:37", type:"ravito",
+      desc:"Premier ravitaillement" },
+    { nom:"Refuge Bonatti", km:21.2, h:"13:30", type:"passage",
+      desc:"Balcon face aux Grandes Jorasses" },
+    { nom:"Arnouvaz", km:26.3, h:"14:28", type:"ravito",
+      desc:"Dernier arrêt avant le point le plus haut" },
+    { nom:"Grand Col Ferret", km:30.9, h:"16:00", type:"sommet",
+      desc:"2 527 m — le toit de la course. Passage en Suisse", frontiere:"🇮🇹 → 🇨🇭" },
+    { nom:"La Fouly", km:40.7, h:"17:06", type:"ravito",
+      desc:"Ravitaillement en Suisse" },
+    { nom:"Champex-Lac", km:54.9, h:"19:24", type:"base",
+      desc:"Grand arrêt : il change de chaussettes, mange chaud, et repart pour la nuit",
+      tag:"🌙 La nuit tombe ici" },
+    { nom:"Plan de l'Au", km:59.8, h:"20:24", type:"passage",
+      desc:"Simple pointage, pas de ravitaillement" },
+    { nom:"La Giète", km:66.3, h:"21:55", type:"sommet",
+      desc:"Montée réputée difficile, dans le noir" },
+    { nom:"Trient", km:71.5, h:"22:51", type:"ravito",
+      desc:"Soupe chaude au milieu de la nuit" },
+    { nom:"Les Tseppes", km:75.2, h:"00:15", type:"sommet",
+      desc:"La montée la plus raide de toute la course" },
+    { nom:"Vallorcine", km:82.5, h:"01:40", type:"ravito",
+      desc:"Retour en France. Encore 18 km", frontiere:"🇨🇭 → 🇫🇷" },
+    { nom:"La Flégère", km:93.7, h:"04:35", type:"ravito",
+      desc:"Dernier ravitaillement. Le jour se lève bientôt" },
+    { nom:"Chamonix", km:100.9, h:"05:30", type:"arrivee",
+      desc:"L'arrivée, sous l'arche" }
+  ]
+};
+
+var KM_NUIT = 54.9;   // Champex : c'est la que la frontale s'allume
+
+/* --- les horaires, avec le passage de minuit -----------------------------
+   Les heures apres minuit appartiennent au samedi. On avance d'un jour des
+   qu'une heure est anterieure a la precedente. */
+(function dates() {
+  var d = new Date(COURSE.depart);
+  var prec = null;
+  COURSE.points.forEach(function (p) {
+    var hm = p.h.split(':');
+    var t = new Date(d);
+    t.setHours(+hm[0], +hm[1], 0, 0);
+    if (prec && t < prec) t.setDate(t.getDate() + 1);
+    p.date = t;
+    prec = t;
+  });
+})();
+
+var DEPART = new Date(COURSE.depart);
+var FIN = new Date(COURSE.fin);
+
+function deuxCh(n) { return (n < 10 ? '0' : '') + n; }
+function hFr(d) { return deuxCh(d.getHours()) + 'h' + deuxCh(d.getMinutes()); }
+function kmFr(k) { return k.toFixed(1).replace('.', ','); }
+
+/* Ou en est-on, selon l'heure du visiteur. Retourne le km theorique et
+   l'index du segment. */
+function positionTheorique(maintenant) {
+  var P = COURSE.points;
+  if (maintenant <= P[0].date) return { km: 0, i: 0, avant: true };
+  for (var i = 1; i < P.length; i++) {
+    if (maintenant <= P[i].date) {
+      var a = P[i - 1], b = P[i];
+      var t = (maintenant - a.date) / ((b.date - a.date) || 1);
+      return { km: a.km + (b.km - a.km) * t, i: i, prochain: b, precedent: a };
+    }
+  }
+  return { km: COURSE.distance, i: P.length - 1, fini: true };
+}
+
+/* ------------------------------------------------------------- en-tete */
+function majEtat(now) {
+  var lbl = document.getElementById('etatLbl');
+  var val = document.getElementById('etatVal');
+  if (now < DEPART) {
+    var s = Math.floor((DEPART - now) / 1000);
+    var j = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    lbl.textContent = 'Départ dans';
+    val.textContent = (j ? j + 'j ' : '') + h + 'h ' + deuxCh(m) + 'min';
+  } else if (now < FIN) {
+    var e = Math.floor((now - DEPART) / 60000);
+    lbl.textContent = 'En course depuis';
+    val.textContent = Math.floor(e / 60) + 'h' + deuxCh(e % 60);
+  } else {
+    lbl.textContent = '';
+    val.textContent = '🏁 Course terminée';
+  }
+}
+
+/* --------------------------------------------------- bloc « où devrait-il » */
+function majBloc(now) {
+  var p = positionTheorique(now);
+  var lieu = document.getElementById('ouLieu');
+  var km = document.getElementById('ouKm');
+  var pro = document.getElementById('prochain');
+
+  if (p.avant) {
+    lieu.textContent = 'Au départ, à Courmayeur';
+    km.textContent = 'La course commence vendredi à 9h15';
+    pro.innerHTML = 'Premier point : <b>Refuge Bertone</b>, prévu vers <b>12h37</b>';
+  } else if (p.fini) {
+    lieu.textContent = 'Arrivé à Chamonix';
+    km.textContent = '101 km parcourus';
+    pro.innerHTML = '🏁 <b>C\'est fini.</b>';
+  } else {
+    lieu.textContent = 'vers ' + p.prochain.nom;
+    km.textContent = 'km ' + kmFr(p.km) + ' sur 101';
+    pro.innerHTML = 'Prochain point : <b>' + p.prochain.nom +
+      '</b><br>prévu vers <b>' + hFr(p.prochain.date) + '</b>';
+  }
+  var pct = Math.round(p.km / COURSE.distance * 100);
+  document.getElementById('jauge').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + ' %';
+  return p;
+}
+
+/* ------------------------------------------------------------- timeline */
+function traceTimeline(now) {
+  var p = positionTheorique(now);
+  document.getElementById('timeline').innerHTML = COURSE.points.map(function (x, i) {
+    var passe = now > x.date;
+    var ici = !passe && !p.avant && !p.fini && i === p.i;
+    return '<div class="pt' + (passe ? ' passe' : '') + (ici ? ' ici' : '') +
+      (x.km >= KM_NUIT ? ' nuitpt' : '') + '">' +
+      '<div class="h">' + (passe ? '✓ ' : '') + hFr(x.date) + '</div>' +
+      '<div class="n">' + x.nom + '</div>' +
+      '<div class="k">km ' + kmFr(x.km) + (x.frontiere ? ' · ' + x.frontiere : '') + '</div>' +
+      '<div class="d">' + x.desc + '</div>' +
+      (x.tag ? '<span class="tag">' + x.tag + '</span>' : '') +
+      '</div>';
+  }).join('');
+}
+
+/* --------------------------------------------------------------- profil */
+function traceProfil(trace, now) {
+  var L = 640, H = 210, mb = 26, mt = 14;
+  var alts = trace.map(function (t) { return t[3]; });
+  var lo = Math.min.apply(null, alts) - 60, hi = Math.max.apply(null, alts) + 60;
+  var X = function (k) { return k / COURSE.distance * L; };
+  var Y = function (a) { return mt + (hi - a) / (hi - lo) * (H - mt - mb); };
+
+  var d = trace.map(function (t, i) {
+    return (i ? 'L' : 'M') + X(t[2]).toFixed(1) + ' ' + Y(t[3]).toFixed(1);
+  }).join('');
+  var aire = d + 'L' + L + ' ' + (H - mb) + 'L0 ' + (H - mb) + 'Z';
+
+  var p = positionTheorique(now);
+  var cx = X(p.km);
+  var repere = [0, 30.9, 54.9, 71.5, 93.7, 100.9];
+
+  document.getElementById('profilHote').innerHTML =
+    '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" ' +
+      'aria-label="Profil altimétrique de la course, de 1 035 à 2 543 mètres">' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="var(--vert)" stop-opacity=".55"/>' +
+      '<stop offset="100%" stop-color="var(--vert)" stop-opacity=".06"/>' +
+      '</linearGradient></defs>' +
+    // la nuit, en bleu, a partir de Champex
+    '<rect x="' + X(KM_NUIT) + '" y="0" width="' + (L - X(KM_NUIT)) + '" height="' + (H - mb) +
+      '" fill="var(--nuit)" opacity=".13"/>' +
+    '<text x="' + (X(KM_NUIT) + 6) + '" y="16" class="pf-nom" fill="var(--nuit)">NUIT</text>' +
+    '<path d="' + aire + '" fill="url(#g)"/>' +
+    '<path d="' + d + '" fill="none" stroke="var(--vert)" stroke-width="2.4" ' +
+      'stroke-linejoin="round"/>' +
+    repere.map(function (k) {
+      var pt = COURSE.points.filter(function (q) { return Math.abs(q.km - k) < 0.4; })[0];
+      if (!pt) return '';
+      return '<line x1="' + X(k) + '" y1="' + (H - mb) + '" x2="' + X(k) + '" y2="' + (H - mb + 5) +
+        '" stroke="var(--bord)" stroke-width="1.5"/>' +
+        '<text x="' + Math.min(L - 4, Math.max(4, X(k))) + '" y="' + (H - 8) +
+        '" class="pf-l" text-anchor="' + (k < 6 ? 'start' : (k > 95 ? 'end' : 'middle')) + '">' +
+        pt.nom.replace('Refuge ', '').replace('Grand ', '') + '</text>';
+    }).join('') +
+    (p.avant || p.fini ? '' :
+      '<line x1="' + cx + '" y1="' + mt + '" x2="' + cx + '" y2="' + (H - mb) +
+        '" stroke="#e0245e" stroke-width="2"/>' +
+      '<circle cx="' + cx + '" cy="' + Y(altAu(trace, p.km)) + '" r="6" fill="#e0245e" ' +
+        'stroke="var(--carte)" stroke-width="2.5"/>') +
+    '</svg>';
+}
+
+function altAu(trace, km) {
+  for (var i = 1; i < trace.length; i++) {
+    if (km <= trace[i][2]) {
+      var a = trace[i - 1], b = trace[i];
+      var t = (km - a[2]) / ((b[2] - a[2]) || 1);
+      return a[3] + (b[3] - a[3]) * t;
+    }
+  }
+  return trace[trace.length - 1][3];
+}
+
+function lonlatAu(trace, km) {
+  for (var i = 1; i < trace.length; i++) {
+    if (km <= trace[i][2]) {
+      var a = trace[i - 1], b = trace[i];
+      var t = (km - a[2]) / ((b[2] - a[2]) || 1);
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    }
+  }
+  var d = trace[trace.length - 1];
+  return [d[0], d[1]];
+}
+
+/* ---------------------------------------------------------------- carte */
+var carte = null, coucheFait = null, marqueur = null, TRACE = null;
+
+function construitCarte(data) {
+  if (typeof L === 'undefined') {
+    document.getElementById('carte').outerHTML =
+      '<div class="carte-vide">La carte n\'a pas pu se charger.<br>' +
+      'Le reste de la page fonctionne normalement.</div>';
+    return;
+  }
+  TRACE = data.trace;
+  var pts = TRACE.map(function (t) { return [t[0], t[1]]; });
+
+  carte = L.map('carte', { scrollWheelZoom: false, zoomControl: true });
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 16, attribution: ''
+  }).addTo(carte);
+  document.getElementById('attrib').innerHTML =
+    '© OpenStreetMap contributors, SRTM · © OpenTopoMap (CC-BY-SA)';
+
+  /* Le parcours entier sert de fond. En pointille blanc cerne de sombre :
+     sur une carte topographique chargee, un gris uni disparait dans le
+     relief, et c'est justement le contraste entre fait et reste qui doit
+     sauter aux yeux. */
+  L.polyline(pts, { color: '#2b3a33', weight: 6, opacity: .35 }).addTo(carte);
+  L.polyline(pts, { color: '#ffffff', weight: 3, opacity: .9,
+                    dashArray: '2 7', lineCap: 'round' }).addTo(carte);
+  // la portion theoriquement parcourue, par-dessus, en plein
+  coucheFait = L.polyline([], { color: '#16a34a', weight: 5.5, opacity: .95 }).addTo(carte);
+
+  data.wpt.forEach(function (w) {
+    var nom = w[0], lat = w[1], lon = w[2], km = w[3], alt = w[4];
+    var p = COURSE.points.filter(function (q) { return Math.abs(q.km - km) < 0.6; })[0];
+    var gros = p && (p.type === 'ravito' || p.type === 'base' ||
+                     p.type === 'depart' || p.type === 'arrivee');
+    L.circleMarker([lat, lon], {
+      radius: gros ? 7 : 5,
+      color: '#fff', weight: 2,
+      fillColor: p && p.type === 'sommet' ? '#b45309' : '#16a34a',
+      fillOpacity: 1
+    }).addTo(carte).bindPopup(
+      '<b>' + (p ? p.nom : nom) + '</b>' +
+      '<div class="pk">km ' + kmFr(km) + ' · ' + alt + ' m' +
+        (p && p.frontiere ? ' · ' + p.frontiere : '') + '</div>' +
+      (p ? '<div class="ph">Prévu vers ' + hFr(p.date) + '</div>' +
+           '<div class="pd">' + p.desc + '</div>' : ''));
+  });
+
+  /* Leaflet calcule son zoom sur la taille du conteneur. Si on l'appelle
+     avant que la mise en page soit finie, il mesure une boite vide et se cale
+     sur un glacier au hasard. invalidateSize() lui fait relire ses dimensions
+     reelles — et on le refait au redimensionnement, pour la rotation du
+     telephone. */
+  var bornes = L.polyline(pts).getBounds();
+  function recadrer() {
+    carte.invalidateSize();
+    carte.fitBounds(bornes, { padding: [22, 22] });
+  }
+  recadrer();
+  requestAnimationFrame(recadrer);
+  setTimeout(recadrer, 350);
+  window.addEventListener('resize', function () {
+    clearTimeout(window._rc); window._rc = setTimeout(recadrer, 200);
+  });
+  document.getElementById('recentrer').addEventListener('click', recadrer);
+
+  majCarte(new Date());
+}
+
+function majCarte(now) {
+  if (!carte || !TRACE) return;
+  var p = positionTheorique(now);
+  var fait = TRACE.filter(function (t) { return t[2] <= p.km; })
+                  .map(function (t) { return [t[0], t[1]]; });
+  if (!p.avant && fait.length) {
+    var ll = lonlatAu(TRACE, p.km);
+    fait.push(ll);
+    coucheFait.setLatLngs(fait);
+    if (!marqueur) {
+      marqueur = L.marker(ll, {
+        icon: L.divIcon({ className: '', html: '<div class="pulse"></div>',
+                          iconSize: [20, 20], iconAnchor: [10, 10] })
+      }).addTo(carte).bindPopup(
+        '<b>Position estimée</b><div class="pd">Calculée sur son plan de course, ' +
+        'pas sur son GPS. Sa vraie position est sur le tracker officiel.</div>');
+    } else {
+      marqueur.setLatLng(ll);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------- boucle */
+function tout() {
+  var now = new Date();
+  majEtat(now);
+  majBloc(now);
+  traceTimeline(now);
+  if (TRACE) { traceProfil(TRACE, now); majCarte(now); }
+}
+
+document.getElementById('lienTracker').href = TRACKER;
+
+document.getElementById('partage').addEventListener('click', function () {
+  var url = location.href.split('#')[0];
+  var d = { title: 'Suivre Pierre sur la CCC', text: '101 km dans le Mont-Blanc, vendredi 28 août.', url: url };
+  if (navigator.share) { navigator.share(d).catch(function () {}); return; }
+  var b = this;
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject())
+    .then(function () { b.textContent = '✓ Lien copié'; setTimeout(function () { b.textContent = 'Partager cette page'; }, 2200); })
+    .catch(function () { prompt('Copiez ce lien :', url); });
+});
+
+tout();
+setInterval(tout, 60000);          // une fois par minute suffit
+setInterval(function () { majEtat(new Date()); }, 1000);   // sauf le compte a rebours
+
+fetch('ccc_trace.json')
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    TRACE = d.trace;
+    traceProfil(TRACE, new Date());
+    if (typeof L !== 'undefined') construitCarte(d);
+    else window.addEventListener('load', function () { construitCarte(d); });
+  })
+  .catch(function () {
+    document.getElementById('profilHote').innerHTML =
+      '<p style="color:var(--pale);font-size:14px;text-align:center;padding:20px">' +
+      'Le profil n\'a pas pu se charger.</p>';
+    document.getElementById('carte').outerHTML =
+      '<div class="carte-vide">La carte n\'a pas pu se charger.<br>' +
+      'Le reste de la page fonctionne normalement.</div>';
+  });
+</script>
+</body>
+</html>
