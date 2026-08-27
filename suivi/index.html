@@ -895,13 +895,18 @@ function lblType(t) { return { montee: 'Montée', descente: 'Descente', roulant:
 /* Quand un point a ete pointe pour de vrai, l'heure reelle prend la place de
    la prevision, qui reste lisible barree en dessous. */
 function reelOuPrevu(x) {
+  /* LiveTrail pointe Champex et Vallorcine DEUX fois, entree et sortie, a
+     treize metres d'intervalle. Le plan, lui, se cale sur la sortie — c'est
+     l'heure officielle, temps d'arret compris. On garde donc la DERNIERE
+     correspondance : afficher l'entree ferait passer pour de l'avance les
+     vingt minutes du ravito. */
+  var trouve = null;
   for (var i = 0; i < LIVE.passages.length; i++) {
-    if (Math.abs(LIVE.passages[i].km - x.km) < 1.5) {
-      return '<span class="reel">' + hh(LIVE.passages[i].date) + '</span>' +
-             '<span class="prev">' + hh(x.date) + '</span>';
-    }
+    if (Math.abs(LIVE.passages[i].km - x.km) < 1.5) trouve = LIVE.passages[i];
   }
-  return (x.r ? '' : '~') + hh(x.date);
+  if (!trouve) return (x.r ? '' : '~') + hh(x.date);
+  return '<span class="reel">' + hh(trouve.date) + '</span>' +
+         '<span class="prev">' + hh(x.date) + '</span>';
 }
 
 function majMarche(now) {
