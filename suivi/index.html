@@ -87,6 +87,74 @@ main { padding:0 14px; }
 .btn:active { transform:scale(.97); }
 .btn.plein i { width:7px; height:7px; border-radius:50%; background:#0f1a02; font-style:normal; animation:bat 2.4s infinite; }
 
+/* ------------------------------------------------------- suivi en direct */
+/* La carte du direct n'existe QUE si un pointage est arrive. Pas de bloc
+   vide, pas de « en attente » : tant qu'il n'y a rien, la page est celle
+   d'avant, au pixel pres. */
+.direct {
+  margin: 0 0 12px; padding: 13px 15px 14px;
+  border: 1px solid rgba(163,230,53,.28); border-radius: var(--r);
+  background: rgba(163,230,53,.05);
+  animation: entre .5s var(--sortie) both;
+}
+.direct .top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.direct .vif {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(163,230,53,.5); animation: pulse 2.4s infinite; flex: none;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(163,230,53,.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(163,230,53,0); }
+  100% { box-shadow: 0 0 0 0 rgba(163,230,53,0); }
+}
+.direct .lbl {
+  font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.direct .age { margin-left: auto; font: 400 10px/1 var(--mono); color: var(--muted); }
+.direct .pt-nom {
+  font: 500 19px/1.15 var(--titre); letter-spacing: -.02em; color: var(--text);
+}
+.direct .pt-nom small {
+  font: 400 12px/1 var(--mono); color: var(--muted); margin-left: 8px; letter-spacing: 0;
+}
+.direct .pt-nom .rang {
+  float: right; font: 500 11px/1 var(--mono); color: var(--muted);
+  letter-spacing: .02em; padding: 4px 7px; border-radius: 5px;
+  background: var(--surface2); border: 1px solid var(--border2);
+}
+.direct .pt-nom .rang sup { font-size: 8px; }
+.direct .chif {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 11px;
+  padding-top: 11px; border-top: 1px solid var(--border2);
+}
+.direct .chif div { min-width: 0; }
+.direct .chif .v {
+  font: 500 16px/1 var(--mono); color: var(--text); letter-spacing: -.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.direct .chif .v.av { color: var(--green); }
+.direct .chif .v.re { color: var(--orange); }
+.direct .chif .l {
+  font: 400 9.5px/1.3 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); margin-top: 5px;
+}
+.direct.perime { border-color: var(--border2); background: rgba(255,255,255,.02); }
+.direct.perime .vif { background: var(--muted); animation: none; }
+.direct.perime .lbl { color: var(--muted); }
+/* Bandeau d'apercu : impossible a confondre avec du vrai. */
+.factice {
+  margin: 0 0 12px; padding: 8px 12px; border-radius: var(--r);
+  background: rgba(232,160,32,.12); border: 1px solid rgba(232,160,32,.3);
+  font: 500 11px/1.4 var(--mono); color: var(--orange); letter-spacing: .02em;
+}
+/* Heures reelles dans le tableau de marche. */
+.c-h .reel { color: var(--accent); font-weight: 500; }
+.c-h .prev { display: block; font-size: 10px; color: var(--muted); text-decoration: line-through; }
+@media (prefers-reduced-motion: reduce) {
+  .direct { animation: none; } .direct .vif { animation: none; }
+}
+
 /* --------------------------------------------------------------- statut */
 .statut {
   margin:0 14px; padding:11px 13px; border-radius:var(--r);
@@ -328,6 +396,7 @@ details.leg[open] summary::before { content:"–"; }
 <main>
 
   <section class="vue on" id="v-maintenant">
+    <div id="direct"></div>
     <div class="tuiles" id="tuiles"></div>
 
     <div class="duo">
@@ -517,7 +586,135 @@ function hm(min) { return Math.floor(min / 60) + ' h ' + dd(min % 60); }
    ligne alors que « 13h50 » tient. */
 function hmc(min) { return Math.floor(min / 60) + 'h' + dd(min % 60); }
 
+/* ═══════════════════════════════════════════════════════ suivi en direct ═══
+ * LiveTrail publie les pointages du dossard, mais sans en-tete CORS : un
+ * navigateur ne peut pas le lire directement. Le backend Railway sert donc
+ * de relais, avec un cache d'une minute cote serveur.
+ *
+ * Regle unique, et elle prime sur tout le reste : SI LE DIRECT NE REPOND
+ * PAS, LA PAGE NE CHANGE PAS. Pas de message d'erreur, pas de bloc vide,
+ * pas de compteur fige. Le plan theorique reprend la main tout seul. Le
+ * jour de la course personne n'est disponible pour reparer quoi que ce
+ * soit : la degradation doit etre invisible.
+ */
+var LIVE_URL = 'https://web-production-049ea.up.railway.app/api/live';
+var LIVE = { dernier: null, passages: [], maj: null, fini: false, factice: false };
+
+/* "13:59:12" -> minutes. Tolere h:mm:ss, hh:mm, et le vide. */
+function duree(t) {
+  if (!t) return null;
+  var m = String(t).match(/^(\d{1,3}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  return (+m[1]) * 60 + (+m[2]) + (m[3] ? (+m[3]) / 60 : 0);
+}
+
+/* Date reelle d'un pointage.
+   On prefere `temps` (temps de course cumule) : DEPART + duree ne depend ni
+   du fuseau ni du changement de jour. L'heure murale ne sert que de secours,
+   avec bascule de jour des qu'elle recule — la course passe minuit. */
+function dateDe(p, precedente) {
+  var d = duree(p.temps);
+  if (d !== null) return new Date(DEPART.getTime() + d * 60000);
+  var h = String(p.depart || p.arrivee || '').match(/^(\d{1,2}):(\d{2})/);
+  if (!h) return null;
+  var j = new Date(DEPART);
+  j.setHours(+h[1], +h[2], 0, 0);
+  while (precedente && j < precedente) j = new Date(j.getTime() + 86400000);
+  if (j < DEPART) j = new Date(j.getTime() + 86400000);
+  return j;
+}
+
+/* Ne garde que ce qui est exploitable, et refuse tout le reste. Une reponse
+   a moitie comprise est plus dangereuse qu'une absence de reponse. */
+function digere(d) {
+  if (!d || d.ok === false || !Array.isArray(d.passages)) return null;
+  var out = [], prec = null;
+  for (var i = 0; i < d.passages.length; i++) {
+    var p = d.passages[i];
+    if (typeof p.km !== 'number' || p.km < 0 || p.km > DISTANCE + 1) continue;
+    var t = dateDe(p, prec);
+    if (!t || isNaN(t.getTime())) continue;
+    prec = t;
+    out.push({ km: p.km, nom: p.nom || '', date: t, rang: p.rang || null,
+               arrivee: p.arrivee || null, depart: p.depart || null });
+  }
+  out.sort(function (a, b) { return a.km - b.km; });
+  return { passages: out, dernier: out.length ? out[out.length - 1] : null,
+           maj: d.maj ? new Date(d.maj) : null, perime: !!d.perime,
+           fini: out.length ? out[out.length - 1].km >= DISTANCE - 0.5 : false };
+}
+
+function chargeLive() {
+  if (LIVE.factice) return;                    /* apercu : on ne va rien chercher */
+  var stop = null, ctrl = null;
+  try { ctrl = new AbortController(); stop = setTimeout(function () { ctrl.abort(); }, 9000); }
+  catch (e) { ctrl = null; }
+  fetch(LIVE_URL, ctrl ? { signal: ctrl.signal, cache: 'no-store' } : { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var v = digere(d);
+      if (!v) return;                          /* illisible : on garde l'existant */
+      LIVE.passages = v.passages; LIVE.dernier = v.dernier;
+      LIVE.maj = v.maj; LIVE.perime = v.perime; LIVE.fini = v.fini;
+      tout();
+    })
+    .catch(function () { /* silence voulu : le plan theorique suffit */ })
+    .then(function () { if (stop) clearTimeout(stop); });
+}
+
+/* Apercu visuel, declenche par #demo dans l'adresse. Fabrique localement,
+   jamais servi par le serveur : aucune donnee inventee ne peut arriver du
+   backend et se faire passer pour un vrai pointage. */
+function apercu() {
+  var faux = [[0, 'Courmayeur', 0], [9.4, 'Tête de la Tronche', 138],
+              [13.6, 'Refuge Bertone', 199], [21.2, 'Refuge Bonatti', 281],
+              [26.3, 'Arnouvaz', 336], [30.9, 'Grand Col Ferret', 419],
+              [40.7, 'La Fouly', 494]];
+  LIVE.factice = true;
+  LIVE.passages = faux.map(function (f, i) {
+    return { km: f[0], nom: f[1], date: new Date(DEPART.getTime() + f[2] * 60000),
+             rang: 900 - i * 40, arrivee: null, depart: null };
+  });
+  LIVE.dernier = LIVE.passages[LIVE.passages.length - 1];
+  LIVE.maj = maintenant(); LIVE.fini = false;
+}
+
+/* Ecart au plan, en minutes, mesure au dernier point pointe. Negatif = avance. */
+function ecartPlan() {
+  var d = LIVE.dernier;
+  if (!d) return null;
+  var ref = null, meilleur = 1e9;
+  for (var i = 0; i < POINTS.length; i++) {
+    var e = Math.abs(POINTS[i].km - d.km);
+    if (e < meilleur) { meilleur = e; ref = POINTS[i]; }
+  }
+  if (!ref || meilleur > 1.5) return null;
+  return Math.round((d.date - ref.date) / 60000);
+}
+
 function ou(now) {
+  /* Un pointage prime toujours sur une interpolation horaire : on SAIT ou il
+     etait. Entre deux pointages on projette a son allure reelle du moment,
+     sans jamais franchir le point suivant tant qu'il n'a pas bipe — annoncer
+     un passage qui n'a pas eu lieu serait pire que de le dire en retard. */
+  if (now < DEPART) return { km: 0, i: 0, avant: true };
+  var d = LIVE.dernier;
+  if (d) {
+    if (LIVE.fini) return { km: DISTANCE, i: POINTS.length - 1, fini: true, live: true };
+    var j = 0;
+    while (j < POINTS.length && POINTS[j].km <= d.km + 0.05) j++;
+    if (j >= POINTS.length) return { km: DISTANCE, i: POINTS.length - 1, fini: true, live: true };
+    var suiv = POINTS[j], prec = POINTS[j - 1] || POINTS[0];
+    /* Son retard cumule etire d'autant la section en cours. */
+    var prevu = prec.date - DEPART, reel = d.date - DEPART;
+    var facteur = (prevu > 60000 && reel > 0) ? reel / prevu : 1;
+    if (!isFinite(facteur) || facteur < 0.3) facteur = 1;
+    if (facteur > 3) facteur = 3;
+    var duree = Math.max(60000, (suiv.date - prec.date) * facteur);
+    var f = Math.max(0, Math.min(0.97, (now - d.date) / duree));
+    return { km: d.km + (suiv.km - d.km) * f, i: j, prochain: suiv,
+             precedent: prec, frac: f, live: true, pointe: d };
+  }
   if (now <= POINTS[0].date) return { km: 0, i: 0, avant: true };
   for (var i = 1; i < POINTS.length; i++) {
     if (now <= POINTS[i].date) {
@@ -556,11 +753,52 @@ function majStatut(now) {
       (j ? j + ' j ' : '') + h + ' h ' + dd(m) + ' min</b> · vendredi 09:15</span>';
   } else if (now < FIN) {
     var e = Math.floor((now - DEPART) / 60000), p = ou(now);
-    s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
-      ' · position théorique km <b>' + km1(p.km) + '</b></span>';
+    if (p.live && p.pointe) {
+      var ec = ecartPlan();
+      s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
+        ' · pointé à <b>' + p.pointe.nom + '</b>' +
+        (ec === null ? '' : ' · ' + (ec > 0 ? '+' : '') + ec + ' min') + '</span>';
+    } else {
+      s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
+        ' · position théorique km <b>' + km1(p.km) + '</b></span>';
+    }
   } else {
     s.innerHTML = '<span class="pt"></span><span><b>Course terminée</b></span>';
   }
+}
+
+/* Carte du dernier pointage. Absente tant qu'aucun n'est arrive. */
+function majDirect(now) {
+  var h = document.getElementById('direct');
+  if (!h) return;
+  var d = LIVE.dernier;
+  if (!d) { h.innerHTML = ''; return; }
+
+  var ec = ecartPlan(), age = LIVE.maj ? Math.round((now - LIVE.maj) / 60000) : null;
+  var arrivee = new Date(POINTS[POINTS.length - 1].date.getTime() + (ec || 0) * 60000);
+  var cases = [
+    { v: hmc(Math.round((d.date - DEPART) / 60000)), l: 'de course' },
+    ec === null ? { v: km1(DISTANCE - d.km) + ' km', l: 'restants' }
+                : { v: (ec > 0 ? '+' : '') + ec + ' min', l: ec > 0 ? 'sur le plan' : 'd\'avance',
+                    c: ec > 0 ? 're' : 'av' },
+    LIVE.fini ? { v: hh(d.date), l: 'arrivée' } : { v: '~' + hh(arrivee), l: 'arrivée estimée' }
+  ];
+
+  h.innerHTML =
+    (LIVE.factice ? '<div class="factice">APERÇU — pointages simulés, ce n\'est pas la course</div>' : '') +
+    '<div class="direct' + (LIVE.perime ? ' perime' : '') + '">' +
+      '<div class="top"><span class="vif"></span>' +
+      '<span class="lbl">' + (LIVE.fini ? 'Arrivé' : 'Dernier pointage') + '</span>' +
+      '<span class="age">' + (LIVE.perime ? 'liaison perdue'
+        : age === null ? '' : age < 2 ? 'à l\'instant' : 'il y a ' + age + ' min') + '</span></div>' +
+      '<div class="pt-nom">' + (d.nom || 'km ' + km1(d.km)) +
+        '<small>km ' + km1(d.km) + ' · ' + hh(d.date) + '</small>' +
+        (d.rang ? '<span class="rang">' + d.rang + '<sup>e</sup></span>' : '') + '</div>' +
+      '<div class="chif">' + cases.map(function (c) {
+        return '<div><div class="v ' + (c.c || '') + '">' + c.v + '</div>' +
+               '<div class="l">' + c.l + '</div></div>';
+      }).join('') + '</div>' +
+    '</div>';
 }
 
 function majMaintenant(now) {
@@ -639,6 +877,18 @@ function majMaintenant(now) {
 }
 function lblType(t) { return { montee: 'Montée', descente: 'Descente', roulant: 'Roulant' }[t]; }
 
+/* Quand un point a ete pointe pour de vrai, l'heure reelle prend la place de
+   la prevision, qui reste lisible barree en dessous. */
+function reelOuPrevu(x) {
+  for (var i = 0; i < LIVE.passages.length; i++) {
+    if (Math.abs(LIVE.passages[i].km - x.km) < 1.5) {
+      return '<span class="reel">' + hh(LIVE.passages[i].date) + '</span>' +
+             '<span class="prev">' + hh(x.date) + '</span>';
+    }
+  }
+  return (x.r ? '' : '~') + hh(x.date);
+}
+
 function majMarche(now) {
   var p = ou(now);
   document.getElementById('marche').innerHTML = POINTS.map(function (x, i) {
@@ -651,7 +901,7 @@ function majMarche(now) {
       '<td class="c-e up">' + (x.dp ? '+' + mil(x.dp) : '—') + '</td>' +
       '<td class="c-e dn">' + (x.dm ? '−' + mil(x.dm) : '—') + '</td>' +
       '<td class="c-d">+' + mil(x.dpc) + '</td>' +
-      '<td class="c-h">' + (x.r ? '' : '~') + hh(x.date) + '</td>' +
+      '<td class="c-h">' + reelOuPrevu(x) + '</td>' +
       '<td class="c-b">' + (x.bdate ? hh(x.bdate) : '—') + '</td>' +
       '<td class="c-m">' + (x.marge || '—') + '</td></tr>';
   }).join('');
@@ -836,9 +1086,15 @@ document.querySelectorAll('.onglets button').forEach(function (b) {
   b.addEventListener('click', function () { montre(b.dataset.v); window.scrollTo(0, 0); });
 });
 
+/* Horloge de la page. L'apercu #demo l'avance pour montrer le rendu en
+   course ; LIVE.factice n'est jamais vrai en production. */
+function maintenant() {
+  return LIVE.factice ? new Date(DEPART.getTime() + 502 * 60000) : new Date();
+}
+
 function tout() {
-  var now = new Date();
-  majStatut(now); majMaintenant(now); majMarche(now); majProfil(now); majCarte(now);
+  var now = maintenant();
+  majStatut(now); majDirect(now); majMaintenant(now); majMarche(now); majProfil(now); majCarte(now);
 }
 
 document.getElementById('lienTracker').href = TRACKER;
@@ -851,9 +1107,20 @@ document.getElementById('partage').addEventListener('click', function () {
 
 majSections();
 try { montre(sessionStorage.getItem('ccc-suivi-vue') || 'maintenant'); } catch (e) { montre('maintenant'); }
+if (location.hash === '#demo') apercu();
 tout();
 setInterval(tout, 60000);
-setInterval(function () { majStatut(new Date()); }, 1000);
+
+/* Le direct toutes les minutes, comme le cache du relais. Rien a gagner a
+   demander plus vite : LiveTrail ne bouge qu'au franchissement d'un tapis. */
+chargeLive();
+setInterval(chargeLive, 60000);
+/* Au retour d'onglet, on rafraichit tout de suite plutot que d'afficher une
+   vieille valeur en attendant la minute suivante. */
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) chargeLive();
+});
+setInterval(function () { majStatut(maintenant()); }, 1000);
 
 fetch('ccc_trace.json')
   .then(function (r) { return r.json(); })
