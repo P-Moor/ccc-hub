@@ -134,6 +134,13 @@ main { padding:0 14px; }
   background: var(--surface2); border: 1px solid var(--border2);
 }
 .direct .pt-nom .rang sup { font-size: 8px; }
+.direct .bal {
+  display: flex; align-items: center; gap: 7px; margin-top: 10px;
+  padding: 8px 10px; border-radius: 7px; background: rgba(163,230,53,.07);
+  font-family: var(--f-mono); font-size: 11px; line-height: 1.4; color: var(--muted);
+}
+.direct .bal b { color: var(--accent); font-weight: 500; }
+.direct .bal .vif { width: 5px; height: 5px; }
 .direct .chif {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 11px;
   padding-top: 11px; border-top: 1px solid var(--border2);
@@ -613,7 +620,7 @@ function hmc(min) { return Math.floor(min / 60) + 'h' + dd(min % 60); }
  * soit : la degradation doit etre invisible.
  */
 var LIVE_URL = 'https://web-production-049ea.up.railway.app/api/live';
-var LIVE = { dernier: null, passages: [], maj: null, fini: false, factice: false };
+var LIVE = { dernier: null, passages: [], balise: null, maj: null, fini: false, factice: false };
 
 /* "13:59:12" -> minutes. Tolere h:mm:ss, hh:mm, et le vide. */
 function duree(t) {
@@ -639,6 +646,30 @@ function dateDe(p, precedente) {
   return j;
 }
 
+/* Projette une position GPS sur le trace pour en deduire le kilometre.
+ *
+ * Le trace est la reference : en collant le marqueur au point le plus proche
+ * de la ligne plutot qu'a la coordonnee brute, on evite qu'il flotte a cote
+ * du sentier a cause de l'imprecision GPS ou de la simplification du trace.
+ *
+ * Refuse au-dela de deux kilometres d'ecart. A cette distance la position ne
+ * decrit plus le parcours : releve aberrant, autre coureur, format mal lu.
+ * Mieux vaut la projection horaire, qui est au moins coherente. */
+function kmDeLaPosition(lat, lon) {
+  if (!TRACE || !TRACE.length) return null;
+  var meilleur = null, d2 = Infinity;
+  var cos = Math.cos(lat * Math.PI / 180);
+  for (var i = 0; i < TRACE.length; i++) {
+    var a = (TRACE[i][0] - lat) * 111.2;
+    var b = (TRACE[i][1] - lon) * 111.2 * cos;
+    var d = a * a + b * b;
+    if (d < d2) { d2 = d; meilleur = TRACE[i]; }
+  }
+  var ecart = Math.sqrt(d2);
+  if (!meilleur || ecart > 2) return null;
+  return { km: meilleur[2], lat: meilleur[0], lon: meilleur[1], ecart: ecart };
+}
+
 /* Ne garde que ce qui est exploitable, et refuse tout le reste. Une reponse
    a moitie comprise est plus dangereuse qu'une absence de reponse. */
 function digere(d) {
@@ -654,7 +685,20 @@ function digere(d) {
                arrivee: p.arrivee || null, depart: p.depart || null });
   }
   out.sort(function (a, b) { return a.km - b.km; });
+
+  /* La balise, si elle a repondu. Elle ne remplace jamais les pointages —
+     ceux-la disent qu'il EST PASSE quelque part, elle dit seulement ou il se
+     trouve. Deux affirmations differentes, on ne les melange pas.
+     Elle est refusee si elle le place en arriere de son dernier pointage :
+     une position ne peut pas contredire un tapis de chronometrage. */
+  var bal = null;
+  if (d.position && typeof d.position.lat === 'number' && typeof d.position.lon === 'number') {
+    var p = kmDeLaPosition(d.position.lat, d.position.lon);
+    if (p && (!out.length || p.km >= out[out.length - 1].km - 1)) bal = p;
+  }
+
   return { passages: out, dernier: out.length ? out[out.length - 1] : null,
+           balise: bal,
            maj: d.maj ? new Date(d.maj) : null, perime: !!d.perime,
            fini: out.length ? out[out.length - 1].km >= DISTANCE - 0.5 : false };
 }
@@ -670,6 +714,7 @@ function chargeLive() {
       var v = digere(d);
       if (!v) return;                          /* illisible : on garde l'existant */
       LIVE.passages = v.passages; LIVE.dernier = v.dernier;
+      LIVE.balise = v.balise;
       LIVE.maj = v.maj; LIVE.perime = v.perime; LIVE.fini = v.fini;
       tout();
     })
@@ -713,6 +758,21 @@ function ou(now) {
      sans jamais franchir le point suivant tant qu'il n'a pas bipe — annoncer
      un passage qui n'a pas eu lieu serait pire que de le dire en retard. */
   if (now < DEPART) return { km: 0, i: 0, avant: true };
+
+  /* La balise emet en continu : quand elle repond, elle sait mieux que nous
+     ou il est. On ne projette plus, on lit. */
+  if (LIVE.balise && !LIVE.fini) {
+    var kb = LIVE.balise.km, jb = 0;
+    while (jb < POINTS.length && POINTS[jb].km <= kb + 0.05) jb++;
+    if (jb < POINTS.length) {
+      var pb = POINTS[jb - 1] || POINTS[0], sb = POINTS[jb];
+      var fb = (sb.km - pb.km) > 0 ? (kb - pb.km) / (sb.km - pb.km) : 0;
+      return { km: kb, i: jb, prochain: sb, precedent: pb,
+               frac: Math.max(0, Math.min(1, fb)),
+               live: true, balise: true, pointe: LIVE.dernier };
+    }
+  }
+
   var d = LIVE.dernier;
   if (d) {
     if (LIVE.fini) return { km: DISTANCE, i: POINTS.length - 1, fini: true, live: true };
@@ -746,7 +806,12 @@ function ou(now) {
 function dplusAu(p) {
   if (p.avant) return 0;
   if (p.fini) return POINTS[POINTS.length - 1].dpc;
-  return p.precedent.dpc + (p.prochain.dpc - p.precedent.dpc) * p.frac;
+  if (!p.precedent || !p.prochain) return 0;
+  var f = typeof p.frac === 'number' && isFinite(p.frac) ? p.frac : 0;
+  var v = p.precedent.dpc + (p.prochain.dpc - p.precedent.dpc) * f;
+  /* Un NaN qui remonte jusqu'a l'ecran est pire qu'un chiffre approche :
+     personne ne sait quoi en faire a 3 h du matin. */
+  return isFinite(v) ? v : p.precedent.dpc;
 }
 
 /* La prochaine barriere est celle du prochain point NON FRANCHI, pas la
@@ -768,7 +833,13 @@ function majStatut(now) {
       (j ? j + ' j ' : '') + h + ' h ' + dd(m) + ' min</b> · vendredi 09:15</span>';
   } else if (now < FIN) {
     var e = Math.floor((now - DEPART) / 60000), p = ou(now);
-    if (p.live && p.pointe) {
+    if (p.balise) {
+      var eb = ecartPlan();
+      s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
+        ' · balise km <b>' + km1(p.km) + '</b>' +
+        (p.pointe ? ' · pointé à ' + p.pointe.nom : '') +
+        (eb === null ? '' : ' · ' + (eb > 0 ? '+' : '') + eb + ' min') + '</span>';
+    } else if (p.live && p.pointe) {
       var ec = ecartPlan();
       s.innerHTML = '<span class="pt"></span><span><b>EN COURSE</b> · ' + hm(e) +
         ' · pointé à <b>' + p.pointe.nom + '</b>' +
@@ -794,6 +865,7 @@ function majDirect(now) {
   var cases = [
     { v: hmc(Math.round((d.date - DEPART) / 60000)), l: 'de course' },
     ec === null ? { v: km1(DISTANCE - d.km) + ' km', l: 'restants' }
+                : ec === 0 ? { v: 'pile', l: 'sur le plan' }
                 : { v: (ec > 0 ? '+' : '') + ec + ' min', l: ec > 0 ? 'sur le plan' : 'd\'avance',
                     c: ec > 0 ? 're' : 'av' },
     LIVE.fini ? { v: hh(d.date), l: 'arrivée' } : { v: '~' + hh(arrivee), l: 'arrivée estimée' }
@@ -809,6 +881,10 @@ function majDirect(now) {
       '<div class="pt-nom">' + (d.nom || 'km ' + km1(d.km)) +
         '<small>km ' + km1(d.km) + ' · ' + hh(d.date) + '</small>' +
         (d.rang ? '<span class="rang">' + d.rang + '<sup>e</sup></span>' : '') + '</div>' +
+      (LIVE.balise && !LIVE.fini
+        ? '<div class="bal"><span class="vif"></span>Balise GPS · en ce moment vers le <b>km ' +
+          km1(LIVE.balise.km) + '</b>, ' + km1(DISTANCE - LIVE.balise.km) + ' km avant l\'arrivée</div>'
+        : '') +
       '<div class="chif">' + cases.map(function (c) {
         return '<div><div class="v ' + (c.c || '') + '">' + c.v + '</div>' +
                '<div class="l">' + c.l + '</div></div>';
