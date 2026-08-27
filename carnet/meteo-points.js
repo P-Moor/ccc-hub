@@ -25,14 +25,14 @@ export const METEO_POINTS = [
   { nom: "Arnouvaz",             km: 26.3,   lat: 45.87133, lon: 7.05394, alt: 1777, type: "ravito" },
   { nom: "Grand Col Ferret",     km: 30.9,   lat: 45.88899, lon: 7.07790, alt: 2527, type: "sommet", expose: true },
   { nom: "La Fouly",             km: 40.7,   lat: 45.93566, lon: 7.09845, alt: 1604, type: "ravito" },
-  { nom: "Champex-Lac",          km: 54.9,   lat: 46.02559, lon: 7.12246, alt: 1472, type: "base" },
-  { nom: "Plan de l'Au",         km: 59.8,   lat: 46.04983, lon: 7.07972, alt: 1340, type: "pointage" },
-  { nom: "La Giète",             km: 66.3,   lat: 46.05500, lon: 7.03364, alt: 1885, type: "sommet" },
-  { nom: "Trient",               km: 71.5,   lat: 46.05547, lon: 6.99494, alt: 1304, type: "ravito" },
-  { nom: "Les Tseppes",          km: 75.2,   lat: 46.04747, lon: 6.97971, alt: 1936, type: "sommet", expose: true },
-  { nom: "Vallorcine",           km: 82.5,   lat: 46.03242, lon: 6.93236, alt: 1260, type: "ravito" },
-  { nom: "La Flégère",           km: 93.7,   lat: 45.96089, lon: 6.88719, alt: 1882, type: "ravito", expose: true },
-  { nom: "Chamonix",             km: 100.9,  lat: 45.92360, lon: 6.86912, alt: 1035, type: "arrivee" },
+  { nom: "Champex-Lac",          km: 54.2,   lat: 46.02559, lon: 7.12246, alt: 1472, type: "base" },
+  { nom: "Plan de l'Au",         km: 59.1,   lat: 46.04983, lon: 7.07972, alt: 1340, type: "pointage" },
+  { nom: "Martigny",             km: 69.2,   lat: 46.08589, lon: 7.05736, alt: 507,  type: "ravito" },
+  { nom: "Trient",               km: 79.3,   lat: 46.05547, lon: 6.99494, alt: 1304, type: "ravito" },
+  { nom: "Les Tseppes",          km: 83.1,   lat: 46.04747, lon: 6.97971, alt: 1936, type: "sommet", expose: true },
+  { nom: "Vallorcine",           km: 90.4,   lat: 46.03242, lon: 6.93236, alt: 1260, type: "ravito" },
+  { nom: "La Flégère",           km: 101.6,  lat: 45.96089, lon: 6.88719, alt: 1882, type: "ravito", expose: true },
+  { nom: "Chamonix",             km: 108.8,  lat: 45.92360, lon: 6.86912, alt: 1035, type: "arrivee" },
 ];
 
 /** Source : gratuite, sans clé, et elle accepte l'altitude par point. */

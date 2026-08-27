@@ -445,10 +445,14 @@ function traceProfil() {
            '" text-anchor="' + ancre + '">' + court(s.nom) + '</text>';
   }).join('');
 
-  const axe = [0, 25, 50, 75, 101.5].map(k =>
+  const kFin = RACE.distanceKm;
+  // On saute la graduation ronde trop proche de la fin : a 108,8 km le « 100 »
+  // se collait au libelle final et les deux devenaient illisibles. Le seuil est
+  // proportionnel pour que ca tienne quelle que soit la distance.
+  const axe = [0, 25, 50, 75, 100].filter(k => k < kFin * 0.88).concat([kFin]).map(k =>
     '<text class="pf-axe-txt" x="' + px(k).toFixed(1) + '" y="' + (VB_H - 4) +
-    '" text-anchor="' + (k === 0 ? 'start' : (k > 100 ? 'end' : 'middle')) + '">' +
-    (k === 101.5 ? '101,5 km' : k) + '</text>').join('');
+    '" text-anchor="' + (k === 0 ? 'start' : (k >= kFin ? 'end' : 'middle')) + '">' +
+    (k === kFin ? kmFmt(k) + ' km' : k) + '</text>').join('');
 
   return '' +
   '<svg class="profil-svg" id="pfSvg" viewBox="0 0 ' + VB_W + ' ' + VB_H + '" role="img" aria-label="Profil altimetrique de la CCC">' +
@@ -637,7 +641,7 @@ function idsConnusCheck() {
   return e;
 }
 
-const VERSION = 'ccc-v2-carnet-37';
+const VERSION = 'ccc-v2-carnet-38';
 
 /* L'estampille du coffre ne suit PAS la version de l'app : elle ne bouge que
    quand le contenu chiffre change. Sinon chaque livraison ferait croire a un
@@ -732,7 +736,7 @@ const estNuit = km => km > RACE.nuit.kmEstime;
 
 // Le plan C n'a pas de marge : il EST la barriere moins 20 min.
 const MARGE_C = '0h20';
-const SCEN_COURT = { A: 'cible 20h15', B: 'pied ~23h', C: 'survie' };
+const SCEN_COURT = { A: 'cible 22h25', B: 'pied ~25h30', C: 'survie' };
 
 const heureDe = (s, i) => { const r = s.rows[i]; return r.horloge || r.max; };
 const margeDe = (s, i) => s.rows[i].marge || (s.id === 'C' ? MARGE_C : null);
@@ -1050,8 +1054,10 @@ function traceCourse() {
       '<div class="co-trio">' +
         '<div><span>arrivé à</span><b>' + hhmm(fin) + '</b></div>' +
         '<div><span>temps</span><b>' + dureeTxt(fin - DEPART) + '</b></div>' +
-        '<div><span>marge</span><b class="ok">' + dureeTxt(b[8] - fin) + '</b></div>' +
-      '</div><div class="co-consigne"><span>Fini</span>C\'est fait. 101,5 km et 6 062 m de D+.</div></div>';
+        '<div><span>marge</span><b class="ok">' + dureeTxt(b[b.length - 1] - fin) + '</b></div>' +
+      '</div><div class="co-consigne"><span>Fini</span>C\'est fait. ' +
+      kmFmt(RACE.distanceKm) + ' km et ' + RACE.dplus.toLocaleString('fr-FR') +
+      ' m de D+.</div></div>';
   } else {
     const s = SECTIONS[i];
     const marge = b[i] - e[i];
@@ -1303,7 +1309,9 @@ function traceFeuilleCourse() {
   return '<div class="fc-tete">' +
       '<div class="fc-titre">CCC <b>4330</b></div>' +
       '<div class="fc-faits">vendredi 28 août &#183; départ <b>' + hhmm(DEPART) + '</b> Courmayeur &#183; vague 2 &#183; ' +
-        '101,5 km &#183; 6 062 m D+ &#183; barrière finale <b>' + hhmm(FIN) + '</b> &#183; cible 20h15</div>' +
+        kmFmt(RACE.distanceKm) + ' km &#183; ' + RACE.dplus.toLocaleString('fr-FR') +
+        ' m D+ &#183; barrière finale <b>' + hhmm(FIN) + '</b> &#183; cible ' +
+        SCENARIOS[0].label.replace('Cible ', '') + '</div>' +
     '</div>' + tableau +
     '<div class="fc-verso">' + profil +
       '<div class="fc-colonnes">' + regles + nutri + froid + '</div>' + panic + '</div>';
@@ -1383,7 +1391,8 @@ function traceBilan() {
       '<div><span>ce que la course demande</span><b>' + besoin + ' g</b></div></div>' +
     '<div class="ck-piste"><i style="width:' + pct + '%"></i></div>' +
     '<div class="bl-t">' + (ecart < 0
-      ? '<b>' + Math.abs(ecart) + ' g de moins</b> que la cible sur les 20h15, soit environ ' +
+      ? '<b>' + Math.abs(ecart) + ' g de moins</b> que la cible sur les ' +
+        SCENARIOS[0].label.replace('Cible ~', '') + ', soit environ ' +
         Math.round(Math.abs(ecart) / NUT.meta.dureeCibleH) + ' g par heure. C\'est assumé : la première section ' +
         'vise 55 à 60 g/h, pas 70.'
       : 'Le plan couvre la cible.') + '</div>' +

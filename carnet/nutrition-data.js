@@ -33,7 +33,7 @@ export const NUTRITION = {
       id: "planau",
       avant: "Plan de l'Au compté comme ravito express.",
       apres: "Plan de l'Au N'APPARAÎT PAS dans la liste officielle des postes CCC (8 postes : Bertone, Arnouvaz, La Fouly, Champex, Trient, Vallorcine, La Flégère, Arrivée). C'est très probablement un POINTAGE SEUL.",
-      consequence: "⚠️ Champex → Trient devient 16,5 km / 3h05 SANS ravito, de nuit, avec Bovine dedans. Autonomie complète obligatoire au départ de Champex.",
+      consequence: "⚠️ Champex → Martigny fait 15,0 km SANS ravito, de nuit. Le parcours du 27/08 a supprimé Bovine et intercalé Martigny : c'est 1,6 km de moins qu'avant en autonomie, mais les services exacts de Martigny restent à confirmer. Partir de Champex en autonomie complète, comme prévu initialement.",
       aVerifier: "À confirmer sur le carnet de course officiel dès réception."
     },
     {
@@ -147,18 +147,18 @@ export const NUTRITION = {
           "🧦 Chaussettes sèches · NOK · frontale sur la tête",
           "Remplir Boost + eau À FOND"
         ],
-        eviter: ["⛔ Ne pas dépasser 20 min", "⛔ Charcuterie / raclette (gras + purines avant Bovine)"],
+        eviter: ["⛔ Ne pas dépasser 20 min", "⛔ Charcuterie / raclette (gras + purines avant la descente sur Martigny)"],
         note: "🔴 POINT LE PLUS IMPORTANT DE LA COURSE. C'est ici que la 2e moitié se prépare."
       }
     },
     {
-      de: "Champex-Lac", vers: "Trient", km: 16.5, duree: "3h05", eta: "22:51",
+      de: "Champex-Lac", vers: "Martigny", km: 15.0, duree: "2h36", eta: "22:00",
       autonomieRequise: true, viaPointage: "Plan de l'Au (pointage seul, PAS de ravito)",
-      besoinG: 215, porte: "1 flasque Boost + 1 eau · 3 gels dont 1 caféiné · 1 barre", apportG: 175,
+      besoinG: 182, porte: "1 flasque Boost + 1 eau · 3 gels dont 1 caféiné · 1 barre", apportG: 175,
       enCourant: [
         "🌙 La nuit tombe vers 20:30 dans cette section",
-        "Café n°1 pris au départ de Champex, il agit dans Bovine",
-        "Montée de Bovine : manger avant, pas dans la pente raide",
+        "Caféine 35 mg au départ de Champex : elle agit dans la descente sur Martigny",
+        "Remontée Martigny → Trient : 1 082 m à 10,7 % — manger dans la vallée AVANT, pas dans la pente",
         "Descente technique sur Trient : racines, prudence de nuit"
       ],
       alerte: "🔴 LA PLUS LONGUE AUTONOMIE DE LA COURSE — 3h05 sans ravito, de nuit. Partir de Champex avec TOUT. Si tu oublies quelque chose ici, tu le paies pendant 3 heures.",
@@ -175,7 +175,23 @@ export const NUTRITION = {
       }
     },
     {
-      de: "Trient", vers: "Vallorcine", km: 12.0, duree: "2h34", eta: "01:40",
+      de: "Martigny", vers: "Trient", km: 10.1, duree: "3h00", eta: "01:00",
+      besoinG: 210, porte: "1 flasque Boost + 1 eau · 3 gels · 1 barre", apportG: 190,
+      enCourant: [
+        "⛰️ +1 082 m sur 10,1 km, soit 10,7 % de moyenne — marche efficace aux bâtons",
+        "Manger dans la vallée AVANT d'attaquer, pas dans la pente",
+        "FC < 145 · c'est long mais ce n'est pas raide"
+      ],
+      ravito: {
+        nom: "Trient", type: "SOLIDE CHAUD", duree: "15 min", assistance: false,
+        surPlace: ["Soupe ou vermicelles chauds", "Bouillon salé", "Remplir Boost + eau à fond",
+                   "☕ Caféine 100 mg — Peach Tea"],
+        eviter: ["⛔ Ne pas dépasser 15 min", "⛔ Ne pas s'asseoir sans avoir mis la veste d'abord"],
+        note: "⛔ NE PAS TRAÎNER. C'est ici que la marge cesse de grossir : Vallorcine, la Flégère et Chamonix ont gardé leur barrière alors que tu y arrives 2h10 plus tard."
+      }
+    },
+    {
+      de: "Trient", vers: "Vallorcine", km: 11.1, duree: "2h50", eta: "03:50",
       besoinG: 180, porte: "recharge Trient", apportG: 180,
       enCourant: ["Montée des Tseppes / Catogne : très raide au début, s'adoucit", "Descente rapide sur Vallorcine — piste large puis forêt technique"],
       ravito: {
@@ -186,7 +202,7 @@ export const NUTRITION = {
       }
     },
     {
-      de: "Vallorcine", vers: "La Flégère", km: 11.4, duree: "2h45", eta: "04:35",
+      de: "Vallorcine", vers: "La Flégère", km: 11.2, duree: "2h55", eta: "06:45",
       besoinG: 190, porte: "recharge Vallorcine + réserve", apportG: 190,
       enCourant: [
         "🔴 LA SECTION LA PLUS DURE : +969 m, blocs, de nuit, après 16h de course",
@@ -201,7 +217,7 @@ export const NUTRITION = {
       }
     },
     {
-      de: "La Flégère", vers: "Chamonix", km: 6.8, duree: "0h50", eta: "05:30",
+      de: "La Flégère", vers: "Chamonix", km: 7.2, duree: "0h55", eta: "07:40",
       besoinG: 60, porte: "ce qu'il reste", apportG: 60,
       enCourant: ["−845 m de descente finale · quadriceps · rien à manger si l'estomac refuse"],
       ravito: { nom: "🏁 ARRIVÉE CHAMONIX", type: "ARRIVÉE", duree: "—", assistance: true,
@@ -245,14 +261,15 @@ export const NUTRITION = {
 
   /* ====================================================================== */
   cafeine: [
-    { n:1, ou:"Départ Champex", quand:"~19:45", produit:"Ultra Energy Chocolat", mg:35,  pourquoi:"Avant la nuit, avant Bovine" },
-    { n:2, ou:"Trient",         quand:"~23:00", produit:"Boost Peach Tea",       mg:100, pourquoi:"Le point bas prévu" },
-    { n:3, ou:"Vallorcine",     quand:"~01:45", produit:"Boost Peach Tea",       mg:100, pourquoi:"Avant la Tête aux Vents" },
-    { n:4, ou:"Avant Tête aux Vents", quand:"~02:30", produit:"Barre Caramel Macchiato", mg:65, pourquoi:"La section la plus dure" },
+    { n:1, ou:"Départ Champex", quand:"19:24", produit:"Ultra Energy Chocolat", mg:35,  pourquoi:"Avant la nuit, avant la descente sur Martigny" },
+    { n:2, ou:"Martigny",       quand:"22:00", produit:"Barre Caramel Macchiato", mg:65, nouveau:true,
+      pourquoi:"🆕 AVANT la remontée de 1 082 m, pas après. Le point bas de la course : 507 m." },
+    { n:3, ou:"Trient",         quand:"01:00", produit:"Boost Peach Tea",       mg:100, pourquoi:"Le point bas prévu — moral, pas altitude" },
+    { n:4, ou:"Vallorcine",     quand:"03:50", produit:"Boost Peach Tea",       mg:100, pourquoi:"Dernier bloc + Tête aux Vents" },
     { n:"R", ou:"Réserve",      quand:"coup de mou imprévu", produit:"2 Peach Tea + 2 Caramel Macchiato", mg:0,
       pourquoi:"⛔ JAMAIS avant Champex — elle ne marche que si tu ne l'as pas gaspillée de jour" }
   ],
-  cafeineTotal: "~300 mg répartis sur 7 h",
+  cafeineTotal: "300 mg répartis sur 8 h 30 (la nuit s'est allongée de 2 h)",
   cafeineRegles: [
     "⛔ ZÉRO caféine avant Champex — elle ne marche que si elle n'a pas été gaspillée de jour",
     "⛔ Espacer d'au moins 2 h — deux Peach Tea coup sur coup font 200 mg",

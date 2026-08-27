@@ -121,7 +121,33 @@ export const BALISE = {
     sanction: "155 € retenus si elle n'est pas rendue avant le 30/08",
     secours: "Envoi postal à ses frais, Maison UTMB, 31 rue du Lyret à Chamonix, avant le 31/08"
   },
-  alerte: "⚠️ METTRE UNE ALARME LE SAMEDI 29. C'est typiquement ce qu'on oublie après 20 h de course."
+  alerte: "⚠️ METTRE UNE ALARME LE SAMEDI 29. C'est typiquement ce qu'on oublie après 20 h de course.",
+
+  /* Le mode d'emploi, arrive le 26/08. Deux consignes de timing decident si
+     la trace existe ou pas, et aucune des deux n'est intuitive : une heure
+     AVANT le depart, cinq minutes APRES l'arrivee. */
+  modele: "Track the Race",
+  protocole: {
+    allumer: {
+      geste: "Maintenir Power ON quelques secondes, jusqu'à ce que le voyant rouge s'allume ET que l'appareil vibre.",
+      quand: "🔴 AU MOINS UNE HEURE AVANT LE DÉPART, donc avant 08:15.",
+      pierre: "En pratique : à Courmayeur vers 07:30, en descendant de la navette. Pas plus tard.",
+      alerte: "⛔ JAMAIS d'objet pointu pour appuyer sur le bouton."
+    },
+    eteindre: {
+      geste: "Maintenir Power OFF jusqu'à ce que le voyant rouge se mette à clignoter.",
+      quand: "🔴 AU MOINS CINQ MINUTES APRÈS la ligne d'arrivée.",
+      pierre: "Le réflexe est de l'éteindre en franchissant l'arche. C'est trop tôt : la fin de trace serait coupée."
+    },
+    sos: "Bouton SOS maintenu 5 SECONDES : envoie le signal d'urgence à l'organisation.",
+    voyants: [
+      { c: "bleu",  q: "GPS", d: "réception satellite" },
+      { c: "rouge", q: "PWR", d: "état de la batterie" },
+      { c: "vert",  q: "GSM", d: "couverture mobile" }
+    ],
+    ou: "Dans une poche du gilet, pas à même la peau : le mode d'emploi insiste sur la protection contre la transpiration et l'humidité.",
+    qr: "Un QR est imprimé sur la balise : il permet de vérifier le numéro de dossard associé et de partager sa course."
+  }
 };
 
 /* ==================== menus, de J-3 au jour J ==================== */
@@ -211,19 +237,22 @@ export const MENUS = {
 /* ==================== les traces GPX pour la montre ==================== */
 
 export const TRACES = {
-  pourquoi: "Sans les sommets, l'objectif entre Vallorcine et La Flégère fait 11,4 km : trop long à tenir dans la tête à 2 h du matin. Avec eux, tu ne montes plus vers un ravito mais vers un col. La course se découpe en 13 morceaux au lieu de 9, et le plus long tombe de 16,5 à 11,5 km.",
+  pourquoi: "Sans les sommets, tu ne montes que vers des ravitos. Avec eux, la course se découpe en 15 morceaux au lieu de 11, et le plus long tombe à 11,2 km — tenable dans la tête à 2 h du matin. ⚠️ REFAITS LE 27/08 sur le parcours modifié : chargés avec l'ancienne version, ta montre t'annoncerait La Giète, qui ne figure plus au parcours, et se tromperait de huit kilomètres à l'arrivée.",
   fichiers: [
-    { nom: "CCC_2026_RAVITOS_SOMMETS.gpx", points: 13,
-      quoi: "9 ravitos + 4 sommets", recommande: true },
-    { nom: "CCC_2026_RAVITOS.gpx", points: 9, quoi: "les ravitos seuls" }
+    { nom: "CCC_2026_RAVITOS_SOMMETS.gpx", points: 15,
+      quoi: "11 ravitos + 4 sommets · Martigny inclus", recommande: true },
+    { nom: "CCC_2026_RAVITOS.gpx", points: 11, quoi: "les ravitos seuls · Martigny inclus" }
   ],
-  chaquePoint: "Chaque point porte sa consigne en description : Trient « veste avant de s'asseoir », Champex « emporter du salé », Plan de l'Au « pointage seul, pas de ravito ».",
+  chaquePoint: "Chaque point porte sa consigne ET SA BARRIÈRE en description : Bertone « 1h08 de marge, le point le plus serré », Martigny « caféine 65 mg AVANT la remontée », Vallorcine « barrière inchangée, marge 3h25 au lieu de 5h35 ».",
   instructions: [
+    "⛔ D'ABORD : SUPPRIMER l'ancien parcours de la montre. Deux traces chargées, la Fenix suit la mauvaise.",
     "Garmin Connect → Entraînement → Parcours → Importer le GPX → envoyer vers la montre",
-    "⚠️ Vérifier que les 13 points apparaissent dans l'aperçu. Sinon, les ajouter à la main dans l'éditeur de parcours.",
+    "⚠️ Vérifier que les 15 points apparaissent dans l'aperçu, MARTIGNY COMPRIS. Sinon, les ajouter à la main.",
+    "⚠️ Vérifier que l'aperçu annonce 108,8 km. S'il affiche 100 km, c'est l'ancienne trace : recommencer.",
     "Écran de données « prochain objectif » : distance au point suivant · ETA au point suivant · heure du jour. Trois champs, une question.",
     "ClimbPro reste actif en parallèle, les deux se complètent",
-    "📅 Charger le SAMEDI 22, pas dimanche : une journée de marge si la synchro coince"
+    "Auto Lap OFF · alerte Temps 30:00 (nutrition) · alerte FC 145",
+    "📅 CE SOIR 19:00. Le parcours a changé le 27/08 à 16h05 : il n'y a plus de journée de marge."
   ]
 };
 

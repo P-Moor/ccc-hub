@@ -31,7 +31,7 @@ export const SAC = {
     ],
     zones: [
       { id: "surmoi",     label: "Sur moi en permanence", sub: "Contrôlable du départ à l'arrivée" },
-      { id: "sac",        label: "Dans le sac de course", sub: "Ce que tu portes sur 101,5 km" },
+      { id: "sac",        label: "Dans le sac de course", sub: "Ce que tu portes sur 108,8 km" },
       { id: "allegement", label: "Sac d'allègement Champex", sub: "Remis au retrait du dossard · retrouvé au km 54,6" },
       { id: "bagage",     label: "Bagage voyage", sub: "Reste à Chamonix" }
     ]
@@ -93,7 +93,7 @@ export const SAC = {
     { id:"a02", zone:"allegement", crit:"perso", phase:"veille", txt:"🍫 Nutrition 2ᵉ moitié", detail:"8 gels DONT LES 5 CAFÉINÉS + 2 barres + 2 mini-ziplocks Boost" },
     { id:"a03", zone:"allegement", crit:"perso", phase:"veille", txt:"🧴 NOK en recharge" },
     { id:"a04", zone:"allegement", crit:"perso", phase:"veille", txt:"👕 Couche chaude sèche", detail:"T-shirt manches longues — la nuit commence juste après" },
-    { id:"a05", zone:"allegement", crit:"reglementaire", phase:"veille", txt:"🔋 Piles de rechange frontale", detail:"La nuit fait ~9 h : Bovine → Trient → Catogne → Tête aux Vents → Flégère" },
+    { id:"a05", zone:"allegement", crit:"reglementaire", phase:"veille", txt:"🔋 Piles de rechange frontale", detail:"La nuit fait ~11 h avec le parcours du 27/08 : Martigny → Trient → Les Tseppes → Tête aux Vents → Flégère. Deux heures de plus qu'au plan initial." },
     { id:"a06", zone:"allegement", crit:"confort", phase:"veille", txt:"Lingettes / petite serviette" },
     { id:"a07", zone:"allegement", crit:"confort", phase:"veille", txt:"2ᵉ paire d'Epitact", detail:"⚠️ Uniquement si l'Epitact est validé au test du 19" },
 

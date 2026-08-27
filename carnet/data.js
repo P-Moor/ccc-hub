@@ -4,9 +4,15 @@
 export const RACE = {
   nom: "CCC by UTMB 2026", dossard: 4330, vague: 2,
   depart: "2026-08-28T09:15:00+02:00",
-  distanceKm: 100.9, dplus: 6050,
+  distanceKm: 108.8, dplus: 6400,
   barriereFinale: "2026-08-29T12:00:00+02:00",
-  nuit: { tombeVers: "20:30", kmEstime: 59.8, lever: "06:45" }
+  // La nuit tombe pile a l'entree de la descente sur Martigny : 4 km pour
+  // -604 m, le passage le plus expose pour le 5e metatarsien, et il se fait
+  // desormais dans le noir. Batons, cadence haute, pas de freinage talon.
+  nuit: { tombeVers: "20:30", kmEstime: 60.5, lever: "06:45" },
+  // Parcours modifie le 27/08 : Bovine supprime, remplace par Martigny.
+  modifie: { le: "27/08", avantKm: 100.9, avantDplus: 6050, avantCible: "20h15",
+             quoi: "Bovine supprimé → descente sur Martigny (507 m) puis remontée complète sur Trient." }
 };
 
 // sections[i] = du point i-1 (ou depart) vers .nom
@@ -20,77 +26,99 @@ export const SECTIONS = [
   { nom:"La Fouly", km:14.4, cumKm:40.7, dplus:865, dminus:1037, sommet:"Grand Col Ferret 2527 m",
     consigne:"Toit de la course · vent possible · veste à portée", arret:"moyen", arretMin:9,
     ravito:"complet", assist:false },
-  { nom:"Champex-Lac", km:14.2, cumKm:54.9, dplus:599, dminus:731, sommet:"",
+  { nom:"Champex-Lac", km:13.5, cumKm:54.2, dplus:516, dminus:648, sommet:"",
     consigne:"Vallée roulante · relance douce, ne pas courir vite", arret:"grand", arretMin:18, ravito:"base", assist:true,
     todo:["Sac d'allègement","Chaussettes sèches","NOK","Frontale sur la tête","☕ Café n°1","Repas assis"] },
-  { nom:"Plan de l'Au", km:4.9, cumKm:59.8, dplus:74, dminus:208, sommet:"",
-    consigne:"Frontale allumée · ~20:30 la nuit tombe", arret:"express", arretMin:4,
-    ravito:"controle", assist:false },
-  { nom:"Trient", km:11.7, cumKm:71.5, dplus:770, dminus:807, sommet:"La Giète 1885 m",
-    consigne:"De nuit · rythme régulier · personne ne va vite ici", arret:"grand", arretMin:15, ravito:"complet", assist:false,
-    todo:["Soupe chaude","VESTE avant de s'asseoir","☕ Café n°2","Point bas prévu, normal"] },
-  { nom:"Vallorcine", km:11.0, cumKm:82.5, dplus:807, dminus:853, sommet:"Les Tseppes 1936 m",
-    consigne:"Un pas après l'autre · le mantra sert ici", arret:"moyen", arretMin:9, ravito:"complet", assist:true,
-    todo:["☕ Café n°3","Dernier vrai ravito"] },
-  { nom:"La Flégère", km:11.2, cumKm:93.7, dplus:966, dminus:342, sommet:"",
+  { nom:"Plan de l'Au", km:4.9, cumKm:59.1, dplus:74, dminus:208, sommet:"",
+    consigne:"Frontale allumée · ~20:30 la nuit tombe · la descente qui suit est LE passage à risque pour le pied",
+    arret:"express", arretMin:4, ravito:"controle", assist:false },
+  { nom:"Martigny", km:10.1, cumKm:69.2, dplus:163, dminus:996, sommet:"", nouveau:true,
+    consigne:"Descente de 604 m sur 4 km puis vallée roulante · bâtons, cadence 84-88, pas de freinage talon",
+    arret:"moyen", arretMin:9, ravito:"complet", assist:false,
+    todo:["☕ Café 65 mg AVANT la remontée","Salé si disponible","Point bas de la course : 507 m"] },
+  { nom:"Trient", km:10.1, cumKm:79.3, dplus:1082, dminus:286, sommet:"",
+    consigne:"Remontée de 1 082 m à 10,7 % de moyenne · marche efficace aux bâtons, pas de l'escalade · FC < 145",
+    arret:"grand", arretMin:15, ravito:"complet", assist:false,
+    todo:["Soupe chaude","VESTE avant de s'asseoir","☕ Café 100 mg","Point bas prévu, normal"] },
+  { nom:"Vallorcine", km:11.1, cumKm:90.4, dplus:807, dminus:853, sommet:"Les Tseppes 1936 m",
+    consigne:"Un pas après l'autre · le mantra sert ici · ⚠️ barrière inchangée, marge divisée par deux",
+    arret:"moyen", arretMin:9, ravito:"complet", assist:true,
+    todo:["☕ Café 100 mg","Dernier vrai ravito"] },
+  { nom:"La Flégère", km:11.2, cumKm:101.6, dplus:966, dminus:342, sommet:"",
     consigne:"LA plus dure · 2h45 · blocs, de nuit · ELLE EST PRÉVUE. Après elle, c'est fini.",
     arret:"express", arretMin:4, laPlusDure:true, ravito:"eau", assist:false },
-  { nom:"Chamonix", km:7.2, cumKm:100.9, dplus:21, dminus:866, sommet:"",
+  { nom:"Chamonix", km:7.2, cumKm:108.8, dplus:21, dminus:866, sommet:"",
     consigne:"Descente finale · rien à gérer, juste descendre", arret:"arrivee", arretMin:0,
     ravito:"arrivee", assist:false }
 ];
 
 // horloge = heure d'arrivee au point · marge vs barriere
-export const SCENARIO_A = { id:"A", label:"Cible ~20h15", arrets:"1h12",
+export const SCENARIO_A = { id:"A", label:"Cible ~22h25", arrets:"1h21",
   rows:[
     { pt:"Bertone",      section:"3h22", horloge:"12:37", barriere:"13:45", marge:"1h08" },
-    { pt:"Arnouvaz",     section:"1h47", horloge:"14:28", barriere:"16:30", marge:"2h01" },
-    { pt:"La Fouly",     section:"2h29", horloge:"17:06", barriere:"20:15", marge:"3h08" },
-    { pt:"Champex",      section:"2h08", horloge:"19:24", barriere:"23:15", marge:"3h50" },
-    { pt:"Plan de l'Au", section:"0h42", horloge:"20:24", barriere:"00:15", marge:"3h50" },
-    { pt:"Trient",       section:"2h23", horloge:"22:51", barriere:"04:00", marge:"5h08" },
-    { pt:"Vallorcine",   section:"2h34", horloge:"01:40", barriere:"07:15", marge:"5h34" },
-    { pt:"La Flégère",   section:"2h45", horloge:"04:35", barriere:"10:45", marge:"6h09" },
-    { pt:"Chamonix",     section:"0h50", horloge:"05:30", barriere:"12:00", marge:"6h30" }
+    { pt:"Arnouvaz",     section:"1h51", horloge:"14:28", barriere:"16:30", marge:"2h02" },
+    { pt:"La Fouly",     section:"2h38", horloge:"17:06", barriere:"20:15", marge:"3h09" },
+    { pt:"Champex",      section:"2h18", horloge:"19:24", barriere:"23:15", marge:"3h51" },
+    { pt:"Plan de l'Au", section:"1h00", horloge:"20:24", barriere:"00:15", marge:"3h51" },
+    { pt:"Martigny",     section:"1h36", horloge:"22:00", barriere:"02:15", marge:"4h15", nouveau:true },
+    { pt:"Trient",       section:"3h00", horloge:"01:00", barriere:"06:00", marge:"5h00" },
+    { pt:"Vallorcine",   section:"2h50", horloge:"03:50", barriere:"07:15", marge:"3h25", retrecie:"5h35" },
+    { pt:"La Flégère",   section:"2h55", horloge:"06:45", barriere:"10:45", marge:"4h00", retrecie:"6h10" },
+    { pt:"Chamonix",     section:"0h55", horloge:"07:40", barriere:"12:00", marge:"4h20", retrecie:"6h30" }
   ]};
 
-export const SCENARIO_B = { id:"B", label:"Le pied parle ~23h", arrets:"1h42 (3 protocoles pieds)",
+// Recalcule sur le parcours modifie. On applique la MEME degradation relative
+// qu'avant — l'ancien scenario B perdait 13,6 % sur la cible — au nouveau
+// temps de 22h25, ce qui donne 25h28.
+//
+// ⚠️ CE QUE CE RECALCUL REVELE, ET QUI EST NEUF : si le pied parle, le point
+// de coupe n'est plus seulement Bertone. VALLORCINE le devient, avec 54 min
+// de marge, a 06:21 le samedi matin. Avant la modification ce point offrait
+// 3h28 et ne faisait courir aucun risque. La barriere n'a pas bouge, mais on
+// y arrive 2h30 plus tard.
+export const SCENARIO_B = { id:"B", label:"Le pied parle ~25h30", arrets:"1h55 (3 protocoles pieds)",
   rows:[
-    { pt:"Bertone",      horloge:"12:44", marge:"1h00" },
-    { pt:"Arnouvaz",     horloge:"14:50", marge:"1h39" },
-    { pt:"La Fouly",     horloge:"17:49", marge:"2h25" },
-    { pt:"Champex",      horloge:"20:33", marge:"2h41" },
-    { pt:"Plan de l'Au", horloge:"21:40", marge:"2h34" },
-    { pt:"Trient",       horloge:"00:26", marge:"3h33" },
-    { pt:"Vallorcine",   horloge:"03:46", marge:"3h28" },
-    { pt:"La Flégère",   horloge:"07:13", marge:"3h31" },
-    { pt:"Chamonix",     horloge:"08:15", marge:"3h44" }
+    { pt:"Bertone",      horloge:"13:04", marge:"0h41", serre:true },
+    { pt:"Arnouvaz",     horloge:"15:11", marge:"1h19" },
+    { pt:"La Fouly",     horloge:"18:10", marge:"2h05" },
+    { pt:"Champex",      horloge:"20:47", marge:"2h28" },
+    { pt:"Plan de l'Au", horloge:"21:55", marge:"2h20" },
+    { pt:"Martigny",     horloge:"23:44", marge:"2h31" },
+    { pt:"Trient",       horloge:"03:08", marge:"2h52" },
+    { pt:"Vallorcine",   horloge:"06:21", marge:"0h54", serre:true },
+    { pt:"La Flégère",   horloge:"09:40", marge:"1h05" },
+    { pt:"Chamonix",     horloge:"10:43", marge:"1h17" }
   ]};
 
 export const SCENARIO_C = { id:"C", label:"Survie (barrière moins 20 min)",
   rows:[
     { pt:"Bertone", max:"13:25" }, { pt:"Arnouvaz", max:"16:10" },
     { pt:"La Fouly", max:"19:55" }, { pt:"Champex", max:"22:55" },
-    { pt:"Plan de l'Au", max:"23:55" }, { pt:"Trient", max:"03:40" },
-    { pt:"Vallorcine", max:"06:55" }, { pt:"La Flégère", max:"10:25" },
-    { pt:"Chamonix", max:"11:40" }
+    { pt:"Plan de l'Au", max:"23:55" }, { pt:"Martigny", max:"01:55" },
+    { pt:"Trient", max:"05:40" }, { pt:"Vallorcine", max:"06:55" },
+    { pt:"La Flégère", max:"10:25" }, { pt:"Chamonix", max:"11:40" }
   ]};
 
 export const SCENARIOS = [SCENARIO_A, SCENARIO_B, SCENARIO_C];
 
 export const NUTRITION = {
-  cible: "≈70 g/h · ≈1400 g total",
+  cible: "≈70 g/h · ≈1570 g total (22h25)",
+  unites: { total: 32, avant: 29, aSortir: 3,
+            ou: "Les 3 unités supplémentaires se répartissent entre Champex et Trient : 5h35 de course sur ce tronçon, deux ravitos seulement." },
   regle: "Une prise = manger ET boire, ensemble · alarme Fenix 30 min",
   boisson: "Flasque 1 : Näak Boost 60 concombre (60 g gluc · 500 mg Na / 500 ml) · Flasque 2 : eau (refroidissement + gels) · recharge Ultra Energy aux ravitos (testée ✅)",
+  // Nouveau schema du 27/08 : la nuit s'allonge d'environ 2 h et un point
+  // d'appui s'ajoute a Martigny, juste AVANT la remontee de 1 082 m.
   cafeine: [
-    { ou:"Départ Champex ~19:45", quoi:"Café n°1" },
-    { ou:"Trient ~23:00", quoi:"Café n°2" },
-    { ou:"Vallorcine ~01:45", quoi:"Café n°3" },
-    { ou:"Réserve ×2", quoi:"Jamais avant Champex" }
+    { ou:"Champex 19:24", quoi:"35 mg — amorçage avant la tombée du jour" },
+    { ou:"Martigny 22:00", quoi:"65 mg — AVANT la remontée de 1 082 m" },
+    { ou:"Trient 01:00", quoi:"100 mg — creux nocturne" },
+    { ou:"Vallorcine 03:50", quoi:"100 mg — dernier bloc + Tête aux Vents" }
   ],
+  cafeineTotal: "300 mg",
   portage: {
     depart: "7 gels + 3 barres + 2 ziplocks + 2 gels réserve",
-    champex: "8 gels dont 5 caféinés + 2 barres + 2 ziplocks"
+    champex: "11 gels dont 5 caféinés + 2 barres + 2 ziplocks — 3 unités de plus qu'au plan initial"
   },
 
   // Decoupage lisible des memes donnees, pour l'ecran : deux flasques, trois
@@ -101,14 +129,15 @@ export const NUTRITION = {
   ],
   recharge: "Aux ravitos : Näak Ultra Energy, 55 g par 500 ml. Testée ✅",
   cafes: [
-    { n:1, ou:"Départ de Champex", h:"~19:45", km:54.6 },
-    { n:2, ou:"Trient", h:"~23:00", km:71.2 },
-    { n:3, ou:"Vallorcine", h:"~01:45", km:83.2 }
+    { n:1, ou:"Champex", h:"19:24", km:54.2, mg:35 },
+    { n:2, ou:"Martigny", h:"22:00", km:69.2, mg:65, nouveau:true },
+    { n:3, ou:"Trient", h:"01:00", km:79.3, mg:100 },
+    { n:4, ou:"Vallorcine", h:"03:50", km:90.4, mg:100 }
   ],
-  cafeRegle: "Jamais avant Champex. Deux gels caféinés en réserve.",
+  cafeRegle: "Jamais avant Champex. 300 mg au total, réparti sur quatre prises.",
   charge: [
     { q:"Au départ", g:7, b:3, z:2, plus:"2 gels de réserve" },
-    { q:"À Champex", g:8, b:2, z:2, plus:"dont 5 caféinés" }
+    { q:"À Champex", g:11, b:2, z:2, plus:"dont 5 caféinés · +3 unités vs plan initial" }
   ]
 };
 
@@ -152,7 +181,7 @@ export const SAC = [
     "Gobelet 15 cl minimum", "Sifflet", "Couverture de survie 1,40 × 2 m",
     "Bande élastique 100 × 6 cm", "Pièce d'identité"
   ]},
-  { id:'sac', t:"Dans le sac de course", s:"Ce que tu portes sur 101,5 km", items:[
+  { id:'sac', t:"Dans le sac de course", s:"Ce que tu portes sur 108,8 km", items:[
     "2 frontales + piles de rechange pour chacune",
     "Veste imperméable à capuche, coutures soudées",
     "Seconde couche chaude ≥ 180 g", "Pantalon ou collant long",
@@ -180,11 +209,14 @@ export const SAC = [
 
 // Points de passage sans ravitaillement, repris du plan de course du Hub.
 // Ils comptent autant que les postes : ce sont les reperes entre deux ravitos.
-/* Les sommets nommes, entre les postes. Refaits le 24/08 sur le GPX officiel :
-   les kilometrages etaient faux de 1 a 2 km, et deux sommets portaient un nom
-   qui n'est pas le leur. « Bovine » est en realite LA GIETE, « Catogne » est
-   LES TSEPPES. Ce n'est pas un detail de nomenclature : c'est ce qui est ecrit
-   sur les panneaux et ce que disent les benevoles. */
+/* Les sommets nommes, entre les postes. Refaits le 24/08 sur le GPX officiel,
+   puis le 27/08 sur le parcours modifie.
+   Le travail de nomenclature du 24/08 tenait a ce que deux sommets portaient
+   un nom qui n'etait pas le leur : « Bovine » etait en realite LA GIETE, et
+   « Catogne » LES TSEPPES. La modification du 27/08 a tranche la premiere
+   question toute seule — LA GIETE NE FIGURE PLUS AU PARCOURS, la course
+   descend sur Martigny a la place. Reste Les Tseppes, dont le nom compte
+   toujours : c'est ce qui est ecrit sur les panneaux. */
 export const REPERES = [
   { km:9.4,  nom:"Tête de la Tronche", alt:2543, t:"sommet",
     r:"Point haut de la première montée. +1 418 m sur 9,4 km, sans transition. VAM 450-480." },
@@ -192,9 +224,9 @@ export const REPERES = [
     r:"Point d'eau. Sentier balcon roulant en surplomb du val Ferret — c'est là qu'on mange en marchant." },
   { km:30.9, nom:"Grand Col Ferret", alt:2527, t:"col",
     r:"Toit de la course, frontière Italie / Suisse. +762 m sur 4,5 km. Aucun ravitaillement, vent probable : veste à portée AVANT la montée." },
-  { km:66.3, nom:"La Giète", alt:1885, t:"sommet",
-    r:"Le sommet après Champex — son vrai nom, longtemps appelé Bovine par erreur. +731 m sur 6,5 km, de nuit." },
-  { km:75.2, nom:"Les Tseppes", alt:1936, t:"sommet",
+  { km:69.2, nom:"Martigny", alt:507, t:"ravito",
+    r:"🆕 Le point bas de la course, 507 m — La Giète et Bovine ont disparu du parcours le 27/08. On y descend 604 m en 4 km de nuit, puis on remonte 1 082 m sur 10,1 km. C'est long, mais c'est à 10,7 % de moyenne : de la marche aux bâtons, pas de l'escalade." },
+  { km:83.1, nom:"Les Tseppes", alt:1936, t:"sommet",
     r:"🔴 +647 m sur 3,8 km, soit 17 % de pente moyenne : LA PLUS RAIDE DE LA COURSE, et elle tombe vers 23 h. Un pas après l'autre, bâtons courts." }
 ];
 
@@ -391,9 +423,12 @@ export const PANIC = {
 // apres = index du poste qui declenche l'alerte.
 export const ALERTES = [
   { apres:3, cle:'front1', icone:"🔦", t:"Frontale sur la tête", d:"La nuit tombe vers 20:30, tu ne repars pas de Champex sans elle." },
-  { apres:3, cle:'cafe1',  icone:"☕", t:"Café n°1 maintenant",   d:"Au départ de Champex, vers 19:45." },
-  { apres:5, cle:'cafe2',  icone:"☕", t:"Café n°2 maintenant",   d:"Trient, vers 23:00. Veste AVANT de t'asseoir." },
-  { apres:6, cle:'cafe3',  icone:"☕", t:"Café n°3 maintenant",   d:"Vallorcine, vers 01:45. Dernier vrai ravito." }
+  { apres:3, cle:'cafe1',  icone:"☕", t:"Caféine 35 mg",  d:"Au départ de Champex, vers 19:24. Amorçage avant la tombée du jour." },
+  { apres:4, cle:'pied1',  icone:"🦶", t:"Descente à risque", d:"4 km pour −604 m jusqu'à la vallée, de nuit. Bâtons, cadence 84-88, ne pas freiner sur les talons." },
+  { apres:5, cle:'cafe2',  icone:"☕", t:"Caféine 65 mg",  d:"Martigny, vers 22:00. AVANT la remontée de 1 082 m, pas après." },
+  { apres:6, cle:'cafe3',  icone:"☕", t:"Caféine 100 mg", d:"Trient, vers 01:00. Veste AVANT de t'asseoir." },
+  { apres:7, cle:'cafe4',  icone:"☕", t:"Caféine 100 mg", d:"Vallorcine, vers 03:50. Dernier vrai ravito." },
+  { apres:7, cle:'barr1',  icone:"⛔", t:"Ta marge a fondu ici", d:"Vallorcine garde sa barrière de 07:15 alors que tu y arrives 2h10 plus tard : 3h25 au lieu de 5h35. Ne traîne pas." }
 ];
 
 // Libelles des modes d'arret

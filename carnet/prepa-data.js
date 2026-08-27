@@ -192,7 +192,7 @@ export const AFFUTAGE = {
     },
     {
       date: "2026-08-28", j: "J-0", jour: "Vendredi", type: "course", priorite: "critique",
-      titre: "CCC — 101,5 km · 6 062 m D+",
+      titre: "CCC — 108,8 km · 6 400 m D+ · parcours modifié le 27/08",
       matin: [
         { h: "05:00", quoi: "Réveil" },
         { h: "05:20-05:45", quoi: "Petit-déj testé : pain + miel, banane, café noir" },

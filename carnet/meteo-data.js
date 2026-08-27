@@ -46,12 +46,19 @@ export const METEO = {
   profilAltitude: [
     { lieu:"Courmayeur",       alt:1221, heure:"09:15",  temp:"10-16 °C" },
     { lieu:"Grand Col Ferret", alt:2529, heure:"~16:00", temp:"2-7 °C + vent" },
-    { lieu:"Champex",          alt:1408, heure:"19:24",  temp:"8-13 °C" },
-    { lieu:"Bovine",           alt:2044, heure:"~21:30", temp:"4-9 °C" },
-    { lieu:"Catogne",          alt:2070, heure:"~00:30", temp:"1-5 °C" },
-    { lieu:"Tête aux Vents",   alt:1886, heure:"~03:30", temp:"0-4 °C", critique:true },
-    { lieu:"Chamonix",         alt:1035, heure:"05:30",  temp:"6-10 °C" }
+    { lieu:"Champex",          alt:1472, heure:"19:24",  temp:"8-13 °C" },
+    { lieu:"Martigny",         alt:507,  heure:"22:00",  temp:"14-19 °C", nouveau:true,
+      note:"🆕 Le point bas. Presque 1 400 m plus bas que l'ancien passage par Bovine : il y fera DIX DEGRÉS DE PLUS. Ne pas s'y couvrir par réflexe nocturne." },
+    { lieu:"Les Tseppes",      alt:1936, heure:"~02:20", temp:"1-5 °C" },
+    { lieu:"Tête aux Vents",   alt:1886, heure:"~05:30", temp:"0-4 °C", critique:true },
+    { lieu:"Chamonix",         alt:1035, heure:"07:40",  temp:"6-10 °C" }
   ],
+  // Le parcours du 27/08 a supprime Bovine (2 044 m) et Catogne (2 070 m),
+  // les deux passages nocturnes les plus hauts. Il les remplace par la vallee
+  // du Rhone a 507 m. Consequence thermique : la partie la plus froide de la
+  // nuit n'est plus au milieu, elle est repoussee a la fin, sur Les Tseppes
+  // et la Tete aux Vents, apres 17 heures de course au lieu de 15.
+  changement27: "La nuit est devenue plus chaude au milieu (Martigny, 507 m) et plus froide à la fin (Tête aux Vents à 05:30 au lieu de 03:30, après 20 h d'effort).",
   conclusion: "🥶 Le vrai risque thermique n'est pas la chaleur du jour — c'est le FROID DE NUIT EN ALTITUDE, à l'heure la plus froide, après 18 h d'effort, trempé de sueur, en mouvement lent. Mais garder l'acclimatation chaleur (11 h de jour, montée de la Tronche plein sud).",
   aRegarderAussi: "La PLUIE — change tout (veste, sur-pantalon, sur-gants, adhérence sur les blocs de la Tête aux Vents). À vérifier le 25."
 };

@@ -9,7 +9,7 @@ export const CONFIANCE = {
 
   comparaison: [
     { quoi: "km-effort",          wild: "85,2",  ccc: "162,1" },
-    { quoi: "Temps total",        wild: "9h07",  ccc: "~20h15" },
+    { quoi: "Temps total",        wild: "9h07",  ccc: "~22h25" },
     { quoi: "Allure / km-effort", wild: "6:25",  ccc: "7:29", cle: true },
     { quoi: "FC moyenne",         wild: "150 = 90 % du seuil", ccc: "~132 = 78 %", cle: true }
   ],
@@ -31,7 +31,7 @@ export const CONFIANCE = {
 
   vigilance: {
     titre: "Le point de vigilance",
-    txt: "À Wildstrubel, 46 min d'arrêts sur 9h07 : 8,5 %. Le plan CCC prévoit 1h12 sur 20h15 : 5,9 %. Le budget planifié est plus serré que ton comportement réel.",
+    txt: "À Wildstrubel, 46 min d'arrêts sur 9h07 : 8,5 %. Le plan CCC prévoit 1h21 sur 22h25 : 6,0 %. Le budget planifié reste plus serré que ton comportement réel — le parcours modifié n'y change rien.",
     conclusion: "C'est le scénario B — 1h42 d'arrêts, arrivée 08:15, 3h44 de marge. Ne pas chercher à rattraper aux jambes ce qui est pris aux ravitos."
   }
 };
