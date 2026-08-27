@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CCC 2026 — Plan de course · Pierre Moor 4330</title>
-<meta name="description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15. Tableau de marche, barrières horaires, carte du parcours.">
+<meta name="description" content="Courmayeur → Chamonix · 108,8 km · 6 400 m D+ · 28 août, 09:15. Parcours modifié le 27/08. Tableau de marche, barrières horaires, carte.">
 <meta name="theme-color" content="#0f0f10">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -13,7 +13,7 @@
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="CCC 2026 — Plan de course · Pierre Moor #4330">
-<meta property="og:description" content="Courmayeur → Chamonix · 100,9 km · 6 050 m D+ · 28 août, 09:15">
+<meta property="og:description" content="Courmayeur → Chamonix · 108,8 km · 6 400 m D+ · 28 août, 09:15">
 <meta property="og:image" content="https://p-moor.github.io/ccc-hub/carnet/assets/ccc_100km_profil.png">
 <meta property="og:url" content="https://p-moor.github.io/ccc-hub/suivi/">
 <meta name="twitter:card" content="summary_large_image">
@@ -86,6 +86,16 @@ main { padding:0 14px; }
 .btn.plein { flex:1; background:var(--accent); border-color:var(--accent); color:#0f1a02; font-weight:700; }
 .btn:active { transform:scale(.97); }
 .btn.plein i { width:7px; height:7px; border-radius:50%; background:#0f1a02; font-style:normal; animation:bat 2.4s infinite; }
+
+/* Bandeau du changement de parcours. Il s'adresse a des gens qui ont peut-etre
+   deja note « arrivee vers 05:30 » quelque part : il faut que la correction se
+   voie avant le reste, pas qu'elle se devine dans un tableau. */
+.modif {
+  margin: 12px 0 0; padding: 11px 13px; border-radius: var(--r);
+  background: rgba(232,160,32,.09); border: 1px solid rgba(232,160,32,.28);
+  font-family: var(--f-body); font-size: 12px; line-height: 1.55; color: var(--text);
+}
+.modif b { font-weight: 500; color: var(--orange); }
 
 /* ------------------------------------------------------- suivi en direct */
 /* La carte du direct n'existe QUE si un pointage est arrive. Pas de bloc
@@ -377,8 +387,11 @@ details.leg[open] summary::before { content:"–"; }
 <header class="tete">
   <div class="l1"><span class="puce">CCC 2026</span>
     <h1>Pierre Moor · 4330</h1></div>
-  <div class="meta">Courmayeur → Chamonix · 100,9 km · 6 050 m D+<br>
-    Départ vendredi 28 août 09:15 · objectif ~20 h 15 · heure limite samedi 12:00</div>
+  <div class="meta">Courmayeur → Chamonix · 108,8 km · 6 400 m D+<br>
+    Départ vendredi 28 août 09:15 · arrivée estimée ~07 h 40 samedi · heure limite samedi 12:00</div>
+  <div class="modif">⚠️ <b>Parcours modifié le 27/08 par l'organisation.</b> Deux secteurs suisses ont
+    changé : la course passe de 100,9 à 108,8 km et passe désormais par Martigny.
+    Environ 2 h de course en plus — l'arrivée est attendue vers 07 h 40 samedi, pas 05 h 30.</div>
   <div class="act">
     <a class="btn plein" id="lienTracker" href="#" target="_blank" rel="noopener"><i></i>Tracker UTMB</a>
     <button class="btn" id="partage">Copier le lien</button>
@@ -404,13 +417,13 @@ details.leg[open] summary::before { content:"–"; }
         <div class="h"><span class="t">Distance</span><span class="p" id="pDist">0 %</span></div>
         <div class="s" id="sDist">—</div>
         <div class="barre"><i id="bDist" style="width:0%"></i></div>
-        <div class="f"><span>0 km</span><span>100,9 km</span></div>
+        <div class="f"><span>0 km</span><span>108,8 km</span></div>
       </div>
       <div class="jaugec">
         <div class="h"><span class="t">Dénivelé</span><span class="p" id="pDen">0 %</span></div>
         <div class="s" id="sDen">—</div>
         <div class="barre"><i id="bDen" style="width:0%"></i></div>
-        <div class="f"><span>0 m</span><span>6 050 m</span></div>
+        <div class="f"><span>0 m</span><span>6 400 m</span></div>
       </div>
     </div>
 
@@ -514,44 +527,46 @@ details.leg[open] summary::before { content:"–"; }
 /* ⚠️ A confirmer au retrait du dossard le 27. Seule ligne a changer. */
 var TRACKER = "https://live.utmb.world";
 
-var DISTANCE = 100.9, DPLUS = 6050;
+var DISTANCE = 108.8, DPLUS = 6400;
 var DEPART = new Date("2026-08-28T09:15:00+02:00");
 var FIN    = new Date("2026-08-29T12:00:00+02:00");
-var KM_NUIT = 54.9;
+/* 20:30 tombe desormais entre Plan de l'Au et Martigny, pas a Champex : la
+   nuit commence pile a l'entree de la grande descente sur la vallee. */
+var KM_NUIT = 59.7;
 
 /* dp/dm : denivele DE L'ETAPE. dpc/dmc : cumul depuis le depart. Calcules sur
    le trace officiel ; ils tombent au metre pres sur ce que publie LiveTrail. */
 var POINTS = [
   { nom:"Courmayeur",         km:0.0,   alt:1221, dp:0,    dm:0,    dpc:0,    dmc:0,    h:"09:15", t:"depart", r:1 },
-  { nom:"Tête de la Tronche", km:9.4,   alt:2543, dp:1418, dm:95,   dpc:1418, dmc:95,   h:"12:05", t:"sommet" },
+  { nom:"Tête de la Tronche", km:9.4,   alt:2543, dp:1418, dm:95,   dpc:1418, dmc:95,   h:"11:45", t:"sommet" },
   { nom:"Refuge Bertone",     km:13.6,  alt:1982, dp:18,   dm:581,  dpc:1436, dmc:676,  h:"12:37", b:"13:45", t:"ravito", r:1 },
-  { nom:"Refuge Bonatti",     km:21.2,  alt:2027, dp:323,  dm:277,  dpc:1759, dmc:953,  h:"13:30", t:"sommet" },
-  { nom:"Arnouvaz",           km:26.3,  alt:1777, dp:149,  dm:396,  dpc:1908, dmc:1349, h:"14:28", b:"16:30", t:"ravito", r:1 },
-  { nom:"Grand Col Ferret",   km:30.9,  alt:2527, dp:761,  dm:9,    dpc:2669, dmc:1358, h:"16:00", t:"sommet" },
-  { nom:"La Fouly",           km:40.7,  alt:1604, dp:104,  dm:1028, dpc:2773, dmc:2386, h:"17:06", b:"20:15", t:"ravito", r:1 },
-  { nom:"Champex-Lac",        km:54.9,  alt:1472, dp:599,  dm:731,  dpc:3372, dmc:3117, h:"19:24", b:"23:15", t:"base", r:1 },
-  { nom:"Plan de l'Au",       km:59.8,  alt:1340, dp:74,   dm:208,  dpc:3446, dmc:3325, h:"20:24", b:"00:15", t:"pointage", r:1 },
-  { nom:"La Giète",           km:66.3,  alt:1885, dp:731,  dm:184,  dpc:4177, dmc:3509, h:"21:55", t:"sommet" },
-  { nom:"Trient",             km:71.5,  alt:1304, dp:41,   dm:623,  dpc:4218, dmc:4132, h:"22:51", b:"04:00", t:"ravito", r:1 },
-  { nom:"Les Tseppes",        km:75.2,  alt:1936, dp:647,  dm:16,   dpc:4865, dmc:4148, h:"00:15", t:"sommet" },
-  { nom:"Vallorcine",         km:82.5,  alt:1260, dp:161,  dm:837,  dpc:5026, dmc:4985, h:"01:40", b:"07:15", t:"ravito", r:1 },
-  { nom:"La Flégère",         km:93.7,  alt:1882, dp:966,  dm:342,  dpc:5992, dmc:5327, h:"04:35", b:"10:45", t:"ravito", r:1 },
-  { nom:"Chamonix",           km:100.9, alt:1035, dp:21,   dm:866,  dpc:6013, dmc:6193, h:"05:30", b:"12:00", t:"arrivee", r:1 }
+  { nom:"Refuge Bonatti",     km:21.2,  alt:2027, dp:321,  dm:277,  dpc:1757, dmc:953,  h:"13:45", t:"sommet" },
+  { nom:"Arnouvaz",           km:26.3,  alt:1777, dp:148,  dm:396,  dpc:1905, dmc:1349, h:"14:28", b:"16:30", t:"ravito", r:1 },
+  { nom:"Grand Col Ferret",   km:30.9,  alt:2527, dp:761,  dm:9,    dpc:2666, dmc:1358, h:"15:55", t:"sommet" },
+  { nom:"La Fouly",           km:40.7,  alt:1604, dp:104,  dm:1028, dpc:2770, dmc:2386, h:"17:06", b:"20:15", t:"ravito", r:1 },
+  { nom:"Champex-Lac",        km:54.2,  alt:1472, dp:516,  dm:648,  dpc:3286, dmc:3034, h:"19:24", b:"23:15", t:"base", r:1 },
+  { nom:"Plan de l'Au",       km:59.1,  alt:1340, dp:74,   dm:208,  dpc:3360, dmc:3242, h:"20:24", b:"00:15", t:"pointage", r:1 },
+  { nom:"Martigny",           km:69.2,  alt:507,  dp:163,  dm:996,  dpc:3523, dmc:4238, h:"22:00", b:"02:15", t:"ravito", r:1, neuf:1 },
+  { nom:"Trient",             km:79.3,  alt:1304, dp:1082, dm:286,  dpc:4605, dmc:4524, h:"01:00", b:"06:00", t:"ravito", r:1 },
+  { nom:"Les Tseppes",        km:83.1,  alt:1936, dp:647,  dm:16,   dpc:5252, dmc:4540, h:"02:20", t:"sommet" },
+  { nom:"Vallorcine",         km:90.4,  alt:1260, dp:160,  dm:837,  dpc:5412, dmc:5377, h:"03:50", b:"07:15", t:"ravito", r:1 },
+  { nom:"La Flégère",         km:101.6, alt:1882, dp:966,  dm:342,  dpc:6378, dmc:5719, h:"06:45", b:"10:45", t:"ravito", r:1 },
+  { nom:"Chamonix",           km:108.8, alt:1035, dp:21,   dm:866,  dpc:6399, dmc:6585, h:"07:40", b:"12:00", t:"arrivee", r:1 }
 ];
 
 var SECTIONS = [
-  { de:"Courmayeur", a:"Tête de la Tronche", km:9.4, dp:1418, dm:95, pente:14.1, duree:"2 h 50", t:"montee" },
-  { de:"Tête de la Tronche", a:"Refuge Bertone", km:4.2, dp:18, dm:581, pente:-13.4, duree:"32 min", t:"descente" },
-  { de:"Refuge Bertone", a:"Refuge Bonatti", km:7.5, dp:323, dm:277, pente:0.6, duree:"53 min", t:"roulant" },
-  { de:"Refuge Bonatti", a:"Arnouvaz", km:5.2, dp:149, dm:396, pente:-4.8, duree:"58 min", t:"descente" },
-  { de:"Arnouvaz", a:"Grand Col Ferret", km:4.5, dp:761, dm:9, pente:16.7, duree:"1 h 32", t:"montee" },
-  { de:"Grand Col Ferret", a:"La Fouly", km:9.9, dp:104, dm:1028, pente:-9.3, duree:"1 h 06", t:"descente" },
-  { de:"La Fouly", a:"Champex-Lac", km:14.2, dp:599, dm:731, pente:-0.9, duree:"2 h 18", t:"roulant" },
+  { de:"Courmayeur", a:"Tête de la Tronche", km:9.4, dp:1418, dm:95, pente:14.1, duree:"2 h 30", t:"montee" },
+  { de:"Tête de la Tronche", a:"Refuge Bertone", km:4.2, dp:18, dm:581, pente:-13.4, duree:"52 min", t:"descente" },
+  { de:"Refuge Bertone", a:"Refuge Bonatti", km:7.5, dp:321, dm:277, pente:0.6, duree:"1 h 08", t:"roulant" },
+  { de:"Refuge Bonatti", a:"Arnouvaz", km:5.2, dp:148, dm:396, pente:-4.8, duree:"43 min", t:"descente" },
+  { de:"Arnouvaz", a:"Grand Col Ferret", km:4.5, dp:761, dm:9, pente:16.7, duree:"1 h 27", t:"montee" },
+  { de:"Grand Col Ferret", a:"La Fouly", km:9.9, dp:104, dm:1028, pente:-9.3, duree:"1 h 11", t:"descente" },
+  { de:"La Fouly", a:"Champex-Lac", km:13.5, dp:516, dm:648, pente:-1.0, duree:"2 h 18", t:"roulant" },
   { de:"Champex-Lac", a:"Plan de l'Au", km:4.9, dp:74, dm:208, pente:-2.7, duree:"1 h 00", t:"roulant" },
-  { de:"Plan de l'Au", a:"La Giète", km:6.5, dp:731, dm:184, pente:8.4, duree:"1 h 31", t:"montee" },
-  { de:"La Giète", a:"Trient", km:5.2, dp:41, dm:623, pente:-11.2, duree:"56 min", t:"descente" },
-  { de:"Trient", a:"Les Tseppes", km:3.8, dp:647, dm:16, pente:16.6, duree:"1 h 24", t:"montee" },
-  { de:"Les Tseppes", a:"Vallorcine", km:7.3, dp:161, dm:837, pente:-9.3, duree:"1 h 25", t:"descente" },
+  { de:"Plan de l'Au", a:"Martigny", km:10.1, dp:163, dm:996, pente:-8.2, duree:"1 h 36", t:"descente" },
+  { de:"Martigny", a:"Trient", km:10.1, dp:1082, dm:286, pente:7.9, duree:"3 h 00", t:"montee" },
+  { de:"Trient", a:"Les Tseppes", km:3.8, dp:647, dm:16, pente:16.6, duree:"1 h 20", t:"montee" },
+  { de:"Les Tseppes", a:"Vallorcine", km:7.3, dp:160, dm:837, pente:-9.3, duree:"1 h 30", t:"descente" },
   { de:"Vallorcine", a:"La Flégère", km:11.2, dp:966, dm:342, pente:5.6, duree:"2 h 55", t:"montee" },
   { de:"La Flégère", a:"Chamonix", km:7.2, dp:21, dm:866, pente:-11.7, duree:"55 min", t:"descente" }
 ];
@@ -820,16 +835,16 @@ function majMaintenant(now) {
     ];
   } else if (p.avant) {
     tuiles = [
-      { v: '20h15', l: 'Objectif' },
-      { v: '100,9', u: 'km', l: 'Distance' },
-      { v: '6 050', u: 'm', l: 'Montée totale', c: 'att' },
+      { v: '22h25', l: 'Objectif' },
+      { v: km1(DISTANCE), u: 'km', l: 'Distance' },
+      { v: mil(DPLUS), u: 'm', l: 'Montée totale', c: 'att' },
       { v: '26h30', l: 'Temps maximum', c: 'lim' }
     ];
   } else {
     tuiles = [
       { v: '—', l: 'Terminé' },
-      { v: '100,9', u: 'km', l: 'Distance' },
-      { v: '6 050', u: 'm', l: 'Montée totale', c: 'att' },
+      { v: km1(DISTANCE), u: 'km', l: 'Distance' },
+      { v: mil(DPLUS), u: 'm', l: 'Montée totale', c: 'att' },
       { v: '26h30', l: 'Temps maximum', c: 'lim' }
     ];
   }
@@ -848,7 +863,7 @@ function majMaintenant(now) {
   var pe = Math.round(dpAvale / DPLUS * 100);
   document.getElementById('pDen').textContent = pe + ' %';
   document.getElementById('bDen').style.width = pe + '%';
-  document.getElementById('sDen').textContent = mil(dpAvale) + ' m sur 6 050 m';
+  document.getElementById('sDen').textContent = mil(dpAvale) + ' m sur ' + mil(DPLUS);
 
   var sec = SECTIONS[Math.max(0, p.i - 1)];
   var ic = { montee: '↗', descente: '↘', roulant: '→' }[sec.t];
@@ -941,7 +956,7 @@ function majProfil(now) {
      qui rende la transition franche sans masquer le relief. */
   document.getElementById('profilHote').innerHTML =
     '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" ' +
-      'aria-label="Profil altimetrique, jour puis nuit a partir de Champex">' +
+      'aria-label="Profil altimetrique, jour puis nuit a partir du km 60">' +
     '<defs>' +
       '<linearGradient id="gj" x1="0" y1="0" x2="0" y2="1">' +
         '<stop offset="0%" stop-color="#a3e635" stop-opacity=".42"/>' +
@@ -976,9 +991,9 @@ function majProfil(now) {
     '<text x="2" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
       'font-family="DM Mono,monospace">0 km</text>' +
     '<text x="' + xn.toFixed(1) + '" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
-      'font-family="DM Mono,monospace" text-anchor="middle">Champex 54,9</text>' +
+      'font-family="DM Mono,monospace" text-anchor="middle">km ' + km1(KM_NUIT) + '</text>' +
     '<text x="' + (L - 2) + '" y="' + (H - 8) + '" fill="#868992" font-size="9" ' +
-      'font-family="DM Mono,monospace" text-anchor="end">100,9 km</text>' +
+      'font-family="DM Mono,monospace" text-anchor="end">' + km1(DISTANCE) + ' km</text>' +
     '</svg>';
 }
 
