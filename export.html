@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CCC Hub · Export des données locales</title>
+<style>
+  :root { color-scheme: dark; --bg:#0b0f0a; --card:#151a13; --line:#26301f; --text:#e8efe0; --muted:#8a9a7a; --accent:#a3e635; --warn:#f59e0b; --bad:#ef4444; }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 -apple-system, system-ui, sans-serif; padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+  h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 16px }
+  .card { background:var(--card); border:1px solid var(--line); padding:14px; margin-bottom:12px }
+  .big { font-size:28px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums }
+  button { appearance:none; border:0; width:100%; min-height:48px; margin:6px 0; padding:0 16px; font:600 15px system-ui; background:var(--accent); color:#0b0f0a; cursor:pointer }
+  button.alt { background:#26301f; color:var(--text) }
+  button:disabled { opacity:.5 }
+  #msg { min-height:24px; font-size:14px; color:var(--muted); white-space:pre-line }
+  #msg.ok { color:var(--accent) } #msg.err { color:var(--bad) }
+  table { width:100%; border-collapse:collapse; font-size:12px; font-family: ui-monospace, Menlo, monospace }
+  td { padding:6px 4px; border-top:1px solid var(--line); vertical-align:top; word-break:break-all }
+  td:last-child { text-align:right; color:var(--muted); white-space:nowrap }
+  .tag { display:inline-block; font-size:11px; padding:1px 6px; border:1px solid var(--line); color:var(--muted); margin-left:6px }
+  .warnbox { border-color:var(--warn); color:#fcd34d }
+  a { color:var(--accent) }
+</style>
+</head>
+<body>
+<h1>Export des données locales</h1>
+<p class="sub">Copie intégrale du <code>localStorage</code> de cette page (CCC Hub). Rien n'est modifié.</p>
+
+<div class="card">
+  <div class="big" id="count">…</div>
+  <div id="meta" class="sub" style="margin:0"></div>
+</div>
+
+<div class="card warnbox" id="ctx"></div>
+
+<div class="card">
+  <button id="btnServer">Envoyer une copie au serveur (recommandé)</button>
+  <button id="btnDownload" class="alt">Télécharger le fichier JSON</button>
+  <button id="btnCopy" class="alt">Copier dans le presse-papier</button>
+  <div id="msg"></div>
+</div>
+
+<div class="card">
+  <details><summary>Détail des clés</summary><table id="tbl"></table></details>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const msg = (t, cls) => { const m = $('msg'); m.textContent = t; m.className = cls || ''; };
+
+  // ── 1. Collecte : TOUTES les clés, valeur brute + version parsée si JSON ──
+  const dump = { exported_at: new Date().toISOString(), origin: location.origin,
+                 standalone: !!navigator.standalone || matchMedia('(display-mode: standalone)').matches,
+                 user_agent: navigator.userAgent, keys: {} };
+  let total = 0;
+  const rows = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const raw = localStorage.getItem(k);
+    total += (raw || '').length;
+    let parsed = null; try { parsed = JSON.parse(raw); } catch (_) {}
+    dump.keys[k] = { raw, json: parsed };
+    rows.push([k, (raw || '').length]);
+  }
+  dump.total_chars = total;
+  rows.sort((a, b) => b[1] - a[1]);
+
+  // ── 2. Affichage ──
+  $('count').textContent = `${rows.length} clé${rows.length > 1 ? 's' : ''} · ${(total / 1024).toFixed(1)} Ko`;
+  $('meta').textContent = `${dump.standalone ? 'App installée (écran d’accueil)' : 'Navigateur'} · ${new Date().toLocaleString('fr-BE')}`;
+  $('tbl').innerHTML = rows.map(([k, n]) =>
+    `<tr><td>${k}${/^ccc_/.test(k) ? '' : '<span class="tag">hors app</span>'}</td><td>${n.toLocaleString('fr-BE')}</td></tr>`).join('') || '<tr><td>aucune clé</td><td></td></tr>';
+
+  // Point crucial iPhone : l'app installée sur l'écran d'accueil et Safari ont
+  // chacun LEUR PROPRE localStorage. Cette page ne voit que celui du contexte
+  // dans lequel elle est ouverte.
+  $('ctx').innerHTML = dump.standalone
+    ? 'Tu es dans l’app installée : ce sont bien les données de l’app.'
+    : 'Tu es dans un navigateur. Sur iPhone, l’app installée sur l’écran d’accueil a un stockage <b>séparé</b> : si tu utilises surtout l’app installée, ouvre cette page <b>depuis l’app</b> (Réglages) pour exporter ses données, pas depuis Safari.';
+
+  const filename = `ccc-localstorage-${new Date().toISOString().slice(0, 10)}-${dump.standalone ? 'app' : 'navigateur'}.json`;
+  const text = () => JSON.stringify(dump, null, 1);
+
+  // ── 3. Télécharger ──
+  $('btnDownload').onclick = () => {
+    try {
+      const blob = new Blob([text()], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      msg(`Fichier proposé : ${filename}\n(sur iPhone : « Enregistrer dans Fichiers »)`, 'ok');
+    } catch (e) { msg('Téléchargement impossible ici : utilise « Copier » ou « Envoyer au serveur ». ' + e, 'err'); }
+  };
+
+  // ── 4. Copier ──
+  $('btnCopy').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(text());
+      msg('Copié. Colle-le dans une note ou un mail à toi-même.', 'ok');
+    } catch (_) {
+      const ta = document.createElement('textarea'); ta.value = text(); document.body.appendChild(ta);
+      ta.select(); const ok = document.execCommand('copy'); ta.remove();
+      msg(ok ? 'Copié. Colle-le dans une note ou un mail à toi-même.' : 'Copie refusée par le navigateur : utilise « Télécharger ».', ok ? 'ok' : 'err');
+    }
+  };
+
+  // ── 5. Envoyer au serveur : PUT /api/state/<clé>, avec l'URL et le Bearer
+  //      que l'app garde déjà dans localStorage (garmin_url / garmin_token).
+  //      La copie atterrit sur le volume /data et donc dans /api/export. ──
+  const base = (localStorage.getItem('garmin_url') || '').replace(/\/+$/, '');
+  const token = localStorage.getItem('garmin_token') || '';
+  if (!base || !token) {
+    $('btnServer').disabled = true;
+    $('btnServer').textContent = 'Serveur non configuré ici (URL/token absents)';
+  }
+  $('btnServer').onclick = async () => {
+    const key = `ls_backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${dump.standalone ? 'app' : 'nav'}`;
+    $('btnServer').disabled = true; msg('Envoi en cours…');
+    try {
+      const r = await fetch(`${base}/api/state/${key}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: dump, updated_at: new Date().toISOString() })
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      msg(`Copie enregistrée sur le serveur sous la clé « ${key} » (${(total / 1024).toFixed(1)} Ko). Elle fera partie de la prochaine sauvegarde /api/export.`, 'ok');
+    } catch (e) {
+      msg('Échec de l’envoi (' + e.message + '). Utilise « Télécharger » ou « Copier ».', 'err');
+      $('btnServer').disabled = false;
+    }
+  };
+})();
+</script>
+</body>
+</html>
